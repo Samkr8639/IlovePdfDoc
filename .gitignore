@@ -48,6 +48,7 @@ coverage/
 */coverage/
 .nyc_output/
 .vitest/
+test-fixtures/*_output.pdf
 
 # 7. Runtime Logs
 *.log
