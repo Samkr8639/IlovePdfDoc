@@ -1,5 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MergeResult } from '../../../core/services/browser-pdf.service';
 
 @Component({
@@ -37,7 +38,12 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
       </div>
 
       <div class="actions-group">
-        <a [href]="result().url" [download]="result().filename" class="btn-primary download-btn">
+        <a
+          [href]="safeUrl()"
+          [download]="result().filename"
+          (click)="downloadFile($event)"
+          class="btn-primary download-btn"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
@@ -173,6 +179,34 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
   `]
 })
 export class ResultViewComponent {
+  private sanitizer = inject(DomSanitizer);
+
   readonly result = input.required<MergeResult>();
   readonly reset = output<void>();
+
+  readonly safeUrl = computed<SafeUrl>(() => {
+    return this.sanitizer.bypassSecurityTrustUrl(this.result().url);
+  });
+
+  downloadFile(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    const res = this.result();
+    if (!res?.url) return;
+
+    // Use native DOM anchor to enforce exact filename and .pdf extension in Chromium
+    const link = document.createElement('a');
+    link.href = res.url;
+    link.download = res.filename.endsWith('.pdf') ? res.filename : `${res.filename}.pdf`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+    }, 150);
+  }
 }
