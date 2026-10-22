@@ -1,0 +1,32 @@
+{
+  "name": "paperflow-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-grade online PDF toolkit with hybrid browser/server processing",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev:api": "npm --workspace=apps/api run dev",
+    "dev:web": "npm --workspace=apps/web run start",
+    "build:contracts": "npm --workspace=packages/contracts run build",
+    "build:api": "npm --workspace=apps/api run build",
+    "build:web": "npm --workspace=apps/web run build"
+  },
+  "keywords": [
+    "pdf",
+    "pdf-toolkit",
+    "pdf-lib",
+    "angular",
+    "express",
+    "hybrid-processing"
+  ],
+  "author": "PaperFlow Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
