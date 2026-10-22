@@ -15,433 +15,567 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   imports: [
     RouterLink,
     DropzoneComponent,
-    FileListComponent,
     ProcessingStateComponent,
     ResultViewComponent
   ],
   template: `
-    <div class="tool-page">
-      <!-- HEADER & BREADCRUMBS -->
-      <section class="tool-header-section">
-        <div class="container tool-header-container">
-          <nav class="breadcrumbs" aria-label="Breadcrumb">
-            <a routerLink="/" class="crumb-link">Home</a>
-            <span class="crumb-sep">/</span>
-            <span class="crumb-cat">Organize PDF</span>
-            <span class="crumb-sep">/</span>
-            <span class="crumb-current">Merge PDF</span>
-          </nav>
+    <div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+      <!-- UPLOAD STATE: SEAMLESS UNIFIED HERO & DROPZONE (NOT TWO SECTIONS) -->
+      @if (currentState() === 'upload') {
+        <section class="unified-hero-section">
+          <div class="container hero-content">
+            <nav class="breadcrumbs" aria-label="Breadcrumb">
+              <a routerLink="/" class="crumb-link">Home</a>
+              <span class="crumb-sep">/</span>
+              <span class="crumb-cat">Organize PDF</span>
+              <span class="crumb-sep">/</span>
+              <span class="crumb-current">Merge PDF</span>
+            </nav>
 
-          <!-- Merge PDF Multi-tone Vector Badge -->
-          <div class="hero-badge-wrap">
-            <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="4" width="22" height="22" rx="5" fill="#E53238" />
-              <line x1="9" y1="9" x2="19" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-              <polyline points="13 19 19 19 19 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
-              <line x1="39" y1="39" x2="29" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-              <polyline points="35 29 29 29 29 35" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
+            <h1 class="tool-h1">Merge PDF files</h1>
+            <p class="tool-lead">
+              Combine PDFs in the order you want with the easiest PDF merger available.
+            </p>
 
-          <h1 class="tool-h1">Merge PDF files</h1>
-          <p class="tool-lead">
-            Combine PDFs in the order you want with the easiest PDF merger available.
-            Fast, secure, and 100% private in your browser.
-          </p>
-
-          <div class="privacy-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            <span>100% Client-Side • Files Never Leave Your Device</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
-      <section class="adsense-section">
-        <div class="container">
-          <div class="adsense-wrapper" aria-label="Advertisement">
-            <span class="adsense-label">Advertisement</span>
-            <div class="adsense-slot adsense-leaderboard">
-              <div class="adsense-placeholder-content">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
-                  <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
+            @if (errorMessage()) {
+              <div class="error-banner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-                <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+                <span>{{ errorMessage() }}</span>
+                <button class="error-close" (click)="errorMessage.set(null)">✕</button>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
+            }
 
-      <!-- INTERACTIVE WORKSPACE -->
-      <section class="workspace-section">
-        <div class="container workspace-container">
-          @if (errorMessage()) {
-            <div class="error-banner">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span>{{ errorMessage() }}</span>
-              <button class="error-close" (click)="errorMessage.set(null)">✕</button>
-            </div>
-          }
-
-          <!-- STATE 1: UPLOAD DROPZONE -->
-          @if (currentState() === 'upload') {
-            <div class="workspace-dropzone-wrapper">
+            <!-- UPLOADER COMPONENT -->
+            <div class="hero-dropzone-wrap">
               <app-dropzone
                 title="Select PDF files"
                 subtitle="or drop PDFs here"
                 acceptedTypes=".pdf,application/pdf"
                 [multiple]="true"
-                limitInfo="No file limit • Free & Private in your browser"
+                limitInfo=""
                 (filesSelected)="onFilesAdded($event)"
               ></app-dropzone>
             </div>
-          }
+          </div>
+        </section>
 
-          <!-- STATE 2: ORGANIZE & REORDER -->
-          @if (currentState() === 'organize') {
-            <div class="organize-workspace">
-              <div class="workspace-controls-bar">
-                <div class="controls-left">
-                  <span class="files-summary">
-                    <strong>{{ selectedFiles().length }}</strong> files ready to combine
-                  </span>
-                  <button type="button" class="btn-secondary add-more-btn" (click)="fileInput.click()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <line x1="12" y1="5" x2="12" y2="19"></line>
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>Add More Files</span>
-                  </button>
-                  <input
-                    #fileInput
-                    type="file"
-                    hidden
-                    multiple
-                    accept=".pdf,application/pdf"
-                    (change)="onFileInputChange($event)"
-                  />
-                </div>
-
-                <div class="controls-right">
-                  <button type="button" class="btn-secondary clear-btn" (click)="resetWorkspace()">
-                    <span>Clear All</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- FILE LIST -->
-              <app-file-list
-                [files]="selectedFiles()"
-                (moveUp)="onMoveUp($event)"
-                (moveDown)="onMoveDown($event)"
-                (removeFile)="onRemoveFile($event)"
-              ></app-file-list>
-
-              <!-- FLOATING ACTION DOCK -->
-              <div class="action-dock">
-                <div class="dock-info">
-                  <span class="dock-pill">Sequence Preserved</span>
-                  <span class="dock-note">Pages will merge in the exact sequence shown above.</span>
-                </div>
-
-                <button
-                  type="button"
-                  class="btn-primary merge-submit-btn"
-                  [disabled]="selectedFiles().length < 2 || isProcessing()"
-                  (click)="executeMerge()"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                    <polyline points="2 17 12 22 22 17"></polyline>
-                    <polyline points="2 12 12 17 22 12"></polyline>
+        <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+        <section class="adsense-section">
+          <div class="container">
+            <div class="adsense-wrapper" aria-label="Advertisement">
+              <span class="adsense-label">Advertisement</span>
+              <div class="adsense-slot adsense-leaderboard">
+                <div class="adsense-placeholder-content">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
+                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
                   </svg>
-                  <span>Merge {{ selectedFiles().length }} PDFs (Instant)</span>
-                </button>
+                  <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+                </div>
               </div>
             </div>
-          }
+          </div>
+        </section>
 
-          <!-- STATE 3: PROCESSING -->
-          @if (currentState() === 'processing') {
-            <app-processing-state
-              title="Merging Documents..."
-              [message]="processingMessage()"
-              [percent]="processingProgress()"
-            ></app-processing-state>
-          }
+        <!-- FEATURES & VALUE PROPOSITION -->
+        <section class="features-section">
+          <div class="container">
+            <div class="section-heading">
+              <h2 class="section-title">The easiest & safest way to merge PDF documents</h2>
+              <p class="section-subtitle">Engineered for privacy, speed, and precision.</p>
+            </div>
 
-          <!-- STATE 4: COMPLETED RESULT -->
-          @if (currentState() === 'completed' && mergeResult()) {
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon-badge">
+                  <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                    <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
+                    <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+                  </svg>
+                </div>
+                <h3 class="feature-title">100% In-Browser Privacy</h3>
+                <p class="feature-desc">
+                  Your PDF documents never touch a third-party server. Everything is merged directly inside your browser memory using WebAssembly.
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon-badge">
+                  <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
+                    <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <h3 class="feature-title">Lossless Quality</h3>
+                <p class="feature-desc">
+                  Original vector graphics, fonts, margins, high-res images, and hyperlinks remain intact with zero degradation.
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon-badge">
+                  <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
+                    <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <h3 class="feature-title">Interactive Sequence Order</h3>
+                <p class="feature-desc">
+                  Effortlessly reorder documents before merging. Drag and drop cards to arrange them in the exact order you need.
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon-badge">
+                  <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="40" height="40" rx="10" fill="#E53238" />
+                    <path d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z" stroke="white" stroke-width="2.5" fill="none"/>
+                  </svg>
+                </div>
+                <h3 class="feature-title">Free & Unlimited</h3>
+                <p class="feature-desc">
+                  Combine as many files as you need with no subscriptions, watermark additions, or hidden paywalls.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3-STEP GUIDE SECTION -->
+        <section class="seo-guide-section">
+          <div class="container">
+            <div class="guide-header">
+              <h2 class="guide-title">How to merge PDF files online</h2>
+              <p class="guide-lead">Three effortless steps to combine your documents with precision.</p>
+            </div>
+
+            <div class="steps-grid">
+              <div class="step-card">
+                <div class="step-num">01</div>
+                <h3 class="step-title">Select documents</h3>
+                <p class="step-desc">
+                  Click "Select PDF files", drag and drop your files into the uploader, or open documents from Google Drive or Dropbox.
+                </p>
+              </div>
+
+              <div class="step-card">
+                <div class="step-num">02</div>
+                <h3 class="step-title">Arrange sequence</h3>
+                <p class="step-desc">
+                  Drag and drop files to set the exact order or use the quick arrow buttons. Add more files anytime.
+                </p>
+              </div>
+
+              <div class="step-card">
+                <div class="step-num">03</div>
+                <h3 class="step-title">Merge & download</h3>
+                <p class="step-desc">
+                  Click "Merge PDF". The browser combines all documents instantly with in-browser preview and instant download.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ SECTION FOR MERGE PDF -->
+            <div class="tool-faqs">
+              <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
+              <div class="tool-faqs-list">
+                <div class="faq-card">
+                  <h4 class="faq-q">Are my files uploaded to your servers when merging?</h4>
+                  <p class="faq-a">
+                    No. PDF flow operates with 100% in-browser WebAssembly. Your documents remain strictly inside your device's memory and are never transmitted across any network.
+                  </p>
+                </div>
+
+                <div class="faq-card">
+                  <h4 class="faq-q">Can I merge PDF files with different page orientations?</h4>
+                  <p class="faq-a">
+                    Yes! PDF flow automatically detects and preserves portrait and landscape orientations, margins, embedded fonts, and page dimensions across all files.
+                  </p>
+                </div>
+
+                <div class="faq-card">
+                  <h4 class="faq-q">How many files can I merge at once?</h4>
+                  <p class="faq-a">
+                    You can combine multiple PDF documents in a single operation. Because processing happens locally on your computer, performance is fast and unrestricted.
+                  </p>
+                </div>
+
+                <div class="faq-card">
+                  <h4 class="faq-q">Can I open files directly from Google Drive or Dropbox?</h4>
+                  <p class="faq-a">
+                    Yes, simply click the Google Drive or Dropbox shortcut buttons next to the Select Files button to open your cloud storage in one click.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- MORE POPULAR TOOLS CROSS-LINKS -->
+            <div class="related-tools-box">
+              <h3 class="related-title">Explore more PDF tools</h3>
+              <div class="related-tools-grid">
+                <a routerLink="/split-pdf" class="related-card">
+                  <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="22" height="22" rx="5" fill="#E53238" />
+                    <line x1="19" y1="19" x2="9" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <polyline points="16 9 9 9 9 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                    <line x1="29" y1="29" x2="39" y2="39" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <polyline points="32 39 39 39 39 32" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <div class="related-info">
+                    <h4>Split PDF</h4>
+                    <p>Separate one page or whole sets</p>
+                  </div>
+                </a>
+
+                <a routerLink="/compress-pdf" class="related-card">
+                  <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="18" height="18" rx="4" fill="#10B981" />
+                    <polyline points="10 16 16 16 16 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="26" y="4" width="18" height="18" rx="4" fill="#10B981" />
+                    <polyline points="38 16 32 16 32 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="4" y="26" width="18" height="18" rx="4" fill="#10B981" />
+                    <polyline points="10 32 16 32 16 38" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="26" y="26" width="18" height="18" rx="4" fill="#10B981" />
+                    <polyline points="38 32 32 32 32 38" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <div class="related-info">
+                    <h4>Compress PDF</h4>
+                    <p>Reduce file size while saving quality</p>
+                  </div>
+                </a>
+
+                <a routerLink="/pdf-to-word" class="related-card">
+                  <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
+                    <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="18" y="16" width="26" height="26" rx="6" fill="#2B579A" />
+                    <text x="31" y="35" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">W</text>
+                  </svg>
+                  <div class="related-info">
+                    <h4>PDF to Word</h4>
+                    <p>Convert PDF to DOC & DOCX</p>
+                  </div>
+                </a>
+
+                <a routerLink="/protect-pdf" class="related-card">
+                  <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                    <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
+                    <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+                  </svg>
+                  <div class="related-info">
+                    <h4>Protect PDF</h4>
+                    <p>Encrypt with AES password security</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ORGANIZE STATE: EXACT LAYOUT FROM USER SCREENSHOT (CANVAS + RIGHT SIDEBAR) -->
+      @if (currentState() === 'organize') {
+        <div class="organize-workspace-screen">
+          <!-- MAIN CANVAS AREA (Left/Center) -->
+          <div class="canvas-main-area">
+            @if (errorMessage()) {
+              <div class="error-banner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>{{ errorMessage() }}</span>
+                <button class="error-close" (click)="errorMessage.set(null)">✕</button>
+              </div>
+            }
+
+            <!-- CARDS GRID -->
+            <div class="pdf-cards-canvas">
+              @for (file of selectedFiles(); track file.id; let idx = $index; let first = $first; let last = $last) {
+                <div
+                  class="pdf-document-card"
+                  draggable="true"
+                  (dragstart)="onDragStart(idx)"
+                  (dragover)="onDragOverCard($event, idx)"
+                  (drop)="onDropCard($event, idx)"
+                  title="Drag to reorder"
+                >
+                  <!-- Card Hover Controls -->
+                  <div class="card-hover-actions">
+                    <button
+                      type="button"
+                      class="card-action-btn delete-action"
+                      (click)="onRemoveFile(idx)"
+                      title="Remove file"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Document Page Graphic / Thumbnail -->
+                  <div class="doc-sheet-graphic">
+                    <div class="doc-lines-sim">
+                      <div class="sim-line title-bar"></div>
+                      <div class="sim-line body-1"></div>
+                      <div class="sim-line body-2"></div>
+                      <div class="sim-line body-1"></div>
+                      <div class="sim-line body-3"></div>
+                      <div class="sim-line body-2"></div>
+                      <div class="sim-line body-1"></div>
+                    </div>
+                  </div>
+
+                  <!-- Filename Label at bottom -->
+                  <div class="card-meta">
+                    <span class="meta-filename" [title]="file.name">{{ file.name }}</span>
+                    <span class="meta-pages">{{ file.pageCount }} {{ file.pageCount === 1 ? 'page' : 'pages' }}</span>
+                  </div>
+
+                  <!-- Order Switcher Arrows -->
+                  <div class="card-reorder-pills">
+                    <button
+                      type="button"
+                      class="pill-arrow-btn"
+                      [disabled]="first"
+                      (click)="onMoveUp(idx)"
+                      title="Move left"
+                    >
+                      ‹
+                    </button>
+                    <span class="pill-order-num">{{ idx + 1 }}</span>
+                    <button
+                      type="button"
+                      class="pill-arrow-btn"
+                      [disabled]="last"
+                      (click)="onMoveDown(idx)"
+                      title="Move right"
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- FLOATING RED ACTION BUTTONS (Exact 4 icons from screenshot) -->
+            <div class="floating-tools-stack">
+              <!-- 1. Add More Files (+ with black count badge) -->
+              <div class="floating-btn-wrap">
+                <button
+                  type="button"
+                  class="floating-circle-btn add-more-circle"
+                  (click)="fileInput.click()"
+                  title="Add more files"
+                >
+                  <span class="floating-count-badge">{{ selectedFiles().length }}</span>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+                <span class="floating-tooltip-label">Add more files</span>
+              </div>
+
+              <!-- 2. Computer / Laptop Upload -->
+              <div class="floating-btn-wrap">
+                <button
+                  type="button"
+                  class="floating-circle-btn pc-circle"
+                  (click)="fileInput.click()"
+                  title="Upload from computer"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </button>
+                <span class="floating-tooltip-label">Upload from PC</span>
+              </div>
+
+              <!-- 3. Google Drive -->
+              <div class="floating-btn-wrap">
+                <button
+                  type="button"
+                  class="floating-circle-btn drive-circle"
+                  (click)="openGoogleDrive($event)"
+                  title="Google Drive"
+                >
+                  <svg width="20" height="18" viewBox="0 0 24 21" fill="none">
+                    <path d="M8.04 13.8L12.04 20.73H23.54L19.54 13.8H8.04Z" fill="#ffffff"/>
+                    <path d="M15.96 0.27H4.46L0.46 7.2L6.21 17.16L10.21 10.23L15.96 0.27Z" fill="#ffffff" opacity="0.85"/>
+                    <path d="M15.96 0.27L10.21 10.23L14.21 17.16L23.54 20.73L19.96 7.2L15.96 0.27Z" fill="#ffffff" opacity="0.7"/>
+                  </svg>
+                </button>
+                <span class="floating-tooltip-label">Google Drive</span>
+              </div>
+
+              <!-- 4. Dropbox -->
+              <div class="floating-btn-wrap">
+                <button
+                  type="button"
+                  class="floating-circle-btn dropbox-circle"
+                  (click)="openDropbox($event)"
+                  title="Dropbox"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 22" fill="#ffffff">
+                    <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+                  </svg>
+                </button>
+                <span class="floating-tooltip-label">Dropbox</span>
+              </div>
+
+              <input
+                #fileInput
+                type="file"
+                hidden
+                multiple
+                accept=".pdf,application/pdf"
+                (change)="onFileInputChange($event)"
+              />
+            </div>
+          </div>
+
+          <!-- RIGHT SIDEBAR (Exact layout from user screenshot) -->
+          <aside class="sidebar-action-panel">
+            <div class="sidebar-body">
+              <h2 class="sidebar-heading">Merge PDF</h2>
+
+              <!-- Blue Info Callout (Exact text from screenshot) -->
+              <div class="sidebar-info-banner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2.2" class="info-svg">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <div class="info-text">
+                  @if (selectedFiles().length < 2) {
+                    Please, select more PDF files by clicking again on 'Select PDF files'.
+                    Select multiple files by maintaining pressed 'Ctrl'
+                  } @else {
+                    To reorder your files, drag and drop them or click the arrows below each card.
+                    Files will merge in the exact sequence shown.
+                  }
+                </div>
+              </div>
+
+              <!-- Sidebar File Count & Clear -->
+              <div class="sidebar-details-row">
+                <span class="details-count">
+                  <strong>{{ selectedFiles().length }}</strong> {{ selectedFiles().length === 1 ? 'file' : 'files' }} ready
+                </span>
+                <button type="button" class="sidebar-reset-link" (click)="resetWorkspace()">
+                  Clear all
+                </button>
+              </div>
+
+              <!-- Dedicated Sidebar AdSense Slot -->
+              <div class="sidebar-adsense-slot">
+                <span class="adsense-label">Advertisement</span>
+                <div class="sidebar-ad-box">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4">
+                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                  <span>Google AdSense (300 × 250)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Giant Red Merge PDF Button Sticky Bottom -->
+            <div class="sidebar-footer">
+              <button
+                type="button"
+                class="giant-merge-submit-btn"
+                [class.btn-disabled]="selectedFiles().length < 2 || isProcessing()"
+                [disabled]="selectedFiles().length < 2 || isProcessing()"
+                (click)="executeMerge()"
+              >
+                <span>Merge PDF</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 16 16 12 12 8"></polyline>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+              </button>
+            </div>
+          </aside>
+        </div>
+      }
+
+      <!-- PROCESSING STATE -->
+      @if (currentState() === 'processing') {
+        <div class="processing-workspace-screen">
+          <app-processing-state
+            title="Merging Documents..."
+            [message]="processingMessage()"
+            [percent]="processingProgress()"
+          ></app-processing-state>
+        </div>
+      }
+
+      <!-- COMPLETED RESULT STATE -->
+      @if (currentState() === 'completed' && mergeResult()) {
+        <div class="completed-workspace-screen">
+          <div class="container result-container">
             <app-result-view
               [result]="mergeResult()!"
               (reset)="resetWorkspace()"
             ></app-result-view>
-          }
-        </div>
-      </section>
-
-      <!-- MID ADSENSE ADVERTISEMENT SLOT -->
-      <section class="adsense-section">
-        <div class="container">
-          <div class="adsense-wrapper" aria-label="Advertisement">
-            <span class="adsense-label">Advertisement</span>
-            <div class="adsense-slot adsense-mid-banner">
-              <div class="adsense-placeholder-content">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
-                  <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-                <span>Google AdSense Slot • Responsive Billboard (970 × 90 / 728 × 90)</span>
-              </div>
-            </div>
           </div>
         </div>
-      </section>
-
-      <!-- VALUE PROPOSITION / FEATURE HIGHLIGHTS (With Professional Badges) -->
-      <section class="features-section">
-        <div class="container">
-          <div class="section-heading">
-            <h2 class="section-title">The easiest & safest way to merge PDF documents</h2>
-            <p class="section-subtitle">Engineered for privacy, speed, and precision.</p>
-          </div>
-
-          <div class="features-grid">
-            <div class="feature-card">
-              <div class="feature-icon-badge">
-                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
-                  <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
-                  <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
-                  <polygon points="22.5,23.5 25.5,23.5 26,29 22,29" fill="#1E3A8A"/>
-                </svg>
-              </div>
-              <h3 class="feature-title">100% In-Browser Privacy</h3>
-              <p class="feature-desc">
-                Your PDF documents never touch a third-party server. Everything is merged directly inside your browser memory using WebAssembly.
-              </p>
-            </div>
-
-            <div class="feature-card">
-              <div class="feature-icon-badge">
-                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
-                  <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <h3 class="feature-title">Lossless Quality</h3>
-              <p class="feature-desc">
-                Original vector graphics, fonts, margins, high-res images, and hyperlinks remain intact with zero degradation.
-              </p>
-            </div>
-
-            <div class="feature-card">
-              <div class="feature-icon-badge">
-                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
-                  <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <h3 class="feature-title">Interactive Sequence Order</h3>
-              <p class="feature-desc">
-                Effortlessly reorder documents before merging. Shift pages up or down to ensure your combined document is organized perfectly.
-              </p>
-            </div>
-
-            <div class="feature-card">
-              <div class="feature-icon-badge">
-                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="40" height="40" rx="10" fill="#E53238" />
-                  <path d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z" stroke="white" stroke-width="2.5" fill="none"/>
-                </svg>
-              </div>
-              <h3 class="feature-title">Free & Unlimited</h3>
-              <p class="feature-desc">
-                Combine as many files as you need with no subscriptions, watermark additions, or hidden paywalls.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3-STEP GUIDE SECTION -->
-      <section class="seo-guide-section">
-        <div class="container">
-          <div class="guide-header">
-            <h2 class="guide-title">How to merge PDF files online</h2>
-            <p class="guide-lead">Three effortless steps to combine your documents with precision.</p>
-          </div>
-
-          <div class="steps-grid">
-            <div class="step-card">
-              <div class="step-num">01</div>
-              <h3 class="step-title">Select documents</h3>
-              <p class="step-desc">
-                Click "Select PDF files", drag and drop your files into the uploader, or open documents from Google Drive or Dropbox.
-              </p>
-            </div>
-
-            <div class="step-card">
-              <div class="step-num">02</div>
-              <h3 class="step-title">Arrange sequence</h3>
-              <p class="step-desc">
-                Use the Move Up and Move Down arrows to set the exact page order. Add more files or remove items anytime.
-              </p>
-            </div>
-
-            <div class="step-card">
-              <div class="step-num">03</div>
-              <h3 class="step-title">Merge & download</h3>
-              <p class="step-desc">
-                Click "Merge PDFs". The browser combines all documents instantly with in-browser preview and instant download.
-              </p>
-            </div>
-          </div>
-
-          <!-- FAQ SECTION FOR MERGE PDF -->
-          <div class="tool-faqs">
-            <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
-            <div class="tool-faqs-list">
-              <div class="faq-card">
-                <h4 class="faq-q">Are my files uploaded to your servers when merging?</h4>
-                <p class="faq-a">
-                  No. PDF flow operates with 100% in-browser WebAssembly. Your documents remain strictly inside your device's memory and are never transmitted across any network.
-                </p>
-              </div>
-
-              <div class="faq-card">
-                <h4 class="faq-q">Can I merge PDF files with different page orientations?</h4>
-                <p class="faq-a">
-                  Yes! PDF flow automatically detects and preserves portrait and landscape orientations, margins, embedded fonts, and page dimensions across all files.
-                </p>
-              </div>
-
-              <div class="faq-card">
-                <h4 class="faq-q">How many files can I merge at once?</h4>
-                <p class="faq-a">
-                  You can combine multiple PDF documents in a single operation. Because processing happens locally on your computer, performance is fast and unrestricted.
-                </p>
-              </div>
-
-              <div class="faq-card">
-                <h4 class="faq-q">Can I open files directly from Google Drive or Dropbox?</h4>
-                <p class="faq-a">
-                  Yes, simply click the Google Drive or Dropbox shortcut buttons next to the Select Files button to open your cloud storage in one click.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- MORE POPULAR TOOLS CROSS-LINKS -->
-          <div class="related-tools-box">
-            <h3 class="related-title">Explore more PDF tools</h3>
-            <div class="related-tools-grid">
-              <a routerLink="/split-pdf" class="related-card">
-                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="22" height="22" rx="5" fill="#E53238" />
-                  <line x1="19" y1="19" x2="9" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                  <polyline points="16 9 9 9 9 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
-                  <line x1="29" y1="29" x2="39" y2="39" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                  <polyline points="32 39 39 39 39 32" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <div class="related-info">
-                  <h4>Split PDF</h4>
-                  <p>Separate one page or whole sets</p>
-                </div>
-              </a>
-
-              <a routerLink="/compress-pdf" class="related-card">
-                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="18" height="18" rx="4" fill="#10B981" />
-                  <polyline points="10 16 16 16 16 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="26" y="4" width="18" height="18" rx="4" fill="#10B981" />
-                  <polyline points="38 16 32 16 32 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="4" y="26" width="18" height="18" rx="4" fill="#10B981" />
-                  <polyline points="10 32 16 32 16 38" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="26" y="26" width="18" height="18" rx="4" fill="#10B981" />
-                  <polyline points="38 32 32 32 32 38" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <div class="related-info">
-                  <h4>Compress PDF</h4>
-                  <p>Reduce file size while saving quality</p>
-                </div>
-              </a>
-
-              <a routerLink="/pdf-to-word" class="related-card">
-                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
-                  <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="18" y="16" width="26" height="26" rx="6" fill="#2B579A" />
-                  <text x="31" y="35" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">W</text>
-                </svg>
-                <div class="related-info">
-                  <h4>PDF to Word</h4>
-                  <p>Convert PDF to DOC & DOCX</p>
-                </div>
-              </a>
-
-              <a routerLink="/protect-pdf" class="related-card">
-                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
-                  <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
-                  <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
-                  <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
-                </svg>
-                <div class="related-info">
-                  <h4>Protect PDF</h4>
-                  <p>Encrypt with AES password security</p>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      }
     </div>
   `,
   styles: [`
     .tool-page {
-      background: #f8fafc;
-      min-height: 100vh;
+      background: #f4f5f8;
+      min-height: calc(100vh - 72px);
+      display: flex;
+      flex-direction: column;
+    }
+    .tool-page.organize-mode {
+      background: #f4f5f8;
+      overflow-x: hidden;
     }
 
-    /* HEADER SECTION */
-    .tool-header-section {
-      padding: 48px 0 28px;
+    /* UPLOAD STATE: UNIFIED HERO (NOT TWO SECTIONS) */
+    .unified-hero-section {
+      padding: 56px 0 36px;
       text-align: center;
-      background: #ffffff;
-      border-bottom: 1px solid var(--surface-border);
+      background: #f4f5f8;
     }
-    .tool-header-container {
+    .hero-content {
+      max-width: 900px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 820px;
-      margin: 0 auto;
     }
     .breadcrumbs {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 13.5px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
+      color: #64748b;
+      margin-bottom: 24px;
     }
     .crumb-link {
-      color: var(--text-muted);
+      color: #64748b;
       text-decoration: none;
-      transition: color 0.15s ease;
     }
     .crumb-link:hover {
       color: #E53238;
@@ -450,46 +584,440 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       color: #cbd5e1;
     }
     .crumb-current {
-      color: var(--text-main);
+      color: #0f172a;
       font-weight: 700;
     }
-    .hero-badge-wrap {
-      margin-bottom: 14px;
-      transition: transform 0.25s ease;
-    }
-    .hero-badge-wrap:hover {
-      transform: scale(1.08);
-    }
     .tool-h1 {
-      font-size: clamp(34px, 4vw, 44px);
+      font-size: clamp(38px, 4.5vw, 48px);
       font-weight: 800;
       letter-spacing: -0.025em;
-      color: var(--text-main);
+      color: #0f172a;
       margin: 0 0 12px;
     }
     .tool-lead {
-      font-size: 17px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin: 0 0 18px;
-      max-width: 620px;
+      font-size: 18px;
+      color: #475569;
+      line-height: 1.5;
+      margin: 0 0 32px;
+      max-width: 660px;
     }
-    .privacy-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      background: #ecfdf5;
-      color: #059669;
-      font-size: 12.5px;
-      font-weight: 600;
-      border-radius: 9999px;
-      border: 1px solid #a7f3d0;
+    .hero-dropzone-wrap {
+      width: 100%;
+      max-width: 680px;
     }
 
-    /* ADSENSE PLACEHOLDER SLOTS */
+    /* ORGANIZE WORKSPACE SCREEN: CANVAS (LEFT) + SIDEBAR (RIGHT) */
+    .organize-workspace-screen {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 72px);
+      width: 100%;
+      background: #f4f5f8;
+      position: relative;
+    }
+
+    /* MAIN CANVAS (Left/Center) */
+    .canvas-main-area {
+      flex: 1;
+      padding: 40px 80px 40px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-height: 600px;
+    }
+
+    /* PDF CARDS CANVAS */
+    .pdf-cards-canvas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* INDIVIDUAL PDF DOCUMENT CARD (Exact matching user screenshot) */
+    .pdf-document-card {
+      width: 180px;
+      height: 250px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+      padding: 12px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      cursor: grab;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pdf-document-card:hover {
+      border-color: #fca5a5;
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px -2px rgba(229, 50, 56, 0.12);
+    }
+    .pdf-document-card:active {
+      cursor: grabbing;
+    }
+
+    /* Top right hover action */
+    .card-hover-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .pdf-document-card:hover .card-hover-actions {
+      opacity: 1;
+    }
+    .card-action-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: transform 0.15s ease;
+    }
+    .card-action-btn:hover {
+      transform: scale(1.15);
+    }
+
+    /* Document Sheet Graphic */
+    .doc-sheet-graphic {
+      width: 110px;
+      height: 145px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      margin-top: 6px;
+      position: relative;
+    }
+    .doc-lines-sim {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sim-line {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+    }
+    .sim-line.title-bar {
+      height: 6px;
+      background: #94a3b8;
+      width: 60%;
+      margin-bottom: 4px;
+    }
+    .sim-line.body-1 { width: 90%; }
+    .sim-line.body-2 { width: 100%; }
+    .sim-line.body-3 { width: 75%; }
+
+    /* Filename text */
+    .card-meta {
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 4px;
+    }
+    .meta-filename {
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    .meta-pages {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* Reorder pill switcher */
+    .card-reorder-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 6px;
+    }
+    .pill-arrow-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pill-arrow-btn:hover:not(:disabled) {
+      border-color: #E53238;
+      color: #E53238;
+    }
+    .pill-arrow-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .pill-order-num {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    /* FLOATING RED TOOLS STACK (Right edge of canvas - Exact matching user screenshot) */
+    .floating-tools-stack {
+      position: absolute;
+      top: 40px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 20;
+    }
+    .floating-btn-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .floating-circle-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #E53238;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(229, 50, 56, 0.3);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .floating-circle-btn:hover {
+      background: #d3282e;
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(229, 50, 56, 0.45);
+    }
+    .floating-circle-btn:hover + .floating-tooltip-label {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-8px);
+    }
+
+    /* Badge on '+' button */
+    .floating-count-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ffffff;
+    }
+
+    /* Tooltip on hover (black pill) */
+    .floating-tooltip-label {
+      position: absolute;
+      right: 52px;
+      background: #1e293b;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      padding: 5px 10px;
+      border-radius: 6px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(0);
+      transition: all 0.2s ease;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .floating-tooltip-label::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -4px;
+      transform: translateY(-50%);
+      border-width: 4px 0 4px 4px;
+      border-style: solid;
+      border-color: transparent transparent transparent #1e293b;
+    }
+
+    /* RIGHT SIDEBAR (Exact layout from user screenshot) */
+    .sidebar-action-panel {
+      width: 350px;
+      background: #ffffff;
+      border-left: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: calc(100vh - 72px);
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.03);
+      position: sticky;
+      top: 72px;
+    }
+    .sidebar-body {
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sidebar-heading {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      text-align: center;
+      margin: 0;
+    }
+
+    /* Blue Alert Info Box (Exact matching user screenshot) */
+    .sidebar-info-banner {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .info-svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .info-text {
+      font-size: 13px;
+      color: #0369a1;
+      line-height: 1.5;
+    }
+
+    /* Details row */
+    .sidebar-details-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .details-count {
+      font-size: 13.5px;
+      color: #334155;
+    }
+    .sidebar-reset-link {
+      background: none;
+      border: none;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #ef4444;
+      cursor: pointer;
+    }
+    .sidebar-reset-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Sidebar AdSense */
+    .sidebar-adsense-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .sidebar-ad-box {
+      width: 100%;
+      height: 250px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Sticky Bottom Merge Button */
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid #f1f5f9;
+      background: #ffffff;
+    }
+    .giant-merge-submit-btn {
+      width: 100%;
+      height: 64px;
+      border-radius: 10px;
+      background: #E53238;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(229, 50, 56, 0.35);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .giant-merge-submit-btn:hover:not(.btn-disabled) {
+      background: #d3282e;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(229, 50, 56, 0.45);
+    }
+    .giant-merge-submit-btn.btn-disabled {
+      background: #f87171;
+      opacity: 0.65;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ADSENSE COMMON STYLES */
     .adsense-section {
       padding: 24px 0 12px;
+      background: #ffffff;
+      border-top: 1px solid var(--surface-border);
     }
     .adsense-wrapper {
       display: flex;
@@ -509,20 +1037,12 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       width: 100%;
       border: 1px dashed #cbd5e1;
       border-radius: 8px;
-      background: #ffffff;
+      background: #fafafa;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: border-color 0.2s ease;
-    }
-    .adsense-slot:hover {
-      border-color: #94a3b8;
     }
     .adsense-leaderboard {
-      min-height: 90px;
-      max-width: 970px;
-    }
-    .adsense-mid-banner {
       min-height: 90px;
       max-width: 970px;
     }
@@ -537,29 +1057,21 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       padding: 16px;
     }
 
-    /* WORKSPACE */
-    .workspace-section {
-      padding: 24px 0 48px;
-    }
-    .workspace-container {
-      max-width: 1080px;
-      margin: 0 auto;
-    }
-    .workspace-dropzone-wrapper {
-      width: 100%;
-    }
+    /* ERROR BANNER */
     .error-banner {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 20px;
-      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      border-radius: 8px;
       background-color: #fef2f2;
       color: #dc2626;
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       border: 1px solid #fecaca;
+      width: 100%;
+      max-width: 800px;
     }
     .error-close {
       margin-left: auto;
@@ -571,123 +1083,9 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       cursor: pointer;
     }
 
-    /* ORGANIZE WORKSPACE */
-    .workspace-controls-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 24px;
-      background: #ffffff;
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-    }
-    .controls-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .files-summary {
-      font-size: 15px;
-      color: var(--text-main);
-    }
-    .add-more-btn {
-      padding: 8px 16px;
-      font-size: 13.5px;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-      color: var(--text-main);
-      transition: all 0.2s ease;
-    }
-    .add-more-btn:hover {
-      border-color: #E53238;
-      color: #E53238;
-    }
-    .clear-btn {
-      padding: 8px 16px;
-      font-size: 13.5px;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      cursor: pointer;
-      color: #64748b;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .clear-btn:hover {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #dc2626;
-    }
-    
-    /* FLOATING ACTION DOCK */
-    .action-dock {
-      position: sticky;
-      bottom: 24px;
-      z-index: 30;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 18px 28px;
-      margin-top: 32px;
-      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(229, 50, 56, 0.12);
-    }
-    .dock-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .dock-pill {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #E53238;
-    }
-    .dock-note {
-      font-size: 13.5px;
-      color: var(--text-muted);
-    }
-    .merge-submit-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 16px 36px;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 12px;
-      background: #E53238;
-      color: #ffffff;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(229, 50, 56, 0.35);
-      transition: all 0.2s ease;
-    }
-    .merge-submit-btn:hover:not(:disabled) {
-      background: #d3282e;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(229, 50, 56, 0.45);
-    }
-    .merge-submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
     /* FEATURES GRID */
     .features-section {
-      padding: 56px 0;
+      padding: 64px 0;
       background: #ffffff;
       border-top: 1px solid var(--surface-border);
     }
@@ -744,7 +1142,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       margin: 0;
     }
 
-    /* 3-STEP PROCESS GUIDE */
+    /* 3-STEP GUIDE */
     .seo-guide-section {
       padding: 64px 0 56px;
       background: #ffffff;
@@ -904,7 +1302,40 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       margin: 0;
     }
 
+    /* PROCESSING & COMPLETED SCREENS */
+    .processing-workspace-screen,
+    .completed-workspace-screen {
+      padding: 60px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+    .result-container {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
     @media (max-width: 1024px) {
+      .organize-workspace-screen {
+        flex-direction: column;
+      }
+      .sidebar-action-panel {
+        width: 100%;
+        min-height: auto;
+        position: static;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+      }
+      .canvas-main-area {
+        padding: 32px 20px 80px;
+      }
+      .floating-tools-stack {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        flex-direction: row;
+      }
       .features-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -923,14 +1354,6 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       .related-tools-grid {
         grid-template-columns: 1fr;
       }
-      .action-dock {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
-      }
-      .merge-submit-btn {
-        width: 100%;
-      }
     }
   `]
 })
@@ -946,6 +1369,7 @@ export class MergePdfComponent implements OnInit {
   processingMessage = signal<string>('');
   errorMessage = signal<string | null>(null);
   mergeResult = signal<MergeResult | null>(null);
+  draggedIdx: number | null = null;
 
   ngOnInit(): void {
     const tool = this.toolRegistry.getToolById('merge-pdf');
@@ -1006,6 +1430,40 @@ export class MergePdfComponent implements OnInit {
     if (list.length === 0) {
       this.currentState.set('upload');
     }
+  }
+
+  onDragStart(index: number): void {
+    this.draggedIdx = index;
+  }
+
+  onDragOverCard(event: DragEvent, index: number): void {
+    event.preventDefault();
+  }
+
+  onDropCard(event: DragEvent, index: number): void {
+    event.preventDefault();
+    if (this.draggedIdx === null || this.draggedIdx === index) return;
+    const list = [...this.selectedFiles()];
+    const item = list.splice(this.draggedIdx, 1)[0];
+    list.splice(index, 0, item);
+    this.selectedFiles.set(list);
+    this.draggedIdx = null;
+  }
+
+  openGoogleDrive(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://drive.google.com/', '_blank', 'noopener,noreferrer');
+  }
+
+  openDropbox(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
   }
 
   resetWorkspace(): void {
