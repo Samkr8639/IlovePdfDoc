@@ -1,35 +1,91 @@
-# Dependencies
+# ==============================================================================
+# PaperFlow Monorepo .gitignore
+# Only required source code, configurations, and documentation are committed.
+# ==============================================================================
+
+# 1. Dependencies (Never commit dependencies)
 node_modules/
+*/node_modules/
+*/*/node_modules/
 .pnp
 .pnp.js
 
-# Build Outputs
+# 2. Build & Compiled Outputs
 dist/
+*/dist/
+*/*/dist/
 dist-ssr/
 out-tsc/
 bazel-out/
+*.tsbuildinfo
 
-# Angular
+# 3. Angular Specific Cache
 .angular/
+*/.angular/
+/.angular/cache
 
-# Environment and Secrets
+# 4. Environment & Secrets (Keep only .env.example)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
 
-# Logs
+# 5. Temporary Uploads & File Processing Storage
+tmp/
+*/tmp/
+*/*/tmp/
+temp/
+*/temp/
+uploads/
+*/uploads/
+*.tmp
+*.bak
+
+# 6. Test Results & Coverage
+coverage/
+*/coverage/
+.nyc_output/
+.vitest/
+
+# 7. Runtime Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-*.log
+pnpm-debug.log*
 
-# OS & IDE
+# 8. Operating System Artifacts
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+[Dd]esktop.ini
+
+# 9. IDEs & Editors
 .idea/
+*.sublime-project
+*.sublime-workspace
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-tmp/
+.history/
+
+# 10. VS Code (Ignore user state, keep shared settings & configurations)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+apps/web/.vscode/*
+!apps/web/.vscode/settings.json
+!apps/web/.vscode/tasks.json
+!apps/web/.vscode/launch.json
+!apps/web/.vscode/extensions.json
