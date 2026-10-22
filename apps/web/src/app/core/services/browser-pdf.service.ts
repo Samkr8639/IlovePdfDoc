@@ -130,9 +130,9 @@ export class BrowserPdfService {
       mergedPdfBytes.byteOffset,
       mergedPdfBytes.byteOffset + mergedPdfBytes.byteLength
     ) as ArrayBuffer;
-    const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
     const filename = `paperflow-merged-${new Date().toISOString().slice(0, 10)}.pdf`;
+    const blob = new File([pdfArrayBuffer], filename, { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
 
     onProgress?.(100, 'Merge completed successfully!');
 

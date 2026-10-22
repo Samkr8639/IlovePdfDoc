@@ -310,28 +310,56 @@ export class ResultViewComponent {
     this.showPreview.update((v) => !v);
   }
 
-  downloadFile(event?: Event): void {
-    if (event) {
-      event.preventDefault();
-    }
+  async downloadFile(event?: Event): Promise<void> {
     const res = this.result();
     if (!res?.blob) return;
 
-    // Create a fresh blob URL each time to guarantee correct Content-Type
-    const downloadUrl = URL.createObjectURL(res.blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = res.filename.endsWith('.pdf') ? res.filename : `${res.filename}.pdf`;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
+    const filename = res.filename.endsWith('.pdf') ? res.filename : `${res.filename}.pdf`;
 
-    // Cleanup after a short delay
-    setTimeout(() => {
-      if (document.body.contains(link)) {
-        document.body.removeChild(link);
+    // 1. Modern Chromium File System Access API: Native "Save As" file picker
+    // Allows user to choose folder and guarantees the .pdf extension
+    if ('showSaveFilePicker' in window) {
+      if (event) {
+        event.preventDefault();
       }
-      URL.revokeObjectURL(downloadUrl);
-    }, 300);
+      try {
+        const handle = await (window as any).showSaveFilePicker({
+          suggestedName: filename,
+          types: [
+            {
+              description: 'PDF Document (*.pdf)',
+              accept: { 'application/pdf': ['.pdf'] }
+            }
+          ]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(res.blob);
+        await writable.close();
+        return;
+      } catch (err: unknown) {
+        // User clicked Cancel in the Save dialog
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        // If permission error or failure, fall through to native anchor download
+      }
+    }
+
+    // 2. Standard HTML5 anchor download fallback
+    // When called from code (no event), trigger the anchor cleanly using persistent res.url
+    if (!event) {
+      const link = document.createElement('a');
+      link.href = res.url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+      }, 2000);
+    }
+    // If event is present on <a>, letting default proceed downloads with res.url and download="filename"
   }
 }
