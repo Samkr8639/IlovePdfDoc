@@ -1,6 +1,6 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { MergeResult } from '../../../core/services/browser-pdf.service';
 
 @Component({
@@ -35,6 +35,41 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
           <span class="meta-label">Privacy</span>
           <span class="meta-val text-emerald">100% Client-side</span>
         </div>
+      </div>
+
+      <!-- PDF PREVIEW SECTION -->
+      <div class="preview-section">
+        <div class="preview-toolbar">
+          <div class="preview-toolbar-left">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>Document Preview</span>
+          </div>
+          <div class="preview-toolbar-right">
+            <button type="button" class="preview-toggle-btn" (click)="togglePreview()">
+              {{ showPreview() ? 'Hide Preview' : 'Show Preview' }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                @if (showPreview()) {
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                } @else {
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                }
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        @if (showPreview()) {
+          <div class="preview-frame-wrapper">
+            <iframe
+              [src]="previewUrl()"
+              class="preview-iframe"
+              title="Merged PDF Preview"
+            ></iframe>
+          </div>
+        }
       </div>
 
       <div class="actions-group">
@@ -79,7 +114,7 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
       text-align: center;
       padding: 48px 32px;
       gap: 24px;
-      max-width: 620px;
+      max-width: 820px;
       margin: 32px auto;
     }
     .success-icon-wrapper {
@@ -137,6 +172,66 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
       height: 28px;
       background: var(--surface-border);
     }
+
+    /* PREVIEW SECTION */
+    .preview-section {
+      width: 100%;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface-bg);
+    }
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--surface-border);
+      background: #ffffff;
+    }
+    .preview-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .preview-toolbar-right {
+      display: flex;
+      align-items: center;
+    }
+    .preview-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-600);
+      background: var(--primary-50);
+      border: 1px solid var(--primary-200);
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .preview-toggle-btn:hover {
+      background: var(--primary-100);
+      border-color: var(--primary-300);
+    }
+    .preview-frame-wrapper {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      background: #f3f4f6;
+    }
+    .preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
     .actions-group {
       display: flex;
       flex-direction: column;
@@ -176,6 +271,21 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
       border-color: var(--primary-200);
       color: var(--primary-600);
     }
+
+    @media (max-width: 640px) {
+      .preview-frame-wrapper {
+        height: 360px;
+      }
+      .meta-box {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+      }
+      .meta-divider {
+        width: 60%;
+        height: 1px;
+      }
+    }
   `]
 })
 export class ResultViewComponent {
@@ -184,29 +294,44 @@ export class ResultViewComponent {
   readonly result = input.required<MergeResult>();
   readonly reset = output<void>();
 
+  readonly showPreview = signal<boolean>(true);
+
+  /** Sanitised blob URL for the download link */
   readonly safeUrl = computed<SafeUrl>(() => {
     return this.sanitizer.bypassSecurityTrustUrl(this.result().url);
   });
+
+  /** Sanitised blob URL for the iframe src (SafeResourceUrl required for iframe) */
+  readonly previewUrl = computed<SafeResourceUrl>(() => {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.result().url);
+  });
+
+  togglePreview(): void {
+    this.showPreview.update((v) => !v);
+  }
 
   downloadFile(event?: Event): void {
     if (event) {
       event.preventDefault();
     }
     const res = this.result();
-    if (!res?.url) return;
+    if (!res?.blob) return;
 
-    // Use native DOM anchor to enforce exact filename and .pdf extension in Chromium
+    // Create a fresh blob URL each time to guarantee correct Content-Type
+    const downloadUrl = URL.createObjectURL(res.blob);
     const link = document.createElement('a');
-    link.href = res.url;
+    link.href = downloadUrl;
     link.download = res.filename.endsWith('.pdf') ? res.filename : `${res.filename}.pdf`;
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
 
+    // Cleanup after a short delay
     setTimeout(() => {
       if (document.body.contains(link)) {
         document.body.removeChild(link);
       }
-    }, 150);
+      URL.revokeObjectURL(downloadUrl);
+    }, 300);
   }
 }
