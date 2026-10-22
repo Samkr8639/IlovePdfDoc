@@ -9,12 +9,21 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:dev": "npm run build:contracts && npm run build:api && npm run build:web:dev",
+    "build:staging": "npm run build:contracts && npm run build:api && npm run build:web:staging",
+    "build:prod": "npm run build:contracts && npm run build:api && npm run build:web:prod",
     "test": "npm run test --workspaces --if-present",
     "dev:api": "npm --workspace=apps/api run dev",
+    "dev:api:staging": "npm --workspace=apps/api run dev:staging",
+    "dev:api:prod": "npm --workspace=apps/api run dev:prod",
     "dev:web": "npm --workspace=apps/web run start",
+    "dev:web:staging": "npm --workspace=apps/web run start:staging",
     "build:contracts": "npm --workspace=packages/contracts run build",
     "build:api": "npm --workspace=apps/api run build",
-    "build:web": "npm --workspace=apps/web run build"
+    "build:web": "npm --workspace=apps/web run build",
+    "build:web:dev": "npm --workspace=apps/web run build:dev",
+    "build:web:staging": "npm --workspace=apps/web run build:staging",
+    "build:web:prod": "npm --workspace=apps/web run build:prod"
   },
   "keywords": [
     "pdf",
@@ -27,6 +36,7 @@
   "author": "PaperFlow Team",
   "license": "MIT",
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "typescript": "^5.9.3"
   }
 }
