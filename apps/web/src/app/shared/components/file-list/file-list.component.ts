@@ -9,13 +9,13 @@ import { ValidatedPdfFile } from '../../../core/services/browser-pdf.service';
         @for (file of files(); track file.id; let idx = $index; let first = $first; let last = $last) {
           <div class="dribbble-file-row" [class.file-error]="!file.isValid">
             <div class="file-info-left">
-              <!-- Red PDF Badge Icon -->
-              <div class="pdf-file-badge">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
+              <!-- Red PDF Badge Icon in Circular Chip (Exact Dribbble video) -->
+              <div class="file-chip">
+                <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                  <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#E53935"/>
+                  <path d="M15.5 2V7.5H21L15.5 2Z" fill="#B71C1C" opacity="0.8"/>
+                  <text x="11" y="16.5" font-size="6.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif" letter-spacing="-0.3px">PDF</text>
                 </svg>
-                <span class="pdf-badge-text">PDF</span>
               </div>
 
               <div class="file-text-col">
@@ -105,25 +105,17 @@ import { ValidatedPdfFile } from '../../../core/services/browser-pdf.service';
       gap: 14px;
       overflow: hidden;
     }
-    .pdf-file-badge {
+    .file-chip {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: var(--coral-50);
-      color: var(--coral-600);
-      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
       flex-shrink: 0;
-    }
-    .pdf-badge-text {
-      position: absolute;
-      bottom: 4px;
-      font-size: 8px;
-      font-weight: 800;
-      line-height: 1;
     }
     .file-text-col {
       display: flex;

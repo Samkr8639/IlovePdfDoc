@@ -21,9 +21,29 @@ import { ToolCategory } from '@paperflow/contracts';
             <!-- 1. PDF to Word -->
             <a routerLink="/merge-pdf" class="popular-card card-active">
               <div class="card-format-row">
-                <span class="format-pill pill-red">PDF</span>
-                <span class="format-arrow">→</span>
-                <span class="format-pill pill-blue">W</span>
+                <!-- Red PDF Document in Circular Chip -->
+                <div class="circular-chip">
+                  <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#E53935"/>
+                    <path d="M15.5 2V7.5H21L15.5 2Z" fill="#B71C1C" opacity="0.8"/>
+                    <text x="11" y="16.5" font-size="6.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif" letter-spacing="-0.3px">PDF</text>
+                  </svg>
+                </div>
+                <!-- Clean Transition Arrow -->
+                <div class="format-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <polyline points="14 6 20 12 14 18"></polyline>
+                  </svg>
+                </div>
+                <!-- Blue Word Document in Circular Chip -->
+                <div class="circular-chip">
+                  <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#2563EB"/>
+                    <path d="M15.5 2V7.5H21L15.5 2Z" fill="#1D4ED8" opacity="0.8"/>
+                    <text x="11" y="16.5" font-size="7.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif">W</text>
+                  </svg>
+                </div>
               </div>
               <h3 class="card-title">PDF to Word</h3>
             </a>
@@ -31,9 +51,28 @@ import { ToolCategory } from '@paperflow/contracts';
             <!-- 2. Word to PDF -->
             <a routerLink="/merge-pdf" class="popular-card">
               <div class="card-format-row">
-                <span class="format-pill pill-blue">W</span>
-                <span class="format-arrow">→</span>
-                <span class="format-pill pill-red">PDF</span>
+                <!-- Blue Word Document -->
+                <div class="circular-chip">
+                  <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#2563EB"/>
+                    <path d="M15.5 2V7.5H21L15.5 2Z" fill="#1D4ED8" opacity="0.8"/>
+                    <text x="11" y="16.5" font-size="7.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif">W</text>
+                  </svg>
+                </div>
+                <div class="format-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <polyline points="14 6 20 12 14 18"></polyline>
+                  </svg>
+                </div>
+                <!-- Red PDF Document -->
+                <div class="circular-chip">
+                  <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#E53935"/>
+                    <path d="M15.5 2V7.5H21L15.5 2Z" fill="#B71C1C" opacity="0.8"/>
+                    <text x="11" y="16.5" font-size="6.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif" letter-spacing="-0.3px">PDF</text>
+                  </svg>
+                </div>
               </div>
               <h3 class="card-title">Word to PDF</h3>
             </a>
@@ -41,50 +80,68 @@ import { ToolCategory } from '@paperflow/contracts';
             <!-- 3. JPG to PDF -->
             <a routerLink="/images-to-pdf" class="popular-card">
               <div class="card-format-row">
-                <span class="format-pill pill-purple">JPG</span>
-                <span class="format-arrow">→</span>
-                <span class="format-pill pill-red">PDF</span>
+                <!-- Purple JPG Document -->
+                <div class="circular-chip">
+                  <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#7C3AED"/>
+                    <path d="M15.5 2V7.5H21L15.5 2Z" fill="#6D28D9" opacity="0.8"/>
+                    <text x="11" y="16.5" font-size="6" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif" letter-spacing="-0.3px">JPG</text>
+                  </svg>
+                </div>
+                <div class="format-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <polyline points="14 6 20 12 14 18"></polyline>
+                  </svg>
+                </div>
+                <!-- Red PDF Document -->
+                <div class="circular-chip">
+                  <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M3 2C1.89543 2 1 2.89543 1 4V20C1 21.1046 1.89543 22 3 22H19C20.1046 22 21 21.1046 21 20V7.5L15.5 2H3Z" fill="#E53935"/>
+                    <path d="M15.5 2V7.5H21L15.5 2Z" fill="#B71C1C" opacity="0.8"/>
+                    <text x="11" y="16.5" font-size="6.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Space Grotesk', sans-serif" letter-spacing="-0.3px">PDF</text>
+                  </svg>
+                </div>
               </div>
               <h3 class="card-title">JPG to PDF</h3>
             </a>
 
-            <!-- 4. Merge PDF -->
+            <!-- 4. Merge PDF (Exact Dribbble Red Fork Icon) -->
             <a routerLink="/merge-pdf" class="popular-card">
               <div class="card-format-row">
-                <div class="single-icon-chip icon-merge">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="18" cy="18" r="3"></circle>
-                    <circle cx="6" cy="6" r="3"></circle>
-                    <path d="M6 9v12"></path>
-                    <path d="M18 9a9 9 0 0 1-9 9"></path>
+                <div class="circular-chip">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 4.5v3.5c0 3.2 5 4.8 5 8v3.5"/>
+                    <path d="M17 4.5v3.5c0 3.2-5 4.8-5 8"/>
                   </svg>
                 </div>
               </div>
               <h3 class="card-title">Merge PDF</h3>
             </a>
 
-            <!-- 5. Compress PDF -->
+            <!-- 5. Compress PDF (Exact Dribbble Inward Diagonal Arrows) -->
             <a routerLink="/compress-pdf" class="popular-card">
               <div class="card-format-row">
-                <div class="single-icon-chip icon-compress">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="4 14 10 14 10 20"></polyline>
-                    <polyline points="20 10 14 10 14 4"></polyline>
-                    <line x1="14" y1="10" x2="21" y2="3"></line>
-                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                <div class="circular-chip">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="4 9 9 9 9 4"/>
+                    <line x1="9" y1="9" x2="3" y2="3"/>
+                    <polyline points="20 15 15 15 15 20"/>
+                    <line x1="15" y1="15" x2="21" y2="21"/>
                   </svg>
                 </div>
               </div>
               <h3 class="card-title">Compress PDF</h3>
             </a>
 
-            <!-- 6. Protect PDF -->
+            <!-- 6. Protect PDF (Exact Dribbble Green Padlock) -->
             <a routerLink="/protect-pdf" class="popular-card">
               <div class="card-format-row">
-                <div class="single-icon-chip icon-protect">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                <div class="circular-chip">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="5" y="11" width="14" height="10" rx="2.5" fill="#16A34A"/>
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
                   </svg>
                 </div>
               </div>
@@ -198,14 +255,14 @@ import { ToolCategory } from '@paperflow/contracts';
                   <div class="tool-icon-chip" [class]="'icon-' + tool.id">
                     @switch (tool.icon) {
                       @case ('layers') {
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                          <polyline points="2 17 12 22 22 17"></polyline>
-                          <polyline points="2 12 12 17 22 12"></polyline>
+                        <!-- Exact Video Red Fork Icon -->
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M7 4.5v3.5c0 3.2 5 4.8 5 8v3.5"/>
+                          <path d="M17 4.5v3.5c0 3.2-5 4.8-5 8"/>
                         </svg>
                       }
                       @case ('scissors') {
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                           <circle cx="6" cy="6" r="3"></circle>
                           <circle cx="6" cy="18" r="3"></circle>
                           <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
@@ -214,30 +271,33 @@ import { ToolCategory } from '@paperflow/contracts';
                         </svg>
                       }
                       @case ('rotate-cw') {
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                           <polyline points="23 4 23 10 17 10"></polyline>
                           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                         </svg>
                       }
                       @case ('minimize-2') {
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="4 14 10 14 10 20"></polyline>
-                          <polyline points="20 10 14 10 14 4"></polyline>
-                          <line x1="14" y1="10" x2="21" y2="3"></line>
-                          <line x1="3" y1="21" x2="10" y2="14"></line>
+                        <!-- Exact Video Inward Diagonal Arrows -->
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="4 9 9 9 9 4"/>
+                          <line x1="9" y1="9" x2="3" y2="3"/>
+                          <polyline points="20 15 15 15 15 20"/>
+                          <line x1="15" y1="15" x2="21" y2="21"/>
                         </svg>
                       }
                       @case ('image') {
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                           <circle cx="8.5" cy="8.5" r="1.5"></circle>
                           <polyline points="21 15 16 10 5 21"></polyline>
                         </svg>
                       }
                       @case ('lock') {
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        <!-- Exact Video Green Padlock -->
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                          <rect x="5" y="11" width="14" height="10" rx="2.5" fill="currentColor"/>
+                          <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                          <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
                         </svg>
                       }
                       @default {
@@ -332,39 +392,36 @@ import { ToolCategory } from '@paperflow/contracts';
       border-color: var(--coral-400);
     }
 
-    /* FORMAT TRANSITION PILLS */
+    /* FORMAT TRANSITION ICONS (Dribbble Video Design) */
     .card-format-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
-    .format-pill {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      color: #ffffff;
-      line-height: 1;
-    }
-    .pill-red { background: var(--coral-600); }
-    .pill-blue { background: #2563eb; }
-    .pill-purple { background: #7c3aed; }
-    .format-arrow {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .single-icon-chip {
+    .circular-chip {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
     }
-    .icon-merge { color: var(--coral-600); background: var(--coral-50); }
-    .icon-compress { color: #f97316; background: #fff7ed; }
-    .icon-protect { color: #16a34a; background: #f0fdf4; }
+    .popular-card:hover .circular-chip {
+      background: #ffffff;
+      transform: scale(1.06);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+    .format-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+    }
 
     .card-title {
       font-size: 16px;

@@ -28,21 +28,27 @@ import { RouterLink } from '@angular/router';
             @if (activeMenu() === 'from') {
               <div class="dropdown-pane">
                 <a routerLink="/" (click)="closeMenu()" class="dropdown-item">
-                  <span class="dropdown-icon-pill icon-red">PDF</span>
-                  <span class="dropdown-arrow">→</span>
-                  <span class="dropdown-icon-pill icon-blue">DOC</span>
+                  <div class="mini-format-pair">
+                    <span class="mini-chip chip-red">PDF</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-chip chip-blue">DOC</span>
+                  </div>
                   <span class="dropdown-label">PDF to Word</span>
                 </a>
                 <a routerLink="/" (click)="closeMenu()" class="dropdown-item">
-                  <span class="dropdown-icon-pill icon-red">PDF</span>
-                  <span class="dropdown-arrow">→</span>
-                  <span class="dropdown-icon-pill icon-purple">JPG</span>
+                  <div class="mini-format-pair">
+                    <span class="mini-chip chip-red">PDF</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-chip chip-purple">JPG</span>
+                  </div>
                   <span class="dropdown-label">PDF to JPG</span>
                 </a>
                 <a routerLink="/" (click)="closeMenu()" class="dropdown-item">
-                  <span class="dropdown-icon-pill icon-red">PDF</span>
-                  <span class="dropdown-arrow">→</span>
-                  <span class="dropdown-icon-pill icon-green">XLS</span>
+                  <div class="mini-format-pair">
+                    <span class="mini-chip chip-red">PDF</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-chip chip-green">XLS</span>
+                  </div>
                   <span class="dropdown-label">PDF to Excel</span>
                 </a>
               </div>
@@ -60,15 +66,19 @@ import { RouterLink } from '@angular/router';
             @if (activeMenu() === 'to') {
               <div class="dropdown-pane">
                 <a routerLink="/" (click)="closeMenu()" class="dropdown-item">
-                  <span class="dropdown-icon-pill icon-blue">DOC</span>
-                  <span class="dropdown-arrow">→</span>
-                  <span class="dropdown-icon-pill icon-red">PDF</span>
+                  <div class="mini-format-pair">
+                    <span class="mini-chip chip-blue">DOC</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-chip chip-red">PDF</span>
+                  </div>
                   <span class="dropdown-label">Word to PDF</span>
                 </a>
                 <a routerLink="/images-to-pdf" (click)="closeMenu()" class="dropdown-item">
-                  <span class="dropdown-icon-pill icon-purple">JPG</span>
-                  <span class="dropdown-arrow">→</span>
-                  <span class="dropdown-icon-pill icon-red">PDF</span>
+                  <div class="mini-format-pair">
+                    <span class="mini-chip chip-purple">JPG</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-chip chip-red">PDF</span>
+                  </div>
                   <span class="dropdown-label">JPG to PDF</span>
                 </a>
               </div>
@@ -86,20 +96,47 @@ import { RouterLink } from '@angular/router';
             @if (activeMenu() === 'tools') {
               <div class="dropdown-pane">
                 <a routerLink="/merge-pdf" (click)="closeMenu()" class="dropdown-item">
-                  <span class="tool-dot red-dot"></span>
+                  <!-- Video Fork Icon -->
+                  <div class="menu-icon-chip red-chip">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M7 4.5v3.5c0 3.2 5 4.8 5 8v3.5"/>
+                      <path d="M17 4.5v3.5c0 3.2-5 4.8-5 8"/>
+                    </svg>
+                  </div>
                   <span class="dropdown-label">Merge PDF</span>
                   <span class="badge-mini">In-Browser</span>
                 </a>
                 <a routerLink="/split-pdf" (click)="closeMenu()" class="dropdown-item">
-                  <span class="tool-dot orange-dot"></span>
+                  <div class="menu-icon-chip orange-chip">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <circle cx="6" cy="6" r="3"></circle>
+                      <circle cx="6" cy="18" r="3"></circle>
+                      <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                      <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                      <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                    </svg>
+                  </div>
                   <span class="dropdown-label">Split PDF</span>
                 </a>
                 <a routerLink="/rotate-pdf" (click)="closeMenu()" class="dropdown-item">
-                  <span class="tool-dot blue-dot"></span>
+                  <div class="menu-icon-chip blue-chip">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                  </div>
                   <span class="dropdown-label">Rotate PDF</span>
                 </a>
                 <a routerLink="/compress-pdf" (click)="closeMenu()" class="dropdown-item">
-                  <span class="tool-dot emerald-dot"></span>
+                  <!-- Video Inward Arrows Icon -->
+                  <div class="menu-icon-chip coral-chip">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="4 9 9 9 9 4"/>
+                      <line x1="9" y1="9" x2="3" y2="3"/>
+                      <polyline points="20 15 15 15 15 20"/>
+                      <line x1="15" y1="15" x2="21" y2="21"/>
+                    </svg>
+                  </div>
                   <span class="dropdown-label">Compress PDF</span>
                 </a>
               </div>
@@ -116,12 +153,25 @@ import { RouterLink } from '@angular/router';
             </button>
             @if (activeMenu() === 'security') {
               <div class="dropdown-pane">
-                <a routerLink="/" (click)="closeMenu()" class="dropdown-item">
-                  <span class="tool-dot green-dot"></span>
+                <a routerLink="/protect-pdf" (click)="closeMenu()" class="dropdown-item">
+                  <!-- Video Green Padlock Icon -->
+                  <div class="menu-icon-chip green-chip">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                      <rect x="5" y="11" width="14" height="10" rx="2.5" fill="#16A34A"/>
+                      <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"/>
+                      <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
+                    </svg>
+                  </div>
                   <span class="dropdown-label">Protect PDF</span>
                 </a>
                 <a routerLink="/" (click)="closeMenu()" class="dropdown-item">
-                  <span class="tool-dot yellow-dot"></span>
+                  <div class="menu-icon-chip amber-chip">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                      <rect x="5" y="11" width="14" height="10" rx="2.5" fill="#F59E0B"/>
+                      <path d="M8 11V7a4 4 0 0 1 7.5-2" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+                      <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
+                    </svg>
+                  </div>
                   <span class="dropdown-label">Unlock PDF</span>
                 </a>
               </div>
@@ -273,43 +323,55 @@ import { RouterLink } from '@angular/router';
       background: var(--coral-50);
       color: var(--coral-600);
     }
-    .dropdown-icon-pill {
+    .mini-format-pair {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .mini-chip {
       font-size: 10px;
       font-weight: 800;
       padding: 2px 5px;
       border-radius: 4px;
-      color: #fff;
+      color: #ffffff;
+      line-height: 1;
     }
-    .icon-red { background: var(--coral-600); }
-    .icon-blue { background: #2563eb; }
-    .icon-purple { background: #7c3aed; }
-    .icon-green { background: #16a34a; }
-    .dropdown-arrow {
-      font-size: 12px;
+    .chip-red { background: var(--coral-600); }
+    .chip-blue { background: #2563eb; }
+    .chip-purple { background: #7c3aed; }
+    .chip-green { background: #16a34a; }
+    .mini-arrow {
+      font-size: 11px;
       color: var(--text-light);
     }
+    .menu-icon-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .red-chip { color: var(--coral-600); background: var(--coral-50); }
+    .orange-chip { color: #ea580c; background: #fff7ed; }
+    .blue-chip { color: #2563eb; background: #eff6ff; }
+    .coral-chip { color: var(--coral-600); background: var(--coral-50); }
+    .green-chip { color: #16a34a; background: #f0fdf4; }
+    .amber-chip { color: #d97706; background: #fffbeb; }
     .dropdown-label {
       flex: 1;
+      font-size: 13px;
+      font-weight: 600;
     }
     .badge-mini {
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 9999px;
-      background: var(--emerald-50);
-      color: var(--emerald-700);
+      background: var(--coral-50);
+      color: var(--coral-700);
       font-weight: 700;
     }
-    .tool-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .red-dot { background: var(--coral-600); }
-    .orange-dot { background: #f97316; }
-    .blue-dot { background: #3b82f6; }
-    .emerald-dot { background: #10b981; }
-    .green-dot { background: #16a34a; }
-    .yellow-dot { background: #eab308; }
 
     /* USER PROFILE CHIP (Mark Trainer) */
     .header-right {
