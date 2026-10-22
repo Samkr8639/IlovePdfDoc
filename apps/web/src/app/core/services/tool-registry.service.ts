@@ -1,4 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
+// Loaded from @paperflow/contracts (18 tools suite)
 import { TOOL_REGISTRY, ToolDefinition, ToolCategory } from '@paperflow/contracts';
 
 @Injectable({
