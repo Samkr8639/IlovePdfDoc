@@ -3,98 +3,152 @@ import { Component, input } from '@angular/core';
 @Component({
   selector: 'app-processing-state',
   template: `
-    <div class="processing-card card-clean">
-      <div class="spinner-wrapper">
-        <div class="pulse-ring"></div>
-        <div class="spinner-core">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-icon">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-          </svg>
+    <div class="dribbble-processing-card">
+      <!-- 3 PULSING CORAL DOTS (Exact Dribbble video animation) -->
+      <div class="pulsing-dots-wrapper">
+        <span class="pulse-dot dot-1"></span>
+        <span class="pulse-dot dot-2"></span>
+        <span class="pulse-dot dot-3"></span>
+      </div>
+
+      <!-- SECURED BADGE PILL -->
+      <div class="secured-pill">
+        <span>Secured Data Processing</span>
+      </div>
+
+      <!-- HEADLINE & WARNING SUBTITLE -->
+      <div class="processing-text-block">
+        <h2 class="processing-headline">{{ (title() || 'MERGING PDF DOCUMENTS...').toUpperCase() }}</h2>
+        <p class="processing-subtext">
+          The process will be finished soon.<br/>
+          Please, do not refresh the screen, before it finishes.
+        </p>
+      </div>
+
+      <!-- PROGRESS TRACK & PERCENTAGE -->
+      <div class="progress-section">
+        <span class="progress-percent-label">{{ percent() }}%</span>
+        <div class="dribbble-progress-track">
+          <div class="dribbble-progress-fill" [style.width.%]="percent()"></div>
         </div>
-      </div>
-
-      <div class="processing-details">
-        <h3 class="processing-title">{{ title() }}</h3>
-        <p class="processing-message">{{ message() }}</p>
-      </div>
-
-      <div class="progress-bar-container">
-        <div class="progress-bar-track">
-          <div class="progress-bar-fill" [style.width.%]="percent()"></div>
-        </div>
-        <span class="progress-percent">{{ percent() }}%</span>
-      </div>
-
-      <div class="badge-privacy">
-        <span>Processing 100% locally in browser memory</span>
       </div>
     </div>
   `,
   styles: [`
-    .processing-card {
+    .dribbble-processing-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 48px 32px;
+      padding: 72px 32px;
       gap: 20px;
-      max-width: 580px;
-      margin: 32px auto;
+      max-width: 680px;
+      margin: 40px auto;
+      background: #ffffff;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-sm);
     }
-    .spinner-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 64px;
-      height: 64px;
-    }
-    .spin-icon {
-      color: var(--primary-600);
-      animation: rotate 1s linear infinite;
-    }
-    @keyframes rotate {
-      100% { transform: rotate(360deg); }
-    }
-    .processing-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-    .processing-message {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .progress-bar-container {
-      width: 100%;
+
+    /* 3 PULSING DOTS */
+    .pulsing-dots-wrapper {
       display: flex;
       align-items: center;
       gap: 12px;
+      margin-bottom: 6px;
     }
-    .progress-bar-track {
-      flex: 1;
-      height: 8px;
-      background: var(--surface-border);
+    .pulse-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      animation: dotPulse 1.4s infinite ease-in-out both;
+    }
+    .dot-1 {
+      background: var(--coral-600);
+      animation-delay: -0.32s;
+    }
+    .dot-2 {
+      background: var(--coral-200);
+      animation-delay: -0.16s;
+    }
+    .dot-3 {
+      background: var(--coral-100);
+    }
+    @keyframes dotPulse {
+      0%, 80%, 100% {
+        transform: scale(0.85);
+        opacity: 0.6;
+      }
+      40% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    /* SECURED PILL */
+    .secured-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #f1f3f5;
+      padding: 4px 14px;
+      border-radius: 9999px;
+    }
+
+    /* HEADLINE */
+    .processing-text-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .processing-headline {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: 0.02em;
+      font-family: var(--font-display);
+      margin: 0;
+    }
+    .processing-subtext {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* PROGRESS TRACK */
+    .progress-section {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .progress-percent-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .dribbble-progress-track {
+      width: 100%;
+      height: 12px;
+      background: var(--coral-100);
       border-radius: 9999px;
       overflow: hidden;
+      padding: 2px;
     }
-    .progress-bar-fill {
+    .dribbble-progress-fill {
       height: 100%;
-      background: var(--primary-gradient);
+      background: var(--coral-600);
       border-radius: 9999px;
-      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .progress-percent {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--primary-700);
-      min-width: 36px;
+      transition: width 0.3s ease;
     }
   `]
 })
 export class ProcessingStateComponent {
-  readonly title = input<string>('Merging Documents...');
-  readonly message = input<string>('Reading pages and assembling final PDF...');
+  readonly title = input<string>('Merging PDF Documents...');
+  readonly message = input<string>('');
   readonly percent = input<number>(0);
 }

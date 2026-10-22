@@ -7,223 +7,285 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
   selector: 'app-result-view',
   imports: [RouterLink],
   template: `
-    <div class="result-card card-clean">
-      <div class="success-icon-wrapper">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
+    <div class="dribbble-result-container">
+      <!-- TOP NAVIGATION BAR (Exact Dribbble video Screen 4) -->
+      <div class="result-nav-bar">
+        <a routerLink="/" class="nav-back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Back to main page</span>
+        </a>
+
+        <button type="button" class="nav-restart-btn" (click)="reset.emit()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Start over</span>
+        </button>
       </div>
 
-      <div class="result-header">
-        <h3 class="result-title">PDFs Merged Successfully!</h3>
-        <p class="result-subtitle">Your document is ready. It was created completely on your device.</p>
-      </div>
+      <!-- MAIN DOCUMENT CARDS DUAL VIEW -->
+      <div class="result-dual-view">
+        <!-- 1. LEFT INTERACTIVE ACTION CARD (Dribbble Dark/Hover Card) -->
+        <div class="doc-card action-card">
+          <div class="doc-card-header">
+            <div class="doc-meta-left">
+              <span class="doc-filename" [title]="result().filename">{{ result().filename }}</span>
+              <span class="doc-filesize">{{ result().formattedSize }} • {{ result().pageCount }} Pages</span>
+            </div>
 
-      <div class="meta-box">
-        <div class="meta-item">
-          <span class="meta-label">Total Pages</span>
-          <span class="meta-val">{{ result().pageCount }}</span>
-        </div>
-        <div class="meta-divider"></div>
-        <div class="meta-item">
-          <span class="meta-label">File Size</span>
-          <span class="meta-val">{{ result().formattedSize }}</span>
-        </div>
-        <div class="meta-divider"></div>
-        <div class="meta-item">
-          <span class="meta-label">Privacy</span>
-          <span class="meta-val text-emerald">100% Client-side</span>
-        </div>
-      </div>
-
-      <!-- PDF PREVIEW SECTION -->
-      <div class="preview-section">
-        <div class="preview-toolbar">
-          <div class="preview-toolbar-left">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <span>Document Preview</span>
-          </div>
-          <div class="preview-toolbar-right">
-            <button type="button" class="preview-toggle-btn" (click)="togglePreview()">
-              {{ showPreview() ? 'Hide Preview' : 'Show Preview' }}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                @if (showPreview()) {
-                  <polyline points="18 15 12 9 6 15"></polyline>
-                } @else {
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                }
+            <!-- External Link: Open in New Tab -->
+            <a [href]="safeUrl()" target="_blank" rel="noopener noreferrer" class="doc-external-link" title="Open in New Tab">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
               </svg>
-            </button>
+            </a>
+          </div>
+
+          <!-- Document Mini Summary -->
+          <div class="action-card-body">
+            <div class="completion-icon-ring">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h4 class="action-card-title">Document Ready</h4>
+            <p class="action-card-subtitle">
+              Merged directly in browser memory with zero server uploads.
+            </p>
+          </div>
+
+          <!-- DOWNLOAD BUTTON (Exact Dribbble Red Download file Button) -->
+          <div class="action-card-footer">
+            <a
+              [href]="safeUrl()"
+              [download]="result().filename"
+              (click)="downloadFile($event)"
+              class="dribbble-download-btn download-btn"
+            >
+              <span>Download file</span>
+            </a>
           </div>
         </div>
 
-        @if (showPreview()) {
-          <div class="preview-frame-wrapper">
+        <!-- 2. RIGHT PREVIEW CARD (Interactive PDF Canvas) -->
+        <div class="doc-card preview-card">
+          <div class="preview-card-header">
+            <span class="preview-tag">Live Preview</span>
+            <span class="preview-sub">100% In-Browser Render</span>
+          </div>
+
+          <div class="preview-iframe-box">
             <iframe
               [src]="previewUrl()"
               class="preview-iframe"
               title="Merged PDF Preview"
             ></iframe>
           </div>
-        }
-      </div>
-
-      <div class="actions-group">
-        <a
-          [href]="safeUrl()"
-          [download]="result().filename"
-          (click)="downloadFile($event)"
-          class="btn-primary download-btn"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Download Merged PDF</span>
-        </a>
-
-        <button type="button" class="btn-secondary" (click)="reset.emit()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="1 4 1 10 7 10"></polyline>
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-          </svg>
-          <span>Merge Another Document</span>
-        </button>
-      </div>
-
-      <div class="next-tools">
-        <span class="next-tools-label">Next steps:</span>
-        <div class="next-tools-links">
-          <a routerLink="/split-pdf" class="tool-chip">Split PDF</a>
-          <a routerLink="/rotate-pdf" class="tool-chip">Rotate Pages</a>
-          <a routerLink="/compress-pdf" class="tool-chip">Compress PDF</a>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .result-card {
+    .dribbble-result-container {
+      width: 100%;
+      max-width: 1040px;
+      margin: 32px auto 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* TOP NAV BAR */
+    .result-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+    .nav-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      transition: color 0.15s ease;
+    }
+    .nav-back-link:hover {
+      color: var(--coral-600);
+    }
+    .nav-restart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+    .nav-restart-btn:hover {
+      color: var(--text-main);
+    }
+
+    /* DUAL VIEW GRID */
+    .result-dual-view {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .doc-card {
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* LEFT ACTION CARD */
+    .action-card {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 28px;
+      justify-content: space-between;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25);
+      min-height: 480px;
+    }
+    .doc-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .doc-meta-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+    }
+    .doc-filename {
+      font-size: 17px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .doc-filesize {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .doc-external-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .doc-external-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .action-card-body {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 48px 32px;
-      gap: 24px;
-      max-width: 820px;
-      margin: 32px auto;
+      gap: 12px;
+      margin: 32px 0;
     }
-    .success-icon-wrapper {
+    .completion-icon-ring {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 72px;
-      height: 72px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background: var(--emerald-50);
-      color: var(--emerald-600);
-      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.2);
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
     }
-    .result-title {
-      font-size: 22px;
+    .action-card-title {
+      font-size: 20px;
       font-weight: 800;
-      color: var(--text-main);
+      margin: 0;
     }
-    .result-subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .meta-box {
-      display: flex;
-      align-items: center;
-      background: var(--surface-bg);
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
-      padding: 12px 24px;
-      gap: 20px;
-    }
-    .meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .meta-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-    .meta-val {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-    .text-emerald {
-      color: var(--emerald-600);
-    }
-    .meta-divider {
-      width: 1px;
-      height: 28px;
-      background: var(--surface-border);
+    .action-card-subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      max-width: 260px;
+      margin: 0;
     }
 
-    /* PREVIEW SECTION */
-    .preview-section {
+    /* DRIBBLE DOWNLOAD BUTTON */
+    .action-card-footer {
       width: 100%;
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      background: var(--surface-bg);
     }
-    .preview-toolbar {
+    .dribbble-download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 15px;
+      background: var(--coral-600);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 20px rgba(229, 57, 53, 0.4);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .dribbble-download-btn:hover {
+      background: var(--coral-700);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(229, 57, 53, 0.5);
+    }
+
+    /* RIGHT PREVIEW CARD */
+    .preview-card {
+      background: #ffffff;
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .preview-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 20px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--surface-border);
-      background: #ffffff;
+      background: #fafafa;
     }
-    .preview-toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 600;
+    .preview-tag {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       color: var(--text-main);
     }
-    .preview-toolbar-right {
-      display: flex;
-      align-items: center;
-    }
-    .preview-toggle-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
+    .preview-sub {
       font-size: 12px;
       font-weight: 600;
-      color: var(--primary-600);
-      background: var(--primary-50);
-      border: 1px solid var(--primary-200);
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      color: var(--emerald-600);
     }
-    .preview-toggle-btn:hover {
-      background: var(--primary-100);
-      border-color: var(--primary-300);
-    }
-    .preview-frame-wrapper {
-      position: relative;
+    .preview-iframe-box {
       width: 100%;
-      height: 520px;
-      background: #f3f4f6;
+      height: 540px;
+      background: #f1f3f5;
     }
     .preview-iframe {
       width: 100%;
@@ -232,58 +294,15 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
       display: block;
     }
 
-    .actions-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      max-width: 320px;
-    }
-    .download-btn {
-      width: 100%;
-      padding: 14px 24px;
-      font-size: 16px;
-    }
-    .next-tools {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .next-tools-links {
-      display: flex;
-      gap: 8px;
-    }
-    .tool-chip {
-      padding: 4px 12px;
-      background: var(--surface-bg);
-      border: 1px solid var(--surface-border);
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-main);
-      transition: all 0.15s ease;
-    }
-    .tool-chip:hover {
-      background: var(--primary-50);
-      border-color: var(--primary-200);
-      color: var(--primary-600);
-    }
-
-    @media (max-width: 640px) {
-      .preview-frame-wrapper {
-        height: 360px;
+    @media (max-width: 860px) {
+      .result-dual-view {
+        grid-template-columns: 1fr;
       }
-      .meta-box {
-        flex-direction: column;
-        gap: 12px;
-        padding: 16px;
+      .action-card {
+        min-height: auto;
       }
-      .meta-divider {
-        width: 60%;
-        height: 1px;
+      .preview-iframe-box {
+        height: 380px;
       }
     }
   `]
@@ -293,8 +312,6 @@ export class ResultViewComponent {
 
   readonly result = input.required<MergeResult>();
   readonly reset = output<void>();
-
-  readonly showPreview = signal<boolean>(true);
 
   /** Sanitised blob URL for the download link */
   readonly safeUrl = computed<SafeUrl>(() => {
@@ -306,18 +323,13 @@ export class ResultViewComponent {
     return this.sanitizer.bypassSecurityTrustResourceUrl(this.result().url);
   });
 
-  togglePreview(): void {
-    this.showPreview.update((v) => !v);
-  }
-
   async downloadFile(event?: Event): Promise<void> {
     const res = this.result();
     if (!res?.blob) return;
 
     const filename = res.filename.endsWith('.pdf') ? res.filename : `${res.filename}.pdf`;
 
-    // 1. Modern Chromium File System Access API: Native "Save As" file picker
-    // Allows user to choose folder and guarantees the .pdf extension
+    // Modern Chromium File System Access API
     if ('showSaveFilePicker' in window) {
       if (event) {
         event.preventDefault();
@@ -337,16 +349,13 @@ export class ResultViewComponent {
         await writable.close();
         return;
       } catch (err: unknown) {
-        // User clicked Cancel in the Save dialog
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        // If permission error or failure, fall through to native anchor download
       }
     }
 
-    // 2. Standard HTML5 anchor download fallback
-    // When called from code (no event), trigger the anchor cleanly using persistent res.url
+    // Fallback: standard anchor download using persistent res.url
     if (!event) {
       const link = document.createElement('a');
       link.href = res.url;
@@ -360,6 +369,5 @@ export class ResultViewComponent {
         }
       }, 2000);
     }
-    // If event is present on <a>, letting default proceed downloads with res.url and download="filename"
   }
 }

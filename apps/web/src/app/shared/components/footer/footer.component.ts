@@ -9,43 +9,48 @@ import { RouterLink } from '@angular/router';
     <footer class="footer">
       <div class="container footer-content">
         <div class="footer-brand-col">
-          <div class="brand">
-            <span class="brand-name">Paper<span class="brand-highlight">Flow</span></span>
-          </div>
+          <a routerLink="/" class="footer-brand">
+            <div class="brand-badge">
+              <span class="pdf-tag">PDF</span>
+            </div>
+            <span class="brand-flow">flow</span>
+          </a>
           <p class="brand-tagline">
-            Fast, secure, and 100% private online document tools. All core operations execute directly inside your browser memory.
+            Fast, secure, and 100% private document toolkit. All core operations execute directly inside your browser memory with zero network uploads.
           </p>
           <div class="privacy-note">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shield-icon">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <span>Zero file uploads for client-side tools.</span>
+            <span class="privacy-dot"></span>
+            <span>Zero file uploads • 100% Client-Side</span>
           </div>
         </div>
 
         <div class="footer-links-col">
-          <h4 class="col-title">Organize PDF</h4>
+          <h4 class="col-title">Popular Services</h4>
+          <a routerLink="/merge-pdf" class="footer-link">PDF to Word</a>
+          <a routerLink="/merge-pdf" class="footer-link">Word to PDF</a>
+          <a routerLink="/images-to-pdf" class="footer-link">JPG to PDF</a>
           <a routerLink="/merge-pdf" class="footer-link">Merge PDF</a>
+        </div>
+
+        <div class="footer-links-col">
+          <h4 class="col-title">PDF Tools</h4>
           <a routerLink="/split-pdf" class="footer-link">Split PDF</a>
           <a routerLink="/rotate-pdf" class="footer-link">Rotate PDF</a>
-        </div>
-
-        <div class="footer-links-col">
-          <h4 class="col-title">Convert</h4>
-          <a routerLink="/images-to-pdf" class="footer-link">JPG to PDF</a>
           <a routerLink="/compress-pdf" class="footer-link">Compress PDF</a>
+          <a routerLink="/protect-pdf" class="footer-link">Protect PDF</a>
         </div>
 
         <div class="footer-links-col">
-          <h4 class="col-title">Security & Info</h4>
-          <span class="footer-link text-dim">100% Free Tier</span>
-          <span class="footer-link text-dim">Open Architecture</span>
+          <h4 class="col-title">Security & Terms</h4>
           <span class="footer-link text-dim">Client-Side Engine</span>
+          <span class="footer-link text-dim">No Server Storage</span>
+          <span class="footer-link text-dim">GDPR Compliant</span>
+          <span class="footer-link text-dim">Open Architecture</span>
         </div>
       </div>
 
       <div class="container footer-bottom">
-        <p class="copyright">© 2026 PaperFlow. All rights reserved. Open-source local-first PDF platform.</p>
+        <p class="copyright">© 2026 PDF flow. All rights reserved. Built with in-browser WebAssembly & Web APIs.</p>
         <div class="bottom-links">
           <span>Privacy Guaranteed</span>
           <span>•</span>
@@ -59,7 +64,7 @@ import { RouterLink } from '@angular/router';
       background-color: #ffffff;
       border-top: 1px solid var(--surface-border);
       padding: 64px 0 32px;
-      margin-top: 80px;
+      margin-top: 72px;
     }
     .footer-content {
       display: grid;
@@ -68,16 +73,37 @@ import { RouterLink } from '@angular/router';
       padding-bottom: 48px;
       border-bottom: 1px solid var(--surface-border-subtle);
     }
-    .brand-name {
+    .footer-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      background: var(--coral-600);
+      border-radius: 8px;
+      line-height: 1;
+      box-shadow: 0 2px 6px rgba(229, 57, 53, 0.25);
+    }
+    .pdf-tag {
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+    }
+    .brand-flow {
       font-size: 22px;
       font-weight: 800;
+      letter-spacing: -0.03em;
       color: var(--text-main);
-    }
-    .brand-highlight {
-      color: var(--primary-600);
+      font-family: var(--font-display);
     }
     .brand-tagline {
-      margin-top: 12px;
+      margin-top: 14px;
       font-size: 14px;
       color: var(--text-muted);
       max-width: 320px;
@@ -86,20 +112,29 @@ import { RouterLink } from '@angular/router';
     .privacy-note {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       margin-top: 16px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--emerald-700);
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: var(--coral-50);
+      border: 1px solid var(--coral-200);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--coral-700);
     }
-    .shield-icon {
-      color: var(--emerald-600);
+    .privacy-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--coral-600);
+      box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.2);
     }
     .col-title {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      font-family: var(--font-display);
       color: var(--text-main);
       margin-bottom: 16px;
     }
@@ -112,12 +147,14 @@ import { RouterLink } from '@angular/router';
       font-size: 14px;
       color: var(--text-muted);
       transition: color 0.15s ease;
+      font-weight: 500;
     }
     .footer-link:hover {
-      color: var(--primary-600);
+      color: var(--coral-600);
     }
     .text-dim {
       opacity: 0.7;
+      cursor: default;
     }
     .footer-bottom {
       display: flex;

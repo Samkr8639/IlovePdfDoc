@@ -37,9 +37,9 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
             <span>In-Browser Processing • 100% Private</span>
           </div>
 
-          <h1 class="tool-h1">Merge PDF Files Online</h1>
+          <h1 class="tool-h1">MERGE PDF</h1>
           <p class="tool-lead">
-            Combine multiple PDF files into a single document in seconds.
+            Combine multiple PDF files into a single document with incredible speed.
             Files are processed entirely inside your browser with zero network uploads.
           </p>
         </div>
@@ -199,7 +199,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
               <div class="faq-card card-clean">
                 <h4 class="faq-q">Are my documents uploaded to a remote server?</h4>
                 <p class="faq-a">
-                  No. Unlike traditional converters, PaperFlow executes the entire PDF combination directly inside your browser memory.
+                  No. Unlike traditional converters, PDF flow executes the entire PDF combination directly inside your browser memory.
                   Your files are never transmitted to our backend.
                 </p>
               </div>
@@ -207,14 +207,14 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
               <div class="faq-card card-clean">
                 <h4 class="faq-q">Can I merge documents of different page orientations?</h4>
                 <p class="faq-a">
-                  Yes! PaperFlow automatically preserves portrait and landscape orientations, margins, and embedded fonts across all joined files.
+                  Yes! PDF flow automatically preserves portrait and landscape orientations, margins, and embedded fonts across all joined files.
                 </p>
               </div>
 
               <div class="faq-card card-clean">
                 <h4 class="faq-q">Is there any fee or daily limit?</h4>
                 <p class="faq-a">
-                  PaperFlow is completely free with no daily limits or subscription gates.
+                  PDF flow is completely free with no daily limits or subscription gates.
                 </p>
               </div>
             </div>
@@ -239,7 +239,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       transform: translateX(-50%);
       width: 600px;
       height: 300px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(229, 57, 53, 0.08) 0%, transparent 70%);
       pointer-events: none;
     }
     .tool-header-container {
@@ -259,7 +259,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       margin-bottom: 18px;
     }
     .crumb-link:hover {
-      color: var(--primary-600);
+      color: var(--coral-600);
     }
     .crumb-sep {
       color: var(--text-light);
@@ -272,10 +272,11 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       margin-bottom: 20px;
     }
     .tool-h1 {
-      font-size: clamp(30px, 4.4vw, 46px);
+      font-size: clamp(32px, 4.5vw, 44px);
       font-weight: 800;
-      letter-spacing: -0.025em;
+      letter-spacing: 0.03em;
       color: var(--text-main);
+      font-family: var(--font-display);
     }
     .tool-lead {
       font-size: 16px;
@@ -354,7 +355,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       border-radius: var(--radius-xl);
       padding: 18px 26px;
       margin-top: 28px;
-      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(37, 99, 235, 0.08);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(229, 57, 53, 0.12);
     }
     .dock-info {
       display: flex;
@@ -366,7 +367,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: var(--primary-700);
+      color: var(--coral-600);
     }
     .dock-note {
       font-size: 13px;
@@ -417,7 +418,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
     .step-num {
       font-size: 32px;
       font-weight: 800;
-      color: var(--primary-200);
+      color: var(--coral-600);
       line-height: 1;
       font-family: var(--font-display);
     }
