@@ -12,7 +12,6 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
 @Component({
   selector: 'app-merge-pdf',
-  standalone: true,
   imports: [
     RouterLink,
     DropzoneComponent,
@@ -22,8 +21,9 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   ],
   template: `
     <div class="tool-page">
-      <!-- BREADCRUMBS & HEADER -->
+      <!-- HEADER & BREADCRUMBS -->
       <section class="tool-header-section">
+        <div class="tool-ambient-glow"></div>
         <div class="container tool-header-container">
           <nav class="breadcrumbs" aria-label="Breadcrumb">
             <a routerLink="/" class="crumb-link">Home</a>
@@ -40,7 +40,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
           <h1 class="tool-h1">Merge PDF Files Online</h1>
           <p class="tool-lead">
             Combine multiple PDF files into a single document in seconds.
-            Files are merged entirely inside your browser with zero server uploads.
+            Files are processed entirely inside your browser with zero network uploads.
           </p>
         </div>
       </section>
@@ -80,7 +80,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
               <div class="workspace-controls-bar">
                 <div class="controls-left">
                   <span class="files-summary">
-                    <strong>{{ selectedFiles().length }}</strong> files selected
+                    <strong>{{ selectedFiles().length }}</strong> files ready to combine
                   </span>
                   <button type="button" class="btn-secondary add-more-btn" (click)="fileInput.click()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -114,10 +114,11 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
                 (removeFile)="onRemoveFile($event)"
               ></app-file-list>
 
-              <!-- ACTION BAR -->
+              <!-- FLOATING ACTION DOCK -->
               <div class="action-dock">
                 <div class="dock-info">
-                  <span class="dock-note">Documents will be combined in sequential order.</span>
+                  <span class="dock-pill">Sequence Preserved</span>
+                  <span class="dock-note">Pages will merge in the exact sequence shown above.</span>
                 </div>
 
                 <button
@@ -156,12 +157,13 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
         </div>
       </section>
 
-      <!-- SEO / HOW-TO GUIDE SECTION -->
+      <!-- SEO & GUIDE SECTION -->
       <section class="seo-guide-section">
         <div class="container">
           <div class="guide-header">
-            <h2 class="guide-title">How to Merge PDF Files Online with PaperFlow</h2>
-            <p class="guide-lead">Follow these 3 easy steps to combine multiple PDF documents into one.</p>
+            <span class="badge-tag">Fast & Simple</span>
+            <h2 class="guide-title">How to Merge PDF Files Online</h2>
+            <p class="guide-lead">Three simple steps to combine documents securely in your web browser.</p>
           </div>
 
           <div class="steps-grid">
@@ -169,7 +171,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
               <div class="step-num">01</div>
               <h3 class="step-title">Select Documents</h3>
               <p class="step-desc">
-                Drag and drop your PDF documents into the upload box above, or click "Choose Files" to browse your computer.
+                Drag and drop your PDF documents into the upload box above, or click "Choose Files" to select from your file manager.
               </p>
             </div>
 
@@ -177,7 +179,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
               <div class="step-num">02</div>
               <h3 class="step-title">Arrange the Order</h3>
               <p class="step-desc">
-                Use the Move Up and Move Down arrow buttons to order your files exactly how you want them to appear in the combined document.
+                Use the Move Up and Move Down arrow controls to order your files exactly how you want them to appear in the combined document.
               </p>
             </div>
 
@@ -223,16 +225,30 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   `,
   styles: [`
     .tool-header-section {
-      padding: 48px 0 32px;
+      position: relative;
+      padding: 56px 0 36px;
       text-align: center;
       background: #ffffff;
       border-bottom: 1px solid var(--surface-border);
+      overflow: hidden;
+    }
+    .tool-ambient-glow {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
     .tool-header-container {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 780px;
+      max-width: 800px;
     }
     .breadcrumbs {
       display: flex;
@@ -240,7 +256,7 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       gap: 8px;
       font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
     .crumb-link:hover {
       color: var(--primary-600);
@@ -253,27 +269,28 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       font-weight: 600;
     }
     .mode-badge {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
     .tool-h1 {
-      font-size: clamp(28px, 4vw, 42px);
+      font-size: clamp(30px, 4.4vw, 46px);
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       color: var(--text-main);
     }
     .tool-lead {
       font-size: 16px;
       color: var(--text-muted);
-      margin-top: 12px;
+      margin-top: 14px;
       line-height: 1.6;
+      font-weight: 500;
     }
 
     /* WORKSPACE */
     .workspace-section {
-      padding: 48px 0;
+      padding: 52px 0 64px;
     }
     .workspace-container {
-      max-width: 860px;
+      max-width: 880px;
     }
     .error-banner {
       display: flex;
@@ -298,10 +315,11 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: 18px 24px;
       background: #ffffff;
       border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
     }
     .controls-left {
       display: flex;
@@ -313,53 +331,76 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       color: var(--text-main);
     }
     .add-more-btn {
-      padding: 8px 14px;
+      padding: 8px 16px;
       font-size: 13px;
     }
     .clear-btn {
-      padding: 8px 14px;
+      padding: 8px 16px;
       font-size: 13px;
     }
+    
+    /* FLOATING ACTION DOCK */
     .action-dock {
+      position: sticky;
+      bottom: 24px;
+      z-index: 30;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #ffffff;
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-lg);
-      padding: 20px 24px;
-      margin-top: 24px;
-      box-shadow: var(--shadow-md);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: var(--radius-xl);
+      padding: 18px 26px;
+      margin-top: 28px;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(37, 99, 235, 0.08);
+    }
+    .dock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .dock-pill {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary-700);
     }
     .dock-note {
       font-size: 13px;
       color: var(--text-muted);
     }
     .merge-submit-btn {
-      padding: 14px 28px;
+      padding: 14px 32px;
       font-size: 15px;
     }
 
     /* GUIDE */
     .seo-guide-section {
-      padding: 64px 0 32px;
+      padding: 72px 0 36px;
       background: #ffffff;
       border-top: 1px solid var(--surface-border);
     }
     .guide-header {
       text-align: center;
       max-width: 680px;
-      margin: 0 auto 48px;
+      margin: 0 auto 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
     .guide-title {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 800;
+      letter-spacing: -0.02em;
       color: var(--text-main);
     }
     .guide-lead {
-      font-size: 15px;
+      font-size: 16px;
       color: var(--text-muted);
-      margin-top: 8px;
     }
     .steps-grid {
       display: grid;
@@ -371,12 +412,14 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       flex-direction: column;
       gap: 12px;
       position: relative;
+      padding: 32px 28px;
     }
     .step-num {
       font-size: 32px;
       font-weight: 800;
       color: var(--primary-200);
       line-height: 1;
+      font-family: var(--font-display);
     }
     .step-title {
       font-size: 18px;
@@ -389,17 +432,18 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       line-height: 1.6;
     }
     .tool-faqs {
-      margin-top: 64px;
-      max-width: 820px;
+      margin-top: 68px;
+      max-width: 840px;
       margin-left: auto;
       margin-right: auto;
     }
     .tool-faqs-title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
       color: var(--text-main);
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
+      letter-spacing: -0.02em;
     }
     .tool-faqs-list {
       display: flex;
@@ -407,18 +451,18 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
       gap: 16px;
     }
     .faq-card {
-      padding: 20px 24px;
+      padding: 24px 28px;
     }
     .faq-q {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--text-main);
     }
     .faq-a {
       font-size: 14px;
       color: var(--text-muted);
-      margin-top: 6px;
-      line-height: 1.6;
+      margin-top: 8px;
+      line-height: 1.65;
     }
 
     @media (max-width: 768px) {
@@ -511,7 +555,6 @@ export class MergePdfComponent implements OnInit {
   }
 
   resetWorkspace(): void {
-    // Revoke previous blob URL to prevent memory leaks
     const currentResult = this.mergeResult();
     if (currentResult?.url) {
       URL.revokeObjectURL(currentResult.url);

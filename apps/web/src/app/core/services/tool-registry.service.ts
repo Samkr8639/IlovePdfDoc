@@ -6,6 +6,7 @@ import { TOOL_REGISTRY, ToolDefinition, ToolCategory } from '@paperflow/contract
 })
 export class ToolRegistryService {
   private readonly tools = signal<ToolDefinition[]>(TOOL_REGISTRY);
+  readonly allTools = this.tools.asReadonly();
   readonly selectedCategory = signal<ToolCategory | 'all'>('all');
   readonly searchQuery = signal<string>('');
 
