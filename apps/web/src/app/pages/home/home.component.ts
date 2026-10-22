@@ -83,155 +83,209 @@ import { ToolCategory } from '@paperflow/contracts';
                 <div class="tool-icon-box" [class]="'box-' + tool.id">
                   @switch (tool.id) {
                     @case ('merge-pdf') {
-                      <!-- Orange/Coral Merge PDF Fork -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="4 14 10 14 10 20"></polyline>
-                        <polyline points="20 10 14 10 14 4"></polyline>
-                        <line x1="14" y1="10" x2="21" y2="3"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                      <!-- Professional Merge PDF: 2 converging coral-red tiles with converging arrows -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="9" y1="9" x2="19" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <polyline points="13 19 19 19 19 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="39" y1="39" x2="29" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <polyline points="35 29 29 29 29 35" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('split-pdf') {
-                      <!-- Red Split PDF Icon -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                      <!-- Professional Split PDF: 2 separating coral-red tiles with diverging arrows -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="19" y1="19" x2="9" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <polyline points="16 9 9 9 9 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="29" y1="29" x2="39" y2="39" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <polyline points="32 39 39 39 39 32" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('compress-pdf') {
-                      <!-- Green Inward Arrows -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="4 9 9 9 9 4"></polyline>
-                        <polyline points="20 15 15 15 15 20"></polyline>
-                        <line x1="9" y1="9" x2="3" y2="3"></line>
-                        <line x1="15" y1="15" x2="21" y2="21"></line>
+                      <!-- Professional Compress PDF: 4 inward emerald green tiles -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <!-- Top-Left -->
+                        <rect x="4" y="4" width="18" height="18" rx="4" fill="#10B981" />
+                        <line x1="8" y1="8" x2="16" y2="16" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                        <polyline points="10 16 16 16 16 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Top-Right -->
+                        <rect x="26" y="4" width="18" height="18" rx="4" fill="#10B981" />
+                        <line x1="40" y1="8" x2="32" y2="16" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                        <polyline points="38 16 32 16 32 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Bottom-Left -->
+                        <rect x="4" y="26" width="18" height="18" rx="4" fill="#10B981" />
+                        <line x1="8" y1="40" x2="16" y2="32" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                        <polyline points="10 32 16 32 16 38" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Bottom-Right -->
+                        <rect x="26" y="26" width="18" height="18" rx="4" fill="#10B981" />
+                        <line x1="40" y1="40" x2="32" y2="32" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                        <polyline points="38 32 32 32 32 38" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('pdf-to-word') {
-                      <!-- Blue Word 'W' Badge -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 2H16L21 7V22H4V2Z" fill="currentColor" opacity="0.15"/>
-                        <path d="M15 2V7H20" stroke="currentColor" stroke-width="2"/>
-                        <text x="12" y="17" font-size="9" font-weight="900" fill="currentColor" text-anchor="middle" font-family="'Space Grotesk', sans-serif">W</text>
+                      <!-- Professional PDF to Word: Salmon transition tile + Royal Blue Word 'W' Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
+                        <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="18" y="16" width="26" height="26" rx="6" fill="#2B579A" />
+                        <text x="31" y="35" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">W</text>
                       </svg>
                     }
                     @case ('pdf-to-powerpoint') {
-                      <!-- Orange PPT 'P' Badge -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 2H16L21 7V22H4V2Z" fill="currentColor" opacity="0.15"/>
-                        <path d="M15 2V7H20" stroke="currentColor" stroke-width="2"/>
-                        <text x="12" y="17" font-size="9" font-weight="900" fill="currentColor" text-anchor="middle" font-family="'Space Grotesk', sans-serif">P</text>
+                      <!-- Professional PDF to PPT: Salmon transition tile + Orange PPT 'P' Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
+                        <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="18" y="16" width="26" height="26" rx="6" fill="#D24726" />
+                        <text x="31" y="35" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">P</text>
                       </svg>
                     }
                     @case ('pdf-to-excel') {
-                      <!-- Green Excel 'X' Badge -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 2H16L21 7V22H4V2Z" fill="currentColor" opacity="0.15"/>
-                        <path d="M15 2V7H20" stroke="currentColor" stroke-width="2"/>
-                        <text x="12" y="17" font-size="9" font-weight="900" fill="currentColor" text-anchor="middle" font-family="'Space Grotesk', sans-serif">X</text>
+                      <!-- Professional PDF to Excel: Salmon transition tile + Green Excel 'X' Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
+                        <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="18" y="16" width="26" height="26" rx="6" fill="#107C41" />
+                        <text x="31" y="35" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">X</text>
                       </svg>
                     }
                     @case ('word-to-pdf') {
-                      <!-- Word to PDF -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h10l6 6v10H4V4z"></path>
-                        <polyline points="14 4 14 10 20 10"></polyline>
-                        <path d="M8 17l4-8 4 8" stroke-width="2.5"></path>
+                      <!-- Professional Word to PDF: Blue 'W' Badge + Red PDF Arrow Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="26" height="26" rx="6" fill="#2B579A" />
+                        <text x="17" y="23" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">W</text>
+                        <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="28" y1="28" x2="37" y2="37" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+                        <polyline points="31 37 37 37 37 31" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('powerpoint-to-pdf') {
-                      <!-- PPT to PDF -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <circle cx="12" cy="12" r="3"></circle>
+                      <!-- Professional PPT to PDF: Orange 'P' Badge + Red PDF Arrow Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="26" height="26" rx="6" fill="#D24726" />
+                        <text x="17" y="23" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">P</text>
+                        <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="28" y1="28" x2="37" y2="37" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+                        <polyline points="31 37 37 37 37 31" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('excel-to-pdf') {
-                      <!-- Excel to PDF -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <line x1="3" y1="9" x2="21" y2="9"></line>
-                        <line x1="3" y1="15" x2="21" y2="15"></line>
-                        <line x1="9" y1="3" x2="9" y2="21"></line>
-                        <line x1="15" y1="3" x2="15" y2="21"></line>
+                      <!-- Professional Excel to PDF: Green 'X' Badge + Red PDF Arrow Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="26" height="26" rx="6" fill="#107C41" />
+                        <text x="17" y="23" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">X</text>
+                        <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="28" y1="28" x2="37" y2="37" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+                        <polyline points="31 37 37 37 37 31" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('edit-pdf') {
-                      <!-- Purple Edit PDF Icon -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      <!-- Professional Edit PDF: Plum/Purple Editor Box with Pencil & Anchor Handles -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#9333EA" />
+                        <rect x="12" y="12" width="24" height="24" rx="3" fill="none" stroke="white" stroke-width="1.8" stroke-dasharray="3 2" />
+                        <!-- Corner anchor handles -->
+                        <rect x="10.5" y="10.5" width="3" height="3" fill="white" />
+                        <rect x="34.5" y="10.5" width="3" height="3" fill="white" />
+                        <rect x="10.5" y="34.5" width="3" height="3" fill="white" />
+                        <rect x="34.5" y="34.5" width="3" height="3" fill="white" />
+                        <!-- Stylus / Pencil -->
+                        <path d="M28 16l4 4-10 10h-4v-4l10-10z" fill="white"/>
+                        <circle cx="16" cy="28" r="1.5" fill="white"/>
                       </svg>
                     }
                     @case ('pdf-to-jpg') {
-                      <!-- Yellow PDF to JPG -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
+                      <!-- Professional PDF to JPG: Salmon transition tile + Golden Amber Landscape Photo Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
+                        <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="18" y="16" width="26" height="26" rx="6" fill="#F59E0B" />
+                        <circle cx="25" cy="23" r="2.5" fill="white"/>
+                        <path d="M22 36l5-6 3 3 5-7 7 10H22z" fill="white"/>
                       </svg>
                     }
                     @case ('images-to-pdf') {
-                      <!-- JPG to PDF -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <polyline points="8 12 12 8 16 12"></polyline>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                      <!-- Professional JPG to PDF: Golden Amber 'JPG' Badge + Coral Red Arrow Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="25" height="22" rx="5" fill="#F59E0B" />
+                        <text x="16.5" y="19" font-size="9" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">JPG</text>
+                        <rect x="22" y="20" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="28" y1="26" x2="37" y2="35" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+                        <polyline points="31 35 37 35 37 29" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('sign-pdf') {
-                      <!-- Sign PDF Fountain Pen -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                        <circle cx="11" cy="11" r="2"></circle>
+                      <!-- Professional Sign PDF: Vibrant Blue Badge with Fountain Pen Nib & Signature Stroke -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#0284C7" />
+                        <path d="M28 12l4 4-8 8-4-1 1-4 7-7z" fill="white"/>
+                        <circle cx="21" cy="23" r="1.5" fill="#0284C7"/>
+                        <path d="M13 34c4-3 7 1 11-2s8-1 11 1" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                       </svg>
                     }
                     @case ('watermark-pdf') {
-                      <!-- Watermark Stamp -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="4"></rect>
-                        <path d="M9 15l6-6"></path>
-                        <circle cx="9.5" cy="9.5" r="1.5"></circle>
-                        <circle cx="14.5" cy="14.5" r="1.5"></circle>
+                      <!-- Professional Watermark PDF: Berry Burgundy Badge with Classic Rubber Stamp -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#9D174D" />
+                        <!-- Stamp Handle -->
+                        <path d="M24 13c-2 0-3 1.5-3 3v4h6v-4c0-1.5-1-3-3-3z" fill="white"/>
+                        <!-- Stamp Plate -->
+                        <rect x="15" y="20" width="18" height="5" rx="1.5" fill="white"/>
+                        <!-- Stamp Pad Cushion -->
+                        <rect x="12" y="26" width="24" height="4" rx="1.5" fill="white" opacity="0.9"/>
+                        <!-- Ink impression mark -->
+                        <line x1="15" y1="34" x2="33" y2="34" stroke="white" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2"/>
                       </svg>
                     }
                     @case ('rotate-pdf') {
-                      <!-- Rotate CW -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                      <!-- Professional Rotate PDF: Violet Badge with Page & 360 Degree Curved Arrow -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#7C3AED" />
+                        <rect x="19" y="17" width="10" height="14" rx="2" fill="white" opacity="0.35"/>
+                        <path d="M24 13a11 11 0 1 1-7.8 3.2M16 11v6h6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                       </svg>
                     }
                     @case ('html-to-pdf') {
-                      <!-- HTML Code Tag -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="16 18 22 12 16 6"></polyline>
-                        <polyline points="8 6 2 12 8 18"></polyline>
+                      <!-- Professional HTML to PDF: Yellow 'HTML' Code Badge + Red Arrow Badge -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="26" height="22" rx="5" fill="#EAB308" />
+                        <text x="17" y="19" font-size="8.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">HTML</text>
+                        <rect x="22" y="20" width="22" height="22" rx="5" fill="#E53238" />
+                        <line x1="28" y1="26" x2="37" y2="35" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+                        <polyline points="31 35 37 35 37 29" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     }
                     @case ('unlock-pdf') {
-                      <!-- Unlock Padlock -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <rect x="5" y="11" width="14" height="10" rx="2.5" fill="currentColor"/>
-                        <path d="M8 11V7a4 4 0 0 1 7.5-2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
+                      <!-- Professional Unlock PDF: Sky Blue Badge with Open Padlock & Keyhole -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
+                        <!-- Open Shackle -->
+                        <path d="M19 22V17a5 5 0 0 1 10 0v2" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+                        <!-- Lock Body -->
+                        <rect x="14" y="22" width="20" height="15" rx="3.5" fill="white"/>
+                        <!-- Keyhole -->
+                        <circle cx="24" cy="28" r="2" fill="#2563EB"/>
+                        <rect x="23" y="28" width="2" height="4" fill="#2563EB"/>
                       </svg>
                     }
                     @case ('protect-pdf') {
-                      <!-- Green Padlock -->
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <rect x="5" y="11" width="14" height="10" rx="2.5" fill="currentColor"/>
-                        <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
+                      <!-- Professional Protect PDF: Deep Navy Blue Badge with Security Shield & Keyhole -->
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                        <!-- Shield -->
+                        <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
+                        <!-- Keyhole inside shield -->
+                        <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+                        <polygon points="22.5,23.5 25.5,23.5 26,29 22,29" fill="#1E3A8A"/>
                       </svg>
                     }
                     @default {
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="#E53238" />
+                        <path d="M20 14h8l6 6v14H14V14h6z" fill="white"/>
                       </svg>
                     }
                   }
@@ -367,41 +421,20 @@ import { ToolCategory } from '@paperflow/contracts';
       box-shadow: 0 14px 28px -4px rgba(229, 57, 53, 0.12), 0 4px 10px rgba(0, 0, 0, 0.04);
     }
 
-    /* ICON BOXES WITH EXACT iLovePDF THEME COLORS */
+    /* PROFESSIONAL ICON BADGE CONTAINER */
     .tool-icon-box {
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      margin-bottom: 16px;
+      justify-content: flex-start;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 20px;
       flex-shrink: 0;
-      transition: transform 0.2s ease;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .ilove-card:hover .tool-icon-box {
-      transform: scale(1.08);
+      transform: translateY(-2px) scale(1.08);
     }
-
-    /* Specific Tool Colors matching screenshot */
-    .box-merge-pdf { background: #feebe8; color: #e53935; }
-    .box-split-pdf { background: #fee2e2; color: #ef4444; }
-    .box-compress-pdf { background: #ecfdf5; color: #10b981; }
-    .box-pdf-to-word { background: #eff6ff; color: #2563eb; }
-    .box-pdf-to-powerpoint { background: #fff7ed; color: #ea580c; }
-    .box-pdf-to-excel { background: #f0fdf4; color: #16a34a; }
-    .box-word-to-pdf { background: #eff6ff; color: #2563eb; }
-    .box-powerpoint-to-pdf { background: #fff7ed; color: #ea580c; }
-    .box-excel-to-pdf { background: #f0fdf4; color: #16a34a; }
-    .box-edit-pdf { background: #f5f3ff; color: #7c3aed; }
-    .box-pdf-to-jpg { background: #fffbeb; color: #d97706; }
-    .box-images-to-pdf { background: #fffbeb; color: #d97706; }
-    .box-sign-pdf { background: #ecfeff; color: #0891b2; }
-    .box-watermark-pdf { background: #fae8ff; color: #a855f7; }
-    .box-rotate-pdf { background: #f3e8ff; color: #9333ea; }
-    .box-html-to-pdf { background: #fef9c3; color: #ca8a04; }
-    .box-unlock-pdf { background: #eff6ff; color: #3b82f6; }
-    .box-protect-pdf { background: #f0fdf4; color: #15803d; }
 
     .card-title {
       font-size: 18px;
