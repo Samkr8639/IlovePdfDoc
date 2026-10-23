@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslationService } from '../../../core/services/translation.service';
 
 @Component({
   selector: 'app-footer',
@@ -76,11 +77,17 @@ import { RouterLink } from '@angular/router';
       <!-- FOOTER BOTTOM BAR (Language selector, Copyright, Socials) -->
       <div class="footer-sub-bar">
         <div class="container sub-bar-inner">
-          <div class="lang-selector-chip">
-            <span class="globe-icon">🌐</span>
-            <span>English</span>
+          <!-- Real Interactive Language Selector -->
+          <button
+            type="button"
+            class="lang-selector-chip"
+            (click)="openLanguageModal()"
+            aria-label="Select your language"
+          >
+            <span class="lang-flag-icon">{{ currentLang().flag }}</span>
+            <span class="lang-name-label">{{ currentLang().nativeName }}</span>
             <span class="chevron-sm">▾</span>
-          </div>
+          </button>
 
           <div class="copyright-text">
             © 2026 PDF flow. All rights reserved. 100% In-Browser Privacy Guarantee.
@@ -110,6 +117,84 @@ import { RouterLink } from '@angular/router';
           </div>
         </div>
       </div>
+
+      <!-- LANGUAGE SELECTOR MODAL DIALOG -->
+      @if (isModalOpen()) {
+        <div class="lang-modal-backdrop" (click)="closeLanguageModal()">
+          <div class="lang-modal-dialog" (click)="$event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="lang-modal-header">
+              <div class="modal-title-box">
+                <div class="modal-globe-badge">🌐</div>
+                <div>
+                  <h3 class="modal-title">Select Your Native Language</h3>
+                  <p class="modal-subtitle">Instantly translate the entire website into your native language</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="modal-close-btn"
+                (click)="closeLanguageModal()"
+                aria-label="Close language selector"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- Search input -->
+            <div class="lang-search-box">
+              <svg class="search-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                class="lang-search-input"
+                placeholder="Search by language name or country (e.g. Hindi, Español, Français)..."
+                [value]="searchQuery()"
+                (input)="onSearch($event)"
+              />
+              @if (searchQuery()) {
+                <button type="button" class="clear-search-btn" (click)="clearSearch()">✕</button>
+              }
+            </div>
+
+            <!-- Language Cards Grid -->
+            <div class="lang-grid-scroll">
+              <div class="lang-cards-grid">
+                @for (lang of filteredLanguages(); track lang.code) {
+                  <button
+                    type="button"
+                    class="lang-card-item"
+                    [class.active-lang-item]="currentLang().code === lang.code"
+                    (click)="selectLanguage(lang.code)"
+                  >
+                    <span class="lang-flag-emoji">{{ lang.flag }}</span>
+                    <div class="lang-labels">
+                      <span class="native-label">{{ lang.nativeName }}</span>
+                      <span class="english-label">{{ lang.name }}</span>
+                    </div>
+                    @if (currentLang().code === lang.code) {
+                      <span class="check-icon">✓</span>
+                    }
+                  </button>
+                }
+              </div>
+
+              @if (filteredLanguages().length === 0) {
+                <div class="no-results-msg">
+                  <p>No language found matching "<strong>{{ searchQuery() }}</strong>"</p>
+                </div>
+              }
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="lang-modal-footer">
+              <span class="modal-footer-hint">✨ 100% In-browser instant native translation</span>
+            </div>
+          </div>
+        </div>
+      }
     </footer>
   `,
   styles: [`
@@ -172,25 +257,38 @@ import { RouterLink } from '@angular/router';
     .lang-selector-chip {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 9px;
+      padding: 7px 16px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 9999px;
-      font-size: 13px;
-      color: #cbd5e1;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #f1f5f9;
       cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .lang-selector-chip:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
       color: #ffffff;
+      transform: translateY(-1px);
     }
-    .globe-icon {
-      font-size: 14px;
+    .lang-flag-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+    .lang-name-label {
+      font-weight: 700;
     }
     .chevron-sm {
       font-size: 10px;
       color: #94a3b8;
+      transition: transform 0.2s ease;
+    }
+    .lang-selector-chip:hover .chevron-sm {
+      transform: translateY(1px);
+      color: #ffffff;
     }
     .copyright-text {
       font-size: 13px;
@@ -213,9 +311,250 @@ import { RouterLink } from '@angular/router';
       transform: translateY(-2px);
     }
 
+    /* LANGUAGE SELECTOR MODAL DIALOG */
+    .lang-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .lang-modal-dialog {
+      background: #ffffff;
+      color: #0f172a;
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: dialogPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes dialogPop {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .lang-modal-header {
+      padding: 24px 28px 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .modal-title-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .modal-globe-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .modal-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 3px;
+      letter-spacing: -0.01em;
+    }
+    .modal-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+    }
+    .modal-close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.18s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .modal-close-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: rotate(90deg);
+    }
+
+    /* SEARCH BOX */
+    .lang-search-box {
+      padding: 14px 28px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .search-svg {
+      position: absolute;
+      left: 42px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    .lang-search-input {
+      width: 100%;
+      padding: 11px 40px 11px 44px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .lang-search-input:focus {
+      border-color: #E53238;
+      box-shadow: 0 0 0 3px rgba(229, 50, 56, 0.15);
+    }
+    .clear-search-btn {
+      position: absolute;
+      right: 42px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      cursor: pointer;
+      border: none;
+    }
+    .clear-search-btn:hover {
+      background: #cbd5e1;
+      color: #0f172a;
+    }
+
+    /* GRID SCROLL */
+    .lang-grid-scroll {
+      padding: 20px 28px;
+      overflow-y: auto;
+      max-height: 420px;
+    }
+    .lang-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .lang-card-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s ease;
+      position: relative;
+    }
+    .lang-card-item:hover {
+      border-color: #fca5a5;
+      background: #fff5f5;
+      transform: translateY(-1px);
+    }
+    .lang-card-item.active-lang-item {
+      border-color: #E53238;
+      background: #fef2f2;
+      box-shadow: 0 0 0 1px #E53238;
+    }
+    .lang-flag-emoji {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .lang-labels {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+    .native-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .english-label {
+      font-size: 11.5px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .check-icon {
+      font-size: 14px;
+      font-weight: 900;
+      color: #E53238;
+      margin-left: auto;
+    }
+    .no-results-msg {
+      text-align: center;
+      padding: 36px 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .lang-modal-footer {
+      padding: 14px 28px;
+      background: #f8fafc;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-footer-hint {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
     @media (max-width: 1024px) {
       .footer-main-grid {
         grid-template-columns: repeat(3, 1fr);
+      }
+      .lang-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -229,7 +568,52 @@ import { RouterLink } from '@angular/router';
         align-items: center;
         text-align: center;
       }
+      .lang-cards-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })
-export class FooterComponent {}
+export class FooterComponent {
+  private translationService = inject(TranslationService);
+  isModalOpen = signal<boolean>(false);
+  searchQuery = signal<string>('');
+
+  get currentLang() {
+    return this.translationService.currentLanguage;
+  }
+
+  filteredLanguages = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.translationService.languages;
+    return this.translationService.languages.filter(l =>
+      l.name.toLowerCase().includes(q) ||
+      l.nativeName.toLowerCase().includes(q) ||
+      l.code.toLowerCase().includes(q)
+    );
+  });
+
+  openLanguageModal(): void {
+    this.searchQuery.set('');
+    this.isModalOpen.set(true);
+  }
+
+  closeLanguageModal(): void {
+    this.isModalOpen.set(false);
+  }
+
+  onSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+  }
+
+  selectLanguage(langCode: string): void {
+    this.translationService.setLanguage(langCode);
+    this.closeLanguageModal();
+  }
+}
+

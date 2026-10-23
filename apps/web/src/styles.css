@@ -260,3 +260,34 @@ button {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-3px);
 }
+
+/* ==========================================================================
+   GOOGLE TRANSLATE SEAMLESS EMBED & CLEANUP
+   ========================================================================== */
+#google_translate_element,
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.skiptranslate iframe {
+  display: none !important;
+  visibility: hidden !important;
+}
