@@ -1,5 +1,5 @@
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
-export type ToolCategory = 'organize' | 'convert' | 'optimize' | 'edit' | 'security';
+export type ToolCategory = 'organize' | 'convert' | 'optimize' | 'edit' | 'security' | 'intelligence' | 'workflows';
 export type ToolStatus = 'available' | 'beta' | 'planned';
 
 export interface ToolSeo {
@@ -24,6 +24,7 @@ export interface ToolDefinition {
   maxFileSizeBytes: number;
   status: ToolStatus;
   badgeText?: string;
+  isNew?: boolean;
   seo: ToolSeo;
 }
 
@@ -431,6 +432,296 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
       description: 'Encrypt your PDF document with a secure password to restrict access.',
       keywords: ['protect pdf', 'encrypt pdf', 'password protect pdf', 'lock pdf'],
       canonical: 'https://pdfflow.app/protect-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'organize-pdf',
+    name: 'Organize PDF',
+    shortDescription: 'Sort pages of your PDF file however you like. Delete PDF pages or add PDF pages to your document at will.',
+    longDescription: 'Rearrange, rotate, delete, or duplicate pages in any order.',
+    category: 'organize',
+    route: '/merge-pdf',
+    icon: 'grid',
+    processingMode: 'browser',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'Instant',
+    seo: {
+      title: 'Organize PDF Pages Online | PDF flow',
+      description: 'Sort, delete, and rotate PDF pages in your browser.',
+      keywords: ['organize pdf', 'sort pdf pages', 'reorder pdf'],
+      canonical: 'https://pdfflow.app/organize-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'pdf-to-pdfa',
+    name: 'PDF to PDF/A',
+    shortDescription: 'Transform your PDF to PDF/A, the ISO-standardized version of PDF for long-term archiving.',
+    longDescription: 'Convert documents to PDF/A-1b, PDF/A-2b, or PDF/A-3b for guaranteed future readability.',
+    category: 'convert',
+    route: '/pdf-to-word',
+    icon: 'archive',
+    processingMode: 'hybrid',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 5,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'ISO Compliant',
+    seo: {
+      title: 'PDF to PDF/A Converter Online | PDF flow',
+      description: 'Convert PDF files to ISO-standard PDF/A format.',
+      keywords: ['pdf to pdfa', 'archive pdf', 'iso pdf'],
+      canonical: 'https://pdfflow.app/pdf-to-pdfa',
+      faqs: []
+    }
+  },
+  {
+    id: 'repair-pdf',
+    name: 'Repair PDF',
+    shortDescription: 'Repair a damaged PDF and recover data from corrupt PDF. Fix PDF files with our Repair tool.',
+    longDescription: 'Analyze corrupted cross-reference tables and recover readable text and assets.',
+    category: 'optimize',
+    route: '/compress-pdf',
+    icon: 'tool',
+    processingMode: 'hybrid',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 2,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'Planned',
+    seo: {
+      title: 'Repair PDF Online - Fix Corrupt PDF | PDF flow',
+      description: 'Fix corrupt and unreadable PDF files.',
+      keywords: ['repair pdf', 'fix corrupt pdf', 'recover pdf'],
+      canonical: 'https://pdfflow.app/repair-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'page-numbers',
+    name: 'Page numbers',
+    shortDescription: 'Add page numbers into PDFs with ease. Choose your positions, dimensions, typography.',
+    longDescription: 'Custom header and footer pagination with dynamic total page count tags.',
+    category: 'edit',
+    route: '/edit-pdf',
+    icon: 'hash',
+    processingMode: 'browser',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'Planned',
+    seo: {
+      title: 'Add Page Numbers to PDF | PDF flow',
+      description: 'Number PDF pages easily with customized styles.',
+      keywords: ['page numbers pdf', 'number pdf', 'paginate pdf'],
+      canonical: 'https://pdfflow.app/page-numbers',
+      faqs: []
+    }
+  },
+  {
+    id: 'scan-to-pdf',
+    name: 'Scan to PDF',
+    shortDescription: 'Capture document scans from your mobile device or webcam and save them instantly to PDF.',
+    longDescription: 'Direct image capture with perspective correction and automatic contrast enhancement.',
+    category: 'organize',
+    route: '/images-to-pdf',
+    icon: 'camera',
+    processingMode: 'browser',
+    acceptedFileTypes: ['image/*'],
+    maxFiles: 10,
+    maxFileSizeBytes: 20 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'Instant',
+    seo: {
+      title: 'Scan to PDF Online | PDF flow',
+      description: 'Scan documents with camera or scanner to PDF.',
+      keywords: ['scan to pdf', 'mobile scanner', 'document camera'],
+      canonical: 'https://pdfflow.app/scan-to-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'ocr-pdf',
+    name: 'OCR PDF',
+    shortDescription: 'Easily convert scanned PDF into searchable and selectable text documents with high accuracy.',
+    longDescription: 'Multi-language optical character recognition for digitizing paper archives.',
+    category: 'optimize',
+    route: '/pdf-to-word',
+    icon: 'file-text',
+    processingMode: 'hybrid',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 3,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'AI Powered',
+    seo: {
+      title: 'OCR PDF Online - Searchable Text | PDF flow',
+      description: 'Extract text from scanned PDF documents using OCR.',
+      keywords: ['ocr pdf', 'searchable pdf', 'extract text pdf'],
+      canonical: 'https://pdfflow.app/ocr-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'compare-pdf',
+    name: 'Compare PDF',
+    shortDescription: 'Show side-by-side differences between two PDF files to easily spot revisions and content changes.',
+    longDescription: 'Visual difference highlighting and textual revision comparison.',
+    category: 'security',
+    route: '/merge-pdf',
+    icon: 'columns',
+    processingMode: 'browser',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 2,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'Planned',
+    seo: {
+      title: 'Compare PDF Documents Online | PDF flow',
+      description: 'Spot revisions and differences between PDF files.',
+      keywords: ['compare pdf', 'pdf diff', 'pdf revision check'],
+      canonical: 'https://pdfflow.app/compare-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'redact-pdf',
+    name: 'Redact PDF',
+    shortDescription: 'Permanently remove or block out sensitive text, confidential numbers, and images from PDF.',
+    longDescription: 'Irreversible sanitization of private data, metadata, and visual layers.',
+    category: 'security',
+    route: '/protect-pdf',
+    icon: 'slash',
+    processingMode: 'browser',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'High Security',
+    seo: {
+      title: 'Redact PDF Online - Remove Sensitive Data | PDF flow',
+      description: 'Permanently blackout confidential information from PDF.',
+      keywords: ['redact pdf', 'blackout pdf', 'sanitize pdf'],
+      canonical: 'https://pdfflow.app/redact-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'crop-pdf',
+    name: 'Crop PDF',
+    shortDescription: 'Crop margins and define a custom visible area for each page or the whole document.',
+    longDescription: 'Adjust trim box and crop box geometry to eliminate empty borders.',
+    category: 'edit',
+    route: '/edit-pdf',
+    icon: 'crop',
+    processingMode: 'browser',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'planned',
+    badgeText: 'Planned',
+    seo: {
+      title: 'Crop PDF Online - Trim Margins | PDF flow',
+      description: 'Crop margins and customize page viewing bounds in PDF.',
+      keywords: ['crop pdf', 'trim pdf margins', 'resize pdf bounds'],
+      canonical: 'https://pdfflow.app/crop-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'pdf-forms',
+    name: 'PDF Forms',
+    shortDescription: 'Fill out interactive PDF forms or create fillable forms with text fields, checkboxes and radio buttons.',
+    longDescription: 'AcroForm and XFA form viewer, filler, and export tool.',
+    category: 'edit',
+    route: '/edit-pdf',
+    icon: 'check-square',
+    processingMode: 'browser',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'NEW',
+    isNew: true,
+    seo: {
+      title: 'PDF Forms Builder & Filler Online | PDF flow',
+      description: 'Create and fill interactive PDF forms online.',
+      keywords: ['pdf forms', 'fill pdf form', 'create fillable pdf'],
+      canonical: 'https://pdfflow.app/pdf-forms',
+      faqs: []
+    }
+  },
+  {
+    id: 'ai-summarizer',
+    name: 'AI Summarizer',
+    shortDescription: 'Summarize lengthy reports and extract key points, paragraphs, and statistics using intelligent AI.',
+    longDescription: 'Generative AI summarization, executive brief extraction, and bullet-point digest.',
+    category: 'intelligence',
+    route: '/pdf-to-word',
+    icon: 'sparkles',
+    processingMode: 'hybrid',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'NEW',
+    isNew: true,
+    seo: {
+      title: 'AI PDF Summarizer - Instant Document Insights | PDF flow',
+      description: 'Summarize PDF documents and extract key bullet points using AI.',
+      keywords: ['ai pdf summarizer', 'chat with pdf', 'summarize pdf online'],
+      canonical: 'https://pdfflow.app/ai-summarizer',
+      faqs: []
+    }
+  },
+  {
+    id: 'translate-pdf',
+    name: 'Translate PDF',
+    shortDescription: 'Translate your entire PDF into 50+ languages while preserving layout, fonts, and table styling.',
+    longDescription: 'High-fidelity AI document translation with format retention.',
+    category: 'intelligence',
+    route: '/pdf-to-word',
+    icon: 'globe',
+    processingMode: 'hybrid',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'NEW',
+    isNew: true,
+    seo: {
+      title: 'Translate PDF Online - 50+ Languages | PDF flow',
+      description: 'Translate PDF files into 50+ languages while keeping formatting.',
+      keywords: ['translate pdf', 'multilingual pdf', 'ai pdf translator'],
+      canonical: 'https://pdfflow.app/translate-pdf',
+      faqs: []
+    }
+  },
+  {
+    id: 'pdf-to-markdown',
+    name: 'PDF to Markdown',
+    shortDescription: 'Convert complex PDF documents into clean, structured Markdown ready for LLMs, GitHub, and docs.',
+    longDescription: 'Parse headings, tables, code snippets, and lists into pristine GFM Markdown.',
+    category: 'intelligence',
+    route: '/pdf-to-word',
+    icon: 'code',
+    processingMode: 'hybrid',
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    maxFiles: 1,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'NEW',
+    isNew: true,
+    seo: {
+      title: 'PDF to Markdown Converter Online | PDF flow',
+      description: 'Convert PDF files into structured Markdown for documentation and AI.',
+      keywords: ['pdf to markdown', 'pdf to md', 'convert pdf to text'],
+      canonical: 'https://pdfflow.app/pdf-to-markdown',
       faqs: []
     }
   }
