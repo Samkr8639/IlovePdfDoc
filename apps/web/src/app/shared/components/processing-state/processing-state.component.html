@@ -1,0 +1,30 @@
+<div class="dribbble-processing-card">
+  <!-- 3 PULSING CORAL DOTS (Exact Dribbble video animation) -->
+  <div class="pulsing-dots-wrapper">
+    <span class="pulse-dot dot-1"></span>
+    <span class="pulse-dot dot-2"></span>
+    <span class="pulse-dot dot-3"></span>
+  </div>
+
+  <!-- SECURED BADGE PILL -->
+  <div class="secured-pill">
+    <span>Secured Data Processing</span>
+  </div>
+
+  <!-- HEADLINE & WARNING SUBTITLE -->
+  <div class="processing-text-block">
+    <h2 class="processing-headline">{{ (title() || 'MERGING PDF DOCUMENTS...').toUpperCase() }}</h2>
+    <p class="processing-subtext">
+      The process will be finished soon.<br/>
+      Please, do not refresh the screen, before it finishes.
+    </p>
+  </div>
+
+  <!-- PROGRESS TRACK & PERCENTAGE -->
+  <div class="progress-section">
+    <span class="progress-percent-label">{{ percent() }}%</span>
+    <div class="dribbble-progress-track">
+      <div class="dribbble-progress-fill" [style.width.%]="percent()"></div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,512 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- UPLOAD STATE: SEAMLESS UNIFIED HERO & DROPZONE (NOT TWO SECTIONS) -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <h1 class="tool-h1">Merge PDF files</h1>
+        <p class="tool-lead">
+          Combine PDFs in the order you want with the easiest PDF merger available.
+        </p>
+
+        @if (errorMessage()) {
+          <div class="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+            <button class="error-close" (click)="errorMessage.set(null)">✕</button>
+          </div>
+        }
+
+        <!-- UPLOADER COMPONENT -->
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            title="Select PDF files"
+            subtitle="or drop PDFs here"
+            acceptedTypes=".pdf,application/pdf"
+            [multiple]="true"
+            limitInfo=""
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section">
+      <div class="container">
+        <div class="adsense-wrapper" aria-label="Advertisement">
+          <span class="adsense-label">Advertisement</span>
+          <div class="adsense-slot adsense-leaderboard">
+            <div class="adsense-placeholder-content">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES & VALUE PROPOSITION -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-heading">
+          <h2 class="section-title">The easiest & safest way to merge PDF documents</h2>
+          <p class="section-subtitle">Engineered for privacy, speed, and precision.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
+                <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">100% In-Browser Privacy</h3>
+            <p class="feature-desc">
+              Your PDF documents never touch a third-party server. Everything is merged directly inside your browser memory using WebAssembly.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
+                <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Lossless Quality</h3>
+            <p class="feature-desc">
+              Original vector graphics, fonts, margins, high-res images, and hyperlinks remain intact with zero degradation.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
+                <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Interactive Sequence Order</h3>
+            <p class="feature-desc">
+              Effortlessly reorder documents before merging. Drag and drop cards to arrange them in the exact order you need.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#E53238" />
+                <path d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z" stroke="white" stroke-width="2.5" fill="none"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Free & Unlimited</h3>
+            <p class="feature-desc">
+              Combine as many files as you need with no subscriptions, watermark additions, or hidden paywalls.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-STEP GUIDE SECTION -->
+    <section class="seo-guide-section">
+      <div class="container">
+        <div class="guide-header">
+          <h2 class="guide-title">How to merge PDF files online</h2>
+          <p class="guide-lead">Three effortless steps to combine your documents with precision.</p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <h3 class="step-title">Select documents</h3>
+            <p class="step-desc">
+              Click "Select PDF files", drag and drop your files into the uploader, or open documents from Google Drive or Dropbox.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <h3 class="step-title">Arrange sequence</h3>
+            <p class="step-desc">
+              Drag and drop files to set the exact order or use the quick arrow buttons. Add more files anytime.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <h3 class="step-title">Merge & download</h3>
+            <p class="step-desc">
+              Click "Merge PDF". The browser combines all documents instantly with in-browser preview and instant download.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ SECTION FOR MERGE PDF -->
+        <div class="tool-faqs">
+          <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
+          <div class="tool-faqs-list">
+            <div class="faq-card">
+              <h4 class="faq-q">Are my files uploaded to your servers when merging?</h4>
+              <p class="faq-a">
+                No. PDF flow operates with 100% in-browser WebAssembly. Your documents remain strictly inside your device's memory and are never transmitted across any network.
+              </p>
+            </div>
+
+            <div class="faq-card">
+              <h4 class="faq-q">Can I merge PDF files with different page orientations?</h4>
+              <p class="faq-a">
+                Yes! PDF flow automatically detects and preserves portrait and landscape orientations, margins, embedded fonts, and page dimensions across all files.
+              </p>
+            </div>
+
+            <div class="faq-card">
+              <h4 class="faq-q">How many files can I merge at once?</h4>
+              <p class="faq-a">
+                You can combine multiple PDF documents in a single operation. Because processing happens locally on your computer, performance is fast and unrestricted.
+              </p>
+            </div>
+
+            <div class="faq-card">
+              <h4 class="faq-q">Can I open files directly from Google Drive or Dropbox?</h4>
+              <p class="faq-a">
+                Yes, simply click the Google Drive or Dropbox shortcut buttons next to the Select Files button to open your cloud storage in one click.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MORE POPULAR TOOLS CROSS-LINKS -->
+        <div class="related-tools-box">
+          <h3 class="related-title">Explore more PDF tools</h3>
+          <div class="related-tools-grid">
+            <a routerLink="/split-pdf" class="related-card">
+              <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="22" height="22" rx="5" fill="#E53238" />
+                <line x1="19" y1="19" x2="9" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                <polyline points="16 9 9 9 9 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="22" y="22" width="22" height="22" rx="5" fill="#E53238" />
+                <line x1="29" y1="29" x2="39" y2="39" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                <polyline points="32 39 39 39 39 32" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="related-info">
+                <h4>Split PDF</h4>
+                <p>Separate one page or whole sets</p>
+              </div>
+            </a>
+
+            <a routerLink="/compress-pdf" class="related-card">
+              <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="18" height="18" rx="4" fill="#10B981" />
+                <polyline points="10 16 16 16 16 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="26" y="4" width="18" height="18" rx="4" fill="#10B981" />
+                <polyline points="38 16 32 16 32 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="4" y="26" width="18" height="18" rx="4" fill="#10B981" />
+                <polyline points="10 32 16 32 16 38" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="26" y="26" width="18" height="18" rx="4" fill="#10B981" />
+                <polyline points="38 32 32 32 32 38" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="related-info">
+                <h4>Compress PDF</h4>
+                <p>Reduce file size while saving quality</p>
+              </div>
+            </a>
+
+            <a routerLink="/pdf-to-word" class="related-card">
+              <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="20" height="20" rx="4.5" fill="#FEE2E2" />
+                <path d="M10 10l7 7M17 12v5h-5" stroke="#E53238" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="18" y="16" width="26" height="26" rx="6" fill="#2B579A" />
+                <text x="31" y="35" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif">W</text>
+              </svg>
+              <div class="related-info">
+                <h4>PDF to Word</h4>
+                <p>Convert PDF to DOC & DOCX</p>
+              </div>
+            </a>
+
+            <a routerLink="/protect-pdf" class="related-card">
+              <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
+                <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+              </svg>
+              <div class="related-info">
+                <h4>Protect PDF</h4>
+                <p>Encrypt with AES password security</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ORGANIZE STATE: EXACT LAYOUT FROM USER SCREENSHOT (CANVAS + RIGHT SIDEBAR) -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- MAIN CANVAS AREA (Left/Center) -->
+      <div class="canvas-main-area">
+        @if (errorMessage()) {
+          <div class="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+            <button class="error-close" (click)="errorMessage.set(null)">✕</button>
+          </div>
+        }
+
+        <!-- CARDS GRID -->
+        <div class="pdf-cards-canvas">
+          @for (file of selectedFiles(); track file.id; let idx = $index; let first = $first; let last = $last) {
+            <div
+              class="pdf-document-card"
+              draggable="true"
+              (dragstart)="onDragStart(idx)"
+              (dragover)="onDragOverCard($event, idx)"
+              (drop)="onDropCard($event, idx)"
+              title="Drag to reorder"
+            >
+              <!-- Card Hover Controls -->
+              <div class="card-hover-actions">
+                <button
+                  type="button"
+                  class="card-action-btn delete-action"
+                  (click)="onRemoveFile(idx)"
+                  title="Remove file"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Document Page Graphic / Thumbnail -->
+              <div class="doc-sheet-graphic">
+                <div class="doc-lines-sim">
+                  <div class="sim-line title-bar"></div>
+                  <div class="sim-line body-1"></div>
+                  <div class="sim-line body-2"></div>
+                  <div class="sim-line body-1"></div>
+                  <div class="sim-line body-3"></div>
+                  <div class="sim-line body-2"></div>
+                  <div class="sim-line body-1"></div>
+                </div>
+              </div>
+
+              <!-- Filename Label at bottom -->
+              <div class="card-meta">
+                <span class="meta-filename" [title]="file.name">{{ file.name }}</span>
+                <span class="meta-pages">{{ file.pageCount }} {{ file.pageCount === 1 ? 'page' : 'pages' }}</span>
+              </div>
+
+              <!-- Order Switcher Arrows -->
+              <div class="card-reorder-pills">
+                <button
+                  type="button"
+                  class="pill-arrow-btn"
+                  [disabled]="first"
+                  (click)="onMoveUp(idx)"
+                  title="Move left"
+                >
+                  ‹
+                </button>
+                <span class="pill-order-num">{{ idx + 1 }}</span>
+                <button
+                  type="button"
+                  class="pill-arrow-btn"
+                  [disabled]="last"
+                  (click)="onMoveDown(idx)"
+                  title="Move right"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING RED ACTION BUTTONS (Exact 4 icons from screenshot) -->
+        <div class="floating-tools-stack">
+          <!-- 1. Add More Files (+ with black count badge) -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn add-more-circle"
+              (click)="fileInput.click()"
+              title="Add more files"
+            >
+              <span class="floating-count-badge">{{ selectedFiles().length }}</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Add more files</span>
+          </div>
+
+          <!-- 2. Computer / Laptop Upload -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn pc-circle"
+              (click)="fileInput.click()"
+              title="Upload from computer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Upload from PC</span>
+          </div>
+
+          <!-- 3. Google Drive -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn drive-circle"
+              (click)="openGoogleDrive($event)"
+              title="Google Drive"
+            >
+              <svg width="20" height="18" viewBox="0 0 24 21" fill="none">
+                <path d="M8.04 13.8L12.04 20.73H23.54L19.54 13.8H8.04Z" fill="#ffffff"/>
+                <path d="M15.96 0.27H4.46L0.46 7.2L6.21 17.16L10.21 10.23L15.96 0.27Z" fill="#ffffff" opacity="0.85"/>
+                <path d="M15.96 0.27L10.21 10.23L14.21 17.16L23.54 20.73L19.96 7.2L15.96 0.27Z" fill="#ffffff" opacity="0.7"/>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Google Drive</span>
+          </div>
+
+          <!-- 4. Dropbox -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn dropbox-circle"
+              (click)="openDropbox($event)"
+              title="Dropbox"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 22" fill="#ffffff">
+                <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Dropbox</span>
+          </div>
+
+          <input
+            #fileInput
+            type="file"
+            hidden
+            multiple
+            accept=".pdf,application/pdf"
+            (change)="onFileInputChange($event)"
+          />
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR (Exact layout from user screenshot) -->
+      <aside class="sidebar-action-panel">
+        <div class="sidebar-body">
+          <h2 class="sidebar-heading">Merge PDF</h2>
+
+          <!-- Blue Info Callout (Exact text from screenshot) -->
+          <div class="sidebar-info-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2.2" class="info-svg">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <div class="info-text">
+              @if (selectedFiles().length < 2) {
+                Please, select more PDF files by clicking again on 'Select PDF files'.
+                Select multiple files by maintaining pressed 'Ctrl'
+              } @else {
+                To reorder your files, drag and drop them or click the arrows below each card.
+                Files will merge in the exact sequence shown.
+              }
+            </div>
+          </div>
+
+          <!-- Sidebar File Count & Clear -->
+          <div class="sidebar-details-row">
+            <span class="details-count">
+              <strong>{{ selectedFiles().length }}</strong> {{ selectedFiles().length === 1 ? 'file' : 'files' }} ready
+            </span>
+            <button type="button" class="sidebar-reset-link" (click)="resetWorkspace()">
+              Clear all
+            </button>
+          </div>
+
+          <!-- Dedicated Sidebar AdSense Slot -->
+          <div class="sidebar-adsense-slot">
+            <span class="adsense-label">Advertisement</span>
+            <div class="sidebar-ad-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Google AdSense (300 × 250)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Giant Red Merge PDF Button Sticky Bottom -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="giant-merge-submit-btn"
+            [class.btn-disabled]="selectedFiles().length < 2 || isProcessing()"
+            [disabled]="selectedFiles().length < 2 || isProcessing()"
+            (click)="executeMerge()"
+          >
+            <span>Merge PDF</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 16 16 12 12 8"></polyline>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- PROCESSING STATE -->
+  @if (currentState() === 'processing') {
+    <div class="processing-workspace-screen">
+      <app-processing-state
+        title="Merging Documents..."
+        [message]="processingMessage()"
+        [percent]="processingProgress()"
+      ></app-processing-state>
+    </div>
+  }
+
+  <!-- COMPLETED RESULT STATE -->
+  @if (currentState() === 'completed' && mergeResult()) {
+    <div class="completed-workspace-screen">
+      <div class="container result-container">
+        <app-result-view
+          [result]="mergeResult()!"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
+      </div>
+    </div>
+  }
+</div>

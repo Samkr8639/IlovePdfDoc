@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { MergePdfComponent } from './pages/merge-pdf/merge-pdf.component';
+import { PdfToWordComponent } from './pages/pdf-to-word/pdf-to-word.component';
 import { ToolPlaceholderComponent } from './pages/tool-placeholder/tool-placeholder.component';
 
 export const routes: Routes = [
@@ -26,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'pdf-to-word',
-    component: ToolPlaceholderComponent,
+    component: PdfToWordComponent,
     title: 'PDF to Word Converter Online | PDF flow'
   },
   {
@@ -98,6 +99,24 @@ export const routes: Routes = [
     path: 'protect-pdf',
     component: ToolPlaceholderComponent,
     title: 'Protect PDF with Password Online | PDF flow'
+  },
+  {
+    path: 'about-us',
+    loadComponent: () => import('./pages/about-us/about-us.component').then(m => m.AboutUsComponent),
+    title: 'About Us - The Story & Mission Behind PDF flow | Free & Secure PDF Tools'
+  },
+  {
+    path: 'about',
+    redirectTo: 'about-us'
+  },
+  {
+    path: 'contact-us',
+    loadComponent: () => import('./pages/contact-us/contact-us.component').then(m => m.ContactUsComponent),
+    title: 'Contact - Get in Touch with PDF flow Support & Sales'
+  },
+  {
+    path: 'contact',
+    redirectTo: 'contact-us'
   },
   {
     path: '**',

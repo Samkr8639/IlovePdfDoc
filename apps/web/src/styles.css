@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
 
 :root {
+  --header-height: 72px;
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Space Grotesk', var(--font-family);
 
@@ -97,17 +98,22 @@ button {
   background: none;
 }
 
-/* Container - Wide & Responsive (iLovePDF layout dimension) */
+/* Container - Full Width & Fluid Responsive */
 .container {
   width: 100%;
-  /* max-width: 1540px; */
-  margin: 0 auto;
-  padding: 0 48px 48px;
+  margin: 0;
+  padding: 0 40px 48px;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 24px 36px;
+  }
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 16px;
+    padding: 0 16px 28px;
   }
 }
 

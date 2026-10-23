@@ -1,15 +1,24 @@
-import { Injectable, signal, computed } from '@angular/core';
-// Loaded from @paperflow/contracts (18 tools suite)
-import { TOOL_REGISTRY, ToolDefinition, ToolCategory } from '@paperflow/contracts';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { TOOL_REGISTRY, ToolDefinition, ToolCategory, ApiResponse } from '@paperflow/contracts';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ToolRegistryService {
+  private readonly http = inject(HttpClient, { optional: true });
+
   private readonly tools = signal<ToolDefinition[]>(TOOL_REGISTRY);
   readonly allTools = this.tools.asReadonly();
   readonly selectedCategory = signal<ToolCategory | 'all'>('all');
   readonly searchQuery = signal<string>('');
+  readonly isLoading = signal<boolean>(false);
+  readonly error = signal<string | null>(null);
+
+  constructor() {
+    this.fetchToolsFromApi();
+  }
 
   readonly filteredTools = computed(() => {
     const category = this.selectedCategory();
@@ -25,6 +34,29 @@ export class ToolRegistryService {
       return matchesCategory && matchesQuery;
     });
   });
+
+  fetchToolsFromApi(): void {
+    if (!this.http) {
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.http.get<ApiResponse<ToolDefinition[]>>(`${environment.apiBaseUrl}/tools`).subscribe({
+      next: (res) => {
+        if (res && res.success && Array.isArray(res.data)) {
+          this.tools.set(res.data);
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.warn('Backend API tools fetch failed, using fallback registry:', err);
+        this.error.set('Could not fetch tools from API, using cached registry.');
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   getAllTools(): ToolDefinition[] {
     return this.tools();

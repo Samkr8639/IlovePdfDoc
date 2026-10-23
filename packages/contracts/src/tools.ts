@@ -89,25 +89,38 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     icon: 'minimize-2',
     processingMode: 'hybrid',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
-    maxFiles: 1,
+    maxFiles: 20,
     maxFileSizeBytes: 100 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    status: 'available',
+    badgeText: '100% In-Browser',
     seo: {
-      title: 'Compress PDF Online - Reduce File Size | PDF flow',
-      description: 'Compress PDF files online without losing readability. Free optimization tool.',
-      keywords: ['compress pdf', 'reduce pdf size', 'shrink pdf', 'pdf compressor'],
+      title: 'Compress PDF Online Free - Reduce File Size | PDF flow',
+      description: 'Compress PDF files online without losing readability. Reduce file size while preserving document quality with Extreme, Recommended, or Less compression.',
+      keywords: ['compress pdf', 'reduce pdf size', 'shrink pdf', 'pdf compressor', 'free online pdf compression'],
       canonical: 'https://pdfflow.app/compress-pdf',
-      faqs: []
+      faqs: [
+        {
+          question: 'Will compressing my PDF reduce text or print quality?',
+          answer: 'No. Our recommended compression preserves font vectors and crisp typography, while applying stream compression and removing duplicate resource objects.'
+        },
+        {
+          question: 'Are my confidential documents uploaded to any remote server?',
+          answer: 'Never. PDF flow processes your documents directly inside your browser using client-side WebAssembly, keeping your documents 100% private.'
+        },
+        {
+          question: 'Which compression level should I choose?',
+          answer: 'Recommended is ideal for 95% of documents, balancing file size and visual fidelity. Extreme is best for strict email and portal size limits. Less is optimal for high-resolution graphics and print documents.'
+        }
+      ]
     }
   },
   {
     id: 'pdf-to-word',
     name: 'PDF to Word',
-    shortDescription: 'Easily convert your PDF files into easy to edit DOC and DOCX documents.',
+    shortDescription: 'Easily convert your PDF files into easy to edit DOC and DOCX documents. The converted WORD document is almost 100% accurate.',
     longDescription: 'Transform PDF documents into editable Microsoft Word files with preserved typography, formatting, and layout structure.',
     category: 'convert',
-    route: '/merge-pdf',
+    route: '/pdf-to-word',
     icon: 'doc-word',
     processingMode: 'hybrid',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
@@ -306,9 +319,9 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'sign-pdf',
     name: 'Sign PDF',
-    shortDescription: 'Sign yourself or request electronic signatures from others securely.',
+    shortDescription: 'Sign yourself or request electronic signatures from others.',
     longDescription: 'Add legally binding cryptographic electronic signatures and initials to your PDF documents.',
-    category: 'edit',
+    category: 'security',
     route: '/sign-pdf',
     icon: 'sign-pen',
     processingMode: 'browser',
@@ -327,8 +340,8 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   },
   {
     id: 'watermark-pdf',
-    name: 'Watermark PDF',
-    shortDescription: 'Stamp an image or text over your PDF in seconds. Choose typography and position.',
+    name: 'Watermark',
+    shortDescription: 'Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.',
     longDescription: 'Protect intellectual property and confidentiality by stamping custom text or logo watermarks.',
     category: 'edit',
     route: '/watermark-pdf',
@@ -350,9 +363,9 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'rotate-pdf',
     name: 'Rotate PDF',
-    shortDescription: 'Rotate your PDF pages 90, 180, or 270 degrees clockwise or counterclockwise.',
+    shortDescription: 'Rotate your PDFs the way you need them. You can even rotate multiple PDFs at once!',
     longDescription: 'Fix orientation for scanned documents and horizontal pages. Rotate individual pages or the entire document permanently.',
-    category: 'organize',
+    category: 'edit',
     route: '/rotate-pdf',
     icon: 'rotate-cw',
     processingMode: 'browser',
@@ -372,7 +385,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'html-to-pdf',
     name: 'HTML to PDF',
-    shortDescription: 'Convert web pages in HTML to PDF with full CSS formatting preservation.',
+    shortDescription: 'Convert webpages in HTML to PDF. Copy and paste the URL of the page you want and convert it to PDF with a click.',
     longDescription: 'Convert public webpages or raw HTML files into high-fidelity printable PDF documents.',
     category: 'convert',
     route: '/html-to-pdf',
@@ -394,7 +407,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'unlock-pdf',
     name: 'Unlock PDF',
-    shortDescription: 'Remove PDF password security, giving you the freedom to use your PDFs.',
+    shortDescription: 'Remove PDF password security, giving you the freedom to use your PDFs as you want.',
     longDescription: 'Decouple passwords and restrictive permission locks from your authorized PDF documents.',
     category: 'security',
     route: '/unlock-pdf',
@@ -416,7 +429,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'protect-pdf',
     name: 'Protect PDF',
-    shortDescription: 'Encrypt your PDF with standard AES password protection to prevent unauthorized viewing.',
+    shortDescription: 'Protect PDF files with a password. Encrypt PDF documents to prevent unauthorized access.',
     longDescription: 'Secure confidential contracts and sensitive documents with robust password encryption.',
     category: 'security',
     route: '/protect-pdf',
@@ -438,7 +451,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'organize-pdf',
     name: 'Organize PDF',
-    shortDescription: 'Sort pages of your PDF file however you like. Delete PDF pages or add PDF pages to your document at will.',
+    shortDescription: 'Sort pages of your PDF file however you like. Delete PDF pages or add PDF pages to your document at your convenience.',
     longDescription: 'Rearrange, rotate, delete, or duplicate pages in any order.',
     category: 'organize',
     route: '/merge-pdf',
@@ -460,7 +473,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'pdf-to-pdfa',
     name: 'PDF to PDF/A',
-    shortDescription: 'Transform your PDF to PDF/A, the ISO-standardized version of PDF for long-term archiving.',
+    shortDescription: 'Transform your PDF to PDF/A, the ISO-standardized version of PDF for long term archiving. Your PDF will preserve formatting when accessed in the future.',
     longDescription: 'Convert documents to PDF/A-1b, PDF/A-2b, or PDF/A-3b for guaranteed future readability.',
     category: 'convert',
     route: '/pdf-to-word',
@@ -526,7 +539,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'scan-to-pdf',
     name: 'Scan to PDF',
-    shortDescription: 'Capture document scans from your mobile device or webcam and save them instantly to PDF.',
+    shortDescription: 'Capture document scans from your mobile device and send them instantly to your browser.',
     longDescription: 'Direct image capture with perspective correction and automatic contrast enhancement.',
     category: 'organize',
     route: '/images-to-pdf',
@@ -548,7 +561,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'ocr-pdf',
     name: 'OCR PDF',
-    shortDescription: 'Easily convert scanned PDF into searchable and selectable text documents with high accuracy.',
+    shortDescription: 'Easily convert scanned PDF into searchable and selectable documents.',
     longDescription: 'Multi-language optical character recognition for digitizing paper archives.',
     category: 'optimize',
     route: '/pdf-to-word',
@@ -570,7 +583,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'compare-pdf',
     name: 'Compare PDF',
-    shortDescription: 'Show side-by-side differences between two PDF files to easily spot revisions and content changes.',
+    shortDescription: 'Show a side-by-side document comparison and easily spot changes between different file versions.',
     longDescription: 'Visual difference highlighting and textual revision comparison.',
     category: 'security',
     route: '/merge-pdf',
@@ -592,7 +605,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'redact-pdf',
     name: 'Redact PDF',
-    shortDescription: 'Permanently remove or block out sensitive text, confidential numbers, and images from PDF.',
+    shortDescription: 'Redact text and graphics to permanently remove sensitive information from a PDF.',
     longDescription: 'Irreversible sanitization of private data, metadata, and visual layers.',
     category: 'security',
     route: '/protect-pdf',
@@ -614,7 +627,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'crop-pdf',
     name: 'Crop PDF',
-    shortDescription: 'Crop margins and define a custom visible area for each page or the whole document.',
+    shortDescription: 'Crop margins of PDF documents or select specific areas, then apply the changes to one page or the whole document.',
     longDescription: 'Adjust trim box and crop box geometry to eliminate empty borders.',
     category: 'edit',
     route: '/edit-pdf',
@@ -636,7 +649,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'pdf-forms',
     name: 'PDF Forms',
-    shortDescription: 'Fill out interactive PDF forms or create fillable forms with text fields, checkboxes and radio buttons.',
+    shortDescription: 'Detect form fields automatically, create interactive fillable PDFs, or fill PDF forms yourself. Add text fields, checkboxes, multiple choice fields, and lists.',
     longDescription: 'AcroForm and XFA form viewer, filler, and export tool.',
     category: 'edit',
     route: '/edit-pdf',
@@ -646,7 +659,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
     status: 'available',
-    badgeText: 'NEW',
+    badgeText: 'New!',
     isNew: true,
     seo: {
       title: 'PDF Forms Builder & Filler Online | PDF flow',
@@ -659,7 +672,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'ai-summarizer',
     name: 'AI Summarizer',
-    shortDescription: 'Summarize lengthy reports and extract key points, paragraphs, and statistics using intelligent AI.',
+    shortDescription: 'Quickly generate concise summaries from articles, paragraphs, and essays, providing clear and precise key points in seconds.',
     longDescription: 'Generative AI summarization, executive brief extraction, and bullet-point digest.',
     category: 'intelligence',
     route: '/pdf-to-word',
@@ -669,7 +682,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
     status: 'available',
-    badgeText: 'NEW',
+    badgeText: 'New!',
     isNew: true,
     seo: {
       title: 'AI PDF Summarizer - Instant Document Insights | PDF flow',
@@ -682,7 +695,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'translate-pdf',
     name: 'Translate PDF',
-    shortDescription: 'Translate your entire PDF into 50+ languages while preserving layout, fonts, and table styling.',
+    shortDescription: 'Easily translate PDF files powered by AI. Keep fonts, layout, and formatting perfectly intact.',
     longDescription: 'High-fidelity AI document translation with format retention.',
     category: 'intelligence',
     route: '/pdf-to-word',
@@ -692,7 +705,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
     status: 'available',
-    badgeText: 'NEW',
+    badgeText: 'New!',
     isNew: true,
     seo: {
       title: 'Translate PDF Online - 50+ Languages | PDF flow',
@@ -705,7 +718,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'pdf-to-markdown',
     name: 'PDF to Markdown',
-    shortDescription: 'Convert complex PDF documents into clean, structured Markdown ready for LLMs, GitHub, and docs.',
+    shortDescription: 'Easily turn PDFs into Markdown files. Perfect for notes, docs, and LLMs. Headings, tables, lists, and links preserved automatically.',
     longDescription: 'Parse headings, tables, code snippets, and lists into pristine GFM Markdown.',
     category: 'intelligence',
     route: '/pdf-to-word',
@@ -715,7 +728,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
     status: 'available',
-    badgeText: 'NEW',
+    badgeText: 'New!',
     isNew: true,
     seo: {
       title: 'PDF to Markdown Converter Online | PDF flow',

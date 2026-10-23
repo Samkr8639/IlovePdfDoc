@@ -1,0 +1,348 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- ===================================================================
+       1. UPLOAD STATE: HERO & DROPZONE
+       =================================================================== -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+          <a routerLink="/" class="crumb-link">I Love PDF & Doc</a>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-current">PDF to Word</span>
+        </div>
+
+        <h1 class="tool-h1">PDF to Word Converter</h1>
+        <p class="tool-lead">
+          Convert PDF documents into editable Word files while preserving as much of the original formatting as possible.
+        </p>
+
+        @if (errorMessage()) {
+          <div class="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+            <button type="button" class="error-close" (click)="errorMessage.set(null)">✕</button>
+          </div>
+        }
+
+        <!-- UPLOADER COMPONENT -->
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            title="Select PDF files"
+            subtitle="or drop PDFs here"
+            acceptedTypes=".pdf,application/pdf"
+            [multiple]="true"
+            limitInfo=""
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section">
+      <div class="container">
+        <div class="adsense-card">
+          <span class="ad-label">ADVERTISEMENT</span>
+          <div class="ad-placeholder-content">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDITORIAL / SEO CONTENT SECTION -->
+    <section class="editorial-features-section">
+      <div class="container">
+        <div class="section-title-wrap">
+          <h2 class="editorial-heading">The easiest & most accurate way to convert PDF to Word</h2>
+          <p class="editorial-subheading">
+            Engineered for accuracy, privacy, and speed. Turn non-editable PDFs into Microsoft Word (.docx) documents in seconds.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-box blue-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <h3>100% Genuine DOCX</h3>
+            <p>Generates real Microsoft Word documents (.docx) compatible with Microsoft 365, Word 2007+, Google Docs, and LibreOffice.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box red-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3>Client-Side Privacy</h3>
+            <p>Standard documents convert directly in your browser. Confidential files, contracts, and resumes never leave your device.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box purple-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
+              </svg>
+            </div>
+            <h3>OCR for Scanned Pages</h3>
+            <p>Built-in optical character recognition extracts readable text from image-based and scanned PDF pages.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-STEP HOW TO USE GUIDE -->
+    <section class="how-to-section">
+      <div class="container">
+        <h2 class="section-heading-centered">How to convert PDF to Word online</h2>
+        <div class="steps-grid">
+          <div class="step-card">
+            <span class="step-badge">1</span>
+            <h3>Select PDF file</h3>
+            <p>Upload your PDF document from your computer, or drag and drop it into the conversion zone.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">2</span>
+            <h3>Choose conversion mode</h3>
+            <p>Select No OCR for standard digital PDFs or OCR for scanned documents requiring text recognition.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">3</span>
+            <h3>Download Word document</h3>
+            <p>Click Convert to WORD and instantly download your editable, fully formatted DOCX file.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ===================================================================
+       2. ORGANIZE / CONFIGURE WORKSPACE (MATCHING USER SCREENSHOT)
+       =================================================================== -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- MAIN CANVAS AREA (Left/Center) -->
+      <div class="canvas-main-area">
+        <!-- Hidden file input for adding more files -->
+        <input
+          #addMoreInput
+          type="file"
+          accept=".pdf,application/pdf"
+          multiple
+          class="hidden-file-input"
+          (change)="onMoreFilesAdded($event)"
+        />
+
+        <!-- CENTERED SELECTED PDF DOCUMENT CARD -->
+        <div class="pdf-cards-canvas">
+          @for (fileItem of selectedFiles(); track fileItem.id; let idx = $index) {
+            <div class="pdf-document-card">
+              <!-- Remove file action -->
+              <div class="card-hover-actions">
+                <button
+                  type="button"
+                  class="card-action-btn delete-btn"
+                  title="Remove file"
+                  (click)="removeFile(fileItem.id)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Document Page Sheet Graphic -->
+              <div class="pdf-page-sheet">
+                <div class="sheet-corner-fold"></div>
+                <div class="sheet-lines-preview">
+                  <div class="line-skeleton title-line"></div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton half-line"></div>
+                  <div class="table-skeleton">
+                    <div class="table-row-skeleton"></div>
+                    <div class="table-row-skeleton"></div>
+                  </div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton half-line"></div>
+                </div>
+              </div>
+
+              <!-- File Info Label -->
+              <div class="card-file-info">
+                <span class="pdf-file-name" [title]="fileItem.name">
+                  {{ fileItem.name }}
+                </span>
+                <span class="pdf-file-meta">
+                  {{ fileItem.pageCount }} {{ fileItem.pageCount === 1 ? 'page' : 'pages' }} • {{ fileItem.formattedSize }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING RED CIRCULAR ADD BUTTON (Top Right Edge - Matching Screenshot) -->
+        <div class="floating-tools-stack">
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn add-btn"
+              title="Add more files"
+              (click)="addMoreInput.click()"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span class="floating-count-badge">{{ selectedFiles().length }}</span>
+            </button>
+            <span class="floating-tooltip-label">Add more files</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR: PDF TO WORD OPTIONS (Matching Screenshot Exactly) -->
+      <aside class="sidebar-action-panel">
+        <div class="sidebar-body">
+          <h2 class="sidebar-heading">PDF to Word</h2>
+
+          <!-- Mode Selection Radio Cards -->
+          <div class="mode-options-group">
+            <!-- Option 1: No OCR (Default) -->
+            <label
+              class="mode-card"
+              [class.selected]="selectedMode() === 'no_ocr'"
+            >
+              <div class="mode-radio-wrap">
+                <input
+                  type="radio"
+                  name="pdfToWordMode"
+                  value="no_ocr"
+                  [checked]="selectedMode() === 'no_ocr'"
+                  (change)="selectedMode.set('no_ocr')"
+                />
+                <span class="custom-radio"></span>
+              </div>
+              <div class="mode-content">
+                <div class="mode-title-row">
+                  <span class="mode-title">No OCR</span>
+                </div>
+                <p class="mode-desc">
+                  Convert PDFs with selectable text into editable Word files.
+                </p>
+              </div>
+            </label>
+
+            <!-- Option 2: OCR with Premium Badge -->
+            <label
+              class="mode-card"
+              [class.selected]="selectedMode() === 'ocr'"
+            >
+              <div class="mode-radio-wrap">
+                <input
+                  type="radio"
+                  name="pdfToWordMode"
+                  value="ocr"
+                  [checked]="selectedMode() === 'ocr'"
+                  (change)="selectedMode.set('ocr')"
+                />
+                <span class="custom-radio"></span>
+              </div>
+              <div class="mode-content">
+                <div class="mode-title-row">
+                  <span class="mode-title">OCR</span>
+                  <span class="premium-badge">
+                    <span class="crown-icon">👑</span> Premium
+                  </span>
+                </div>
+                <p class="mode-desc">
+                  Convert scanned PDFs with non-selectable text into editable Word files.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Content Analysis Insight Alert -->
+          @if (documentAnalysis(); as analysis) {
+            <div class="sidebar-info-banner">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="info-svg">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <div>
+                <strong>Document Analysis</strong>
+                <p>{{ analysis.detectedTextSummary }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- ACTION FOOTER: BIG RED CONVERT BUTTON -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="btn-convert-action"
+            [disabled]="selectedFiles().length === 0 || isProcessing()"
+            (click)="startConversion()"
+          >
+            <span>Convert to WORD</span>
+            <span class="action-arrow">➔</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ===================================================================
+       3. PROCESSING STATE
+       =================================================================== -->
+  @if (currentState() === 'processing') {
+    <div class="processing-wrapper">
+      <app-processing-state
+        [title]="'CONVERTING PDF TO WORD...'"
+        [percent]="processingProgress()"
+        [message]="processingMessage()"
+      ></app-processing-state>
+    </div>
+  }
+
+  <!-- ===================================================================
+       4. COMPLETED RESULT SCREEN
+       =================================================================== -->
+  @if (currentState() === 'completed' && conversionResult(); as res) {
+    <div class="result-screen-wrapper">
+      <div class="container result-container">
+        <app-result-view
+          [result]="asMergeResult(res)"
+          [title]="'PDF has been converted to WORD!'"
+          [subtitle]="'Your genuine editable Word document is ready for download.'"
+          [downloadLabel]="res.isZip ? 'Download WORD Files (ZIP)' : 'Download WORD'"
+          [savingsText]="'Converted into genuine OpenXML DOCX'"
+          [restartLabel]="'Convert another PDF'"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
+      </div>
+    </div>
+  }
+</div>

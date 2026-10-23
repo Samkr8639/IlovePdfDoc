@@ -19,8 +19,9 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
-  const statusCode = err instanceof AppError ? err.statusCode : 500;
-  const errorCode = err instanceof AppError ? err.code : 'INTERNAL_SERVER_ERROR';
+  const isAppError = err instanceof AppError || (err && typeof (err as any).statusCode === 'number');
+  const statusCode = isAppError ? (err as AppError).statusCode : 500;
+  const errorCode = isAppError ? ((err as AppError).code || 'INTERNAL_SERVER_ERROR') : 'INTERNAL_SERVER_ERROR';
   const message =
     statusCode === 500 && process.env.NODE_ENV === 'production'
       ? 'An unexpected error occurred. Please try again.'
