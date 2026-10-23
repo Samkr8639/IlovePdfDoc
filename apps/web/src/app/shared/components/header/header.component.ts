@@ -504,63 +504,13 @@ import { RouterLink } from '@angular/router';
           </div>
         </nav>
 
-        <!-- 3. RIGHT HEADER ITEMS (Login, Sign up, 9-dot grid icon) -->
+        <!-- 3. RIGHT HEADER ITEMS (Login, Sign up) -->
         <div class="header-right">
           <!-- Login link -->
           <a routerLink="/" class="nav-login-link">Login</a>
 
           <!-- Sign up red button -->
           <a routerLink="/" class="nav-signup-btn">Sign up</a>
-
-          <!-- 9-Dot Grid App Launcher Icon -->
-          <div class="apps-launcher-wrap">
-            <button
-              type="button"
-              class="apps-grid-btn"
-              (click)="toggleMenu('apps')"
-              title="PDF flow Desktop, Mobile & Apps"
-              aria-label="Applications"
-            >
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="4" cy="4" r="2.2"/>
-                <circle cx="12" cy="4" r="2.2"/>
-                <circle cx="20" cy="4" r="2.2"/>
-                <circle cx="4" cy="12" r="2.2"/>
-                <circle cx="12" cy="12" r="2.2"/>
-                <circle cx="20" cy="12" r="2.2"/>
-                <circle cx="4" cy="20" r="2.2"/>
-                <circle cx="12" cy="20" r="2.2"/>
-                <circle cx="20" cy="20" r="2.2"/>
-              </svg>
-            </button>
-
-            @if (activeMenu() === 'apps') {
-              <div class="apps-dropdown-pane" (mouseleave)="closeMenu()">
-                <div class="apps-dropdown-title">PDF flow Ecosystem</div>
-                <a routerLink="/" (click)="closeMenu()" class="app-row-item">
-                  <span class="app-icon-wrap">💻</span>
-                  <div>
-                    <strong>PDF Desktop App</strong>
-                    <p>Process offline on Windows & Mac</p>
-                  </div>
-                </a>
-                <a routerLink="/" (click)="closeMenu()" class="app-row-item">
-                  <span class="app-icon-wrap">📱</span>
-                  <div>
-                    <strong>PDF Mobile App</strong>
-                    <p>iOS & Android scan and sign</p>
-                  </div>
-                </a>
-                <a routerLink="/" (click)="closeMenu()" class="app-row-item">
-                  <span class="app-icon-wrap">⚡</span>
-                  <div>
-                    <strong>Developer REST API</strong>
-                    <p>Automate document workflows</p>
-                  </div>
-                </a>
-              </div>
-            }
-          </div>
 
           <!-- Mobile Hamburger Toggle -->
           <button class="mobile-toggle" (click)="toggleMobileMenu()" aria-label="Toggle menu">
@@ -903,79 +853,6 @@ import { RouterLink } from '@angular/router';
       box-shadow: 0 4px 12px rgba(229, 50, 56, 0.35);
     }
 
-    /* 9-DOT GRID LAUNCHER */
-    .apps-launcher-wrap {
-      position: relative;
-    }
-    .apps-grid-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      color: #4b5563;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .apps-grid-btn:hover {
-      color: #111827;
-      background: #f3f4f6;
-    }
-    .apps-dropdown-pane {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      width: 270px;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-      padding: 16px;
-      z-index: 100;
-      animation: menuFadeIn 0.18s ease;
-    }
-    .apps-dropdown-title {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #94a3b8;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .app-row-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      text-decoration: none;
-      color: #1e293b;
-      font-size: 13px;
-      transition: all 0.15s ease;
-    }
-    .app-row-item:hover {
-      background: #f8fafc;
-      color: #E53238;
-    }
-    .app-icon-wrap {
-      font-size: 18px;
-    }
-    .app-row-item strong {
-      display: block;
-      font-size: 13.5px;
-      font-weight: 700;
-    }
-    .app-row-item p {
-      margin: 0;
-      font-size: 11px;
-      color: #64748b;
-    }
-
     /* MOBILE TOGGLE */
     .mobile-toggle {
       display: none;
@@ -1057,16 +934,16 @@ import { RouterLink } from '@angular/router';
   `]
 })
 export class HeaderComponent {
-  activeMenu = signal<'convert' | 'all' | 'apps' | null>(null);
+  activeMenu = signal<'convert' | 'all' | null>(null);
   mobileMenuOpen = signal<boolean>(false);
   private closeTimer: any = null;
 
-  openMenu(menu: 'convert' | 'all' | 'apps'): void {
+  openMenu(menu: 'convert' | 'all'): void {
     this.cancelCloseMenu();
     this.activeMenu.set(menu);
   }
 
-  toggleMenu(menu: 'convert' | 'all' | 'apps'): void {
+  toggleMenu(menu: 'convert' | 'all'): void {
     if (this.activeMenu() === menu) {
       this.closeMenu();
     } else {

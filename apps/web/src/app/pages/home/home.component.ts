@@ -390,13 +390,14 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
         </div>
       </main>
 
-      <!-- 3. "WORK YOUR WAY" (Ecosystem 3-Column Section) -->
+      <!-- 3. "WORK YOUR WAY" (Roadmap / Coming Soon Section) -->
       <section class="work-your-way-section">
         <div class="container">
           <div class="section-center-head">
-            <h2 class="section-title-large">Work your way</h2>
+            <span class="roadmap-pill-tag">ROADMAP & UPCOMING</span>
+            <h2 class="section-title-large">Coming soon to all your devices</h2>
             <p class="section-subtitle-muted">
-              Access your documents from any device, offline or in the cloud.
+              We are actively developing native apps and advanced team features to bring the full power of PDF tools everywhere you work.
             </p>
           </div>
 
@@ -416,20 +417,21 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
                     <div class="window-doc-view">
                       <div class="doc-line line-lg"></div>
                       <div class="doc-line line-md"></div>
-                      <div class="doc-stamp-chip">Offline Ready</div>
+                      <div class="doc-stamp-chip roadmap-chip">Planned for Windows & Mac</div>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="ecosystem-card-body">
-                <h3 class="ecosystem-heading">Work offline with Desktop</h3>
+                <div class="card-status-badge in-dev">In Development</div>
+                <h3 class="ecosystem-heading">Offline Desktop App</h3>
                 <p class="ecosystem-text">
-                  Powerful document tools right on your computer. Batch process hundreds of gigabytes without internet connection.
+                  We are planning a high-performance native desktop client for Windows & Mac with 100% offline local processing, zero cloud uploads, and unlimited batch speed.
                 </p>
-                <a routerLink="/" class="ecosystem-cta-link">
-                  <span>Explore Desktop</span>
-                  <span class="cta-arrow">↗</span>
-                </a>
+                <div class="roadmap-status-footer">
+                  <span class="status-pulse-dot dot-red-pulse"></span>
+                  <span>Targeted for Next Release</span>
+                </div>
               </div>
             </div>
 
@@ -439,9 +441,9 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
                 <div class="phone-mockup">
                   <div class="phone-camera-notch"></div>
                   <div class="phone-screen">
-                    <div class="phone-header-chip">PDF Scanner</div>
+                    <div class="phone-header-chip">Pocket Scanner</div>
                     <div class="phone-doc-thumb">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E53238" stroke-width="2">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                       </svg>
@@ -450,14 +452,15 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
                 </div>
               </div>
               <div class="ecosystem-card-body">
-                <h3 class="ecosystem-heading">On the go with Mobile</h3>
+                <div class="card-status-badge planned">Planned</div>
+                <h3 class="ecosystem-heading">Mobile App for iOS & Android</h3>
                 <p class="ecosystem-text">
-                  Turn your iOS or Android device into a pocket scanner and signature pad. Edit, scan, and send documents anywhere.
+                  Turn your phone camera into a pocket scanner, sign documents with your finger, and convert photos directly to PDF while on the move.
                 </p>
-                <a routerLink="/" class="ecosystem-cta-link">
-                  <span>Explore Mobile</span>
-                  <span class="cta-arrow">↗</span>
-                </a>
+                <div class="roadmap-status-footer">
+                  <span class="status-pulse-dot dot-blue-pulse"></span>
+                  <span>In Design & UX Phase</span>
+                </div>
               </div>
             </div>
 
@@ -465,27 +468,28 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
             <div class="ecosystem-card">
               <div class="card-visual-header business-bg">
                 <div class="business-mockup">
-                  <div class="invoice-badge">APPROVED</div>
+                  <div class="invoice-badge roadmap-badge">COMING SOON</div>
                   <div class="invoice-lines">
                     <div class="inv-line"></div>
                     <div class="inv-line short"></div>
                   </div>
                   <div class="signature-stroke">
-                    <svg width="70" height="24" viewBox="0 0 100 30" fill="none" stroke="#2563EB" stroke-width="3">
+                    <svg width="70" height="24" viewBox="0 0 100 30" fill="none" stroke="#059669" stroke-width="3">
                       <path d="M5 25c15-20 25 5 40-15s20 25 50-10"/>
                     </svg>
                   </div>
                 </div>
               </div>
               <div class="ecosystem-card-body">
-                <h3 class="ecosystem-heading">Built for business</h3>
+                <div class="card-status-badge roadmap">Roadmap Preview</div>
+                <h3 class="ecosystem-heading">Team Collaboration & Workspaces</h3>
                 <p class="ecosystem-text">
-                  Automate document processing, team management, cryptographic signatures, and enterprise REST API integration.
+                  Shared team workspaces, automated document pipelines, multi-party signature tracking, and cloud connectors are on our extended product roadmap.
                 </p>
-                <a routerLink="/" class="ecosystem-cta-link">
-                  <span>Business Solutions</span>
-                  <span class="cta-arrow">↗</span>
-                </a>
+                <div class="roadmap-status-footer">
+                  <span class="status-pulse-dot dot-green-pulse"></span>
+                  <span>Community Suggestions Welcome</span>
+                </div>
               </div>
             </div>
           </div>
@@ -630,7 +634,6 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
     /* HERO HEADER */
     .hero-header {
       text-align: center;
-      margin: 0 auto 36px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -997,18 +1000,82 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
       line-height: 1.55;
       margin: 0 0 20px;
     }
-    .ecosystem-cta-link {
+    .roadmap-pill-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #E53238;
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+    .card-status-badge {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      align-self: flex-start;
+    }
+    .card-status-badge.in-dev {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .card-status-badge.planned {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    .card-status-badge.roadmap {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .roadmap-chip {
+      background: #fee2e2 !important;
+      color: #991b1b !important;
+    }
+    .roadmap-badge {
+      background: #dbeafe !important;
+      color: #1e40af !important;
+    }
+    .roadmap-status-footer {
       margin-top: auto;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #E53238;
-      text-decoration: none;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #64748b;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
     }
-    .cta-arrow { font-size: 16px; transition: transform 0.2s ease; }
-    .ecosystem-card:hover .cta-arrow { transform: translate(3px, -3px); }
+    .status-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red-pulse {
+      background: #E53238;
+      box-shadow: 0 0 0 3px rgba(229, 50, 56, 0.2);
+    }
+    .dot-blue-pulse {
+      background: #2563EB;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+    .dot-green-pulse {
+      background: #10B981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
 
     /* 4. "GET MORE WITH PREMIUM" SECTION */
     .premium-hero-section {
@@ -1214,7 +1281,7 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
     }
     .trust-container {
       text-align: center;
-      max-width: 860px;
+      // max-width: 860px;
       margin: 0 auto;
     }
     .trust-headline {
@@ -1226,6 +1293,7 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
     .trust-subtitle {
       font-size: 15px;
       color: #64748b;
+      width: 860px;
       line-height: 1.6;
       margin: 0 auto 40px;
     }
