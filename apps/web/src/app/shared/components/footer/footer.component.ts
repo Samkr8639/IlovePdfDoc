@@ -78,10 +78,11 @@ import { TranslationService } from '../../../core/services/translation.service';
       <div class="footer-sub-bar">
         <div class="container sub-bar-inner">
           <!-- Real Language Dropup Selector (Exact UI matching Reference) -->
-          <div class="lang-dropup-container">
+          <div class="lang-dropup-container notranslate skiptranslate" translate="no">
             <button
               type="button"
-              class="lang-selector-btn"
+              class="lang-selector-btn notranslate skiptranslate"
+              translate="no"
               (click)="toggleMenu($event)"
               [class.active]="isMenuOpen()"
               aria-label="Select Language"
@@ -91,7 +92,7 @@ import { TranslationService } from '../../../core/services/translation.service';
                 <line x1="2" y1="12" x2="22" y2="12"></line>
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
               </svg>
-              <span class="lang-label">{{ currentLang().nativeName }}</span>
+              <span class="lang-label notranslate" translate="no">{{ currentLang().nativeName }}</span>
               <svg class="chevron-svg" [class.chevron-rotate]="isMenuOpen()" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -99,49 +100,52 @@ import { TranslationService } from '../../../core/services/translation.service';
 
             <!-- 3-Column Upward Flyout Dropdown -->
             @if (isMenuOpen()) {
-              <div class="lang-dropup-menu" (click)="$event.stopPropagation()">
-                <div class="lang-dropup-grid">
+              <div class="lang-dropup-menu notranslate skiptranslate" translate="no" (click)="$event.stopPropagation()">
+                <div class="lang-dropup-grid notranslate" translate="no">
                   <!-- Column 1 -->
-                  <div class="lang-menu-col">
+                  <div class="lang-menu-col notranslate" translate="no">
                     @for (lang of col1; track lang.code) {
                       <button
                         type="button"
-                        class="lang-menu-item"
+                        class="lang-menu-item notranslate skiptranslate"
+                        translate="no"
                         [class.active-item]="currentLang().code === lang.code"
                         (click)="selectLanguage(lang.code)"
                       >
                         <span class="item-check" [class.visible]="currentLang().code === lang.code">✓</span>
-                        <span class="item-text">{{ lang.nativeName }}</span>
+                        <span class="item-text notranslate" translate="no">{{ lang.nativeName }}</span>
                       </button>
                     }
                   </div>
 
                   <!-- Column 2 -->
-                  <div class="lang-menu-col">
+                  <div class="lang-menu-col notranslate" translate="no">
                     @for (lang of col2; track lang.code) {
                       <button
                         type="button"
-                        class="lang-menu-item"
+                        class="lang-menu-item notranslate skiptranslate"
+                        translate="no"
                         [class.active-item]="currentLang().code === lang.code"
                         (click)="selectLanguage(lang.code)"
                       >
                         <span class="item-check" [class.visible]="currentLang().code === lang.code">✓</span>
-                        <span class="item-text">{{ lang.nativeName }}</span>
+                        <span class="item-text notranslate" translate="no">{{ lang.nativeName }}</span>
                       </button>
                     }
                   </div>
 
                   <!-- Column 3 -->
-                  <div class="lang-menu-col">
+                  <div class="lang-menu-col notranslate" translate="no">
                     @for (lang of col3; track lang.code) {
                       <button
                         type="button"
-                        class="lang-menu-item"
+                        class="lang-menu-item notranslate skiptranslate"
+                        translate="no"
                         [class.active-item]="currentLang().code === lang.code"
                         (click)="selectLanguage(lang.code)"
                       >
                         <span class="item-check" [class.visible]="currentLang().code === lang.code">✓</span>
-                        <span class="item-text">{{ lang.nativeName }}</span>
+                        <span class="item-text notranslate" translate="no">{{ lang.nativeName }}</span>
                       </button>
                     }
                   </div>
