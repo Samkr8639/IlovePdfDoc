@@ -1,0 +1,688 @@
+<div class="cookie-page" id="top">
+
+  <!-- =========================================================================
+       SECTION A: HERO (EDITORIAL ASYMMETRIC GRID)
+       ========================================================================= -->
+  <section class="cookie-hero" aria-labelledby="hero-heading">
+    <div class="cookie-container">
+      <div class="hero-grid">
+        <!-- Hero Text Column -->
+        <div class="hero-text-col">
+          <div class="hero-kicker">CONSENT MANAGEMENT &amp; STORAGE DISCLOSURES</div>
+          <h1 id="hero-heading" class="hero-headline">Cookie &amp; Privacy<br>Preferences.</h1>
+          <p class="hero-lead">
+            Manage your cookie settings and client-side storage preferences for PDF flow. We believe in minimal data footprint: 
+            <strong>strictly necessary storage is kept to an absolute minimum, and we run zero third-party advertising or cross-site tracking beacons</strong>.
+          </p>
+          <div class="hero-actions">
+            <a href="#consent-panel" class="btn-primary-editorial">Configure Preferences</a>
+            <a href="#storage-inventory" class="btn-secondary-link">
+              <span>View Storage Inventory</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 3v10M3 8l5 5 5-5"/>
+              </svg>
+            </a>
+          </div>
+          <div class="hero-foot-note">
+            <span class="pulse-indicator" aria-hidden="true"></span>
+            <span>Effective October 26, 2026 &middot; Real-Time Client Storage &middot; Zero Ad Trackers</span>
+          </div>
+        </div>
+
+        <!-- Hero Authentic Storage & Cookie Inspector Mockup -->
+        <div class="hero-visual-col" aria-hidden="true">
+          <div class="inspector-card">
+            <!-- Simulated Browser App Window Bar -->
+            <div class="inspector-window-header">
+              <div class="window-controls">
+                <span class="control-dot dot-red"></span>
+                <span class="control-dot dot-amber"></span>
+                <span class="control-dot dot-green"></span>
+              </div>
+              <div class="inspector-title-bar">
+                <span class="title-lock">🔒</span>
+                <span class="title-text">pdfflow.app/cookie-settings</span>
+                <span class="title-badge">Client Storage</span>
+              </div>
+              <div class="inspector-window-action">
+                <span class="window-action-tag">v{{ consentService.preferences().version }}</span>
+              </div>
+            </div>
+
+            <!-- Inspector Telemetry View -->
+            <div class="inspector-body">
+              <div class="inspector-toolbar">
+                <div class="inspector-meta">
+                  <span class="inspector-name">Consent &amp; Storage Inspector</span>
+                  <span class="inspector-sub">Real-Time Client-Side Telemetry</span>
+                </div>
+                <div class="inspector-status-pill">
+                  <span class="status-dot"></span>
+                  <span>Active &amp; Enforced</span>
+                </div>
+              </div>
+
+              <!-- Telemetry Cards Strip -->
+              <div class="inspector-metrics-grid">
+                <div class="metric-card">
+                  <div class="metric-icon-box box-green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label">Strictly Necessary</span>
+                    <strong class="metric-val">Enforced Active</strong>
+                    <span class="metric-desc">Consent state &amp; token</span>
+                  </div>
+                </div>
+
+                <div class="metric-card">
+                  <div class="metric-icon-box box-blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="2" y1="12" x2="22" y2="12"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label">Functional Storage</span>
+                    <strong class="metric-val">{{ consentService.preferences().functional ? 'User Enabled' : 'User Disabled' }}</strong>
+                    <span class="metric-desc">Language preference</span>
+                  </div>
+                </div>
+
+                <div class="metric-card">
+                  <div class="metric-icon-box box-slate">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                    </svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label">Ad Trackers &amp; Pixels</span>
+                    <strong class="metric-val">0 Detected / None</strong>
+                    <span class="metric-desc">Zero tracking beacons</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Real-time JSON State Snippet -->
+              <div class="inspector-json-block">
+                <div class="json-header">
+                  <span class="json-dot"></span>
+                  <span class="json-title">localStorage['pdf_flow_cookie_consent']</span>
+                  <span class="json-tag">Active State</span>
+                </div>
+                <div class="json-lines">
+                  <code>&#123;</code>
+                  <code>  "necessary": true,</code>
+                  <code>  "functional": {{ consentService.preferences().functional }},</code>
+                  <code>  "analytics": {{ consentService.preferences().analytics }},</code>
+                  <code>  "advertising": {{ consentService.preferences().advertising }},</code>
+                  <code>  "version": "{{ consentService.preferences().version }}"</code>
+                  <code>&#125;</code>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION B: INTERACTIVE CONSENT PREFERENCES PANEL
+       ========================================================================= -->
+  <section class="cookie-section" id="consent-panel" aria-labelledby="preferences-heading">
+    <div class="cookie-container">
+      <div class="section-lead-header">
+        <span class="section-eyebrow-text">INTERACTIVE CONTROLS</span>
+        <h2 id="preferences-heading" class="section-headline">Manage your consent preferences.</h2>
+        <p class="section-subtext">
+          Customize which categories of client-side storage and cookies you permit. Changes are saved directly to your browser's local storage and take effect immediately.
+        </p>
+      </div>
+
+      <!-- Live Save Notification Banner -->
+      @if (consentService.hasSavedNotification()) {
+        <div class="save-confirmation-banner" role="status" aria-live="polite">
+          <div class="confirmation-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="confirmation-text">
+            <strong>Preferences saved successfully</strong>
+            <span>Your updated cookie and storage settings were saved to your browser at {{ consentService.lastSavedTime() }}.</span>
+          </div>
+          <button type="button" class="btn-dismiss-banner" (click)="consentService.hasSavedNotification.set(false)" aria-label="Dismiss notification">
+            &times;
+          </button>
+        </div>
+      }
+
+      <!-- Quick Action Controls Strip -->
+      <div class="quick-action-strip">
+        <div class="action-strip-intro">
+          <span class="action-strip-label">Bulk Preferences:</span>
+          <span class="action-strip-help">Apply pre-configured choices across all optional categories.</span>
+        </div>
+        <div class="action-buttons-group">
+          <button type="button" class="btn-action-accept" (click)="acceptAll()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Accept All</span>
+          </button>
+          <button type="button" class="btn-action-reject" (click)="rejectOptional()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+            <span>Reject Optional</span>
+          </button>
+          <button type="button" class="btn-action-reset" (click)="resetToDefaults()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            <span>Reset to Defaults</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories Container -->
+      <div class="categories-panel">
+
+        <!-- 1. Strictly Necessary -->
+        <div class="category-card locked-card">
+          <div class="category-main">
+            <div class="category-icon-col">
+              <div class="cat-icon-box icon-necessary">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <circle cx="12" cy="11" r="3"/>
+                </svg>
+              </div>
+            </div>
+            <div class="category-info-col">
+              <div class="cat-title-row">
+                <h3 class="cat-title">Strictly Necessary Storage</h3>
+                <span class="pill-badge pill-locked">Always Active</span>
+              </div>
+              <p class="cat-summary">
+                Essential for basic security, routing integrity, and saving your consent choices.
+              </p>
+              <div class="cat-details">
+                <p>
+                  These storage keys are strictly required to operate the web application. Without them, the site cannot remember whether you have configured your privacy preferences or whether security tokens are valid. In accordance with applicable data protection regulations (including Article 5(3) of the ePrivacy Directive and GDPR Article 6(1)(f)), strictly necessary storage does not require consent and cannot be turned off.
+                </p>
+                <div class="cat-keys-list">
+                  <span class="key-badge">pdf_flow_cookie_consent (LocalStorage)</span>
+                </div>
+              </div>
+            </div>
+            <div class="category-toggle-col">
+              <div class="toggle-wrapper" title="Strictly necessary storage cannot be disabled">
+                <input type="checkbox" id="toggle-necessary" checked disabled class="toggle-checkbox" aria-label="Strictly Necessary Storage is always active">
+                <label for="toggle-necessary" class="toggle-label toggle-disabled">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <span class="toggle-status-text">Required</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Functional & Preferences -->
+        <div class="category-card" [class.category-active]="consentService.preferences().functional">
+          <div class="category-main">
+            <div class="category-icon-col">
+              <div class="cat-icon-box icon-functional">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="category-info-col">
+              <div class="cat-title-row">
+                <h3 class="cat-title">Functional &amp; Preference Storage</h3>
+                <span class="pill-badge" [ngClass]="consentService.preferences().functional ? 'pill-active' : 'pill-inactive'">
+                  {{ consentService.preferences().functional ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <p class="cat-summary">
+                Remembers your language choice and user-interface preferences across visits.
+              </p>
+              <div class="cat-details">
+                <p>
+                  Functional storage remembers stateful user preferences so you do not need to reconfigure them every time you return. Specifically, PDF flow uses your browser’s local storage to save your selected language (via <code>user_language</code>) and may use an ephemeral <code>googtrans</code> cookie if you invoke multilingual translation. If you disable this category, the website resets to English on reload and translation cookies are cleared immediately.
+                </p>
+                <div class="cat-keys-list">
+                  <span class="key-badge">user_language (LocalStorage)</span>
+                  <span class="key-badge">googtrans (Cookie / Translation)</span>
+                </div>
+              </div>
+            </div>
+            <div class="category-toggle-col">
+              <div class="toggle-wrapper">
+                <input 
+                  type="checkbox" 
+                  id="toggle-functional" 
+                  [checked]="consentService.preferences().functional"
+                  (change)="onToggle('functional', $event)"
+                  class="toggle-checkbox"
+                  aria-label="Toggle Functional and Preference Storage">
+                <label for="toggle-functional" class="toggle-label">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <span class="toggle-status-text">
+                {{ consentService.preferences().functional ? 'Enabled' : 'Disabled' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Analytics & Diagnostics -->
+        <div class="category-card" [class.category-active]="consentService.preferences().analytics">
+          <div class="category-main">
+            <div class="category-icon-col">
+              <div class="cat-icon-box icon-analytics">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"/>
+                  <line x1="12" y1="20" x2="12" y2="4"/>
+                  <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+              </div>
+            </div>
+            <div class="category-info-col">
+              <div class="cat-title-row">
+                <h3 class="cat-title">Analytics &amp; Performance Telemetry</h3>
+                <span class="pill-badge" [ngClass]="consentService.preferences().analytics ? 'pill-active' : 'pill-inactive'">
+                  {{ consentService.preferences().analytics ? 'Opted In' : 'Opted Out' }}
+                </span>
+              </div>
+              <p class="cat-summary">
+                Aggregated, privacy-preserving performance telemetry. No third-party analytics trackers are currently installed.
+              </p>
+              <div class="cat-details">
+                <p>
+                  PDF flow does not load Google Analytics, Hotjar, Mixpanel, or third-party behavioral trackers. Your preference here governs whether privacy-conscious, aggregate telemetry or client-side error telemetry may be collected in future updates. By default, this category is switched off. Even if enabled, no cross-site identifiers or document contents are ever transmitted.
+                </p>
+                <div class="cat-keys-list">
+                  <span class="key-badge key-muted">No external analytics scripts loaded</span>
+                </div>
+              </div>
+            </div>
+            <div class="category-toggle-col">
+              <div class="toggle-wrapper">
+                <input 
+                  type="checkbox" 
+                  id="toggle-analytics" 
+                  [checked]="consentService.preferences().analytics"
+                  (change)="onToggle('analytics', $event)"
+                  class="toggle-checkbox"
+                  aria-label="Toggle Analytics and Performance Telemetry">
+                <label for="toggle-analytics" class="toggle-label">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <span class="toggle-status-text">
+                {{ consentService.preferences().analytics ? 'Opted In' : 'Opted Out' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Advertising & Marketing -->
+        <div class="category-card" [class.category-active]="consentService.preferences().advertising">
+          <div class="category-main">
+            <div class="category-icon-col">
+              <div class="cat-icon-box icon-advertising">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+            </div>
+            <div class="category-info-col">
+              <div class="cat-title-row">
+                <h3 class="cat-title">Advertising &amp; Marketing Trackers</h3>
+                <span class="pill-badge" [ngClass]="consentService.preferences().advertising ? 'pill-active' : 'pill-inactive'">
+                  {{ consentService.preferences().advertising ? 'Allowed' : 'Blocked' }}
+                </span>
+              </div>
+              <p class="cat-summary">
+                Third-party ad networks, tracking pixels, and remarketing beacons. PDF flow has zero advertising integrations.
+              </p>
+              <div class="cat-details">
+                <p>
+                  We believe document processing utilities should never be subsidized by ad-tracking networks. PDF flow does not integrate Meta Pixel, Google AdSense, TikTok Pixel, or retargeting cookies. This category is provided for regulatory completeness and remains inactive. We do not sell your personal data or browsing behavior to third-party data brokers under any circumstances.
+                </p>
+                <div class="cat-keys-list">
+                  <span class="key-badge key-muted">Zero ad pixels &middot; 0 beacons active</span>
+                </div>
+              </div>
+            </div>
+            <div class="category-toggle-col">
+              <div class="toggle-wrapper">
+                <input 
+                  type="checkbox" 
+                  id="toggle-advertising" 
+                  [checked]="consentService.preferences().advertising"
+                  (change)="onToggle('advertising', $event)"
+                  class="toggle-checkbox"
+                  aria-label="Toggle Advertising and Marketing Trackers">
+                <label for="toggle-advertising" class="toggle-label">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <span class="toggle-status-text">
+                {{ consentService.preferences().advertising ? 'Allowed' : 'Blocked' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Save Preferences Sticky Action Footer -->
+      <div class="save-actions-panel">
+        <div class="save-actions-text">
+          <strong>Ready to apply your selections?</strong>
+          <span>Your preferences will be saved immediately to this browser's local storage.</span>
+        </div>
+        <div class="save-actions-buttons">
+          <button type="button" class="btn-save-primary" (click)="savePreferences()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            <span>Save Preferences</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION C: COMPLETE STORAGE & COOKIE INVENTORY TABLE
+       ========================================================================= -->
+  <section class="cookie-section bg-slate-subtle" id="storage-inventory" aria-labelledby="inventory-heading">
+    <div class="cookie-container">
+      <div class="section-lead-header">
+        <span class="section-eyebrow-text">TRANSPARENT DISCLOSURES</span>
+        <h2 id="inventory-heading" class="section-headline">Complete cookie &amp; storage inventory.</h2>
+        <p class="section-subtext">
+          Below is an exhaustive, verifiable audit of all storage keys, cookies, and local identifiers used by PDF flow in production.
+        </p>
+      </div>
+
+      <!-- Inventory Table Container -->
+      <div class="inventory-table-card">
+        <div class="table-responsive">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th scope="col" class="th-name">Name / Key</th>
+                <th scope="col" class="th-provider">Provider</th>
+                <th scope="col" class="th-cat">Category</th>
+                <th scope="col" class="th-mech">Mechanism</th>
+                <th scope="col" class="th-duration">Duration</th>
+                <th scope="col" class="th-purpose">Purpose &amp; Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of inventoryRows; track row.name) {
+                <tr>
+                  <td class="td-name">
+                    <code>{{ row.name }}</code>
+                  </td>
+                  <td class="td-provider">
+                    <span class="provider-pill">{{ row.provider }}</span>
+                  </td>
+                  <td class="td-cat">
+                    <span class="cat-pill" [ngClass]="{
+                      'pill-nec': row.category === 'Strictly Necessary',
+                      'pill-func': row.category.includes('Functional')
+                    }">
+                      {{ row.category }}
+                    </span>
+                  </td>
+                  <td class="td-mech">{{ row.mechanism }}</td>
+                  <td class="td-duration">{{ row.duration }}</td>
+                  <td class="td-purpose">{{ row.purpose }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>Inventory accurate as of October 26, 2026. No hidden tracking tags, web beacons, or third-party pixels are injected into any application page.</span>
+        </div>
+      </div>
+
+      <!-- Technical Distinction Cards -->
+      <div class="tech-distinction-grid">
+        <div class="tech-card">
+          <div class="tech-card-header">
+            <span class="tech-badge">STORAGE PRIMITIVE</span>
+            <h4 class="tech-title">Browser LocalStorage</h4>
+          </div>
+          <p class="tech-desc">
+            LocalStorage stores key-value pairs purely inside your device's browser sandbox. Unlike traditional HTTP cookies, LocalStorage data is <strong>never automatically attached to outgoing HTTP requests</strong>, reducing server overhead and eliminating unintended header leakage.
+          </p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-header">
+            <span class="tech-badge">HTTP COOKIES</span>
+            <h4 class="tech-title">First-Party HTTP Cookies</h4>
+          </div>
+          <p class="tech-desc">
+            Cookies are small strings transmitted in request headers. PDF flow limits cookie usage strictly to optional translation helpers (<code>googtrans</code>). When functional cookies are rejected, existing translation cookies are explicitly expired and deleted.
+          </p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-header">
+            <span class="tech-badge">ZERO ADVERTISING</span>
+            <h4 class="tech-title">No Third-Party Trackers</h4>
+          </div>
+          <p class="tech-desc">
+            Unlike many commercial PDF services, PDF flow does not embed Facebook Pixel, LinkedIn Insight Tag, Google AdSense, or affiliate marketing scripts. Your document processing workflows remain confidential and free of ad tracking.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION D: BROWSER-LEVEL COOKIE CONTROLS GUIDE
+       ========================================================================= -->
+  <section class="cookie-section" id="browser-controls" aria-labelledby="browser-heading">
+    <div class="cookie-container">
+      <div class="section-lead-header">
+        <span class="section-eyebrow-text">BROWSER-LEVEL INDEPENDENCE</span>
+        <h2 id="browser-heading" class="section-headline">Managing cookies in your browser settings.</h2>
+        <p class="section-subtext">
+          In addition to our on-page consent controls, all modern web browsers allow you to block, audit, or delete cookies and site data globally or per domain.
+        </p>
+      </div>
+
+      <div class="browser-guides-grid">
+        <!-- Chrome -->
+        <div class="browser-guide-card">
+          <div class="guide-header">
+            <div class="guide-icon">🌐</div>
+            <h4 class="guide-browser-name">Google Chrome</h4>
+          </div>
+          <p class="guide-steps">
+            Settings &rarr; Privacy and security &rarr; Third-party cookies &rarr; Manage site permissions or clear browsing data for <code>pdfflow.app</code>.
+          </p>
+        </div>
+
+        <!-- Firefox -->
+        <div class="browser-guide-card">
+          <div class="guide-header">
+            <div class="guide-icon">🦊</div>
+            <h4 class="guide-browser-name">Mozilla Firefox</h4>
+          </div>
+          <p class="guide-steps">
+            Settings &rarr; Privacy &amp; Security &rarr; Enhanced Tracking Protection &rarr; Cookies and Site Data &rarr; Manage Data.
+          </p>
+        </div>
+
+        <!-- Safari -->
+        <div class="browser-guide-card">
+          <div class="guide-header">
+            <div class="guide-icon">🧭</div>
+            <h4 class="guide-browser-name">Apple Safari</h4>
+          </div>
+          <p class="guide-steps">
+            Preferences / Settings &rarr; Privacy &rarr; Prevent cross-site tracking &rarr; Manage Website Data &rarr; Remove <code>pdfflow.app</code>.
+          </p>
+        </div>
+
+        <!-- Edge -->
+        <div class="browser-guide-card">
+          <div class="guide-header">
+            <div class="guide-icon">🌀</div>
+            <h4 class="guide-browser-name">Microsoft Edge</h4>
+          </div>
+          <p class="guide-steps">
+            Settings &rarr; Cookies and site permissions &rarr; Manage and delete cookies and site data &rarr; See all cookies and site data.
+          </p>
+        </div>
+      </div>
+
+      <div class="incognito-callout">
+        <div class="incognito-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h20"/>
+            <path d="M20 12v8H4v-8"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="incognito-text">
+          <strong>Private / Incognito Browsing:</strong>
+          <span>
+            When you use private browsing windows, all cookies, LocalStorage keys, and session tokens created during your visit are automatically and permanently purged as soon as you close all private tabs.
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION E: TRUST & LEGAL CROSS-NAVIGATION
+       ========================================================================= -->
+  <section class="cookie-section bg-slate-subtle" aria-labelledby="legal-heading">
+    <div class="cookie-container">
+      <div class="section-lead-header">
+        <span class="section-eyebrow-text">RELATED LEGAL &amp; PRIVACY DOCUMENTATION</span>
+        <h2 id="legal-heading" class="section-headline">Explore our complete privacy framework.</h2>
+        <p class="section-subtext">
+          Read our in-depth policies to understand our document-handling guarantees, data retention rules, and technical security controls.
+        </p>
+      </div>
+
+      <div class="trust-grid">
+        <a routerLink="/privacy-policy" class="trust-card">
+          <div class="trust-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="trust-card-body">
+            <strong class="trust-name">Privacy Policy</strong>
+            <span class="trust-desc">How document data is protected, ephemeral conversion policies, and your legal rights.</span>
+          </div>
+          <span class="trust-arrow">&rarr;</span>
+        </a>
+
+        <a routerLink="/gdpr-compliance" class="trust-card">
+          <div class="trust-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="trust-card-body">
+            <strong class="trust-name">GDPR Compliance</strong>
+            <span class="trust-desc">Article 5 technical safeguards, data minimization, and EU privacy rights.</span>
+          </div>
+          <span class="trust-arrow">&rarr;</span>
+        </a>
+
+        <a routerLink="/security-whitepaper" class="trust-card">
+          <div class="trust-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="trust-card-body">
+            <strong class="trust-name">Security Whitepaper</strong>
+            <span class="trust-desc">Architectural documentation of WebAssembly local processing and RAM-only server execution.</span>
+          </div>
+          <span class="trust-arrow">&rarr;</span>
+        </a>
+
+        <a routerLink="/terms-and-conditions" class="trust-card">
+          <div class="trust-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="trust-card-body">
+            <strong class="trust-name">Terms &amp; Conditions</strong>
+            <span class="trust-desc">Conditions of use, intellectual property retention, and service-level commitments.</span>
+          </div>
+          <span class="trust-arrow">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION F: QUIET EDITORIAL CLOSING CTA
+       ========================================================================= -->
+  <section class="cookie-section cta-section" aria-labelledby="cta-heading">
+    <div class="cookie-container">
+      <div class="editorial-cta-box">
+        <div class="cta-content">
+          <span class="cta-eyebrow">VERIFIED PRIVACY STANDARDS</span>
+          <h2 id="cta-heading" class="cta-headline">Document privacy engineered into every tool.</h2>
+          <p class="cta-subtext">
+            No forced accounts. No third-party profiling. Fast, private PDF editing and conversion directly inside your browser.
+          </p>
+        </div>
+        <div class="cta-action-row">
+          <a routerLink="/" class="btn-primary-editorial">Explore PDF Tools</a>
+          <a routerLink="/privacy-policy" class="btn-secondary-editorial">Read Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

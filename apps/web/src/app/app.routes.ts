@@ -119,6 +119,76 @@ export const routes: Routes = [
     redirectTo: 'contact-us'
   },
   {
+    path: 'privacy-policy',
+    loadComponent: () => import('./pages/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
+    title: 'Privacy Policy — PDF flow Document Processing & Data Protection'
+  },
+  {
+    path: 'privacy',
+    redirectTo: 'privacy-policy'
+  },
+  {
+    path: 'terms-and-conditions',
+    loadComponent: () => import('./pages/terms-and-conditions/terms-and-conditions.component').then(m => m.TermsAndConditionsComponent),
+    title: 'Terms & Conditions — PDF flow Document Processing & Service Terms'
+  },
+  {
+    path: 'terms',
+    redirectTo: 'terms-and-conditions'
+  },
+  {
+    path: 'tos',
+    redirectTo: 'terms-and-conditions'
+  },
+  {
+    path: 'gdpr-compliance',
+    loadComponent: () => import('./pages/gdpr-compliance/gdpr-compliance.component').then(m => m.GdprComplianceComponent),
+    title: 'GDPR Compliance & Data Protection — PDF flow'
+  },
+  {
+    path: 'gdpr',
+    redirectTo: 'gdpr-compliance'
+  },
+  {
+    path: 'security-whitepaper',
+    loadComponent: () => import('./pages/security-whitepaper/security-whitepaper.component').then(m => m.SecurityWhitepaperComponent),
+    title: 'Security Architecture & Document Processing Whitepaper — PDF flow'
+  },
+  {
+    path: 'security',
+    redirectTo: 'security-whitepaper'
+  },
+  {
+    path: 'whitepaper',
+    redirectTo: 'security-whitepaper'
+  },
+  {
+    path: 'cookie-settings',
+    loadComponent: () => import('./pages/cookie-settings/cookie-settings.component').then(m => m.CookieSettingsComponent),
+    title: 'Cookie Settings & Privacy Preferences — PDF flow'
+  },
+  {
+    path: 'cookies',
+    redirectTo: 'cookie-settings'
+  },
+  {
+    path: 'cookie-preferences',
+    redirectTo: 'cookie-settings'
+  },
+  {
+    path: 'press-media-kit',
+    loadComponent: () => import('./pages/press-media-kit/press-media-kit.component').then(m => m.PressMediaKitComponent),
+    title: 'Press & Media Kit — Official Brand Assets & Resources | PDF flow'
+  },
+  {
+    path: 'press',
+    redirectTo: 'press-media-kit'
+  },
+  {
+    path: 'media-kit',
+    redirectTo: 'press-media-kit'
+  },
+  {
     path: '**',
     redirectTo: ''
   }

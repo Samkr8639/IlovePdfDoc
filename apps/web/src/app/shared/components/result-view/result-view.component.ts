@@ -44,6 +44,10 @@ export class ResultViewComponent {
   }
 
   downloadFile(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     const res = this.result();
     if (!res) return;
 

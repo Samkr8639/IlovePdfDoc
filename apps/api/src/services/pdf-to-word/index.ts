@@ -1,7 +1,7 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { PdfToWordMode } from '@paperflow/contracts';
-import { extractPdfDocument, ExtractedPdfDocument } from './pdf-layout-extractor';
-import { reconstructDocumentLayout, ReconstructedDocument } from './document-layout-reconstructor';
-import { generateDocxDocument } from './docx-generator';
+import { AppError } from '../../middleware/errorHandler';
 
 export interface ConvertPdfToWordOptions {
   mode?: PdfToWordMode;
@@ -12,40 +12,61 @@ export interface ConvertPdfToWordOptions {
 export interface ConvertPdfToWordResult {
   docxBuffer: Buffer;
   pageCount: number;
-  docModel: ReconstructedDocument;
-  extractedDoc: ExtractedPdfDocument;
+  warnings: string[];
+}
+
+import { pathToFileURL } from 'url';
+
+// Resolves local layout-preserving engine located in the same directory
+function getEngineUrl(): string {
+  const enginePath = path.resolve(__dirname, 'engine.mjs');
+  // Cache-busting timestamp ensures changes to .mjs are picked up instantly
+  return `${pathToFileURL(enginePath).href}?t=${Date.now()}`;
+}
+
+async function getConverter() {
+  const mod = await import(/* @vite-ignore */ getEngineUrl());
+  return mod.convertPdfToDocx;
 }
 
 /**
- * Converts a PDF buffer into a production-grade, layout-accurate Microsoft Word DOCX buffer.
+ * Layout-preserving PDF → DOCX conversion.
+ * Uses the pdfjs-dist v5 + docx-js 9.x layout engine from ./engine.mjs.
+ * Each PDF page becomes a DOCX section with exact dimensions and absolute frame positions.
  */
 export async function convertPdfToDocx(
   pdfBuffer: Buffer,
   options: ConvertPdfToWordOptions = {}
 ): Promise<ConvertPdfToWordResult> {
-  const mode = options.mode || 'no_ocr';
-  const ocrLanguage = options.ocrLanguage || 'eng';
-
-  // 1. Geometry-preserving extraction
-  const extractedDoc = await extractPdfDocument(pdfBuffer, mode, ocrLanguage);
-
-  // 2. Semantic layout and structure reconstruction
-  const docModel = reconstructDocumentLayout(extractedDoc);
-  if (options.originalFilename && !docModel.title) {
-    docModel.title = options.originalFilename.replace(/\.[^/.]+$/, '');
+  // Validate PDF magic bytes
+  if (!pdfBuffer || pdfBuffer.length < 4) {
+    throw new AppError(422, 'INVALID_PDF', 'PDF buffer is empty or too short');
+  }
+  if (pdfBuffer.toString('utf8', 0, 4) !== '%PDF') {
+    throw new AppError(422, 'INVALID_PDF_HEADER', 'File does not have a valid PDF header (%PDF)');
   }
 
-  // 3. Native DOCX generation
-  const docxBuffer = await generateDocxDocument(docModel);
+  try {
+    const convert = await getConverter();
+    const { docx, model } = await convert(pdfBuffer);
 
-  return {
-    docxBuffer,
-    pageCount: extractedDoc.pageCount,
-    docModel,
-    extractedDoc
-  };
+    return {
+      docxBuffer: docx,
+      pageCount: model.pages.length,
+      warnings: model.warnings || []
+    };
+  } catch (err: unknown) {
+    if (err instanceof AppError) throw err;
+
+    const msg = err instanceof Error ? err.message : String(err);
+
+    if (msg.toLowerCase().includes('invalid pdf') || msg.toLowerCase().includes('corrupt')) {
+      throw new AppError(422, 'CORRUPTED_PDF', `Failed to parse PDF: ${msg}`);
+    }
+
+    throw new AppError(500, 'CONVERSION_FAILED', `PDF to Word conversion failed: ${msg}`);
+  }
 }
 
-export * from './pdf-layout-extractor';
-export * from './document-layout-reconstructor';
-export * from './docx-generator';
+// Re-export for backward compat
+export type { ConvertPdfToWordOptions as PdfToWordOptions };

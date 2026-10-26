@@ -320,9 +320,7 @@
   @if (currentState() === 'processing') {
     <div class="processing-wrapper">
       <app-processing-state
-        [title]="'CONVERTING PDF TO WORD...'"
-        [percent]="processingProgress()"
-        [message]="processingMessage()"
+        [title]="'Converting PDF to WORD...'"
       ></app-processing-state>
     </div>
   }

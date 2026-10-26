@@ -16,6 +16,7 @@ import {
   PdfPageAnalysis
 } from '@paperflow/contracts';
 import { BrowserPdfService, ValidatedPdfFile } from './browser-pdf.service';
+import { environment } from '../../../environments/environment';
 
 export interface ConvertedWordResult {
   blob: Blob;
@@ -120,14 +121,8 @@ export class PdfToWordService {
     onProgress?.(15, 'Validating document structures...');
     await new Promise(r => setTimeout(r, 200));
 
-    // Try server-side API first if available, with in-browser fallback
-    try {
-      return await this.convertViaApi(files, options, onProgress);
-    } catch {
-      // Fallback to in-browser client-side conversion engine
-      onProgress?.(40, 'Processing with client-side document engine...');
-      return await this.convertClientSide(files[0], options, onProgress);
-    }
+    // Use genuine layout-preserving conversion engine
+    return await this.convertViaApi(files, options, onProgress);
   }
 
   /**
@@ -149,16 +144,17 @@ export class PdfToWordService {
       formData.append('ocrLanguage', options.ocrLanguage);
     }
 
-    onProgress?.(50, options.mode === 'ocr' ? 'Running OCR text recognition...' : 'Extracting paragraphs & layout...');
+    onProgress?.(50, options.mode === 'ocr' ? 'Running OCR text recognition...' : 'Extracting layout, fonts & vector structures...');
 
-    const response = await fetch('http://localhost:4000/api/v1/pdf-to-word/convert', {
+    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const response = await fetch(`${baseUrl}/pdf-to-word/convert`, {
       method: 'POST',
       body: formData
     });
 
     if (!response.ok) {
       const errJson = await response.json().catch(() => null);
-      throw new Error(errJson?.error?.message || `API error (${response.status})`);
+      throw new Error(errJson?.error?.message || `Conversion API error (${response.status})`);
     }
 
     onProgress?.(80, 'Packaging genuine DOCX document...');
@@ -167,7 +163,8 @@ export class PdfToWordService {
     const job = data.data;
 
     // Fetch the generated DOCX blob
-    const downloadUrl = `http://localhost:4000${job.files[0]?.downloadUrl || `/api/v1/pdf-to-word/jobs/${job.id}/download`}`;
+    const host = baseUrl.replace(/\/api\/v1\/?$/, '');
+    const downloadUrl = `${host}${job.files[0]?.downloadUrl || `/api/v1/pdf-to-word/jobs/${job.id}/download`}`;
     const fileRes = await fetch(downloadUrl);
     const blob = await fileRes.blob();
     const url = URL.createObjectURL(blob);

@@ -1,30 +1,28 @@
-<div class="dribbble-processing-card">
-  <!-- 3 PULSING CORAL DOTS (Exact Dribbble video animation) -->
-  <div class="pulsing-dots-wrapper">
-    <span class="pulse-dot dot-1"></span>
-    <span class="pulse-dot dot-2"></span>
-    <span class="pulse-dot dot-3"></span>
-  </div>
+<div class="circular-processing-screen">
+  <h2 class="processing-title">{{ formattedTitle() }}</h2>
 
-  <!-- SECURED BADGE PILL -->
-  <div class="secured-pill">
-    <span>Secured Data Processing</span>
-  </div>
-
-  <!-- HEADLINE & WARNING SUBTITLE -->
-  <div class="processing-text-block">
-    <h2 class="processing-headline">{{ (title() || 'MERGING PDF DOCUMENTS...').toUpperCase() }}</h2>
-    <p class="processing-subtext">
-      The process will be finished soon.<br/>
-      Please, do not refresh the screen, before it finishes.
-    </p>
-  </div>
-
-  <!-- PROGRESS TRACK & PERCENTAGE -->
-  <div class="progress-section">
-    <span class="progress-percent-label">{{ percent() }}%</span>
-    <div class="dribbble-progress-track">
-      <div class="dribbble-progress-fill" [style.width.%]="percent()"></div>
-    </div>
+  <div class="circular-spinner-wrapper" aria-label="Loading" role="status">
+    <svg class="circular-spinner-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background track circle -->
+      <circle
+        class="spinner-track"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke="#E5E7EB"
+        stroke-width="8"
+      />
+      <!-- Animated red active arc -->
+      <circle
+        class="spinner-arc"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke="#E53238"
+        stroke-width="8"
+        stroke-linecap="round"
+        stroke-dasharray="75 190"
+      />
+    </svg>
   </div>
 </div>
