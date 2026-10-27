@@ -26,7 +26,8 @@ export function createApp(): Express {
           imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
           connectSrc: ["'self'"],
           fontSrc: ["'self'"],
-          objectSrc: ["'none'"]
+          frameSrc: ["'self'", 'blob:'],
+          objectSrc: ["'self'", 'blob:']
         }
       },
       crossOriginResourcePolicy: { policy: 'cross-origin' }
