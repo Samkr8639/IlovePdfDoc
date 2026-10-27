@@ -76,6 +76,26 @@ function resolveFont(fontName: string | undefined, generic?: string, fallbackFon
   return { fontFace: face, isStandard: STANDARD_OFFICE_FONTS.has(face) };
 }
 
+function estimateTextWidth(text: string, fontFace: string, fontSizePt: number): number {
+  const isNarrow = /narrow/i.test(fontFace);
+  let units = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === ' ' || ch === '\t') {
+      units += 0.28;
+    } else if (/[ijl1!|:;.,'"`()[\]]/.test(ch)) {
+      units += 0.26;
+    } else if (/[MWmw@#%_]/.test(ch)) {
+      units += isNarrow ? 0.68 : 0.85;
+    } else if (/[A-Z]/.test(ch)) {
+      units += isNarrow ? 0.50 : 0.62;
+    } else {
+      units += isNarrow ? 0.42 : 0.50;
+    }
+  }
+  return units * fontSizePt;
+}
+
 /**
  * Builds a PowerPoint (.pptx) buffer from either the layout model (No OCR)
  * or OCR pages (OCR mode).
@@ -379,6 +399,19 @@ export async function buildPptx(
         widthPt = Math.min(availableWidth, idealWidth);
       }
 
+      // For single-line text where target font substitution would exceed widthPt,
+      // scale font size down proportionally so it stays within widthPt without colliding with adjacent columns
+      let fontScale = 1.0;
+      if (!isMultiLine && block.lines.length === 1) {
+        const fullText = block.lines[0].map(r => r.text).join('');
+        const primaryRun = block.lines[0][0];
+        const primaryFont = primaryRun ? resolveFont(primaryRun.font, primaryRun.generic).fontFace : 'Calibri';
+        const estWidth = estimateTextWidth(fullText, primaryFont, block.fs);
+        if (estWidth > (widthPt - 2) && estWidth > 0) {
+          fontScale = Math.max(0.6, (widthPt - 2) / estWidth);
+        }
+      }
+
       const x_in = offsetX_in + (xPt / 72) * scale;
       const y_in = offsetY_in + (topPt / 72) * scale;
       const w_in = (widthPt / 72) * scale;
@@ -396,7 +429,8 @@ export async function buildPptx(
             nonStandardFonts.add(run.font);
           }
 
-          const effectiveFs = Math.max(1, Math.round(((run.fs || block.fs) * scale) * 2) / 2);
+          const baseFs = (run.fs || block.fs) * fontScale;
+          const effectiveFs = Math.max(1, Math.round((baseFs * scale) * 2) / 2);
           const textContent = run.text;
 
           runs.push({
@@ -424,7 +458,7 @@ export async function buildPptx(
         h: Math.max(0.05, h_in),
         margin: 0,
         valign: 'top',
-        fit: 'none',
+        fit: 'shrink',
         wrap: false,
         align: isRightAligned ? 'right' : 'left',
         lineSpacing,
