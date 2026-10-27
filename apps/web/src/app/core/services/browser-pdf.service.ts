@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { SplitRangeParser, PageRange } from '../utils/split-range-parser';
+import { environment } from '../../../environments/environment';
 
 export interface ValidatedPdfFile {
   id: string;
@@ -58,6 +59,7 @@ export interface CompressedPdfItem {
   pageCount: number;
   blob: Blob;
   url: string;
+  savingsReason?: string;
 }
 
 export interface CompressPdfResult extends MergeResult {
@@ -72,6 +74,7 @@ export interface CompressPdfResult extends MergeResult {
   isZip: boolean;
   filesCount: number;
   items: CompressedPdfItem[];
+  savingsReason?: string;
 }
 
 @Injectable({
@@ -369,6 +372,80 @@ export class BrowserPdfService {
       }
     }
 
+    // 1. Attempt high-efficiency backend API compression first
+    try {
+      const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+      const formData = new FormData();
+      for (const f of fileList) {
+        formData.append('files', f);
+      }
+      formData.append('level', level);
+
+      onProgress?.(30, `Optimizing raster streams and document layout (${level})...`);
+      const response = await fetch(`${baseUrl}/compress`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        onProgress?.(70, 'Packaging optimized output documents...');
+        const data = await response.json();
+        const job = data.data;
+        const host = baseUrl.replace(/\/api\/v1\/?$/, '');
+
+        const dlRes = await fetch(`${host}${job.downloadUrl}`);
+        const blob = await dlRes.blob();
+        const url = URL.createObjectURL(blob);
+
+        const items: CompressedPdfItem[] = [];
+        for (const f of job.files) {
+          const fileDlRes = await fetch(`${host}${f.downloadUrl}`);
+          const fileBlob = await fileDlRes.blob();
+          items.push({
+            filename: f.compressedFilename,
+            originalSizeBytes: f.originalSize,
+            compressedSizeBytes: f.compressedSize,
+            spaceSavedBytes: f.spaceSaved,
+            reductionPercent: Math.round(f.reductionPercentage),
+            formattedOriginalSize: this.formatBytes(f.originalSize),
+            formattedCompressedSize: this.formatBytes(f.compressedSize),
+            formattedSpaceSaved: this.formatBytes(f.spaceSaved),
+            pageCount: f.pageCount,
+            blob: fileBlob,
+            url: URL.createObjectURL(fileBlob),
+            savingsReason: f.savingsReason
+          });
+        }
+
+        onProgress?.(100, 'Compression completed successfully!');
+        const isZip = items.length > 1;
+        const filename = isZip ? 'paperflow_compressed_files.zip' : items[0].filename;
+
+        return {
+          blob,
+          url,
+          filename,
+          pageCount: items.reduce((acc, it) => acc + it.pageCount, 0),
+          sizeBytes: blob.size,
+          formattedSize: this.formatBytes(blob.size),
+          originalSizeBytes: job.totalOriginalSize,
+          compressedSizeBytes: job.totalCompressedSize,
+          spaceSavedBytes: job.totalSpaceSaved,
+          reductionPercent: Math.round(job.totalReductionPercentage),
+          formattedOriginalSize: this.formatBytes(job.totalOriginalSize),
+          formattedCompressedSize: this.formatBytes(job.totalCompressedSize),
+          formattedSpaceSaved: this.formatBytes(job.totalSpaceSaved),
+          savingsReason: job.savingsReason,
+          level,
+          isZip,
+          filesCount: items.length,
+          items
+        };
+      }
+    } catch {
+      // Offline or unit test fallback: proceed to client-side engine below
+    }
+
     const items: CompressedPdfItem[] = [];
     let totalOriginalSize = 0;
     let totalCompressedSize = 0;
@@ -429,20 +506,24 @@ export class BrowserPdfService {
           useObjectStreams: true,
           objectsPerTick: 50
         });
-      } else if (level === 'recommended') {
-        // Recommended: standard object stream packing
+      } else {
+        // Recommended / Less: standard object stream packing
         compressedBytes = await pdfDoc.save({
           useObjectStreams: true
-        });
-      } else {
-        // Less: standard output without object stream packing, maximum fidelity
-        compressedBytes = await pdfDoc.save({
-          useObjectStreams: false
         });
       }
 
       const origBytes = file.size;
-      const compBytes = compressedBytes.byteLength;
+      let compBytes = compressedBytes.byteLength;
+
+      // Safety rule: never return a file larger than the original
+      let savingsReason = 'Optimization applied to document streams.';
+      if (compBytes >= origBytes) {
+        compressedBytes = new Uint8Array(arrayBuffer);
+        compBytes = origBytes;
+        savingsReason = 'This PDF is mostly text and already well optimised.';
+      }
+
       const spaceSaved = Math.max(0, origBytes - compBytes);
       const reductionPercent = origBytes > 0 ? Math.round(((origBytes - compBytes) / origBytes) * 100) : 0;
 
@@ -471,7 +552,8 @@ export class BrowserPdfService {
         formattedSpaceSaved: this.formatBytes(spaceSaved),
         pageCount: pagesInDoc,
         blob: itemBlob,
-        url: itemUrl
+        url: itemUrl,
+        savingsReason
       });
     }
 
@@ -502,7 +584,8 @@ export class BrowserPdfService {
         level,
         isZip: false,
         filesCount: 1,
-        items
+        items,
+        savingsReason: single.savingsReason
       };
     }
 
@@ -542,7 +625,8 @@ export class BrowserPdfService {
       level,
       isZip: true,
       filesCount: items.length,
-      items
+      items,
+      savingsReason: items[0]?.savingsReason
     };
   }
 }

@@ -18,8 +18,40 @@ export class ResultViewComponent {
   subtitle = input<string>('Your files have been combined into a high-quality PDF document directly in your browser memory.');
   downloadLabel = input<string>('Download Merged PDF');
   savingsText = input<string | null>(null);
+  savingsReason = input<string | null>(null);
   restartLabel = input<string>('Process Another File');
   reset = output<void>();
+
+  formattedOriginalSize = computed<string | null>(() => {
+    return (this.result() as any)?.formattedOriginalSize || null;
+  });
+
+  formattedCompressedSize = computed<string>(() => {
+    return (this.result() as any)?.formattedCompressedSize || this.result()?.formattedSize || '';
+  });
+
+  reductionPercentage = computed<number>(() => {
+    return (this.result() as any)?.reductionPercent ?? 0;
+  });
+
+  hasOriginalSize = computed<boolean>(() => {
+    return !!(this.result() as any)?.formattedOriginalSize;
+  });
+
+  showLowSavingsReason = computed<boolean>(() => {
+    const res = this.result() as any;
+    if (res?.reductionPercent !== undefined) {
+      return res.reductionPercent < 5;
+    }
+    return false;
+  });
+
+  effectiveSavingsReason = computed<string>(() => {
+    if (this.savingsReason()) return this.savingsReason()!;
+    const res = this.result() as any;
+    if (res?.savingsReason) return res.savingsReason;
+    return 'This PDF is mostly text and already well optimised.';
+  });
 
   showPreview = signal<boolean>(false);
   copied = signal<boolean>(false);

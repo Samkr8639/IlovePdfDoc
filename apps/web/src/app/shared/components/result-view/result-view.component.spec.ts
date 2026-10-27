@@ -72,4 +72,56 @@ describe('ResultViewComponent with Document Layout Viewer', () => {
     expect(iframe).toBeTruthy();
     expect(component.previewUrl()).toBeTruthy();
   });
+
+  it('should display original to compressed size and progress bar for compressed PDF', () => {
+    const mockCompressResult: any = {
+      blob: new Blob(['fake compressed pdf'], { type: 'application/pdf' }),
+      url: 'blob:http://localhost:4200/fake-compress-uuid',
+      filename: 'Sample_Brochure.pdf',
+      pageCount: 4,
+      sizeBytes: 150000,
+      formattedSize: '150 KB',
+      formattedOriginalSize: '1.5 MB',
+      formattedCompressedSize: '150 KB',
+      reductionPercent: 90
+    };
+
+    fixture.componentRef.setInput('result', mockCompressResult);
+    fixture.detectChanges();
+
+    const transitionEl = fixture.nativeElement.querySelector('.size-transition-pill');
+    expect(transitionEl).toBeTruthy();
+    expect(transitionEl.textContent).toContain('1.5 MB → 150 KB');
+
+    const progressBar = fixture.nativeElement.querySelector('.savings-progress-track[role="progressbar"]');
+    expect(progressBar).toBeTruthy();
+    expect(progressBar.getAttribute('aria-valuenow')).toBe('90');
+    expect(progressBar.getAttribute('aria-label')).toBe('90% space saved');
+
+    // Low savings callout should NOT show when reduction is 90%
+    const callout = fixture.nativeElement.querySelector('.low-savings-callout');
+    expect(callout).toBeNull();
+  });
+
+  it('should display low savings explanation alert when reduction is less than 5%', () => {
+    const mockLowSavingsResult: any = {
+      blob: new Blob(['fake text pdf'], { type: 'application/pdf' }),
+      url: 'blob:http://localhost:4200/fake-compress-uuid',
+      filename: 'Sample_Contract.pdf',
+      pageCount: 6,
+      sizeBytes: 7400,
+      formattedSize: '7.4 KB',
+      formattedOriginalSize: '7.6 KB',
+      formattedCompressedSize: '7.4 KB',
+      reductionPercent: 2,
+      savingsReason: 'This PDF is mostly text and already well optimised.'
+    };
+
+    fixture.componentRef.setInput('result', mockLowSavingsResult);
+    fixture.detectChanges();
+
+    const callout = fixture.nativeElement.querySelector('.low-savings-callout[role="alert"]');
+    expect(callout).toBeTruthy();
+    expect(callout.textContent).toContain('This PDF is mostly text and already well optimised.');
+  });
 });
