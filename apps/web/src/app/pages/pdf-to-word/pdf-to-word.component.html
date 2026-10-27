@@ -335,6 +335,7 @@
       <div class="container result-container">
         <app-result-view
           [result]="res"
+          [previewPdfUrl]="sourcePdfPreviewUrl()"
           [title]="'PDF has been converted to WORD!'"
           [subtitle]="'Your genuine editable Word document is ready for download.'"
           [downloadLabel]="conversionResult()?.isZip ? 'Download WORD Files (ZIP)' : 'Download WORD'"

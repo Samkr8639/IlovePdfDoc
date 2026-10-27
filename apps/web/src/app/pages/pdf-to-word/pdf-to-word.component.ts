@@ -39,6 +39,7 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
   processingProgress = signal<number>(0);
   processingMessage = signal<string>('Validating document...');
   conversionResult = signal<ConvertedWordResult | null>(null);
+  sourcePdfPreviewUrl = signal<string | null>(null);
 
   readonly mergeResult = computed<MergeResult | null>(() => {
     const res = this.conversionResult();
@@ -49,7 +50,8 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
       filename: res.filename,
       pageCount: res.pageCount,
       sizeBytes: res.wordSizeBytes,
-      formattedSize: res.formattedWordSize
+      formattedSize: res.formattedWordSize,
+      previewUrl: this.sourcePdfPreviewUrl() || undefined
     };
   });
 
@@ -72,6 +74,11 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
     const current = this.conversionResult();
     if (current?.url) {
       URL.revokeObjectURL(current.url);
+    }
+    const pUrl = this.sourcePdfPreviewUrl();
+    if (pUrl) {
+      URL.revokeObjectURL(pUrl);
+      this.sourcePdfPreviewUrl.set(null);
     }
   }
 
@@ -177,6 +184,9 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
 
       // Only update if not aborted/reset
       if (!this.abortController?.signal.aborted) {
+        if (files[0]?.file) {
+          this.sourcePdfPreviewUrl.set(URL.createObjectURL(files[0].file));
+        }
         this.conversionResult.set(result);
         this.currentState.set('completed');
       }

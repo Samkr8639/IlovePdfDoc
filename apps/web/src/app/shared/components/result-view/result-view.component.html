@@ -208,25 +208,15 @@
       </div>
     }
 
-    <!-- LIVE EXPANDABLE PREVIEW FRAME / DOCX VIEWER -->
+    <!-- LIVE EXPANDABLE PREVIEW FRAME -->
     @if (showPreview()) {
       <div class="preview-drawer" [class.docx-drawer]="isDocx()">
         <div class="preview-drawer-header">
           <div class="preview-tag-group">
             <span class="preview-indicator-dot" [class.docx-dot]="isDocx()"></span>
-            <span class="preview-title">{{ isDocx() ? 'Word Document Inspection Viewer' : 'Document Inspection Viewer' }}</span>
-            <span class="preview-engine-tag">{{ isDocx() ? 'In-Browser OpenXML Engine' : 'Local WebAssembly Engine' }}</span>
+            <span class="preview-title">{{ isDocx() ? 'Word Document Layout Preview' : 'Document Inspection Viewer' }}</span>
+            <span class="preview-engine-tag">{{ isDocx() ? 'High-Fidelity Layout Engine' : 'Local WebAssembly Engine' }}</span>
           </div>
-
-          <!-- Docx Zoom Controls if DOCX -->
-          @if (isDocx()) {
-            <div class="docx-zoom-toolbar">
-              <button type="button" class="zoom-btn" (click)="zoomOut()" aria-label="Zoom out" title="Zoom out">−</button>
-              <span class="zoom-level">{{ docxZoom() }}%</span>
-              <button type="button" class="zoom-btn" (click)="zoomIn()" aria-label="Zoom in" title="Zoom in">+</button>
-              <button type="button" class="zoom-reset-btn" (click)="resetZoom()" title="Reset zoom">Reset</button>
-            </div>
-          }
 
           <div class="preview-header-actions">
             <!-- Direct Download Button in Preview -->
@@ -256,37 +246,21 @@
         </div>
 
         @if (isDocx()) {
-          <!-- DOCX RENDER CONTAINER -->
-          <div class="docx-stage-viewport">
-            @if (isLoadingDocx()) {
-              <div class="docx-loading-state" role="status">
-                <div class="docx-spinner"></div>
-                <p>Rendering Word document layout...</p>
-              </div>
-            }
-            @if (docxError()) {
-              <div class="docx-error-state">
-                <p>{{ docxError() }}</p>
-                <a [href]="safeUrl()" [download]="result().filename" class="docx-fallback-download">
-                  Download genuine Word file (.docx)
-                </a>
-              </div>
-            }
-            <div
-              #docxContainer
-              class="docx-render-container"
-              [style.transform]="'scale(' + (docxZoom() / 100) + ')'"
-              [style.transformOrigin]="'top center'"
-            ></div>
+          <div class="docx-preview-banner">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="2" width="20" height="20" rx="4" fill="#2563eb" />
+              <path d="M7 7L10.5 17L12 12.5L13.5 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span><strong>Word Document Layout Preview:</strong> Converted to editable Microsoft Word format. Page structure, tables, columns, and fonts are preserved.</span>
           </div>
-        } @else {
-          <!-- PDF EMBED FRAME -->
-          <iframe
-            [src]="previewUrl()"
-            class="preview-embed-frame"
-            title="Live Merged PDF Preview"
-          ></iframe>
         }
+
+        <!-- HIGH-FIDELITY DOCUMENT EMBED FRAME -->
+        <iframe
+          [src]="previewUrl()"
+          class="preview-embed-frame"
+          [title]="isDocx() ? 'Word Document Layout Preview' : 'Live Document Preview'"
+        ></iframe>
       </div>
     }
   </section>

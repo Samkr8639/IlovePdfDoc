@@ -21,6 +21,7 @@ export interface MergeResult {
   pageCount: number;
   sizeBytes: number;
   formattedSize: string;
+  previewUrl?: string;
 }
 
 export interface SplitPdfOptions {

@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { ResultViewComponent } from './result-view.component';
 import { MergeResult } from '../../../core/services/browser-pdf.service';
 
-describe('ResultViewComponent with In-Browser DOCX Viewer', () => {
+describe('ResultViewComponent with Document Layout Viewer', () => {
   let component: ResultViewComponent;
   let fixture: ComponentFixture<ResultViewComponent>;
 
@@ -41,7 +41,7 @@ describe('ResultViewComponent with In-Browser DOCX Viewer', () => {
     expect(pillBtn.textContent).toContain('Preview Word Document');
   });
 
-  it('should toggle preview state and display Word viewer drawer', () => {
+  it('should toggle preview state and display Word layout viewer drawer', () => {
     expect(component.showPreview()).toBe(false);
     component.togglePreview();
     fixture.detectChanges();
@@ -49,18 +49,27 @@ describe('ResultViewComponent with In-Browser DOCX Viewer', () => {
     expect(component.showPreview()).toBe(true);
     const titleEl = fixture.nativeElement.querySelector('.preview-title');
     expect(titleEl).toBeTruthy();
-    expect(titleEl.textContent).toContain('Word Document Inspection Viewer');
+    expect(titleEl.textContent).toContain('Word Document Layout Preview');
+
+    const bannerEl = fixture.nativeElement.querySelector('.docx-preview-banner');
+    expect(bannerEl).toBeTruthy();
+    expect(bannerEl.textContent).toContain('Word Document Layout Preview');
+
+    const dlBtn = fixture.nativeElement.querySelector('.preview-direct-download-btn');
+    expect(dlBtn).toBeTruthy();
+    expect(dlBtn.textContent).toContain('Download WORD');
   });
 
-  it('should manage zoom controls correctly', () => {
-    expect(component.docxZoom()).toBe(100);
-    component.zoomIn();
-    expect(component.docxZoom()).toBe(110);
-    component.zoomOut();
-    expect(component.docxZoom()).toBe(100);
-    component.zoomOut();
-    expect(component.docxZoom()).toBe(90);
-    component.resetZoom();
-    expect(component.docxZoom()).toBe(100);
+  it('should utilize previewPdfUrl when provided for high-fidelity rendering', () => {
+    const customPdfUrl = 'blob:http://localhost:4200/custom-preview-pdf';
+    fixture.componentRef.setInput('previewPdfUrl', customPdfUrl);
+    fixture.detectChanges();
+
+    component.togglePreview();
+    fixture.detectChanges();
+
+    const iframe = fixture.nativeElement.querySelector('.preview-embed-frame');
+    expect(iframe).toBeTruthy();
+    expect(component.previewUrl()).toBeTruthy();
   });
 });
