@@ -329,6 +329,15 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
     return null;
   });
 
+  resultSavingsReason = computed<string | null>(() => {
+    const t = this.tool();
+    const res = this.toolResult() as (CompressPdfResult | null);
+    if (t?.id === 'compress-pdf' && res) {
+      return (res as any).savingsReason || null;
+    }
+    return null;
+  });
+
   resultRestartLabel = computed<string>(() => {
     const t = this.tool();
     if (!t) return 'Process Another';

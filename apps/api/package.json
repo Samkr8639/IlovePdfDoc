@@ -16,6 +16,7 @@
     "@napi-rs/canvas": "^0.1.80",
     "@paperflow/contracts": "*",
     "@types/multer": "^2.3.0",
+    "@types/sharp": "^0.31.1",
     "cors": "^2.8.5",
     "docx": "^9.14.0",
     "dotenv": "^16.4.7",
@@ -29,6 +30,7 @@
     "pdfjs-dist": "^5.4.296",
     "pngjs": "^7.0.0",
     "pptxgenjs": "^4.0.0",
+    "sharp": "^0.35.5",
     "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^7.0.0",
     "zod": "^4.6.7"

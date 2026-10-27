@@ -20,7 +20,10 @@ function nativeImport(url: string): Promise<any> {
   return new Function('s', 'return import(s)')(url);
 }
 
+let cachedConverter: any = null;
+
 async function getConverter() {
+  if (cachedConverter) return cachedConverter;
   let enginePath = path.resolve(__dirname, 'engine.mjs');
   if (!fs.existsSync(enginePath)) {
     enginePath = path.resolve(__dirname, '../../../src/services/pdf-to-word/engine.mjs');
@@ -29,9 +32,9 @@ async function getConverter() {
     enginePath = path.resolve(__dirname, '../../src/services/pdf-to-word/engine.mjs');
   }
   const url = pathToFileURL(enginePath).href;
-  const targetUrl = process.env.JEST_WORKER_ID ? `${url}?jest=${Date.now()}_${Math.random()}` : url;
-  const mod = await nativeImport(targetUrl);
-  return mod.convertPdfToDocx;
+  const mod = await nativeImport(url);
+  cachedConverter = mod.convertPdfToDocx;
+  return cachedConverter;
 }
 
 /**

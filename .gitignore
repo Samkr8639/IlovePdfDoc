@@ -38,6 +38,8 @@ tmp/
 */*/tmp/
 temp/
 */temp/
+audit-tmp/
+*/audit-tmp/
 uploads/
 */uploads/
 *.tmp

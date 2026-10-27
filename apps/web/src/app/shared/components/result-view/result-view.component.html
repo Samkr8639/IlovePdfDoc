@@ -29,18 +29,31 @@
         <div class="doc-file-info">
           <span class="doc-filename" [title]="result().filename">{{ result().filename }}</span>
           <div class="doc-badges-row">
-            @if (savingsText()) {
+            @if (hasOriginalSize()) {
+              <span class="info-pill size-transition-pill">{{ formattedOriginalSize() }} → {{ formattedCompressedSize() }}</span>
+              <span class="dot-divider">•</span>
               <span class="info-pill savings-pill">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
                   <polyline points="17 18 23 18 23 12"></polyline>
                 </svg>
-                {{ savingsText() }}
+                -{{ reductionPercentage() }}% saved
               </span>
               <span class="dot-divider">•</span>
+            } @else {
+              @if (savingsText()) {
+                <span class="info-pill savings-pill">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                    <polyline points="17 18 23 18 23 12"></polyline>
+                  </svg>
+                  {{ savingsText() }}
+                </span>
+                <span class="dot-divider">•</span>
+              }
+              <span class="info-pill size-pill">{{ result().formattedSize }}</span>
+              <span class="dot-divider">•</span>
             }
-            <span class="info-pill size-pill">{{ result().formattedSize }}</span>
-            <span class="dot-divider">•</span>
             <span class="info-pill page-pill">{{ result().pageCount }} {{ result().pageCount === 1 ? 'Page' : 'Pages' }}</span>
             <span class="dot-divider">•</span>
             <span class="info-pill secure-pill">
@@ -50,6 +63,30 @@
               100% In-Browser
             </span>
           </div>
+
+          @if (hasOriginalSize()) {
+            <div
+              class="savings-progress-track"
+              role="progressbar"
+              [attr.aria-valuenow]="reductionPercentage()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="reductionPercentage() + '% space saved'"
+            >
+              <div class="savings-progress-fill" [style.width.%]="reductionPercentage() > 0 ? reductionPercentage() : 0"></div>
+            </div>
+          }
+
+          @if (showLowSavingsReason()) {
+            <div class="low-savings-callout" role="alert" aria-live="polite">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>{{ effectiveSavingsReason() }}</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -177,10 +214,27 @@
                 </div>
                 <div class="item-stats-col">
                   <span class="item-size-transition">{{ item.formattedOriginalSize }} → {{ item.formattedCompressedSize }}</span>
-                  @if (item.reductionPercent > 0) {
-                    <span class="item-savings-tag">-{{ item.reductionPercent }}%</span>
-                  } @else {
-                    <span class="item-optimized-tag">Optimized</span>
+                  <div class="item-savings-progress-wrap">
+                    <div
+                      class="savings-progress-track item-progress-track"
+                      role="progressbar"
+                      [attr.aria-valuenow]="item.reductionPercent ?? 0"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      [attr.aria-label]="(item.reductionPercent ?? 0) + '% space saved'"
+                    >
+                      <div class="savings-progress-fill" [style.width.%]="(item.reductionPercent ?? 0) > 0 ? (item.reductionPercent ?? 0) : 0"></div>
+                    </div>
+                    @if ((item.reductionPercent ?? 0) > 0) {
+                      <span class="item-savings-tag">-{{ item.reductionPercent }}%</span>
+                    } @else {
+                      <span class="item-optimized-tag">Optimized</span>
+                    }
+                  </div>
+                  @if ((item.reductionPercent ?? 0) < 5 && item.savingsReason) {
+                    <div class="item-low-savings-note" role="alert" aria-live="polite">
+                      {{ item.savingsReason }}
+                    </div>
                   }
                 </div>
                 <a [href]="item.safeUrl" [download]="item.filename" class="item-dl-btn" title="Download this file">
