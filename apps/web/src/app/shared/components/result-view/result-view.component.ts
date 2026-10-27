@@ -1,178 +1,155 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { MergeResult } from '../../../core/services/browser-pdf.service';
 
 @Component({
   selector: 'app-result-view',
   imports: [RouterLink],
-  template: `
-    <div class="result-card card-clean">
-      <div class="success-icon-wrapper">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-      </div>
-
-      <div class="result-header">
-        <h3 class="result-title">PDFs Merged Successfully!</h3>
-        <p class="result-subtitle">Your document is ready. It was created completely on your device.</p>
-      </div>
-
-      <div class="meta-box">
-        <div class="meta-item">
-          <span class="meta-label">Total Pages</span>
-          <span class="meta-val">{{ result().pageCount }}</span>
-        </div>
-        <div class="meta-divider"></div>
-        <div class="meta-item">
-          <span class="meta-label">File Size</span>
-          <span class="meta-val">{{ result().formattedSize }}</span>
-        </div>
-        <div class="meta-divider"></div>
-        <div class="meta-item">
-          <span class="meta-label">Privacy</span>
-          <span class="meta-val text-emerald">100% Client-side</span>
-        </div>
-      </div>
-
-      <div class="actions-group">
-        <a [href]="result().url" [download]="result().filename" class="btn-primary download-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Download Merged PDF</span>
-        </a>
-
-        <button type="button" class="btn-secondary" (click)="reset.emit()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="1 4 1 10 7 10"></polyline>
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-          </svg>
-          <span>Merge Another Document</span>
-        </button>
-      </div>
-
-      <div class="next-tools">
-        <span class="next-tools-label">Next steps:</span>
-        <div class="next-tools-links">
-          <a routerLink="/split-pdf" class="tool-chip">Split PDF</a>
-          <a routerLink="/rotate-pdf" class="tool-chip">Rotate Pages</a>
-          <a routerLink="/compress-pdf" class="tool-chip">Compress PDF</a>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .result-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 48px 32px;
-      gap: 24px;
-      max-width: 620px;
-      margin: 32px auto;
-    }
-    .success-icon-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: var(--emerald-50);
-      color: var(--emerald-600);
-      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.2);
-    }
-    .result-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-    .result-subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .meta-box {
-      display: flex;
-      align-items: center;
-      background: var(--surface-bg);
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
-      padding: 12px 24px;
-      gap: 20px;
-    }
-    .meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .meta-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-    .meta-val {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-    .text-emerald {
-      color: var(--emerald-600);
-    }
-    .meta-divider {
-      width: 1px;
-      height: 28px;
-      background: var(--surface-border);
-    }
-    .actions-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      max-width: 320px;
-    }
-    .download-btn {
-      width: 100%;
-      padding: 14px 24px;
-      font-size: 16px;
-    }
-    .next-tools {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .next-tools-links {
-      display: flex;
-      gap: 8px;
-    }
-    .tool-chip {
-      padding: 4px 12px;
-      background: var(--surface-bg);
-      border: 1px solid var(--surface-border);
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-main);
-      transition: all 0.15s ease;
-    }
-    .tool-chip:hover {
-      background: var(--primary-50);
-      border-color: var(--primary-200);
-      color: var(--primary-600);
-    }
-  `]
+  templateUrl: './result-view.component.html',
+  styleUrl: './result-view.component.css'
 })
 export class ResultViewComponent {
-  readonly result = input.required<MergeResult>();
-  readonly reset = output<void>();
+  private sanitizer = inject(DomSanitizer);
+
+  result = input.required<MergeResult>();
+  previewPdfUrl = input<string | null>(null);
+  title = input<string>('PDFs Merged Successfully!');
+  subtitle = input<string>('Your files have been combined into a high-quality PDF document directly in your browser memory.');
+  downloadLabel = input<string>('Download Merged PDF');
+  savingsText = input<string | null>(null);
+  savingsReason = input<string | null>(null);
+  restartLabel = input<string>('Process Another File');
+  reset = output<void>();
+
+  formattedOriginalSize = computed<string | null>(() => {
+    return (this.result() as any)?.formattedOriginalSize || null;
+  });
+
+  formattedCompressedSize = computed<string>(() => {
+    return (this.result() as any)?.formattedCompressedSize || this.result()?.formattedSize || '';
+  });
+
+  reductionPercentage = computed<number>(() => {
+    return (this.result() as any)?.reductionPercent ?? 0;
+  });
+
+  hasOriginalSize = computed<boolean>(() => {
+    return !!(this.result() as any)?.formattedOriginalSize;
+  });
+
+  showLowSavingsReason = computed<boolean>(() => {
+    const res = this.result() as any;
+    if (res?.reductionPercent !== undefined) {
+      return res.reductionPercent < 5;
+    }
+    return false;
+  });
+
+  effectiveSavingsReason = computed<string>(() => {
+    if (this.savingsReason()) return this.savingsReason()!;
+    const res = this.result() as any;
+    if (res?.savingsReason) return res.savingsReason;
+    return 'This PDF is mostly text and already well optimised.';
+  });
+
+  showPreview = signal<boolean>(false);
+  copied = signal<boolean>(false);
+
+  isDocx = computed<boolean>(() => {
+    return this.result()?.filename?.toLowerCase().endsWith('.docx') || false;
+  });
+
+  safeUrl = computed<SafeUrl>(() => {
+    return this.sanitizer.bypassSecurityTrustUrl(this.result().url);
+  });
+
+  previewUrl = computed<SafeResourceUrl>(() => {
+    const rawUrl = this.previewPdfUrl() || this.result()?.previewUrl || this.result()?.url;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(rawUrl);
+  });
+
+  isZipArchive = computed<boolean>(() => {
+    return this.result()?.filename?.toLowerCase().endsWith('.zip') || false;
+  });
+
+  compressedItems = computed<any[]>(() => {
+    const raw = (this.result() as any)?.items || [];
+    return raw.map((item: any) => ({
+      ...item,
+      safeUrl: this.sanitizer.bypassSecurityTrustUrl(item.url)
+    }));
+  });
+
+  togglePreview(): void {
+    this.showPreview.update(show => !show);
+  }
+
+  downloadFile(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const res = this.result();
+    if (!res) return;
+
+    try {
+      const anchor = document.createElement('a');
+      anchor.href = res.url;
+      anchor.download = res.filename;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    } catch {
+      // Fallback
+    }
+  }
+
+  openGoogleDrive(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://drive.google.com/', '_blank', 'noopener,noreferrer');
+  }
+
+  openDropbox(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
+  }
+
+  copyShareLink(): void {
+    const url = this.result().url;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.copied.set(true);
+        setTimeout(() => this.copied.set(false), 3000);
+      });
+    }
+  }
+
+  shareOnTwitter(): void {
+    const text = encodeURIComponent('Just merged multiple PDFs instantly and privately in browser with PDF flow! Check it out:');
+    const url = encodeURIComponent(window.location.origin);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer');
+  }
+
+  shareOnLinkedIn(): void {
+    const url = encodeURIComponent(window.location.origin);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'noopener,noreferrer');
+  }
+
+  shareOnFacebook(): void {
+    const url = encodeURIComponent(window.location.origin);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener,noreferrer');
+  }
+
+  shareOnWhatsApp(): void {
+    const text = encodeURIComponent('Merge PDFs privately and free with PDF flow: ' + window.location.origin);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank', 'noopener,noreferrer');
+  }
 }

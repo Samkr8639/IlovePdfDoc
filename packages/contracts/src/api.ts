@@ -61,3 +61,19 @@ export interface ProcessingState {
   outputSizeBytes?: number;
   error?: string;
 }
+
+export interface ContactSubmissionPayload {
+  name: string;
+  email: string;
+  subject: string;
+  userType: 'individual' | 'company';
+  productInterests: string[];
+  message: string;
+}
+
+export interface ContactSubmissionResult {
+  ticketId: string;
+  receivedAt: string;
+  estimatedResponseHours: number;
+  message: string;
+}

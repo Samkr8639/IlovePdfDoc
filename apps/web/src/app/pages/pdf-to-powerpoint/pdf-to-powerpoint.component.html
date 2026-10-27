@@ -1,0 +1,476 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- ===================================================================
+       GLOBAL TOP ERROR BANNER (Visible across all states)
+       =================================================================== -->
+  @if (errorMessage()) {
+    <div class="global-error-banner-container" role="alert" aria-live="assertive">
+      <div class="container">
+        <div class="error-banner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span class="error-text">{{ errorMessage() }}</span>
+          <button
+            type="button"
+            class="error-close"
+            aria-label="Dismiss error notification"
+            (click)="errorMessage.set(null)"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================
+       1. UPLOAD STATE: HERO & DROPZONE
+       =================================================================== -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+          <a routerLink="/" class="crumb-link">I Love PDF & Doc</a>
+          <span class="crumb-sep" aria-hidden="true">/</span>
+          <span class="crumb-current" aria-current="page">PDF to PowerPoint</span>
+        </nav>
+
+        <h1 class="tool-h1">PDF to PowerPoint Converter</h1>
+        <p class="tool-lead">
+          Convert PDF documents into editable Microsoft PowerPoint presentations (.pptx). Each page becomes a slide with real editable text, lines, shapes, and images.
+        </p>
+
+        <!-- UPLOADER COMPONENT -->
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            title="Select PDF files"
+            subtitle="or drop PDFs here"
+            acceptedTypes=".pdf,application/pdf"
+            [multiple]="true"
+            limitInfo=""
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+
+        <div class="privacy-reassurance">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shield-icon" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Your PDF is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section" aria-label="Advertisement">
+      <div class="container">
+        <div class="adsense-card">
+          <span class="ad-label">ADVERTISEMENT</span>
+          <div class="ad-placeholder-content">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDITORIAL / SEO CONTENT SECTION -->
+    <section class="editorial-features-section">
+      <div class="container">
+        <div class="section-title-wrap">
+          <h2 class="editorial-heading">Turn PDF slides into editable Microsoft PowerPoint presentations</h2>
+          <p class="editorial-subheading">
+            Engineered for presentation fidelity, editable typography, and rapid workflow. Transform reports, decks, and lecture notes into genuine .pptx files in seconds.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-box ppt-orange-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <h3>100% Genuine PPTX</h3>
+            <p>Generates real PowerPoint presentations (.pptx) with individual editable text boxes, vector rules, boxes, and embedded images compatible with Office 365, PowerPoint 2007+, and Google Slides.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box red-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3>Zero-Retention Security</h3>
+            <p>Your PDF is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes. Files are never stored permanently.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box purple-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
+              </svg>
+            </div>
+            <h3>OCR for Scanned Decks</h3>
+            <p>Built-in optical character recognition generates crisp slide backgrounds and overlays editable text boxes for scanned documents and image-based PDFs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-STEP HOW TO USE GUIDE -->
+    <section class="how-to-section">
+      <div class="container">
+        <h2 class="section-heading-centered">How to convert PDF to PowerPoint online</h2>
+        <div class="steps-grid">
+          <div class="step-card">
+            <span class="step-badge">1</span>
+            <h3>Select PDF file</h3>
+            <p>Upload your PDF document from your computer, or drag and drop it into the conversion zone.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">2</span>
+            <h3>Choose slide options</h3>
+            <p>Select match PDF page size or widescreen 16:9, and toggle OCR if converting scanned pages.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">3</span>
+            <h3>Download PowerPoint presentation</h3>
+            <p>Click Convert to POWERPOINT and instantly download your editable, fully formatted PPTX presentation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ===================================================================
+       2. ORGANIZE / CONFIGURE WORKSPACE
+       =================================================================== -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- MAIN CANVAS AREA (Left/Center) -->
+      <main class="canvas-main-area" aria-label="PDF Document Workspace">
+        <!-- Hidden file input for adding more files -->
+        <input
+          #addMoreInput
+          type="file"
+          accept=".pdf,application/pdf"
+          multiple
+          class="hidden-file-input"
+          aria-hidden="true"
+          (change)="onMoreFilesAdded($event)"
+        />
+
+        <h1 class="visually-hidden">Configure PDF to PowerPoint Conversion</h1>
+
+        <!-- CENTERED SELECTED PDF DOCUMENT CARDS -->
+        <div class="pdf-cards-canvas">
+          @for (fileItem of selectedFiles(); track fileItem.id; let idx = $index) {
+            <div class="pdf-document-card" tabindex="0">
+              <!-- Remove file action -->
+              <div class="card-hover-actions">
+                <button
+                  type="button"
+                  class="card-action-btn delete-btn"
+                  title="Remove file"
+                  aria-label="Remove file"
+                  (click)="removeFile(fileItem.id)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Document Page Sheet Graphic with PowerPoint Badge -->
+              <div class="pdf-page-sheet">
+                <div class="sheet-corner-fold"></div>
+                <div class="ppt-badge-overlay" aria-hidden="true">
+                  <span class="ppt-icon-letter">P</span>
+                </div>
+                <div class="sheet-lines-preview" aria-hidden="true">
+                  <div class="line-skeleton title-line"></div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton half-line"></div>
+                  <div class="slide-skeleton-box">
+                    <div class="slide-skeleton-bullet"></div>
+                    <div class="slide-skeleton-bullet"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- File Info Label -->
+              <div class="card-file-info">
+                <span class="pdf-file-name" [title]="fileItem.name">
+                  {{ fileItem.name }}
+                </span>
+                <span class="pdf-file-meta">
+                  {{ fileItem.pageCount }} {{ fileItem.pageCount === 1 ? 'page' : 'pages' }} • {{ fileItem.formattedSize }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING RED ACTION BUTTONS (Matching Screenshot) -->
+        <div class="floating-tools-stack">
+          <!-- 1. Add More Files (+ with black count badge) -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn add-more-circle"
+              (click)="addMoreInput.click()"
+              title="Add more files"
+              aria-label="Add more files"
+            >
+              <span class="floating-count-badge">{{ selectedFiles().length }}</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Add more files</span>
+          </div>
+
+          <!-- 2. Computer / Laptop Upload -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn pc-circle"
+              (click)="addMoreInput.click()"
+              title="Upload from computer"
+              aria-label="Upload from computer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Upload from PC</span>
+          </div>
+
+          <!-- 3. Google Drive -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn drive-circle"
+              (click)="openGoogleDrive($event)"
+              title="Google Drive"
+              aria-label="Google Drive"
+            >
+              <svg width="20" height="18" viewBox="0 0 24 21" fill="none" aria-hidden="true">
+                <path d="M8.04 13.8L12.04 20.73H23.54L19.54 13.8H8.04Z" fill="#ffffff"/>
+                <path d="M15.96 0.27H4.46L0.46 7.2L6.21 17.16L10.21 10.23L15.96 0.27Z" fill="#ffffff" opacity="0.85"/>
+                <path d="M15.96 0.27L10.21 10.23L14.21 17.16L23.54 20.73L19.96 7.2L15.96 0.27Z" fill="#ffffff" opacity="0.7"/>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Google Drive</span>
+          </div>
+
+          <!-- 4. Dropbox -->
+          <div class="floating-btn-wrap">
+            <button
+              type="button"
+              class="floating-circle-btn dropbox-circle"
+              (click)="openDropbox($event)"
+              title="Dropbox"
+              aria-label="Dropbox"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 22" fill="#ffffff" aria-hidden="true">
+                <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+              </svg>
+            </button>
+            <span class="floating-tooltip-label">Dropbox</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT SIDEBAR: PDF TO POWERPOINT OPTIONS -->
+      <aside class="sidebar-action-panel" aria-label="Conversion Options">
+        <div class="sidebar-body">
+          <h2 class="sidebar-heading">PDF to PowerPoint</h2>
+
+
+          <!-- Mode Selection Radio Cards -->
+          <div class="options-section">
+            <span class="options-section-label">OCR & TEXT EXTRACTION</span>
+            <div class="mode-options-group" role="radiogroup" aria-label="OCR Mode">
+              <!-- Option 1: No OCR (Default) -->
+              <label
+                class="mode-card"
+                [class.selected]="selectedMode() === 'no_ocr'"
+              >
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="pptMode"
+                    value="no_ocr"
+                    [checked]="selectedMode() === 'no_ocr'"
+                    (change)="selectedMode.set('no_ocr')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">No OCR</span>
+                  </div>
+                  <p class="mode-desc">
+                    Directly extracts fonts, text vectors, and coordinates into native editable PowerPoint text boxes.
+                  </p>
+                </div>
+              </label>
+
+              <!-- Option 2: OCR with Premium Badge -->
+              <label
+                class="mode-card"
+                [class.selected]="selectedMode() === 'ocr'"
+                [class.disabled]="!ocrAvailable()"
+              >
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="pptMode"
+                    value="ocr"
+                    [disabled]="!ocrAvailable()"
+                    [checked]="selectedMode() === 'ocr'"
+                    (change)="ocrAvailable() ? selectedMode.set('ocr') : null"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">OCR</span>
+                    <span class="premium-badge">
+                      <span class="crown-icon" aria-hidden="true">👑</span> Premium
+                    </span>
+                  </div>
+                  <p class="mode-desc">
+                    Optical character recognition for scanned or image-based slides. Overlays editable text boxes.
+                  </p>
+                  @if (!ocrAvailable()) {
+                    <p class="ocr-unavailable-note">
+                      OCR conversion requires a Premium subscription or OCR server activation.
+                    </p>
+                  }
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dedicated Sidebar AdSense Slot -->
+          <div class="sidebar-adsense-slot" aria-label="Advertisement">
+            <span class="adsense-label">Advertisement</span>
+            <div class="sidebar-ad-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Google AdSense (300 × 250)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION FOOTER: BIG RED CONVERT BUTTON -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="btn-convert-action"
+            [disabled]="selectedFiles().length === 0 || isProcessing()"
+            (click)="startConversion()"
+          >
+            <span>Convert to POWERPOINT</span>
+            <span class="action-arrow" aria-hidden="true">➔</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ===================================================================
+       3. PROCESSING STATE
+       =================================================================== -->
+  @if (currentState() === 'processing') {
+    <div class="processing-wrapper">
+      <h1 class="visually-hidden">Converting PDF to PowerPoint Presentation</h1>
+      <app-processing-state
+        [title]="'Converting PDF to POWERPOINT...'"
+      ></app-processing-state>
+      <div class="processing-cancel-wrap">
+        <button
+          type="button"
+          class="btn-cancel-processing"
+          aria-label="Cancel conversion process"
+          (click)="cancelConversion()"
+        >
+          Cancel Conversion
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================
+       4. COMPLETED RESULT SCREEN
+       =================================================================== -->
+  @if (currentState() === 'completed' && mergeResult(); as res) {
+    <div class="result-screen-wrapper">
+      <h1 class="visually-hidden">PowerPoint Presentation Ready</h1>
+      <div class="container result-container">
+        <!-- Warnings Banner -->
+        @if (activeWarnings().length > 0) {
+          <div class="result-warnings-banner" role="status">
+            <div class="warning-icon-wrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <div class="warning-content">
+              <strong>Conversion Notes & Recommendations:</strong>
+              <ul>
+                @for (w of activeWarnings(); track w) {
+                  <li>{{ w }}</li>
+                }
+              </ul>
+            </div>
+            <button
+              type="button"
+              class="warning-close-btn"
+              aria-label="Dismiss conversion notes"
+              (click)="dismissWarningBanner()"
+            >
+              ✕
+            </button>
+          </div>
+        }
+
+        <app-result-view
+          [result]="res"
+          [previewPdfUrl]="sourcePdfPreviewUrl()"
+          [title]="'PDF has been converted to POWERPOINT!'"
+          [subtitle]="'Your genuine editable PowerPoint presentation is ready for download.'"
+          [downloadLabel]="conversionResult()?.isZip ? 'Download PowerPoint Presentations (ZIP)' : 'Download POWERPOINT (.pptx)'"
+          [savingsText]="'Converted into genuine OpenXML PPTX presentation'"
+          [restartLabel]="'Convert another PDF'"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
+      </div>
+    </div>
+  }
+</div>

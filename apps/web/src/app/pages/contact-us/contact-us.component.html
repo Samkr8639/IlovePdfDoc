@@ -1,0 +1,342 @@
+<div class="contact-page">
+  <div class="container contact-container">
+    <!-- LEFT COLUMN: EDITORIAL & CONTACT CONTEXT -->
+    <div class="contact-editorial-col">
+      <h1 class="contact-title">Contact</h1>
+      <p class="contact-subtitle">
+        Contact us to report a problem, clarify any doubts about PDF flow, or just find out more.
+      </p>
+
+      <div class="contact-channels-box">
+        <div class="channel-item">
+          <div class="channel-icon-wrap icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <div class="channel-info">
+            <span class="channel-label">Email Support</span>
+            <a href="mailto:support@pdfflow.app" class="channel-val">support&#64;pdfflow.app</a>
+          </div>
+        </div>
+
+        <div class="channel-item">
+          <div class="channel-icon-wrap icon-emerald">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="channel-info">
+            <span class="channel-label">Expected Response</span>
+            <span class="channel-val">Usually within 2–4 hours</span>
+          </div>
+        </div>
+
+        <div class="channel-item">
+          <div class="channel-icon-wrap icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="channel-info">
+            <span class="channel-label">Zero Trace Privacy</span>
+            <span class="channel-val">Your documents remain 100% private</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: MULTI-STEP WIZARD CARD -->
+    <div class="contact-form-col">
+      <div class="wizard-card">
+        @if (submissionResult()) {
+          <!-- SUCCESS STATE -->
+          <div class="success-state-box">
+            <div class="success-icon-badge">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="8 12 11 15 16 9"></polyline>
+              </svg>
+            </div>
+            <h2 class="success-title">Message Received!</h2>
+            <div class="ticket-pill">Ticket: {{ submissionResult()?.ticketId }}</div>
+            <p class="success-desc">
+              {{ submissionResult()?.message }}
+            </p>
+            <div class="success-actions">
+              <button type="button" class="btn-prev-link" (click)="resetForm()">Send Another Message</button>
+              <a routerLink="/" class="btn-primary-red">Return to Home</a>
+            </div>
+          </div>
+        } @else {
+          <!-- STEP PROGRESS BAR -->
+          <div class="wizard-progress-header">
+            <div class="step-indicator-text">
+              <span class="current-step-badge">Step {{ currentStep() }} of 4</span>
+              <span class="step-title-hint">{{ getStepTitle() }}</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" [style.width.%]="(currentStep() / 4) * 100"></div>
+            </div>
+          </div>
+
+          <!-- ERROR BANNER -->
+          @if (apiError()) {
+            <div class="form-error-banner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{{ apiError() }}</span>
+            </div>
+          }
+
+          <!-- STEP 1: CONTACT DETAILS -->
+          @if (currentStep() === 1) {
+            <div class="step-content">
+              <div class="form-row-grid">
+                <div class="form-field">
+                  <label for="userName" class="field-label">Your name*</label>
+                  <input
+                    id="userName"
+                    type="text"
+                    class="text-input"
+                    placeholder="e.g. Sameer Kumar"
+                    [(ngModel)]="formData.name"
+                    name="userName"
+                    required
+                  />
+                </div>
+                <div class="form-field">
+                  <label for="userEmail" class="field-label">Your email*</label>
+                  <input
+                    id="userEmail"
+                    type="email"
+                    class="text-input"
+                    placeholder="e.g. sam@zealousys.com"
+                    [(ngModel)]="formData.email"
+                    name="userEmail"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="generalSubject" class="field-label">General Subject*</label>
+                <div class="select-wrapper">
+                  <select
+                    id="generalSubject"
+                    class="select-input"
+                    [(ngModel)]="formData.subject"
+                    name="generalSubject"
+                    required
+                  >
+                    <option value="Sales">Sales & Enterprise Licensing</option>
+                    <option value="Technical Support">Technical Support & Bug Report</option>
+                    <option value="Feature Request">Feature Request & Suggestions</option>
+                    <option value="Billing & Plans">Billing & Subscriptions</option>
+                    <option value="Security & Compliance">Security & Compliance</option>
+                    <option value="API & Integrations">API & Integrations</option>
+                    <option value="Other">Other / General Inquiries</option>
+                  </select>
+                  <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="wizard-actions">
+                <div class="actions-spacer"></div>
+                <button
+                  type="button"
+                  class="btn-primary-red"
+                  [disabled]="!isStep1Valid()"
+                  (click)="goToStep(2)"
+                >
+                  Next Step
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- STEP 2: PROFILE & PRODUCT INTEREST -->
+          @if (currentStep() === 2) {
+            <div class="step-content">
+              <div class="form-group-block">
+                <label class="group-label">Individual User or Company*</label>
+                <div class="radio-options-row">
+                  <label class="radio-option-card" [class.selected]="formData.userType === 'individual'">
+                    <input
+                      type="radio"
+                      name="userType"
+                      value="individual"
+                      [(ngModel)]="formData.userType"
+                    />
+                    <span class="custom-radio-circle"></span>
+                    <span class="radio-label-text">Individual</span>
+                  </label>
+                  <label class="radio-option-card" [class.selected]="formData.userType === 'company'">
+                    <input
+                      type="radio"
+                      name="userType"
+                      value="company"
+                      [(ngModel)]="formData.userType"
+                    />
+                    <span class="custom-radio-circle"></span>
+                    <span class="radio-label-text">Company</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group-block">
+                <label class="group-label">Product interest*</label>
+                <div class="checkbox-options-list">
+                  @for (interest of productInterestOptions; track interest) {
+                    <label class="checkbox-option-card" [class.checked]="formData.productInterests[interest]">
+                      <input
+                        type="checkbox"
+                        [name]="'interest_' + interest"
+                        [(ngModel)]="formData.productInterests[interest]"
+                      />
+                      <span class="custom-checkbox-box">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </span>
+                      <span class="checkbox-label-text">{{ interest }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <div class="wizard-actions">
+                <button type="button" class="btn-prev-link" (click)="goToStep(1)">Previous Step</button>
+                <button
+                  type="button"
+                  class="btn-primary-red"
+                  (click)="goToStep(3)"
+                >
+                  Next Step
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- STEP 3: MESSAGE -->
+          @if (currentStep() === 3) {
+            <div class="step-content">
+              <div class="form-field">
+                <div class="field-header-row">
+                  <label for="contactMessage" class="field-label">Message*</label>
+                  <span class="char-counter" [class.counter-valid]="formData.message.trim().length >= 10">
+                    {{ formData.message.trim().length }} / 1000 characters
+                  </span>
+                </div>
+                <textarea
+                  id="contactMessage"
+                  class="textarea-input"
+                  rows="6"
+                  placeholder="Please explain your question or issue in detail..."
+                  [(ngModel)]="formData.message"
+                  name="contactMessage"
+                  maxlength="1000"
+                  required
+                ></textarea>
+                @if (formData.message.trim().length < 10) {
+                  <div class="hint-msg-row">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Please enter at least 10 characters.</span>
+                  </div>
+                }
+              </div>
+
+              <div class="wizard-actions">
+                <button type="button" class="btn-prev-link" (click)="goToStep(2)">Previous Step</button>
+                <button
+                  type="button"
+                  class="btn-primary-red"
+                  [disabled]="formData.message.trim().length < 10"
+                  (click)="goToStep(4)"
+                >
+                  Next Step
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- STEP 4: SUMMARY & CONFIRMATION -->
+          @if (currentStep() === 4) {
+            <div class="step-content">
+              <h3 class="summary-section-title">Summary</h3>
+
+              <!-- Summary Box 1: Core Contact Info -->
+              <div class="summary-card">
+                <div class="summary-row">
+                  <span class="summary-label">Your name:</span>
+                  <span class="summary-value">{{ formData.name }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Your email:</span>
+                  <span class="summary-value">{{ formData.email }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">General Subject:</span>
+                  <span class="summary-value">{{ formData.subject }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">User logged in:</span>
+                  <span class="summary-value">No (Guest)</span>
+                </div>
+              </div>
+
+              <!-- Summary Box 2: Extra fields answers -->
+              <div class="summary-card">
+                <h4 class="summary-subhead">Extra fields answers</h4>
+                <div class="summary-extra-list">
+                  <div class="summary-row">
+                    <span class="summary-label">• Product interest:</span>
+                    <span class="summary-value">{{ getSelectedInterestsString() || 'None selected' }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="summary-label">• Individual User or Company:</span>
+                    <span class="summary-value">{{ formData.userType === 'company' ? 'Company' : 'Individual' }}</span>
+                  </div>
+                  <div class="summary-row message-summary-row">
+                    <span class="summary-label">• Message:</span>
+                    <span class="summary-value message-preview">{{ formData.message }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wizard-actions">
+                <button type="button" class="btn-prev-link" (click)="goToStep(3)" [disabled]="isSubmitting()">
+                  Previous Step
+                </button>
+                <button
+                  type="button"
+                  class="btn-primary-red btn-submit"
+                  [disabled]="isSubmitting()"
+                  (click)="submitInquiry()"
+                >
+                  @if (isSubmitting()) {
+                    <span class="btn-spinner"></span>
+                    <span>Sending...</span>
+                  } @else {
+                    <span>Send</span>
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

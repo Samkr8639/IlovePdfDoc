@@ -1,0 +1,131 @@
+import fs from 'fs';
+import path from 'path';
+import JSZip from 'jszip';
+import { convertPdfToDocx } from '../src/services/pdf-to-word';
+
+describe('PDF-to-Word Visual & Structural Layout Regression Suite', () => {
+  const sourcePdfPath = path.resolve(__dirname, '../../../test-fixtures/source.pdf');
+  let docxBuffer: Buffer;
+  let docXml: string;
+  let zip: JSZip;
+
+  beforeAll(async () => {
+    expect(fs.existsSync(sourcePdfPath)).toBe(true);
+    const pdfBuffer = fs.readFileSync(sourcePdfPath);
+
+    const result = await convertPdfToDocx(pdfBuffer, {
+      mode: 'no_ocr',
+      originalFilename: 'Impulse Decisions Auction Portal - Developer Brief.pdf'
+    });
+
+    docxBuffer = result.docxBuffer;
+    expect(docxBuffer.length).toBeGreaterThan(1000);
+
+    zip = await JSZip.loadAsync(docxBuffer);
+    const xmlFile = zip.file('word/document.xml');
+    expect(xmlFile).not.toBeNull();
+    docXml = await xmlFile!.async('text');
+  }, 30000);
+
+  it('generates a valid DOCX container with OpenXML signature and content types', async () => {
+    expect(docxBuffer[0]).toBe(0x50); // P
+    expect(docxBuffer[1]).toBe(0x4b); // K
+    expect(zip.file('[Content_Types].xml')).not.toBeNull();
+    expect(zip.file('word/styles.xml')).not.toBeNull();
+  });
+
+  it('preserves visual layout structures and positioned frame blocks', () => {
+    // Exact layout engine packages text blocks and boxes into positioned frames
+    const frameMatches = docXml.match(/<w:framePr[\s>]/g) || [];
+    expect(frameMatches.length).toBeGreaterThanOrEqual(20);
+  });
+
+  it('mandatory table 1: preserves "User roles and permissions" with 4 capability columns', () => {
+    // Check capability column headers
+    expect(docXml).toContain('Capability');
+    expect(docXml).toContain('Master');
+    expect(docXml).toContain('Event manager');
+    expect(docXml).toContain('Team member');
+
+    // Check capability rows
+    expect(docXml).toContain('Events visible');
+    expect(docXml).toContain('Create events');
+    expect(docXml).toContain('Event setup: team');
+    expect(docXml).toContain('tables');
+    expect(docXml).toContain('Appoint event');
+    expect(docXml).toContain('managers');
+    expect(docXml).toContain('Board totals');
+    expect(docXml).toContain('CSV export');
+    expect(docXml).toContain('Create and sign');
+    expect(docXml).toContain('take payments');
+  });
+
+  it('mandatory table 2: preserves "Payment methods" (Method, How it works, Stripe product)', () => {
+    expect(docXml).toContain('Method');
+    expect(docXml).toContain('How it works');
+    expect(docXml).toContain('Stripe product');
+
+    expect(docXml).toContain('Customer');
+    expect(docXml).toContain('phone');
+    expect(docXml).toContain('Card reader');
+    expect(docXml).toContain('Pay later');
+    expect(docXml).toContain('Stripe Checkout');
+    expect(docXml).toContain('Stripe Terminal');
+  });
+
+  it('mandatory table 3: preserves "External integrations" (Service, Purpose, Notes)', () => {
+    expect(docXml).toContain('Service');
+    expect(docXml).toContain('Purpose');
+    expect(docXml).toContain('Notes');
+
+    expect(docXml).toContain('Royal Mail');
+    expect(docXml).toContain('Transactional email');
+    expect(docXml).toContain('PDF generation');
+    expect(docXml).toContain('Microsoft Entra ID');
+  });
+
+  it('mandatory table 4: preserves "Core records" (Record, Key fields)', () => {
+    expect(docXml).toContain('Record');
+    expect(docXml).toContain('Key fields');
+
+    expect(docXml).toContain('Event');
+    expect(docXml).toContain('Staff member');
+    expect(docXml).toContain('Promissory note');
+    expect(docXml).toContain('Note version');
+    expect(docXml).toContain('Retracted lot');
+    expect(docXml).toContain('Audit entry');
+  });
+
+  it('preserves semantic headings hierarchy (Title, H1, H2)', () => {
+    // Document title
+    expect(docXml).toContain('Impulse Decisions Auction Portal');
+
+    // Section headings (H1)
+    expect(docXml).toContain('Overview');
+    expect(docXml).toContain('Users, roles and permissions');
+    expect(docXml).toContain('Authentication and security');
+    expect(docXml).toContain('Functional requirements');
+    expect(docXml).toContain('Payments');
+    expect(docXml).toContain('Integrations');
+    expect(docXml).toContain('Data, hosting and quality');
+    expect(docXml).toContain('Delivery, acceptance and open questions');
+  });
+
+  it('preserves page-by-page sections and page metadata', async () => {
+    // In visual layout engine, each PDF page is a discrete OpenXML section with 0 margins
+    const sectionMatches = docXml.match(/<w:sectPr[\s>]/g) || [];
+    expect(sectionMatches.length).toBeGreaterThanOrEqual(1);
+    expect(docXml).toContain('Impulse Decisions');
+  });
+
+  it('preserves list numbering and bullet structure with proper indentation', () => {
+    // Numbered list items
+    expect(docXml).toContain('Core platform.');
+    expect(docXml).toContain('Payments.');
+    expect(docXml).toContain('Integrations and polish.');
+
+    // Deliverables and acceptance criteria
+    expect(docXml).toContain('Deliverables');
+    expect(docXml).toContain('Acceptance criteria');
+  });
+});

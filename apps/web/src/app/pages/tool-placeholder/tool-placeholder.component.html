@@ -1,0 +1,794 @@
+@if (tool(); as t) {
+      <div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+        <!-- UPLOAD STATE: UNIFIED HERO & DROPZONE -->
+        @if (currentState() === 'upload') {
+          <section class="unified-hero-section">
+            <div class="container hero-content">
+              <h1 class="tool-h1">{{ heroTitle() }}</h1>
+              <p class="tool-lead">{{ heroSubtitle() }}</p>
+
+              @if (errorMessage()) {
+                <div class="error-banner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  <span>{{ errorMessage() }}</span>
+                  <button type="button" class="error-close" (click)="errorMessage.set(null)">✕</button>
+                </div>
+              }
+
+              <!-- UPLOADER COMPONENT -->
+              <div class="hero-dropzone-wrap">
+                <app-dropzone
+                  [title]="dropzoneButtonTitle()"
+                  [subtitle]="dropzoneSubtitle()"
+                  [acceptedTypes]="acceptedFileTypesString()"
+                  [multiple]="allowMultiple()"
+                  [limitInfo]="dropzoneLimitInfo()"
+                  (filesSelected)="onFilesAdded($event)"
+                ></app-dropzone>
+              </div>
+            </div>
+          </section>
+
+          <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+          <section class="adsense-section">
+            <div class="container">
+              <div class="adsense-wrapper" aria-label="Advertisement">
+                <span class="adsense-label">Advertisement</span>
+                <div class="adsense-slot adsense-leaderboard">
+                  <div class="adsense-placeholder-content">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
+                      <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                      <line x1="8" y1="21" x2="16" y2="21"></line>
+                      <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- FEATURES & VALUE PROPOSITION -->
+          <section class="features-section">
+            <div class="container">
+              <div class="section-heading">
+                <h2 class="section-title">{{ featuresHeading() }}</h2>
+                <p class="section-subtitle">Engineered for privacy, speed, and maximum precision.</p>
+              </div>
+
+              <div class="features-grid">
+                @for (feat of featuresList(); track feat.title) {
+                  <div class="feature-card">
+                    <div class="feature-icon-badge" [style.background]="feat.bgColor">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" [attr.stroke]="feat.iconColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path [attr.d]="feat.iconPath"></path>
+                      </svg>
+                    </div>
+                    <h3 class="feature-title">{{ feat.title }}</h3>
+                    <p class="feature-desc">{{ feat.description }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- 3-STEP GUIDE SECTION -->
+          <section class="seo-guide-section">
+            <div class="container">
+              <div class="guide-header">
+                <h2 class="guide-title">How to {{ t.name.toLowerCase() }} online</h2>
+                <p class="guide-lead">Three effortless steps to process your documents with complete precision.</p>
+              </div>
+
+              <div class="steps-grid">
+                <div class="step-card">
+                  <div class="step-num">01</div>
+                  <h3 class="step-title">Select documents</h3>
+                  <p class="step-desc">
+                    Click "{{ dropzoneButtonTitle() }}", drag and drop your file into the uploader, or import directly from Google Drive or Dropbox.
+                  </p>
+                </div>
+
+                <div class="step-card">
+                  <div class="step-num">02</div>
+                  <h3 class="step-title">Configure options</h3>
+                  <p class="step-desc">
+                    {{ stepTwoDescription() }}
+                  </p>
+                </div>
+
+                <div class="step-card">
+                  <div class="step-num">03</div>
+                  <h3 class="step-title">{{ stepThreeTitle() }}</h3>
+                  <p class="step-desc">
+                    Click "{{ actionButtonLabel() }}". Your document is processed locally in browser memory with instant high-speed download.
+                  </p>
+                </div>
+              </div>
+
+              <!-- FAQ SECTION -->
+              <div class="tool-faqs">
+                <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
+                <div class="tool-faqs-list">
+                  @for (faq of faqsList(); track faq.question) {
+                    <div class="faq-card">
+                      <h4 class="faq-q">{{ faq.question }}</h4>
+                      <p class="faq-a">{{ faq.answer }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- RELATED POPULAR TOOLS -->
+              <div class="related-tools-box">
+                <h3 class="related-title">Explore more PDF tools</h3>
+                <div class="related-tools-grid">
+                  @for (rel of relatedTools(); track rel.id) {
+                    <a [routerLink]="rel.route" class="related-card">
+                      <div class="related-icon-box" [style.background]="rel.bgColor">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <path [attr.d]="rel.iconPath"></path>
+                        </svg>
+                      </div>
+                      <div class="related-info">
+                        <h4>{{ rel.name }}</h4>
+                        <p>{{ rel.desc }}</p>
+                      </div>
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- ORGANIZE / CONFIGURE WORKSPACE SCREEN (CANVAS + SIDEBAR) -->
+        @if (currentState() === 'organize') {
+          <div class="organize-workspace-screen" [class.split-workspace]="t.id === 'split-pdf'">
+            <!-- MAIN CANVAS AREA -->
+            <div class="canvas-main-area" [class.split-canvas-mode]="t.id === 'split-pdf'">
+              @if (errorMessage()) {
+                <div class="error-banner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  <span>{{ errorMessage() }}</span>
+                  <button type="button" class="error-close" (click)="errorMessage.set(null)">✕</button>
+                </div>
+              }
+
+              <!-- SPLIT PDF: MULTI-RANGE OR SINGLE DOCUMENT CANVAS -->
+              @if (t.id === 'split-pdf' && selectedFiles().length > 0) {
+                @if (splitMainTab() === 'range' && splitRangeMode() === 'custom') {
+                  <!-- MULTIPLE CUSTOM RANGES CANVAS (MATCHING REFERENCE) -->
+                  <div class="split-custom-canvas-row">
+                    @for (range of customRanges(); track range.id; let idx = $index) {
+                      <div class="split-range-canvas-item">
+                        <div class="split-range-canvas-header">Range {{ idx + 1 }}</div>
+                        <div class="split-range-canvas-box" [class.has-error]="customRangesValidation().errors[idx]">
+                          <div class="split-sheet-card">
+                            <div class="split-sheet-visual">
+                              <div class="sheet-sim-top">
+                                <div class="sim-brand-title"></div>
+                                <div class="sim-meta-lines">
+                                  <div class="sim-line-sm"></div>
+                                  <div class="sim-line-sm"></div>
+                                </div>
+                              </div>
+                              <div class="sheet-sim-invoice">
+                                <div class="sim-row-head"></div>
+                                <div class="sim-row-item"></div>
+                                <div class="sim-row-item"></div>
+                                <div class="sim-row-item"></div>
+                                <div class="sim-row-total"></div>
+                              </div>
+                            </div>
+                            <div class="split-page-number-tag">
+                              {{ range.from ? range.from : 1 }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="split-single-canvas-view">
+                    <div class="split-sheet-card">
+                      <div class="split-sheet-visual">
+                        <div class="sheet-sim-top">
+                          <div class="sim-brand-title"></div>
+                          <div class="sim-meta-lines">
+                            <div class="sim-line-sm"></div>
+                            <div class="sim-line-sm"></div>
+                          </div>
+                        </div>
+                        <div class="sheet-sim-invoice">
+                          <div class="sim-row-head"></div>
+                          <div class="sim-row-item"></div>
+                          <div class="sim-row-item"></div>
+                          <div class="sim-row-item"></div>
+                          <div class="sim-row-total"></div>
+                        </div>
+                      </div>
+                      <div class="split-page-number-tag">1</div>
+                    </div>
+                    <div class="split-file-label" [title]="selectedFiles()[0].name">
+                      {{ selectedFiles()[0].name }}
+                    </div>
+                  </div>
+                }
+              } @else {
+                <!-- CARDS CANVAS FOR OTHER TOOLS (e.g. compress, convert) -->
+                <div class="pdf-cards-canvas">
+                  @for (file of selectedFiles(); track file.id; let idx = $index) {
+                    <div class="pdf-document-card">
+                      <!-- Delete Button -->
+                      <div class="card-hover-actions">
+                        <button
+                          type="button"
+                          class="card-action-btn delete-action"
+                          (click)="onRemoveFile(idx)"
+                          title="Remove file"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+
+                      <!-- Sheet graphic -->
+                      <div class="doc-sheet-graphic">
+                        <div class="doc-badge-pill" [class.badge-compress]="t.id === 'compress-pdf'">
+                          {{ file.pageCount ? file.pageCount + 'p' : 'DOC' }}
+                        </div>
+                        <div class="doc-lines-sim">
+                          <div class="sim-line title-bar"></div>
+                          <div class="sim-line body-1"></div>
+                          <div class="sim-line body-2"></div>
+                          <div class="sim-line body-3"></div>
+                        </div>
+                      </div>
+
+                      <!-- Meta text -->
+                      <div class="card-meta">
+                        <span class="card-filename" [title]="file.name">{{ file.name }}</span>
+                        <span class="card-filesize">{{ file.formattedSize }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- FLOATING ACTION DOCK: ONLY FOR MULTI-DOC TOOLS (STRICTLY EXCLUDED FOR SPLIT-PDF) -->
+                @if (t.id !== 'split-pdf') {
+                  <div class="canvas-floating-dock">
+                    <div class="floating-btn-wrap">
+                      <button
+                        type="button"
+                        class="floating-circle-btn plus-circle"
+                        (click)="fileInput.click()"
+                        title="Add more files"
+                      >
+                        <span class="floating-count-badge">{{ selectedFiles().length }}</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                      <span class="floating-tooltip-label">Add more files</span>
+                    </div>
+
+                    <div class="floating-btn-wrap">
+                      <button
+                        type="button"
+                        class="floating-circle-btn pc-circle"
+                        (click)="fileInput.click()"
+                        title="Upload from computer"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                          <line x1="8" y1="21" x2="16" y2="21"></line>
+                          <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                      </button>
+                      <span class="floating-tooltip-label">Upload from PC</span>
+                    </div>
+
+                    <div class="floating-btn-wrap">
+                      <button
+                        type="button"
+                        class="floating-circle-btn drive-circle"
+                        (click)="openGoogleDrive($event)"
+                        title="Google Drive"
+                      >
+                        <svg width="20" height="18" viewBox="0 0 24 21" fill="none">
+                          <path d="M8.04 13.8L12.04 20.73H23.54L19.54 13.8H8.04Z" fill="#ffffff"/>
+                          <path d="M15.96 0.27H4.46L0.46 7.2L6.21 17.16L10.21 10.23L15.96 0.27Z" fill="#ffffff" opacity="0.85"/>
+                          <path d="M15.96 0.27L10.21 10.23L14.21 17.16L23.54 20.73L19.96 7.2L15.96 0.27Z" fill="#ffffff" opacity="0.7"/>
+                        </svg>
+                      </button>
+                      <span class="floating-tooltip-label">Google Drive</span>
+                    </div>
+
+                    <div class="floating-btn-wrap">
+                      <button
+                        type="button"
+                        class="floating-circle-btn dropbox-circle"
+                        (click)="openDropbox($event)"
+                        title="Dropbox"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 22" fill="#ffffff">
+                          <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+                        </svg>
+                      </button>
+                      <span class="floating-tooltip-label">Dropbox</span>
+                    </div>
+                  </div>
+                }
+              }
+
+              <input
+                #fileInput
+                type="file"
+                hidden
+                [multiple]="allowMultiple()"
+                [accept]="acceptedFileTypesString()"
+                (change)="onFileInputChange($event)"
+              />
+            </div>
+
+            <!-- RIGHT SIDEBAR (OPTIONS & CTA) -->
+            <aside class="sidebar-action-panel" [class.split-sidebar-panel]="t.id === 'split-pdf'">
+              <!-- 1. SPLIT PDF DEDICATED SIDEBAR (MATCHING USER SCREENSHOTS) -->
+              @if (t.id === 'split-pdf') {
+                <div class="ilove-split-sidebar">
+                  <h2 class="ilove-split-heading">Split</h2>
+
+                  <!-- TOP TABS: EXACTLY 2 TABS (Range & Pages) - EXCLUDING "Size" with crown -->
+                  <div class="ilove-split-tabs">
+                    <!-- Tab 1: Range -->
+                    <button
+                      type="button"
+                      class="ilove-split-tab"
+                      [class.active]="splitMainTab() === 'range'"
+                      (click)="splitMainTab.set('range')"
+                    >
+                      @if (splitMainTab() === 'range') {
+                        <div class="tab-check-circle">
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                      }
+                      <div class="tab-icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <path d="M4 7V4h3m10 0h3v3M4 17v3h3m10 0h3v-3" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
+                          <circle cx="16" cy="12" r="1.5" fill="currentColor"/>
+                          <line x1="9.5" y1="12" x2="14.5" y2="12" stroke-width="1.5"/>
+                        </svg>
+                      </div>
+                      <span class="tab-title">Range</span>
+                    </button>
+
+                    <!-- Tab 2: Pages -->
+                    <button
+                      type="button"
+                      class="ilove-split-tab"
+                      [class.active]="splitMainTab() === 'pages'"
+                      (click)="splitMainTab.set('pages')"
+                    >
+                      @if (splitMainTab() === 'pages') {
+                        <div class="tab-check-circle">
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                      }
+                      <div class="tab-icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <rect x="4" y="5" width="6" height="14" rx="1"/>
+                          <rect x="14" y="5" width="6" height="6" rx="1"/>
+                          <rect x="14" y="13" width="6" height="6" rx="1"/>
+                        </svg>
+                      </div>
+                      <span class="tab-title">Pages</span>
+                    </button>
+                  </div>
+
+                  <!-- TAB BODY: PAGES (SCREENSHOT 1) -->
+                  @if (splitMainTab() === 'pages') {
+                    <div class="ilove-tab-body">
+                      <span class="ilove-field-caption">Extract mode:</span>
+                      <div class="ilove-toggle-row">
+                        <button
+                          type="button"
+                          class="ilove-toggle-btn"
+                          [class.active]="splitExtractMode() === 'extract_all'"
+                          (click)="splitExtractMode.set('extract_all')"
+                        >
+                          Extract all pages
+                        </button>
+                        <button
+                          type="button"
+                          class="ilove-toggle-btn"
+                          [class.active]="splitExtractMode() === 'select_pages'"
+                          (click)="splitExtractMode.set('select_pages')"
+                        >
+                          Select pages
+                        </button>
+                      </div>
+
+                      @if (splitExtractMode() === 'select_pages') {
+                        <div class="ilove-input-group">
+                          <label class="ilove-input-caption">Pages to extract:</label>
+                          <input
+                            type="text"
+                            class="ilove-text-input"
+                            [(ngModel)]="splitPageRanges"
+                            placeholder="example: 1,5-8"
+                          />
+                        </div>
+                      }
+
+                      <div class="ilove-checkbox-row">
+                        <label class="ilove-checkbox-label">
+                          <input
+                            type="checkbox"
+                            [(ngModel)]="mergeExtractedPages"
+                            class="ilove-check"
+                          />
+                          <span>Merge extracted pages into one PDF file.</span>
+                        </label>
+                      </div>
+
+                      <!-- Blue Info Alert matching Screenshot 1 -->
+                      <div class="ilove-info-card">
+                        <div class="ilove-info-icon">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                          </svg>
+                        </div>
+                        <p class="ilove-info-text">
+                          @if (mergeExtractedPages()) {
+                            Selected pages will be merged into 1 PDF file. 1 PDF will be created.
+                          } @else if (splitExtractMode() === 'select_pages') {
+                            Selected pages will be converted into separate PDF files. {{ calculatedSplitCount() }} PDF will be created.
+                          } @else {
+                            Every page of this PDF will be converted into an independent PDF file. {{ selectedFiles()[0]?.pageCount || 1 }} PDFs will be created.
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- TAB BODY: RANGE (SCREENSHOT 2: Custom, Fixed only; NO Smart!) -->
+                  @if (splitMainTab() === 'range') {
+                    <div class="ilove-tab-body">
+                      <span class="ilove-field-caption">Range mode:</span>
+                      <div class="ilove-toggle-row">
+                        <button
+                          type="button"
+                          class="ilove-toggle-btn"
+                          [class.active]="splitRangeMode() === 'custom'"
+                          (click)="splitRangeMode.set('custom')"
+                        >
+                          Custom
+                        </button>
+                        <button
+                          type="button"
+                          class="ilove-toggle-btn"
+                          [class.active]="splitRangeMode() === 'fixed'"
+                          (click)="splitRangeMode.set('fixed')"
+                        >
+                          Fixed
+                        </button>
+                      </div>
+
+                      @if (splitRangeMode() === 'custom') {
+                        <!-- MULTIPLE CUSTOM RANGES (WITH VALIDATION & ADD/REMOVE) -->
+                        <div class="custom-ranges-list">
+                          @for (range of customRanges(); track range.id; let idx = $index) {
+                            <div class="custom-range-card" [class.has-error]="customRangesValidation().errors[idx]">
+                              <div class="range-card-header">
+                                <div class="range-title-wrap">
+                                  <svg class="grip-icon" width="12" height="14" viewBox="0 0 12 16" fill="#94a3b8">
+                                    <circle cx="3" cy="3" r="1.5"/>
+                                    <circle cx="9" cy="3" r="1.5"/>
+                                    <circle cx="3" cy="8" r="1.5"/>
+                                    <circle cx="9" cy="8" r="1.5"/>
+                                    <circle cx="3" cy="13" r="1.5"/>
+                                    <circle cx="9" cy="13" r="1.5"/>
+                                  </svg>
+                                  <span class="range-card-label">Range {{ idx + 1 }}</span>
+                                </div>
+                                @if (customRanges().length > 1) {
+                                  <button
+                                    type="button"
+                                    class="range-delete-btn"
+                                    (click)="removeCustomRange(idx)"
+                                    title="Remove this range"
+                                  >
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                  </button>
+                                }
+                              </div>
+
+                              <div class="range-inputs-dual">
+                                <!-- From Page Input Cell -->
+                                <div class="range-cell" [class.cell-error]="customRangesValidation().errors[idx]?.includes('Start')">
+                                  <span class="cell-label">from page</span>
+                                  <div class="cell-input-wrap">
+                                    <input
+                                      type="number"
+                                      class="cell-input"
+                                      min="1"
+                                      [max]="selectedFiles()[0]?.pageCount || 9999"
+                                      [value]="range.from ?? ''"
+                                      (input)="updateRangeFrom(idx, $any($event.target).value)"
+                                    />
+                                    <div class="cell-spinners">
+                                      <button type="button" class="spin-btn" (click)="stepRangeFrom(idx, 1)" tabindex="-1">▲</button>
+                                      <button type="button" class="spin-btn" (click)="stepRangeFrom(idx, -1)" tabindex="-1">▼</button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- To Page Input Cell -->
+                                <div class="range-cell" [class.cell-error]="customRangesValidation().errors[idx]?.includes('to') || customRangesValidation().errors[idx]?.includes('End')">
+                                  <span class="cell-label">to</span>
+                                  <div class="cell-input-wrap">
+                                    <input
+                                      type="number"
+                                      class="cell-input"
+                                      min="1"
+                                      [max]="selectedFiles()[0]?.pageCount || 9999"
+                                      [value]="range.to ?? ''"
+                                      (input)="updateRangeTo(idx, $any($event.target).value)"
+                                    />
+                                    <div class="cell-spinners">
+                                      <button type="button" class="spin-btn" (click)="stepRangeTo(idx, 1)" tabindex="-1">▲</button>
+                                      <button type="button" class="spin-btn" (click)="stepRangeTo(idx, -1)" tabindex="-1">▼</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              @if (customRangesValidation().errors[idx]) {
+                                <div class="range-inline-error">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                  </svg>
+                                  <span>{{ customRangesValidation().errors[idx] }}</span>
+                                </div>
+                              }
+                            </div>
+                          }
+
+                          <!-- + Add Range Button -->
+                          <button
+                            type="button"
+                            class="add-range-btn"
+                            (click)="addCustomRange()"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <line x1="12" y1="5" x2="12" y2="19"></line>
+                              <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Add Range</span>
+                          </button>
+                        </div>
+                      } @else {
+                        <div class="ilove-input-group">
+                          <label class="ilove-input-caption">Split every (pages):</label>
+                          <input
+                            type="number"
+                            min="1"
+                            class="ilove-text-input"
+                            [(ngModel)]="splitFixedCount"
+                            placeholder="1"
+                          />
+                        </div>
+                      }
+
+                      <div class="ilove-checkbox-row">
+                        <label class="ilove-checkbox-label">
+                          <input
+                            type="checkbox"
+                            [(ngModel)]="mergeExtractedPages"
+                            class="ilove-check"
+                          />
+                          <span>Merge all ranges into one PDF file.</span>
+                        </label>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <!-- 2. DEFAULT SIDEBAR BODY FOR OTHER TOOLS -->
+                <div class="sidebar-body">
+                  <h2 class="sidebar-heading">{{ sidebarTitle() }}</h2>
+
+                  <div class="sidebar-info-banner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2.2" class="info-svg">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <div class="info-text">{{ sidebarInfoText() }}</div>
+                  </div>
+
+                  <!-- COMPRESS PDF OPTIONS -->
+                  @if (t.id === 'compress-pdf') {
+                    <div class="options-group">
+                      <label class="options-label">Compression Level</label>
+                      <div class="compression-cards">
+                        <div
+                          class="compression-card"
+                          [class.selected]="compressionLevel() === 'extreme'"
+                          (click)="compressionLevel.set('extreme')"
+                        >
+                          <div class="comp-radio-circle">
+                            @if (compressionLevel() === 'extreme') {
+                              <div class="comp-radio-dot"></div>
+                            }
+                          </div>
+                          <div class="comp-card-content">
+                            <h4 class="comp-card-title">Extreme Compression</h4>
+                            <p class="comp-card-desc">Less quality, high compression (up to 75% smaller)</p>
+                          </div>
+                        </div>
+
+                        <div
+                          class="compression-card recommended-card"
+                          [class.selected]="compressionLevel() === 'recommended'"
+                          (click)="compressionLevel.set('recommended')"
+                        >
+                          <span class="comp-recommended-badge">Recommended</span>
+                          <div class="comp-radio-circle">
+                            @if (compressionLevel() === 'recommended') {
+                              <div class="comp-radio-dot"></div>
+                            }
+                          </div>
+                          <div class="comp-card-content">
+                            <h4 class="comp-card-title">Recommended Compression</h4>
+                            <p class="comp-card-desc">Good quality, good compression (ideal for emails & web)</p>
+                          </div>
+                        </div>
+
+                        <div
+                          class="compression-card"
+                          [class.selected]="compressionLevel() === 'less'"
+                          (click)="compressionLevel.set('less')"
+                        >
+                          <div class="comp-radio-circle">
+                            @if (compressionLevel() === 'less') {
+                              <div class="comp-radio-dot"></div>
+                            }
+                          </div>
+                          <div class="comp-card-content">
+                            <h4 class="comp-card-title">Less Compression</h4>
+                            <p class="comp-card-desc">High quality, less compression (sharpest text & graphics)</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- PDF TO POWERPOINT OPTIONS -->
+                  @if (t.id === 'pdf-to-powerpoint') {
+                    <div class="options-group">
+                      <label class="options-label">Output Slideshow Format</label>
+                      <div class="format-choice-card active">
+                        <div class="format-icon ppt-icon">PPTX</div>
+                        <div class="format-details">
+                          <h4>Microsoft PowerPoint (.pptx)</h4>
+                          <p>Full slides layout with editable shapes and fonts</p>
+                        </div>
+                      </div>
+
+                      <div class="setting-toggle-row">
+                        <label class="toggle-checkbox-label">
+                          <input type="checkbox" [(ngModel)]="ocrEnabled" />
+                          <span>Apply Optical Character Recognition (OCR)</span>
+                        </label>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- GENERIC OPTIONS FOR OTHER TOOLS -->
+                  @if (t.id !== 'compress-pdf' && t.id !== 'split-pdf' && t.id !== 'pdf-to-powerpoint') {
+                    <div class="options-group">
+                      <label class="options-label">Processing Configuration</label>
+                      <div class="generic-option-box">
+                        <div class="opt-row">
+                          <span class="opt-key">Engine</span>
+                          <span class="opt-val">Local WebAssembly 2.0</span>
+                        </div>
+                        <div class="opt-row">
+                          <span class="opt-key">Output Mode</span>
+                          <span class="opt-val">Lossless Preservation</span>
+                        </div>
+                        <div class="opt-row">
+                          <span class="opt-key">Privacy Shield</span>
+                          <span class="opt-val text-green">100% In-Browser Memory</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+
+                  <div class="sidebar-details-row">
+                    <span class="details-count">
+                      <strong>{{ selectedFiles().length }}</strong> {{ selectedFiles().length === 1 ? 'file' : 'files' }} selected
+                    </span>
+                    <button type="button" class="sidebar-reset-link" (click)="resetWorkspace()">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <!-- GIANT RED ACTION BUTTON STICKY AT BOTTOM -->
+              <div class="sidebar-footer">
+                <button
+                  type="button"
+                  class="giant-action-submit-btn"
+                  [class.btn-disabled]="selectedFiles().length === 0 || isProcessing() || isSplitActionDisabled()"
+                  [disabled]="selectedFiles().length === 0 || isProcessing() || isSplitActionDisabled()"
+                  (click)="executeToolAction()"
+                >
+                  <span>{{ actionButtonLabel() }}</span>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 16 16 12 12 8"></polyline>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                  </svg>
+                </button>
+              </div>
+            </aside>
+          </div>
+        }
+
+        <!-- PROCESSING STATE -->
+        @if (currentState() === 'processing') {
+          <div class="processing-workspace-screen">
+            <app-processing-state
+              [title]="processingTitle()"
+              [message]="processingMessage()"
+              [percent]="processingProgress()"
+            ></app-processing-state>
+          </div>
+        }
+
+        <!-- COMPLETED RESULT STATE -->
+        @if (currentState() === 'completed' && toolResult()) {
+          <div class="completed-workspace-screen">
+            <div class="container result-container">
+              <app-result-view
+                [result]="toolResult()!"
+                [title]="resultTitle()"
+                [subtitle]="resultSubtitle()"
+                [downloadLabel]="resultDownloadLabel()"
+                [savingsText]="resultSavingsText()"
+                [savingsReason]="resultSavingsReason()"
+                [restartLabel]="resultRestartLabel()"
+                (reset)="resetWorkspace()"
+              ></app-result-view>
+            </div>
+          </div>
+        }
+      </div>
+    }

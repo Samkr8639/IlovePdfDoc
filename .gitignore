@@ -38,16 +38,22 @@ tmp/
 */*/tmp/
 temp/
 */temp/
+audit-tmp/
+*/audit-tmp/
 uploads/
 */uploads/
 *.tmp
 *.bak
+*.traineddata
 
 # 6. Test Results & Coverage
 coverage/
 */coverage/
 .nyc_output/
 .vitest/
+test-fixtures/*_output.pdf
+test-fixtures/*_output.docx
+test-fixtures/*_analysis.txt
 
 # 7. Runtime Logs
 *.log

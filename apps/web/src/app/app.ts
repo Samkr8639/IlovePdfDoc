@@ -1,30 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { BackToTopComponent } from './shared/components/back-to-top/back-to-top.component';
+import { LayoutService } from './core/services/layout.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
-  template: `
-    <div class="app-layout">
-      <app-header></app-header>
-      <main class="app-main">
-        <router-outlet></router-outlet>
-      </main>
-      <app-footer></app-footer>
-    </div>
-  `,
-  styles: [`
-    .app-layout {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .app-main {
-      flex: 1;
-    }
-  `]
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, BackToTopComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
-export class App {}
+export class App {
+  readonly layoutService = inject(LayoutService);
+}
