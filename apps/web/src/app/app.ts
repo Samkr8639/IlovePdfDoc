@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { BackToTopComponent } from './shared/components/back-to-top/back-to-top.component';
+import { LayoutService } from './core/services/layout.service';
 
 @Component({
   selector: 'app-root',
@@ -11,4 +12,6 @@ import { BackToTopComponent } from './shared/components/back-to-top/back-to-top.
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class App {}
+export class App {
+  readonly layoutService = inject(LayoutService);
+}

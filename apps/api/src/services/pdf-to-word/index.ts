@@ -1,5 +1,6 @@
+import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { pathToFileURL } from 'url';
 import { PdfToWordMode } from '@paperflow/contracts';
 import { AppError } from '../../middleware/errorHandler';
 
@@ -15,14 +16,25 @@ export interface ConvertPdfToWordResult {
   warnings: string[];
 }
 
-import { pathToFileURL } from 'url';
+function nativeImport(url: string): Promise<any> {
+  return new Function('s', 'return import(s)')(url);
+}
 
-const nativeImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
+let cachedConverter: any = null;
 
 async function getConverter() {
-  const enginePath = path.resolve(__dirname, 'engine.mjs');
-  const mod = await nativeImport(pathToFileURL(enginePath).href);
-  return mod.convertPdfToDocx;
+  if (cachedConverter) return cachedConverter;
+  let enginePath = path.resolve(__dirname, 'engine.mjs');
+  if (!fs.existsSync(enginePath)) {
+    enginePath = path.resolve(__dirname, '../../../src/services/pdf-to-word/engine.mjs');
+  }
+  if (!fs.existsSync(enginePath)) {
+    enginePath = path.resolve(__dirname, '../../src/services/pdf-to-word/engine.mjs');
+  }
+  const url = pathToFileURL(enginePath).href;
+  const mod = await nativeImport(url);
+  cachedConverter = mod.convertPdfToDocx;
+  return cachedConverter;
 }
 
 /**

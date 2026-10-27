@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BrowserPdfService, ValidatedPdfFile, MergeResult } from '../../core/services/browser-pdf.service';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
+import { LayoutService } from '../../core/services/layout.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
@@ -20,10 +21,11 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   templateUrl: './merge-pdf.component.html',
   styleUrl: './merge-pdf.component.css'
 })
-export class MergePdfComponent implements OnInit {
+export class MergePdfComponent implements OnInit, OnDestroy {
   private pdfService = inject(BrowserPdfService);
   private toolRegistry = inject(ToolRegistryService);
   private seo = inject(SeoService);
+  private layoutService = inject(LayoutService);
 
   currentState = signal<WorkspaceState>('upload');
   selectedFiles = signal<ValidatedPdfFile[]>([]);
@@ -55,6 +57,7 @@ export class MergePdfComponent implements OnInit {
 
     if (this.selectedFiles().length > 0) {
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
     }
   }
 
@@ -92,6 +95,7 @@ export class MergePdfComponent implements OnInit {
 
     if (list.length === 0) {
       this.currentState.set('upload');
+      this.layoutService.showFooter();
     }
   }
 
@@ -140,6 +144,15 @@ export class MergePdfComponent implements OnInit {
     this.errorMessage.set(null);
     this.processingProgress.set(0);
     this.currentState.set('upload');
+    this.layoutService.showFooter();
+  }
+
+  ngOnDestroy(): void {
+    const currentResult = this.mergeResult();
+    if (currentResult?.url) {
+      URL.revokeObjectURL(currentResult.url);
+    }
+    this.layoutService.showFooter();
   }
 
   async executeMerge(): Promise<void> {
@@ -162,10 +175,12 @@ export class MergePdfComponent implements OnInit {
 
       this.mergeResult.set(result);
       this.currentState.set('completed');
+      this.layoutService.showFooter();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An error occurred while merging your PDF files.';
       this.errorMessage.set(message);
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
     } finally {
       this.isProcessing.set(false);
     }

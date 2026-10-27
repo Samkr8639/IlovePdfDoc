@@ -140,22 +140,32 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     id: 'pdf-to-powerpoint',
     name: 'PDF to PowerPoint',
     shortDescription: 'Turn your PDF files into easy to edit PPT and PPTX slide decks.',
-    longDescription: 'Convert slide-based PDF documents into fully editable Microsoft PowerPoint presentations.',
+    longDescription: 'Convert slide-based PDF documents into fully editable Microsoft PowerPoint presentations with preserved layout, vectors, and typography.',
     category: 'convert',
     route: '/pdf-to-powerpoint',
     icon: 'doc-ppt',
     processingMode: 'hybrid',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
-    maxFiles: 5,
+    maxFiles: 10,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    status: 'available',
+    badgeText: 'New',
+    isNew: true,
     seo: {
-      title: 'PDF to PowerPoint Converter | PDF flow',
-      description: 'Convert PDF presentations to editable PPTX slides.',
-      keywords: ['pdf to powerpoint', 'pdf to pptx', 'convert pdf slides'],
+      title: 'PDF to PowerPoint Converter Online - Free PPTX Slides | PDF flow',
+      description: 'Convert PDF presentations to editable PowerPoint PPTX slides online. Preserves visual layouts, shapes, tables, and typography with zero permanent storage.',
+      keywords: ['pdf to powerpoint', 'pdf to pptx', 'convert pdf to ppt', 'edit pdf in powerpoint', 'online pdf converter'],
       canonical: 'https://pdfflow.app/pdf-to-powerpoint',
-      faqs: []
+      faqs: [
+        {
+          question: 'Are my converted slides editable in Microsoft PowerPoint?',
+          answer: 'Yes. Each PDF page is converted into a PowerPoint slide with genuine editable text blocks, vector lines, boxes, and images.'
+        },
+        {
+          question: 'How are my files handled during conversion?',
+          answer: 'Your PDF is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes.'
+        }
+      ]
     }
   },
   {

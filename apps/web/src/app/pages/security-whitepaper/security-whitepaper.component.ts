@@ -157,7 +157,7 @@ export class SecurityWhitepaperComponent implements OnInit {
       control: 'Automated 60-Minute Memory Purge',
       implementation: 'In-memory jobStore with pruneExpiredJobs() periodic cleanup',
       status: 'Verified Implemented',
-      details: 'Every job auto-expires 60 minutes after generation. Manual deletion supported via DELETE /api/v1/pdf-to-word/jobs/:jobId.'
+      details: 'Every job auto-expires 10–60 minutes after generation. Manual deletion supported via DELETE /api/v1/pdf-to-word/jobs/:jobId and /api/v1/pdf-to-powerpoint/jobs/:jobId.'
     },
     {
       control: 'Zero User Account Databases',

@@ -1,8 +1,8 @@
-<div class="app-layout">
+<div class="app-layout" [class.workspace-active]="!layoutService.isFooterVisible()">
   <app-header></app-header>
   <main class="app-main">
     <router-outlet></router-outlet>
   </main>
-  <app-footer></app-footer>
-  <app-back-to-top></app-back-to-top>
+  <app-footer [class.workspace-hidden]="!layoutService.isFooterVisible()"></app-footer>
+  <app-back-to-top [class.workspace-hidden]="!layoutService.isFooterVisible()"></app-back-to-top>
 </div>

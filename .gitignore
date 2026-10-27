@@ -38,10 +38,13 @@ tmp/
 */*/tmp/
 temp/
 */temp/
+audit-tmp/
+*/audit-tmp/
 uploads/
 */uploads/
 *.tmp
 *.bak
+*.traineddata
 
 # 6. Test Results & Coverage
 coverage/

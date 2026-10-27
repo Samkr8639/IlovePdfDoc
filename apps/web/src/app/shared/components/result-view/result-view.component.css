@@ -144,6 +144,44 @@
   padding: 2px 8px;
   border-radius: 9999px;
 }
+.size-transition-pill {
+  font-weight: 700;
+  color: #0f172a;
+}
+.savings-progress-track {
+  width: 100%;
+  max-width: 280px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.savings-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.low-savings-callout {
+  margin-top: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #0284c7;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 540px;
+}
+.low-savings-callout svg {
+  color: #0284c7;
+  flex-shrink: 0;
+}
 
 /* Preview toggle pill button */
 .preview-pill-btn {
@@ -352,6 +390,22 @@
   color: #475569;
   padding: 2px 6px;
   border-radius: 6px;
+}
+.item-savings-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.item-progress-track {
+  width: 60px;
+  max-width: 60px;
+  margin-top: 0;
+}
+.item-low-savings-note {
+  font-size: 11px;
+  color: #334155;
+  margin-top: 2px;
+  max-width: 260px;
 }
 .item-dl-btn {
   display: inline-flex;

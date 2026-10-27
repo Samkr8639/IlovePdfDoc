@@ -9,6 +9,8 @@ import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.com
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 
+import { LayoutService } from '../../core/services/layout.service';
+
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
 @Component({
@@ -27,6 +29,7 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
   private pdfToWordService = inject(PdfToWordService);
   private toolRegistry = inject(ToolRegistryService);
   private seo = inject(SeoService);
+  private layoutService = inject(LayoutService);
   private abortController: AbortController | null = null;
 
   currentState = signal<WorkspaceState>('upload');
@@ -68,6 +71,7 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
       this.abortController.abort();
       this.abortController = null;
     }
+    this.layoutService.showFooter();
   }
 
   private revokeCurrentUrl(): void {
@@ -99,6 +103,7 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
     if (validated.length > 0) {
       this.selectedFiles.set(validated);
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
 
       // Analyze the first document to determine if it has selectable text or is scanned
       try {
@@ -189,15 +194,33 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
         }
         this.conversionResult.set(result);
         this.currentState.set('completed');
+        this.layoutService.showFooter();
       }
     } catch (err) {
       if (!this.abortController?.signal.aborted) {
         this.errorMessage.set(err instanceof Error ? err.message : 'Conversion failed. Please try again.');
         this.currentState.set('organize');
+        this.layoutService.hideFooter();
       }
     } finally {
       this.isProcessing.set(false);
     }
+  }
+
+  openGoogleDrive(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://drive.google.com/', '_blank', 'noopener,noreferrer');
+  }
+
+  openDropbox(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
   }
 
   resetWorkspace(): void {
@@ -212,5 +235,6 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
     this.documentAnalysis.set(null);
     this.selectedMode.set('no_ocr');
     this.currentState.set('upload');
+    this.layoutService.showFooter();
   }
 }

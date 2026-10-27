@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { analyzePdf } from './analyze.mjs';
+import { analyzePdf } from '../pdf-layout/analyze.mjs';
 import { buildDocx } from './build.mjs';
 
 const __filename = fileURLToPath(import.meta.url);

@@ -7,6 +7,7 @@ import { toolsRouter } from './routes/tools.route';
 import { contactRouter } from './routes/contact.route';
 import { compressRouter } from './routes/compress.route';
 import { pdfToWordRouter } from './routes/pdf-to-word.route';
+import { pdfToPowerPointRouter } from './routes/pdf-to-powerpoint.route';
 import { errorHandler, AppError } from './middleware/errorHandler';
 import { apiRateLimiter, conversionRateLimiter, contactRateLimiter } from './middleware/rateLimiter';
 import swaggerUi from 'swagger-ui-express';
@@ -60,6 +61,7 @@ export function createApp(): Express {
   app.use('/api/v1/contact', contactRateLimiter, contactRouter);
   app.use('/api/v1/compress', conversionRateLimiter, compressRouter);
   app.use('/api/v1/pdf-to-word', conversionRateLimiter, pdfToWordRouter);
+  app.use('/api/v1/pdf-to-powerpoint', conversionRateLimiter, pdfToPowerPointRouter);
 
   // 404 Route Catch-all
   app.use('*', (req: Request, _res: Response, next) => {
