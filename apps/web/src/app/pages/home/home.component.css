@@ -161,7 +161,7 @@
     .workflow-desc {
       font-size: 13.5px;
       line-height: 1.55;
-      color: #64748b;
+      color: #475569;
       margin: 0 0 24px 0;
     }
     .workflow-btn-link {
@@ -235,7 +235,7 @@
     }
     .add-wf-subtitle {
       font-size: 13px;
-      color: #64748b;
+      color: #475569;
       margin-bottom: 12px;
     }
     .add-wf-tier-badge {
@@ -290,7 +290,7 @@
       height: 32px;
       border-radius: 50%;
       font-size: 14px;
-      color: #64748b;
+      color: #475569;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -320,7 +320,7 @@
     }
     .wf-modal-desc {
       font-size: 14px;
-      color: #64748b;
+      color: #475569;
       line-height: 1.5;
       margin: 0 0 24px 0;
     }
@@ -360,7 +360,7 @@
     }
     .wf-step-preview p {
       font-size: 12.5px;
-      color: #64748b;
+      color: #475569;
       margin: 0;
       line-height: 1.45;
     }
@@ -493,7 +493,7 @@
     }
     .section-subtitle-muted {
       font-size: 16px;
-      color: #64748b;
+      color: #475569;
       margin: 0;
     }
     .ecosystem-cards-grid {
@@ -548,7 +548,7 @@
     .dot-red { width: 6px; height: 6px; border-radius: 50%; background: #EF4444; }
     .dot-yellow { width: 6px; height: 6px; border-radius: 50%; background: #F59E0B; }
     .dot-green { width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
-    .window-title { font-size: 8px; color: #64748b; font-weight: 600; margin-left: auto; }
+    .window-title { font-size: 8px; color: #475569; font-weight: 600; margin-left: auto; }
     .window-body {
       display: flex;
       height: 90px;
@@ -648,7 +648,7 @@
     }
     .ecosystem-text {
       font-size: 14px;
-      color: #64748b;
+      color: #475569;
       line-height: 1.55;
       margin: 0 0 20px;
     }
@@ -706,7 +706,7 @@
       gap: 8px;
       font-size: 12.5px;
       font-weight: 600;
-      color: #64748b;
+      color: #475569;
       padding-top: 14px;
       border-top: 1px solid #f1f5f9;
     }
@@ -838,7 +838,7 @@
       border-top: 1px solid #f1f5f9;
     }
     .mock-sign-mark { font-family: cursive; font-size: 18px; color: #2563EB; font-weight: 700; }
-    .mock-seal { font-size: 10px; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; }
+    .mock-seal { font-size: 10px; font-weight: 800; color: #475569; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; }
 
     /* 5. MEDIA SUITE SECTION */
     .media-suite-section {
@@ -903,7 +903,7 @@
     }
     .media-desc {
       font-size: 15px;
-      color: #64748b;
+      color: #475569;
       line-height: 1.6;
       margin: 0 0 24px;
     }
@@ -943,7 +943,7 @@
     }
     .trust-subtitle {
       font-size: 15px;
-      color: #64748b;
+      color: #475569;
       width: 860px;
       line-height: 1.6;
       margin: 0 auto 40px;
@@ -977,7 +977,7 @@
     }
     .cert-text span {
       font-size: 11px;
-      color: #64748b;
+      color: #475569;
     }
 
     /* RESPONSIVE LAYOUT BREAKPOINTS */

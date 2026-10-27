@@ -36,11 +36,11 @@
   align-items: center;
   gap: 8px;
   font-size: 13.5px;
-  color: #64748b;
+  color: #475569;
   margin-bottom: 24px;
 }
 .crumb-link {
-  color: #64748b;
+  color: #475569;
   text-decoration: none;
 }
 .crumb-link:hover {
@@ -126,7 +126,7 @@
   justify-content: center;
   gap: 10px;
   font-size: 13px;
-  color: #64748b;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -150,7 +150,7 @@
 }
 .editorial-subheading {
   font-size: 16px;
-  color: #64748b;
+  color: #475569;
   line-height: 1.6;
   margin: 0;
 }
@@ -192,7 +192,7 @@
 }
 .feature-card p {
   font-size: 14px;
-  color: #64748b;
+  color: #475569;
   line-height: 1.6;
   margin: 0;
 }
@@ -244,7 +244,7 @@
 }
 .step-card p {
   font-size: 14.5px;
-  color: #64748b;
+  color: #475569;
   line-height: 1.6;
   margin: 0;
 }
@@ -414,7 +414,7 @@
 }
 .pdf-file-meta {
   font-size: 11px;
-  color: #64748b;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -598,7 +598,7 @@
 }
 .mode-desc {
   font-size: 13px;
-  color: #64748b;
+  color: #475569;
   line-height: 1.45;
   margin: 0;
 }

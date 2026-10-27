@@ -213,7 +213,7 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: #64748b;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -324,7 +324,7 @@
 
 .tool-files-count {
   font-size: 13px;
-  color: #64748b;
+  color: #475569;
 }
 
 .tool-status-pill {
@@ -469,7 +469,7 @@
 
 .doc-pages {
   font-size: 10.5px;
-  color: #64748b;
+  color: #475569;
 }
 
 .doc-connector {
@@ -649,7 +649,7 @@
 
 .process-col-desc {
   font-size: 14px;
-  color: #64748b;
+  color: #475569;
   margin-bottom: 28px;
 }
 
@@ -705,7 +705,7 @@
 
 .step-content p {
   font-size: 13.5px;
-  color: #64748b;
+  color: #475569;
   line-height: 1.5;
   margin: 0;
 }
@@ -824,7 +824,7 @@
 
 .spec-tools {
   font-size: 13.5px;
-  color: #64748b;
+  color: #475569;
 }
 
 .engine-badge {
@@ -873,7 +873,7 @@
 .commitment-desc {
   font-size: 14.5px;
   line-height: 1.6;
-  color: #64748b;
+  color: #475569;
   margin: 0;
 }
 
@@ -918,7 +918,7 @@
 .capability-group-desc {
   font-size: 14px;
   line-height: 1.6;
-  color: #64748b;
+  color: #475569;
 }
 
 .capability-tools-grid {
@@ -983,7 +983,7 @@
 .tool-anchor-desc {
   font-size: 13.5px;
   line-height: 1.5;
-  color: #64748b;
+  color: #475569;
   margin-bottom: 12px;
   flex: 1;
 }
@@ -1061,7 +1061,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #475569;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1124,7 +1124,7 @@
 
 .cta-description {
   font-size: 16px;
-  color: #64748b;
+  color: #475569;
   margin: 0;
   max-width: 500px;
 }

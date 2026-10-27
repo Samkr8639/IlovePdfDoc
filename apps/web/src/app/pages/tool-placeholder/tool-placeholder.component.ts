@@ -503,7 +503,7 @@ export class ToolPlaceholderComponent implements OnInit {
       },
       {
         question: 'Do you store copies of my files?',
-        answer: 'No. Everything runs strictly on your computer using in-browser WebAssembly. No files are saved on external servers.'
+        answer: 'No. Browser tools run strictly on your computer using in-browser WebAssembly, while server-assisted tools (such as PDF to Word) process files in ephemeral memory and automatically delete them within 10 minutes. No files are ever saved permanently.'
       },
       {
         question: 'Can I use this tool on mobile or tablet devices?',

@@ -82,7 +82,7 @@ export class PressMediaKitComponent implements OnInit {
     {
       name: 'Muted Slate',
       role: 'Subtitles, secondary labels, borders, and metadata text',
-      hex: '#64748B',
+      hex: '#475569',
       rgb: 'rgb(100, 116, 139)',
       cmyk: 'C:28 M:16 Y:0 K:45',
       isDarkText: false

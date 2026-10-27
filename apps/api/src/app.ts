@@ -14,7 +14,22 @@ export function createApp(): Express {
   const app = express();
 
   // Security Middleware
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'blob:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"]
+        }
+      },
+      crossOriginResourcePolicy: { policy: 'cross-origin' }
+    })
+  );
   app.use(
     cors({
       origin: env.CORS_ORIGIN,
