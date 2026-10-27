@@ -105,6 +105,7 @@ export class AboutUsComponent implements OnInit {
       tools: [
         { id: 'compress-pdf', name: 'Compress PDF', route: '/compress-pdf', description: 'Shrink file size while preserving readability.', executionMode: 'browser' },
         { id: 'pdf-to-word', name: 'PDF to Word', route: '/pdf-to-word', description: 'Reconstruct layouts, tables, and text into DOCX.', executionMode: 'hybrid' },
+        { id: 'pdf-to-powerpoint', name: 'PDF to PowerPoint', route: '/pdf-to-powerpoint', description: 'Reconstruct presentations, slides, and shapes into PPTX.', executionMode: 'hybrid' },
         { id: 'pdf-to-excel', name: 'PDF to Excel', route: '/pdf-to-excel', description: 'Extract tabular records into clean spreadsheets.', executionMode: 'hybrid' },
         { id: 'word-to-pdf', name: 'Word to PDF', route: '/word-to-pdf', description: 'Convert editable DOCX files into fixed-layout PDFs.', executionMode: 'hybrid' }
       ]

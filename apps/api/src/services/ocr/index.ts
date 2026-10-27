@@ -1,5 +1,10 @@
-import { createCanvas } from '@napi-rs/canvas';
-import Tesseract from 'tesseract.js';
+import { createRequire } from 'module';
+
+const nativeRequire = createRequire(__filename);
+
+// Lazy-loaded dependencies for OCR mode
+let activeWorker: any = null;
+let activeWorkerLang = '';
 
 async function getPdfjs(): Promise<any> {
   const dynamicImport = new Function('specifier', 'return import(specifier)');
@@ -23,13 +28,11 @@ export interface OcrPageResult {
   lines: OcrTextLine[];
 }
 
-let activeWorker: Tesseract.Worker | null = null;
-let activeWorkerLang = '';
 
 /**
  * Get or create a Tesseract OCR worker for the given language
  */
-export async function getOcrWorker(lang = 'eng'): Promise<Tesseract.Worker> {
+export async function getOcrWorker(lang = 'eng'): Promise<any> {
   if (activeWorker && activeWorkerLang === lang) {
     return activeWorker;
   }
@@ -43,6 +46,7 @@ export async function getOcrWorker(lang = 'eng'): Promise<Tesseract.Worker> {
     activeWorker = null;
   }
 
+  const Tesseract = require('tesseract.js');
   const worker = await Tesseract.createWorker(lang);
   activeWorker = worker;
   activeWorkerLang = lang;
@@ -83,6 +87,7 @@ export async function renderPdfPageToPng(
   const canvasWidth = Math.max(1, Math.round(viewport.width));
   const canvasHeight = Math.max(1, Math.round(viewport.height));
 
+  const { createCanvas } = require('@napi-rs/canvas');
   const canvas = createCanvas(canvasWidth, canvasHeight);
   const ctx = canvas.getContext('2d');
 

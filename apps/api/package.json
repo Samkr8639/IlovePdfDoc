@@ -10,7 +10,7 @@
     "start": "node dist/index.js",
     "start:staging": "cross-env NODE_ENV=staging node dist/index.js",
     "start:prod": "cross-env NODE_ENV=production node dist/index.js",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles --forceExit"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --workerThreads=false"
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.80",

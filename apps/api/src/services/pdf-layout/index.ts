@@ -68,12 +68,21 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-export async function analyzePdf(buffer: Buffer | Uint8Array, opts: any = {}): Promise<PdfLayoutModel> {
+function nativeImport(url: string): Promise<any> {
+  return new Function('s', 'return import(s)')(url);
+}
+
+async function getScanner() {
   let analyzePath = path.resolve(__dirname, 'analyze.mjs');
   if (!fs.existsSync(analyzePath)) {
     analyzePath = path.resolve(__dirname, '../../src/services/pdf-layout/analyze.mjs');
   }
-  const dynamicImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
-  const mod = await dynamicImport(pathToFileURL(analyzePath).href);
+  const url = pathToFileURL(analyzePath).href;
+  const targetUrl = process.env.JEST_WORKER_ID ? `${url}?jest=${Date.now()}_${Math.random()}` : url;
+  return nativeImport(targetUrl);
+}
+
+export async function analyzePdf(buffer: Buffer | Uint8Array, opts: any = {}): Promise<PdfLayoutModel> {
+  const mod = await getScanner();
   return mod.analyzePdf(buffer, opts);
 }

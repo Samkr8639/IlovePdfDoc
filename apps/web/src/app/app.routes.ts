@@ -32,8 +32,8 @@ export const routes: Routes = [
   },
   {
     path: 'pdf-to-powerpoint',
-    component: ToolPlaceholderComponent,
-    title: 'PDF to PowerPoint Converter | PDF flow'
+    loadComponent: () => import('./pages/pdf-to-powerpoint/pdf-to-powerpoint.component').then(m => m.PdfToPowerPointComponent),
+    title: 'PDF to PowerPoint Converter Online | PDF flow'
   },
   {
     path: 'pdf-to-excel',
