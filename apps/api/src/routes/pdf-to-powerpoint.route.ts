@@ -171,7 +171,7 @@ pdfToPowerPointRouter.post(
       // Validate body parameters using Zod schema
       const parseResult = PdfToPowerPointOptionsSchema.safeParse(req.body);
       if (!parseResult.success) {
-        const issues = parseResult.error.issues.map(i => ({
+        const issues = parseResult.error.issues.map((i: any) => ({
           field: i.path.join('.'),
           issue: i.message
         }));
