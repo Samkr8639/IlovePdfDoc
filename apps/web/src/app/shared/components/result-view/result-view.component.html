@@ -53,19 +53,28 @@
         </div>
       </div>
 
-      <!-- Quick Preview Toggle Pill (Only available for single PDF) -->
+      <!-- Quick Preview Toggle Pill (Only available for single document / not ZIP) -->
       @if (!isZipArchive()) {
         <button
           type="button"
           class="preview-pill-btn"
-          (click)="showPreview.set(!showPreview())"
+          [class.docx-pill-btn]="isDocx()"
+          (click)="togglePreview()"
           [attr.aria-expanded]="showPreview()"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-          <span>{{ showPreview() ? 'Hide Live Preview' : 'Quick Preview' }}</span>
+          @if (isDocx()) {
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="2" width="20" height="20" rx="4" fill="#2563eb" />
+              <path d="M7 7L10.5 17L12 12.5L13.5 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>{{ showPreview() ? 'Hide Word Preview' : 'Preview Word Document' }}</span>
+          } @else {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>{{ showPreview() ? 'Hide Live Preview' : 'Quick Preview' }}</span>
+          }
         </button>
       }
     </div>
@@ -199,29 +208,85 @@
       </div>
     }
 
-    <!-- LIVE EXPANDABLE PREVIEW FRAME -->
+    <!-- LIVE EXPANDABLE PREVIEW FRAME / DOCX VIEWER -->
     @if (showPreview()) {
-      <div class="preview-drawer">
+      <div class="preview-drawer" [class.docx-drawer]="isDocx()">
         <div class="preview-drawer-header">
           <div class="preview-tag-group">
-            <span class="preview-indicator-dot"></span>
-            <span class="preview-title">Document Inspection Viewer</span>
-            <span class="preview-engine-tag">Local WebAssembly Engine</span>
+            <span class="preview-indicator-dot" [class.docx-dot]="isDocx()"></span>
+            <span class="preview-title">{{ isDocx() ? 'Word Document Inspection Viewer' : 'Document Inspection Viewer' }}</span>
+            <span class="preview-engine-tag">{{ isDocx() ? 'In-Browser OpenXML Engine' : 'Local WebAssembly Engine' }}</span>
           </div>
-          <button
-            type="button"
-            class="preview-close-btn"
-            (click)="showPreview.set(false)"
-            aria-label="Close preview"
-          >
-            ✕ Close Preview
-          </button>
+
+          <!-- Docx Zoom Controls if DOCX -->
+          @if (isDocx()) {
+            <div class="docx-zoom-toolbar">
+              <button type="button" class="zoom-btn" (click)="zoomOut()" aria-label="Zoom out" title="Zoom out">−</button>
+              <span class="zoom-level">{{ docxZoom() }}%</span>
+              <button type="button" class="zoom-btn" (click)="zoomIn()" aria-label="Zoom in" title="Zoom in">+</button>
+              <button type="button" class="zoom-reset-btn" (click)="resetZoom()" title="Reset zoom">Reset</button>
+            </div>
+          }
+
+          <div class="preview-header-actions">
+            <!-- Direct Download Button in Preview -->
+            <a
+              [href]="safeUrl()"
+              [download]="result().filename"
+              class="preview-direct-download-btn"
+              role="button"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download {{ isDocx() ? 'WORD' : 'File' }}</span>
+            </a>
+
+            <button
+              type="button"
+              class="preview-close-btn"
+              (click)="showPreview.set(false)"
+              aria-label="Close preview"
+            >
+              ✕ Close
+            </button>
+          </div>
         </div>
-        <iframe
-          [src]="previewUrl()"
-          class="preview-embed-frame"
-          title="Live Merged PDF Preview"
-        ></iframe>
+
+        @if (isDocx()) {
+          <!-- DOCX RENDER CONTAINER -->
+          <div class="docx-stage-viewport">
+            @if (isLoadingDocx()) {
+              <div class="docx-loading-state" role="status">
+                <div class="docx-spinner"></div>
+                <p>Rendering Word document layout...</p>
+              </div>
+            }
+            @if (docxError()) {
+              <div class="docx-error-state">
+                <p>{{ docxError() }}</p>
+                <a [href]="safeUrl()" [download]="result().filename" class="docx-fallback-download">
+                  Download genuine Word file (.docx)
+                </a>
+              </div>
+            }
+            <div
+              #docxContainer
+              class="docx-render-container"
+              [style.transform]="'scale(' + (docxZoom() / 100) + ')'"
+              [style.transformOrigin]="'top center'"
+            ></div>
+          </div>
+        } @else {
+          <!-- PDF EMBED FRAME -->
+          <iframe
+            [src]="previewUrl()"
+            class="preview-embed-frame"
+            title="Live Merged PDF Preview"
+          ></iframe>
+        }
       </div>
     }
   </section>

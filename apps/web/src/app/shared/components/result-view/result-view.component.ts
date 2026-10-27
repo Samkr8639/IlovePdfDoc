@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, output, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { MergeResult } from '../../../core/services/browser-pdf.service';
@@ -12,6 +12,8 @@ import { MergeResult } from '../../../core/services/browser-pdf.service';
 export class ResultViewComponent {
   private sanitizer = inject(DomSanitizer);
 
+  @ViewChild('docxContainer', { static: false }) docxContainerRef?: ElementRef<HTMLDivElement>;
+
   result = input.required<MergeResult>();
   title = input<string>('PDFs Merged Successfully!');
   subtitle = input<string>('Your files have been combined into a high-quality PDF document directly in your browser memory.');
@@ -22,6 +24,13 @@ export class ResultViewComponent {
 
   showPreview = signal<boolean>(false);
   copied = signal<boolean>(false);
+  isLoadingDocx = signal<boolean>(false);
+  docxError = signal<string | null>(null);
+  docxZoom = signal<number>(100);
+
+  isDocx = computed<boolean>(() => {
+    return this.result()?.filename?.toLowerCase().endsWith('.docx') || false;
+  });
 
   safeUrl = computed<SafeUrl>(() => {
     return this.sanitizer.bypassSecurityTrustUrl(this.result().url);
@@ -42,6 +51,49 @@ export class ResultViewComponent {
       safeUrl: this.sanitizer.bypassSecurityTrustUrl(item.url)
     }));
   });
+
+  togglePreview(): void {
+    const nextState = !this.showPreview();
+    this.showPreview.set(nextState);
+    if (nextState && this.isDocx()) {
+      setTimeout(() => this.renderDocxDocument(), 60);
+    }
+  }
+
+  async renderDocxDocument(): Promise<void> {
+    const res = this.result();
+    if (!res?.blob || !this.docxContainerRef?.nativeElement) return;
+    this.isLoadingDocx.set(true);
+    this.docxError.set(null);
+    try {
+      const docx = await import('docx-preview');
+      this.docxContainerRef.nativeElement.innerHTML = '';
+      await docx.renderAsync(res.blob, this.docxContainerRef.nativeElement, undefined, {
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        breakPages: true,
+        useBase64URL: true
+      });
+    } catch (err) {
+      console.error('Failed to render DOCX preview:', err);
+      this.docxError.set('Unable to render DOCX preview in browser. You can still download the genuine file directly.');
+    } finally {
+      this.isLoadingDocx.set(false);
+    }
+  }
+
+  zoomIn(): void {
+    this.docxZoom.update(z => Math.min(150, z + 10));
+  }
+
+  zoomOut(): void {
+    this.docxZoom.update(z => Math.max(60, z - 10));
+  }
+
+  resetZoom(): void {
+    this.docxZoom.set(100);
+  }
 
   downloadFile(event?: Event): void {
     if (event) {
