@@ -95,6 +95,7 @@ export class MergePdfComponent implements OnInit, OnDestroy {
 
     if (list.length === 0) {
       this.currentState.set('upload');
+      this.layoutService.showFooter();
     }
   }
 

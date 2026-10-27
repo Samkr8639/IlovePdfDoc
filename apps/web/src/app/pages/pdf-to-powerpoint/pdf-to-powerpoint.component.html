@@ -372,20 +372,18 @@
             </div>
           </div>
 
-          <!-- Content Analysis Insight Alert -->
-          @if (documentAnalysis(); as analysis) {
-            <div class="sidebar-info-banner" role="status">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="info-svg" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          <!-- Dedicated Sidebar AdSense Slot -->
+          <div class="sidebar-adsense-slot" aria-label="Advertisement">
+            <span class="adsense-label">Advertisement</span>
+            <div class="sidebar-ad-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
               </svg>
-              <div>
-                <strong>Document Analysis</strong>
-                <p>{{ analysis.detectedTextSummary }}</p>
-              </div>
+              <span>Google AdSense (300 × 250)</span>
             </div>
-          }
+          </div>
         </div>
 
         <!-- ACTION FOOTER: BIG RED CONVERT BUTTON -->

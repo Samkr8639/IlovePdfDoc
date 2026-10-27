@@ -315,6 +315,7 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
     }
     this.isProcessing.set(false);
     this.currentState.set('organize');
+    this.layoutService.hideFooter();
     this.errorMessage.set('Conversion was cancelled.');
   }
 

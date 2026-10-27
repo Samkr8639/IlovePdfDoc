@@ -9,6 +9,8 @@
 }
 
 /* Suppress footer and lock viewport when any tool is in organize/workspace mode */
+.app-layout.workspace-active app-footer,
+.app-layout.workspace-active app-back-to-top,
 app-footer.workspace-hidden,
 app-back-to-top.workspace-hidden,
 :host:has(.tool-page.organize-mode) app-footer,
@@ -18,12 +20,14 @@ app-back-to-top.workspace-hidden,
   display: none !important;
 }
 
+.app-layout.workspace-active,
 :host:has(.tool-page.organize-mode) .app-layout,
 .app-layout:has(.tool-page.organize-mode) {
   height: 100vh;
   overflow: hidden;
 }
 
+.app-layout.workspace-active .app-main,
 :host:has(.tool-page.organize-mode) .app-main,
 .app-layout:has(.tool-page.organize-mode) .app-main {
   height: calc(100vh - var(--header-height, 72px));

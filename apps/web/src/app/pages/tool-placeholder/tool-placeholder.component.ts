@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
 import { BrowserPdfService, ValidatedPdfFile, MergeResult, SplitPdfResult, CompressPdfResult } from '../../core/services/browser-pdf.service';
+import { LayoutService } from '../../core/services/layout.service';
 import { ToolDefinition } from '@paperflow/contracts';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
@@ -30,11 +31,12 @@ export interface CustomSplitRange {
   templateUrl: './tool-placeholder.component.html',
   styleUrl: './tool-placeholder.component.css'
 })
-export class ToolPlaceholderComponent implements OnInit {
+export class ToolPlaceholderComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private toolRegistry = inject(ToolRegistryService);
   private seo = inject(SeoService);
   private pdfService = inject(BrowserPdfService);
+  private layoutService = inject(LayoutService);
 
   tool = signal<ToolDefinition | null>(null);
   currentState = signal<WorkspaceState>('upload');
@@ -593,7 +595,16 @@ export class ToolPlaceholderComponent implements OnInit {
         this.selectedFiles.update(current => [...current, ...validated]);
       }
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
     }
+  }
+
+  ngOnDestroy(): void {
+    const res = this.toolResult();
+    if (res?.url) {
+      URL.revokeObjectURL(res.url);
+    }
+    this.layoutService.showFooter();
   }
 
   onFileInputChange(event: Event): void {
@@ -617,6 +628,7 @@ export class ToolPlaceholderComponent implements OnInit {
     this.errorMessage.set(null);
     this.isProcessing.set(false);
     this.currentState.set('upload');
+    this.layoutService.showFooter();
     this.customRanges.set([{ id: '1', from: 1, to: 1 }]);
     this.splitPageRanges.set('');
   }
@@ -763,6 +775,7 @@ export class ToolPlaceholderComponent implements OnInit {
         );
         this.toolResult.set(result);
         this.currentState.set('completed');
+        this.layoutService.showFooter();
         this.isProcessing.set(false);
         return;
       }
@@ -793,11 +806,13 @@ export class ToolPlaceholderComponent implements OnInit {
       });
 
       this.currentState.set('completed');
+      this.layoutService.showFooter();
       this.isProcessing.set(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Processing failed';
       this.errorMessage.set(msg);
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
       this.isProcessing.set(false);
     }
   }
