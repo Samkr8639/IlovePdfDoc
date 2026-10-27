@@ -332,28 +332,51 @@ export async function buildPptx(
     }
 
     // 4. Text Blocks
-    for (const block of page.blocks || []) {
+    const pageBlocks = page.blocks || [];
+    for (let bIdx = 0; bIdx < pageBlocks.length; bIdx++) {
+      const block = pageBlocks[bIdx];
       const isRightAligned = block.align === 'right';
       const isMultiLine = block.lines.length > 1;
 
-      const lineHeightPt = (isMultiLine && block.pitch > 0) ? block.pitch : (block.fs * 1.25);
-      const topPt = Math.max(0, block.y - (lineHeightPt * BASELINE_RATIO));
+      const lineHeightPt = (isMultiLine && block.pitch > 0) ? Math.max(block.fs * 1.15, block.pitch) : (block.fs * 1.25);
+      const topPt = Math.max(0, block.y - (block.fs * BASELINE_RATIO));
       const heightPt = isMultiLine
-        ? (lineHeightPt * (block.lines.length - 1) + block.fs * 1.5)
-        : Math.max(16, block.fs * 1.5);
+        ? (lineHeightPt * (block.lines.length - 1) + block.fs * 1.4)
+        : Math.max(14, block.fs * 1.4);
 
       let xPt: number;
       let widthPt: number;
 
       if (isRightAligned) {
         const textWidth = block.width || 50;
-        widthPt = Math.max(30, textWidth * 1.35 + 20);
+        widthPt = Math.max(30, textWidth * 1.15 + 10);
         xPt = Math.max(0, (block.right || (block.x + block.width)) - widthPt);
       } else {
         xPt = block.x;
-        // Make box wide towards the right edge so font substitutions never wrap or clip
-        const rightEdgePt = page.width - 10;
-        widthPt = Math.max(20, rightEdgePt - xPt);
+        // Bounded width calculation: find closest obstacle to the right on the same vertical slice
+        const bTop = block.y - block.fs;
+        const bBottom = block.y + (isMultiLine ? lineHeightPt * (block.lines.length - 1) : 0) + block.fs * 0.4;
+
+        let minOtherX = page.width - 12;
+        for (let otherIdx = 0; otherIdx < pageBlocks.length; otherIdx++) {
+          if (bIdx === otherIdx) continue;
+          const other = pageBlocks[otherIdx];
+          if (other.x <= block.x + 4) continue;
+
+          const oMulti = other.lines.length > 1;
+          const oLineHeight = (oMulti && other.pitch > 0) ? Math.max(other.fs * 1.15, other.pitch) : (other.fs * 1.25);
+          const oTop = other.y - other.fs;
+          const oBottom = other.y + (oMulti ? oLineHeight * (other.lines.length - 1) : 0) + other.fs * 0.4;
+
+          const vOverlap = !(bBottom < oTop || bTop > oBottom);
+          if (vOverlap && other.x < minOtherX) {
+            minOtherX = other.x;
+          }
+        }
+
+        const availableWidth = Math.max(10, minOtherX - block.x - 3);
+        const idealWidth = Math.max(15, block.width * 1.1 + 4);
+        widthPt = Math.min(availableWidth, idealWidth);
       }
 
       const x_in = offsetX_in + (xPt / 72) * scale;
@@ -364,23 +387,17 @@ export async function buildPptx(
       const runs: PptxGenJS.TextProps[] = [];
       for (let lIdx = 0; lIdx < block.lines.length; lIdx++) {
         const line = block.lines[lIdx];
+        const isLastLine = lIdx === block.lines.length - 1;
         for (let rIdx = 0; rIdx < line.length; rIdx++) {
           const run = line[rIdx];
+          const isLastRun = rIdx === line.length - 1;
           const { fontFace, isStandard } = resolveFont(run.font, run.generic);
           if (!isStandard && run.font) {
             nonStandardFonts.add(run.font);
           }
 
           const effectiveFs = Math.max(1, Math.round(((run.fs || block.fs) * scale) * 2) / 2);
-
-          let textContent = run.text;
-          if (lIdx > 0 && rIdx === 0 && !textContent.startsWith(' ')) {
-            const prevLine = block.lines[lIdx - 1];
-            const lastRun = prevLine[prevLine.length - 1];
-            if (lastRun && !lastRun.text.endsWith(' ') && !lastRun.text.endsWith('-')) {
-              textContent = ' ' + textContent;
-            }
-          }
+          const textContent = run.text;
 
           runs.push({
             text: textContent,
@@ -390,14 +407,14 @@ export async function buildPptx(
               bold: Boolean(run.bold),
               italic: Boolean(run.italic),
               color: cleanHex(run.color),
-              breakLine: (lIdx > 0 && rIdx === 0)
+              breakLine: !isLastLine && isLastRun
             }
           });
         }
       }
 
       const lineSpacing = (isMultiLine && block.pitch > 0)
-        ? Math.max(1, Math.round((block.pitch * scale) * 2) / 2)
+        ? Math.max(1, Math.round(Math.max(block.fs * 1.15, block.pitch * scale) * 2) / 2)
         : undefined;
 
       slide.addText(runs, {

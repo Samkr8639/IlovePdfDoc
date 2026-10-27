@@ -75,6 +75,9 @@ function nativeImport(url: string): Promise<any> {
 async function getScanner() {
   let analyzePath = path.resolve(__dirname, 'analyze.mjs');
   if (!fs.existsSync(analyzePath)) {
+    analyzePath = path.resolve(__dirname, '../../../src/services/pdf-layout/analyze.mjs');
+  }
+  if (!fs.existsSync(analyzePath)) {
     analyzePath = path.resolve(__dirname, '../../src/services/pdf-layout/analyze.mjs');
   }
   const url = pathToFileURL(analyzePath).href;

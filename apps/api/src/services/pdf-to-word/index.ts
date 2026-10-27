@@ -23,6 +23,9 @@ function nativeImport(url: string): Promise<any> {
 async function getConverter() {
   let enginePath = path.resolve(__dirname, 'engine.mjs');
   if (!fs.existsSync(enginePath)) {
+    enginePath = path.resolve(__dirname, '../../../src/services/pdf-to-word/engine.mjs');
+  }
+  if (!fs.existsSync(enginePath)) {
     enginePath = path.resolve(__dirname, '../../src/services/pdf-to-word/engine.mjs');
   }
   const url = pathToFileURL(enginePath).href;
