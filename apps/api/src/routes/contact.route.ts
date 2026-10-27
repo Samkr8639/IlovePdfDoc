@@ -22,7 +22,7 @@ contactRouter.post('/', (req: Request, res: Response, next: NextFunction) => {
   const result = contactSchema.safeParse(req.body);
 
   if (!result.success) {
-    const errorDetails = result.error.errors.map(err => ({
+    const errorDetails = result.error.issues.map(err => ({
       field: err.path.join('.'),
       issue: err.message
     }));

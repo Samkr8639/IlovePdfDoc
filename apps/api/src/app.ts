@@ -8,6 +8,7 @@ import { contactRouter } from './routes/contact.route';
 import { compressRouter } from './routes/compress.route';
 import { pdfToWordRouter } from './routes/pdf-to-word.route';
 import { errorHandler, AppError } from './middleware/errorHandler';
+import { apiRateLimiter, conversionRateLimiter, contactRateLimiter } from './middleware/rateLimiter';
 
 export function createApp(): Express {
   const app = express();
@@ -25,12 +26,15 @@ export function createApp(): Express {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // API Routes
+  // Global API Rate Limiter
+  app.use('/api/v1', apiRateLimiter);
+
+  // API Routes with specific rate limits
   app.use('/api/v1/health', healthRouter);
   app.use('/api/v1/tools', toolsRouter);
-  app.use('/api/v1/contact', contactRouter);
-  app.use('/api/v1/compress', compressRouter);
-  app.use('/api/v1/pdf-to-word', pdfToWordRouter);
+  app.use('/api/v1/contact', contactRateLimiter, contactRouter);
+  app.use('/api/v1/compress', conversionRateLimiter, compressRouter);
+  app.use('/api/v1/pdf-to-word', conversionRateLimiter, pdfToWordRouter);
 
   // 404 Route Catch-all
   app.use('*', (req: Request, _res: Response, next) => {
