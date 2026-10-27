@@ -27,13 +27,13 @@ describe('AboutUsComponent', () => {
 
   it('should render the main hero title', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const title = compiled.querySelector('.hero-title');
-    expect(title?.textContent).toContain('Empowering millions to work smarter with documents');
+    const title = compiled.querySelector('.hero-headline');
+    expect(title?.textContent).toContain('Your documents.');
   });
 
   it('should render all 3 core pillars', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const cards = compiled.querySelectorAll('.pillar-card');
+    const cards = compiled.querySelectorAll('.commitment-card');
     expect(cards.length).toBe(3);
   });
 });

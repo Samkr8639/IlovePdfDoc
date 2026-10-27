@@ -17,15 +17,11 @@ export interface ConvertPdfToWordResult {
 
 import { pathToFileURL } from 'url';
 
-// Resolves local layout-preserving engine located in the same directory
-function getEngineUrl(): string {
-  const enginePath = path.resolve(__dirname, 'engine.mjs');
-  // Cache-busting timestamp ensures changes to .mjs are picked up instantly
-  return `${pathToFileURL(enginePath).href}?t=${Date.now()}`;
-}
+const nativeImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
 
 async function getConverter() {
-  const mod = await import(/* @vite-ignore */ getEngineUrl());
+  const enginePath = path.resolve(__dirname, 'engine.mjs');
+  const mod = await nativeImport(pathToFileURL(enginePath).href);
   return mod.convertPdfToDocx;
 }
 

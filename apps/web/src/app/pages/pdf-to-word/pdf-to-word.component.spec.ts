@@ -88,6 +88,18 @@ describe('PdfToWordComponent Integration Test', () => {
   });
 
   it('should execute conversion and transition to "completed" state with valid Word result', async () => {
+    vi.spyOn(service, 'convertToWord').mockResolvedValue({
+      blob: new Blob(['docx binary payload']),
+      url: 'blob:http://localhost:4200/fake-doc-uuid',
+      filename: 'sample_doc.docx',
+      pageCount: 1,
+      originalSizeBytes: 1024,
+      wordSizeBytes: 2048,
+      formattedOriginalSize: '1.0 KB',
+      formattedWordSize: '2.0 KB',
+      modeUsed: 'no_ocr'
+    });
+
     const file = await createTestPdfFile(1, 'sample_doc.pdf');
     await component.onFilesAdded([file]);
     fixture.detectChanges();

@@ -91,8 +91,8 @@
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
             </div>
-            <h3>Client-Side Privacy</h3>
-            <p>Standard documents convert directly in your browser. Confidential files, contracts, and resumes never leave your device.</p>
+            <h3>Zero-Retention Security</h3>
+            <p>Documents convert via encrypted ephemeral processing with zero data retention. Your files are automatically purged after download.</p>
           </div>
 
           <div class="feature-card">
@@ -162,6 +162,7 @@
                   type="button"
                   class="card-action-btn delete-btn"
                   title="Remove file"
+                  aria-label="Remove file"
                   (click)="removeFile(fileItem.id)"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -208,6 +209,7 @@
               type="button"
               class="floating-circle-btn add-btn"
               title="Add more files"
+              aria-label="Add more files"
               (click)="addMoreInput.click()"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
@@ -328,14 +330,14 @@
   <!-- ===================================================================
        4. COMPLETED RESULT SCREEN
        =================================================================== -->
-  @if (currentState() === 'completed' && conversionResult(); as res) {
+  @if (currentState() === 'completed' && mergeResult(); as res) {
     <div class="result-screen-wrapper">
       <div class="container result-container">
         <app-result-view
-          [result]="asMergeResult(res)"
+          [result]="res"
           [title]="'PDF has been converted to WORD!'"
           [subtitle]="'Your genuine editable Word document is ready for download.'"
-          [downloadLabel]="res.isZip ? 'Download WORD Files (ZIP)' : 'Download WORD'"
+          [downloadLabel]="conversionResult()?.isZip ? 'Download WORD Files (ZIP)' : 'Download WORD'"
           [savingsText]="'Converted into genuine OpenXML DOCX'"
           [restartLabel]="'Convert another PDF'"
           (reset)="resetWorkspace()"

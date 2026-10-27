@@ -36,12 +36,12 @@ export class ResultViewComponent {
   });
 
   compressedItems = computed<any[]>(() => {
-    return (this.result() as any)?.items || [];
+    const raw = (this.result() as any)?.items || [];
+    return raw.map((item: any) => ({
+      ...item,
+      safeUrl: this.sanitizer.bypassSecurityTrustUrl(item.url)
+    }));
   });
-
-  sanitizeUrl(url: string): SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
 
   downloadFile(event?: Event): void {
     if (event) {

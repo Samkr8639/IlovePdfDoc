@@ -58,9 +58,9 @@ export interface PdfToWordJob {
   zipBuffer?: Buffer;
 }
 
-// In-memory job repository with auto-pruning
+// In-memory job repository with auto-pruning (ephemeral 10-minute volatile retention)
 const jobStore = new Map<string, PdfToWordJob>();
-const JOB_RETENTION_MS = 60 * 60 * 1000; // 1 hour
+const JOB_RETENTION_MS = 10 * 60 * 1000; // 10 minutes
 
 function pruneExpiredJobs(): void {
   const now = Date.now();
