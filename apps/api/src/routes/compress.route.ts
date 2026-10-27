@@ -17,7 +17,14 @@ const upload = multer({
   }
 });
 
-export type CompressionLevel = 'extreme' | 'recommended' | 'less';
+import {
+  compressPdf,
+  validatePdfBuffer,
+  CompressionLevel,
+  CompressionStats
+} from '../services/compress';
+
+export { CompressionLevel, validatePdfBuffer };
 
 export interface CompressedFileResult {
   id: string;
@@ -30,6 +37,7 @@ export interface CompressedFileResult {
   pageCount: number;
   buffer: Buffer;
   downloadUrl: string;
+  savingsReason?: string;
 }
 
 export interface CompressionJob {
@@ -60,90 +68,18 @@ function pruneExpiredJobs(): void {
 }
 
 /**
- * Validates a PDF file buffer
- */
-export function validatePdfBuffer(buffer: Buffer, originalname: string): void {
-  if (!buffer || buffer.length === 0) {
-    throw new AppError(400, 'ZERO_BYTE_FILE', `The selected file '${originalname}' is empty.`);
-  }
-
-  if (!originalname.toLowerCase().endsWith('.pdf')) {
-    throw new AppError(400, 'INVALID_FILE_TYPE', `File '${originalname}' must have a .pdf extension.`);
-  }
-
-  // Check magic number %PDF-
-  const header = buffer.subarray(0, 5).toString('ascii');
-  if (header !== '%PDF-') {
-    throw new AppError(400, 'INVALID_PDF_HEADER', `Only valid PDF files are supported. '${originalname}' is not a valid PDF.`);
-  }
-}
-
-/**
- * Compresses a PDF buffer using pdf-lib according to profile
+ * Compresses a PDF buffer using the new high-efficiency engine
  */
 export async function compressSinglePdf(
   buffer: Buffer,
   filename: string,
   level: CompressionLevel = 'recommended'
-): Promise<{ compressedBuffer: Buffer; pageCount: number }> {
-  validatePdfBuffer(buffer, filename);
-
-  let doc: PDFDocument;
-  let pageCount = 0;
-  try {
-    doc = await PDFDocument.load(buffer, { ignoreEncryption: false });
-    pageCount = doc.getPageCount();
-    if (pageCount === 0) {
-      throw new AppError(422, 'EMPTY_PDF', `The PDF '${filename}' contains no pages.`);
-    }
-  } catch (err: unknown) {
-    if (err instanceof AppError || (err && typeof (err as any).statusCode === 'number')) {
-      throw err;
-    }
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    if (errorMsg.toLowerCase().includes('encrypt') || errorMsg.toLowerCase().includes('password')) {
-      throw new AppError(
-        422,
-        'PASSWORD_PROTECTED_PDF',
-        `This PDF '${filename}' could not be opened. It is password-protected or encrypted.`
-      );
-    }
-    throw new AppError(
-      422,
-      'CORRUPTED_PDF',
-      `This PDF '${filename}' could not be opened. It may be corrupted or unreadable.`
-    );
-  }
-
-  let compressedBytes: Uint8Array;
-
-  if (level === 'extreme') {
-    // Extreme: strip non-essential metadata, pack object streams, optimize dictionary
-    doc.setTitle('');
-    doc.setAuthor('');
-    doc.setSubject('');
-    doc.setKeywords([]);
-    doc.setProducer('');
-    doc.setCreator('');
-    compressedBytes = await doc.save({
-      useObjectStreams: true,
-      objectsPerTick: 50
-    });
-  } else if (level === 'recommended') {
-    // Recommended: balanced stream packing, retains document title
-    compressedBytes = await doc.save({
-      useObjectStreams: true
-    });
-  } else {
-    // Less: standard compression without object streams packing, preserve full layout
-    compressedBytes = await doc.save({
-      useObjectStreams: false
-    });
-  }
-
+): Promise<{ compressedBuffer: Buffer; pageCount: number; stats?: CompressionStats }> {
+  const result = await compressPdf(buffer, filename, { level });
   return {
-    compressedBuffer: Buffer.from(compressedBytes),
-    pageCount
+    compressedBuffer: result.compressedBuffer,
+    pageCount: result.pageCount,
+    stats: result.stats
   };
 }
 
@@ -181,7 +117,7 @@ compressRouter.post(
         const file = uploadedFiles[i];
         const fileId = `file-${i + 1}-${crypto.randomBytes(4).toString('hex')}`;
 
-        const { compressedBuffer, pageCount } = await compressSinglePdf(file.buffer, file.originalname, level);
+        const { compressedBuffer, pageCount, stats } = await compressSinglePdf(file.buffer, file.originalname, level);
 
         const originalSize = file.size || file.buffer.length;
         const compressedSize = compressedBuffer.length;
@@ -208,7 +144,8 @@ compressRouter.post(
           reductionPercentage,
           pageCount,
           buffer: compressedBuffer,
-          downloadUrl: `/api/v1/compress/jobs/${jobId}/download/${fileId}`
+          downloadUrl: `/api/v1/compress/jobs/${jobId}/download/${fileId}`,
+          savingsReason: stats?.savingsReason
         });
       }
 
@@ -258,6 +195,7 @@ compressRouter.post(
           totalCompressedSize,
           totalSpaceSaved,
           totalReductionPercentage,
+          savingsReason: processedFiles[0]?.savingsReason || 'Optimization completed',
           files: processedFiles.map(f => ({
             id: f.id,
             originalFilename: f.originalFilename,
@@ -267,7 +205,8 @@ compressRouter.post(
             spaceSaved: f.spaceSaved,
             reductionPercentage: f.reductionPercentage,
             pageCount: f.pageCount,
-            downloadUrl: f.downloadUrl
+            downloadUrl: f.downloadUrl,
+            savingsReason: f.savingsReason
           })),
           downloadUrl: `/api/v1/compress/jobs/${jobId}/download`
         },
@@ -307,6 +246,7 @@ compressRouter.get('/jobs/:jobId', (req: Request, res: Response, next: NextFunct
       totalCompressedSize: job.totalCompressedSize,
       totalSpaceSaved: job.totalSpaceSaved,
       totalReductionPercentage: job.totalReductionPercentage,
+      savingsReason: job.files[0]?.savingsReason || 'Optimization completed',
       files: job.files.map(f => ({
         id: f.id,
         originalFilename: f.originalFilename,
@@ -316,7 +256,8 @@ compressRouter.get('/jobs/:jobId', (req: Request, res: Response, next: NextFunct
         spaceSaved: f.spaceSaved,
         reductionPercentage: f.reductionPercentage,
         pageCount: f.pageCount,
-        downloadUrl: f.downloadUrl
+        downloadUrl: f.downloadUrl,
+        savingsReason: f.savingsReason
       })),
       downloadUrl: `/api/v1/compress/jobs/${job.id}/download`
     },

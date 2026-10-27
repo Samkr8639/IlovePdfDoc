@@ -163,7 +163,7 @@ async function extractImagePlacementsFromPdfjs(buffer: Buffer): Promise<
           matrixStack[matrixStack.length - 1] = next;
         } else if (
           fn === pdfjsLib.OPS.paintImageXObject ||
-          fn === pdfjsLib.OPS.paintJpegXObject ||
+          fn === (pdfjsLib.OPS as any).paintJpegXObject ||
           fn === pdfjsLib.OPS.paintImageMaskXObject
         ) {
           const name = args[0] as string;
