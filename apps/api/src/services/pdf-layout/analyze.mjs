@@ -71,7 +71,8 @@ export async function analyzePdf(buffer, opts = {}) {
     data: new Uint8Array(buffer),
     verbosity: 0,
     useSystemFonts: false,
-    fontExtraProperties: true
+    fontExtraProperties: true,
+    isEvalSupported: false
   });
 
   const pdfDoc = await loadingTask.promise;
@@ -754,12 +755,27 @@ export async function analyzePdf(buffer, opts = {}) {
       boxes,
       images
     });
+
+    try {
+      page.cleanup();
+    } catch {
+      // ignore cleanup error
+    }
   }
 
+  try {
+    await pdfDoc.cleanup();
+    await loadingTask.destroy();
+  } catch {
+    // ignore cleanup error
+  }
+
+  const title = detectedTitle || opts.title || 'Converted Document';
   return {
+    title,
     pages,
     meta: {
-      title: detectedTitle || opts.title || 'Converted Document'
+      title
     },
     warnings
   };

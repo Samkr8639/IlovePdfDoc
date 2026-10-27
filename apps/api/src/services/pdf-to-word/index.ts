@@ -19,8 +19,13 @@ import { pathToFileURL } from 'url';
 
 const nativeImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
 
+import fs from 'fs';
+
 async function getConverter() {
-  const enginePath = path.resolve(__dirname, 'engine.mjs');
+  let enginePath = path.resolve(__dirname, 'engine.mjs');
+  if (!fs.existsSync(enginePath)) {
+    enginePath = path.resolve(__dirname, '../../src/services/pdf-to-word/engine.mjs');
+  }
   const mod = await nativeImport(pathToFileURL(enginePath).href);
   return mod.convertPdfToDocx;
 }
