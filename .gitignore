@@ -42,6 +42,7 @@ uploads/
 */uploads/
 *.tmp
 *.bak
+*.traineddata
 
 # 6. Test Results & Coverage
 coverage/

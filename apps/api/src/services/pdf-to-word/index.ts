@@ -17,8 +17,6 @@ export interface ConvertPdfToWordResult {
 
 import { pathToFileURL } from 'url';
 
-const nativeImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
-
 import fs from 'fs';
 
 async function getConverter() {
@@ -26,7 +24,8 @@ async function getConverter() {
   if (!fs.existsSync(enginePath)) {
     enginePath = path.resolve(__dirname, '../../src/services/pdf-to-word/engine.mjs');
   }
-  const mod = await nativeImport(pathToFileURL(enginePath).href);
+  const dynamicImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
+  const mod = await dynamicImport(pathToFileURL(enginePath).href);
   return mod.convertPdfToDocx;
 }
 

@@ -19,10 +19,13 @@ export interface ConvertedPowerPointFileItem {
   id: string;
   originalFilename: string;
   powerpointFilename: string;
+  pptxFilename?: string;
   originalSizeBytes: number;
   powerpointSizeBytes: number;
+  pptxSizeBytes?: number;
   formattedOriginalSize: string;
   formattedPowerpointSize: string;
+  formattedPptxSize?: string;
   slideCount: number;
   modeUsed: PdfToPowerPointMode;
   slideSizeUsed: PdfToPowerPointSlideSize;

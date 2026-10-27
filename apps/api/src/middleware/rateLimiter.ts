@@ -39,7 +39,7 @@ export const apiRateLimiter = rateLimit({
  */
 export const conversionRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 60,
+  limit: (req) => (req.headers['x-test-rate-limit'] ? 1 : 60),
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit'],

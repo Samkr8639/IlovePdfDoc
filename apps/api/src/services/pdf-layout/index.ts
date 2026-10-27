@@ -68,18 +68,12 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-const nativeImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
-
-let cachedAnalyzePdf: ((buffer: Buffer | Uint8Array, opts?: any) => Promise<PdfLayoutModel>) | null = null;
-
 export async function analyzePdf(buffer: Buffer | Uint8Array, opts: any = {}): Promise<PdfLayoutModel> {
-  if (!cachedAnalyzePdf) {
-    let analyzePath = path.resolve(__dirname, 'analyze.mjs');
-    if (!fs.existsSync(analyzePath)) {
-      analyzePath = path.resolve(__dirname, '../../src/services/pdf-layout/analyze.mjs');
-    }
-    const mod = await nativeImport(pathToFileURL(analyzePath).href);
-    cachedAnalyzePdf = mod.analyzePdf;
+  let analyzePath = path.resolve(__dirname, 'analyze.mjs');
+  if (!fs.existsSync(analyzePath)) {
+    analyzePath = path.resolve(__dirname, '../../src/services/pdf-layout/analyze.mjs');
   }
-  return cachedAnalyzePdf!(buffer, opts);
+  const dynamicImport = new Function('specifier', 'return import(specifier)') as (url: string) => Promise<any>;
+  const mod = await dynamicImport(pathToFileURL(analyzePath).href);
+  return mod.analyzePdf(buffer, opts);
 }

@@ -27,7 +27,8 @@ export const openApiSpec = {
     { name: 'Tools', description: 'Tool registry and capabilities' },
     { name: 'Contact', description: 'Customer support inquiries' },
     { name: 'Compress', description: 'PDF compression services' },
-    { name: 'PDF to Word', description: 'Layout-preserving PDF to DOCX conversion' }
+    { name: 'PDF to Word', description: 'Layout-preserving PDF to DOCX conversion' },
+    { name: 'PDF to PowerPoint', description: 'Layout-preserving PDF to PowerPoint (PPTX) conversion' }
   ],
   paths: {
     '/api/v1/health': {
@@ -336,6 +337,193 @@ export const openApiSpec = {
           },
           '404': {
             description: 'Job expired or not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/v1/pdf-to-powerpoint/convert': {
+      post: {
+        tags: ['PDF to PowerPoint'],
+        summary: 'Convert PDF files to editable PowerPoint presentations (PPTX)',
+        description: 'Uploads 1-10 PDF files with visual layout scanning or OCR. Returns ephemeral conversion job.',
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['files'],
+                properties: {
+                  files: {
+                    type: 'array',
+                    items: { type: 'string', format: 'binary' },
+                    description: 'PDF files to convert (max 10 files, 50MB each)'
+                  },
+                  mode: {
+                    type: 'string',
+                    enum: ['no_ocr', 'ocr'],
+                    default: 'no_ocr',
+                    description: 'Conversion mode (no_ocr for native text layout, ocr for scanned documents)'
+                  },
+                  slideSize: {
+                    type: 'string',
+                    enum: ['match_pdf', 'widescreen_16_9'],
+                    default: 'match_pdf',
+                    description: 'Target slide dimension (match_pdf preserves page size, widescreen_16_9 scales into 13.333x7.5 inches)'
+                  },
+                  ocrLanguage: {
+                    type: 'string',
+                    default: 'eng',
+                    description: 'OCR recognition language (e.g. eng, spa, deu, fra)'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Conversion job completed successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        status: { type: 'string', example: 'completed' },
+                        mode: { type: 'string', example: 'no_ocr' },
+                        slideSize: { type: 'string', example: 'match_pdf' },
+                        totalFiles: { type: 'number', example: 1 },
+                        isZip: { type: 'boolean', example: false },
+                        warnings: {
+                          type: 'array',
+                          items: { type: 'string' }
+                        },
+                        files: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'string', format: 'uuid' },
+                              originalFilename: { type: 'string' },
+                              pptxFilename: { type: 'string' },
+                              slideCount: { type: 'number' },
+                              downloadUrl: { type: 'string' }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Validation error (0-byte file, invalid signature, or invalid options)',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          },
+          '403': {
+            description: 'OCR mode requested without premium entitlement',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          },
+          '413': {
+            description: 'File size exceeds 50MB limit or page count exceeds maximum',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          },
+          '422': {
+            description: 'Corrupted or password-protected PDF file',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          },
+          '429': {
+            description: 'Rate limit exceeded (max 60 conversions per 15 minutes)',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/v1/pdf-to-powerpoint/jobs/{jobId}': {
+      get: {
+        tags: ['PDF to PowerPoint'],
+        summary: 'Get conversion job status and file details',
+        parameters: [
+          {
+            name: 'jobId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'uuid' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Job status retrieved'
+          },
+          '404': {
+            description: 'Job not found or expired',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/v1/pdf-to-powerpoint/jobs/{jobId}/download': {
+      get: {
+        tags: ['PDF to PowerPoint'],
+        summary: 'Download converted PowerPoint presentation (or ZIP if multiple files). Deletes job on download.',
+        parameters: [
+          {
+            name: 'jobId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'uuid' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'PPTX or ZIP binary stream',
+            content: {
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation': {
+                schema: { type: 'string', format: 'binary' }
+              },
+              'application/zip': {
+                schema: { type: 'string', format: 'binary' }
+              }
+            }
+          },
+          '404': {
+            description: 'Job expired, already downloaded, or not found',
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/ApiErrorResponse' }
