@@ -33,24 +33,29 @@ function sanitizeXmlText(str) {
     .replace(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uFFFE\uFFFF]/g, '');
 }
 
-function resolveFont(fontName, generic, fontMap = {}, fallbackFont = 'Arial') {
+function resolveFont(fontName, generic, fontMap = {}, fallbackFont = 'Calibri') {
   if (fontMap[fontName]) return fontMap[fontName];
 
-  if (/league\s*gothic/i.test(fontName)) return 'Arial Narrow';
-  if (/montserrat/i.test(fontName)) return 'Arial';
-  if (/arial|helvetica/i.test(fontName)) return 'Arial';
-  if (/inter/i.test(fontName)) return 'Arial';
-  if (/roboto/i.test(fontName)) return 'Arial';
-  if (/open\s*sans/i.test(fontName)) return 'Arial';
-  if (/lato/i.test(fontName)) return 'Arial';
-  if (/times/i.test(fontName)) return 'Times New Roman';
-  if (/courier/i.test(fontName)) return 'Courier New';
-  if (/georgia/i.test(fontName)) return 'Georgia';
-  if (/verdana/i.test(fontName)) return 'Verdana';
-  if (/tahoma/i.test(fontName)) return 'Tahoma';
-  if (/trebuchet/i.test(fontName)) return 'Trebuchet MS';
+  const lower = String(fontName || '').toLowerCase();
+  if (/league\s*gothic/i.test(lower)) return 'Arial Narrow';
+  if (/montserrat/i.test(lower)) return 'Segoe UI';
+  if (/inter/i.test(lower)) return 'Calibri';
+  if (/roboto/i.test(lower)) return 'Segoe UI';
+  if (/open\s*sans/i.test(lower)) return 'Segoe UI';
+  if (/lato/i.test(lower)) return 'Calibri';
+  if (/poppins/i.test(lower)) return 'Segoe UI';
+  if (/arial|helvetica/i.test(lower)) return 'Arial';
+  if (/times|libertine|roman/i.test(lower)) return 'Times New Roman';
+  if (/courier|consolas|source\s*code|monaco/i.test(lower)) return 'Courier New';
+  if (/georgia/i.test(lower)) return 'Georgia';
+  if (/garamond/i.test(lower)) return 'Garamond';
+  if (/verdana/i.test(lower)) return 'Verdana';
+  if (/tahoma/i.test(lower)) return 'Tahoma';
+  if (/trebuchet/i.test(lower)) return 'Trebuchet MS';
+  if (/cambria/i.test(lower)) return 'Cambria';
+  if (/calibri/i.test(lower)) return 'Calibri';
 
-  if (generic === 'sans-serif') return 'Arial';
+  if (generic === 'sans-serif') return 'Calibri';
   if (generic === 'serif') return 'Times New Roman';
   if (generic === 'monospace') return 'Courier New';
 
