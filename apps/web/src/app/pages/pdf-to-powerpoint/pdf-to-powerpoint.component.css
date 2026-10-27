@@ -509,58 +509,91 @@
   color: #475569;
 }
 
-/* FLOATING ADD BUTTON */
+/* FLOATING RED TOOLS STACK (Right edge of canvas - Exact matching user screenshot) */
 .floating-tools-stack {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 10;
-}
-.floating-btn-wrap {
+  top: 40px;
+  right: 20px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  z-index: 20;
+}
+.floating-btn-wrap {
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: 6px;
 }
 .floating-circle-btn {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #E53238;
   color: #ffffff;
   border: none;
-  box-shadow: 0 4px 14px rgba(229, 50, 56, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(229, 50, 56, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
-  transition: transform 0.15s ease, background 0.15s ease;
 }
 .floating-circle-btn:hover {
-  background: #d0282e;
-  transform: scale(1.06);
+  background: #d3282e;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(229, 50, 56, 0.45);
 }
 .floating-circle-btn:focus-visible {
   outline: 3px solid #0f172a;
   outline-offset: 3px;
 }
+.floating-circle-btn:hover + .floating-tooltip-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-8px);
+}
 .floating-count-badge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
+  top: -3px;
+  right: -3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
   background: #0f172a;
   color: #ffffff;
   font-size: 11px;
-  font-weight: 700;
-  border-radius: 10px;
-  padding: 1px 6px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid #ffffff;
 }
 .floating-tooltip-label {
-  font-size: 11px;
+  position: absolute;
+  right: 52px;
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.floating-tooltip-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 4px solid #1e293b;
 }
 
 /* SIDEBAR ACTION PANEL */

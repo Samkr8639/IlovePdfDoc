@@ -18,6 +18,8 @@ import { ResultViewComponent } from '../../shared/components/result-view/result-
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
+import { LayoutService } from '../../core/services/layout.service';
+
 @Component({
   selector: 'app-pdf-to-powerpoint',
   standalone: true,
@@ -34,6 +36,7 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
   private pptService = inject(PdfToPowerPointService);
   private toolRegistry = inject(ToolRegistryService);
   private seo = inject(SeoService);
+  private layoutService = inject(LayoutService);
 
   private abortController: AbortController | null = null;
   private currentRunId = 0;
@@ -126,11 +129,13 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.currentRunId++;
     this.revokeCurrentUrl();
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
     }
+    this.layoutService.showFooter();
   }
 
   private revokeCurrentUrl(): void {
@@ -185,6 +190,7 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
     if (validated.length > 0) {
       this.selectedFiles.set(validated);
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
 
       // Analyze documents and update analysis map
       const analysisMap = new Map<string, PdfDocumentAnalysis>();
@@ -354,17 +360,35 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
         }
         this.conversionResult.set(result);
         this.currentState.set('completed');
+        this.layoutService.showFooter();
       }
     } catch (err: unknown) {
       if (this.currentRunId === runId && !controller.signal.aborted) {
         this.errorMessage.set(err instanceof Error ? err.message : 'Conversion failed. Please try again.');
         this.currentState.set('organize');
+        this.layoutService.hideFooter();
       }
     } finally {
       if (this.currentRunId === runId) {
         this.isProcessing.set(false);
       }
     }
+  }
+
+  openGoogleDrive(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://drive.google.com/', '_blank', 'noopener,noreferrer');
+  }
+
+  openDropbox(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
   }
 
   dismissWarningBanner(): void {
@@ -386,5 +410,6 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
     this.selectedMode.set('no_ocr');
     this.selectedSlideSize.set('match_pdf');
     this.currentState.set('upload');
+    this.layoutService.showFooter();
   }
 }
