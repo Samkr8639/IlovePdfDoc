@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
 import { PDFDocument, rgb } from 'pdf-lib';
+import fs from 'fs';
+import path from 'path';
 
 describe('PDF to Word API Endpoints', () => {
   const app = createApp();
@@ -71,6 +73,18 @@ describe('PDF to Word API Endpoints', () => {
 
     expect(res.body.success).toBe(false);
     expect(res.body.error.code).toBe('CORRUPTED_PDF');
+  });
+
+  it('rejects password-protected or encrypted PDF with HTTP 422 PASSWORD_PROTECTED', async () => {
+    const encBuf = fs.readFileSync(path.resolve(__dirname, '../../../test-fixtures/encrypted_sample.pdf'));
+    const res = await request(app)
+      .post('/api/v1/pdf-to-word/convert')
+      .attach('files', encBuf, 'encrypted_sample.pdf')
+      .expect(422);
+
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('PASSWORD_PROTECTED');
+    expect(res.body.error.message).toContain('password-protected or encrypted');
   });
 
   it('successfully converts a digital PDF to a genuine DOCX document', async () => {

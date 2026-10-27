@@ -27,6 +27,7 @@
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.296",
     "pngjs": "^7.0.0",
+    "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^7.0.0",
     "zod": "^4.6.7"
   },
@@ -37,6 +38,7 @@
     "@types/node": "^22.13.4",
     "@types/pdf-parse": "^1.1.5",
     "@types/supertest": "^6.0.2",
+    "@types/swagger-ui-express": "^4.1.8",
     "jest": "^29.7.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",

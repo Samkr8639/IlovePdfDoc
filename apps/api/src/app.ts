@@ -9,6 +9,8 @@ import { compressRouter } from './routes/compress.route';
 import { pdfToWordRouter } from './routes/pdf-to-word.route';
 import { errorHandler, AppError } from './middleware/errorHandler';
 import { apiRateLimiter, conversionRateLimiter, contactRateLimiter } from './middleware/rateLimiter';
+import swaggerUi from 'swagger-ui-express';
+import { openApiSpec } from './docs/openapi';
 
 export function createApp(): Express {
   const app = express();
@@ -19,9 +21,9 @@ export function createApp(): Express {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", 'data:', 'blob:'],
+          imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
           connectSrc: ["'self'"],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"]
@@ -40,6 +42,13 @@ export function createApp(): Express {
 
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Interactive Swagger UI & OpenAPI Specification
+  app.get('/api/docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json(openApiSpec);
+  });
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
   // Global API Rate Limiter
   app.use('/api/v1', apiRateLimiter);
