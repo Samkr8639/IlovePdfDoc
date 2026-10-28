@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, OnDestroy, signal, ElementRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
+import { AnimationService } from '../../core/services/animation.service';
 import { ToolCategory } from '@paperflow/contracts';
 import { PtSectionHeaderComponent } from '../../shared/components/pt-section-header/pt-section-header.component';
 import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
@@ -15,9 +16,12 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   toolRegistry = inject(ToolRegistryService);
   private seo = inject(SeoService);
+  private animationService = inject(AnimationService);
+  private elementRef = inject(ElementRef);
+  private animCtx: any = null;
 
   selectedTab = signal<ExtendedFilterCategory>('all');
   isWorkflowModalOpen = signal<boolean>(false);
@@ -38,6 +42,17 @@ export class HomeComponent implements OnInit {
       canonical: 'https://pdftailor.in',
       faqs: []
     });
+  }
+
+  ngAfterViewInit(): void {
+    const el = this.elementRef.nativeElement;
+    this.animCtx = this.animationService.animateHero(el);
+  }
+
+  ngOnDestroy(): void {
+    if (this.animCtx && typeof this.animCtx.revert === 'function') {
+      this.animCtx.revert();
+    }
   }
 
   isLive(toolId: string): boolean {
