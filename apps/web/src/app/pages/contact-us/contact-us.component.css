@@ -77,7 +77,7 @@
   text-decoration: none;
 }
 a.channel-val:hover {
-  color: #E53238;
+  color: var(--pt-teal-700, #0F766E);
 }
 
 /* RIGHT WIZARD CARD */
@@ -103,8 +103,8 @@ a.channel-val:hover {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #E53238;
-  background: #fef2f2;
+  color: var(--pt-teal-700, #0F766E);
+  background: var(--pt-teal-50, #ECF7F5);
   padding: 4px 10px;
   border-radius: 6px;
 }
@@ -122,7 +122,7 @@ a.channel-val:hover {
 }
 .progress-bar-fill {
   height: 100%;
-  background: #E53238;
+  background: var(--pt-teal-700, #0F766E);
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -175,8 +175,8 @@ a.channel-val:hover {
 .text-input:focus,
 .select-input:focus,
 .textarea-input:focus {
-  border-color: #E53238;
-  box-shadow: 0 0 0 3px rgba(229, 50, 56, 0.12);
+  border-color: var(--pt-teal-700, #0F766E);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 }
 .select-wrapper {
   position: relative;
@@ -386,7 +386,7 @@ a.channel-val:hover {
 .btn-prev-link {
   font-size: 14px;
   font-weight: 700;
-  color: #E53238;
+  color: var(--pt-teal-700, #0F766E);
   background: none;
   border: none;
   cursor: pointer;
@@ -398,15 +398,16 @@ a.channel-val:hover {
   text-decoration: underline;
 }
 .btn-primary-red {
-  background: #E53238;
+  background: var(--pt-teal-700, #0F766E);
   color: #ffffff;
+  font-family: var(--pt-font-heading);
   font-size: 14.5px;
-  font-weight: 800;
+  font-weight: 700;
   padding: 12px 28px;
-  border-radius: 10px;
+  border-radius: var(--pt-radius-md, 8px);
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(229, 50, 56, 0.25);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
@@ -414,9 +415,9 @@ a.channel-val:hover {
   text-decoration: none;
 }
 .btn-primary-red:hover:not(:disabled) {
-  background: #dc2626;
+  background: var(--pt-teal-800, #0B5D57);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(229, 50, 56, 0.32);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.35);
 }
 .btn-primary-red:disabled {
   opacity: 0.5;

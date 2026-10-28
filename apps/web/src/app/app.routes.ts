@@ -8,102 +8,102 @@ export const routes: Routes = [
   {
     path: '',
     component: HomeComponent,
-    title: 'PDF flow - Online PDF Converter & Document Tools'
+    title: 'PDFTailor - Online PDF Converter & Document Tools'
   },
   {
     path: 'merge-pdf',
     component: MergePdfComponent,
-    title: 'Merge PDF Online Free - Combine PDF Files Privately | PDF flow'
+    title: 'Merge PDF Online Free - Combine PDF Files Privately | PDFTailor'
   },
   {
     path: 'split-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Split PDF Online - Separate PDF Pages | PDF flow'
+    title: 'Split PDF Online - Separate PDF Pages | PDFTailor'
   },
   {
     path: 'compress-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Compress PDF Online | PDF flow'
+    title: 'Compress PDF Online | PDFTailor'
   },
   {
     path: 'pdf-to-word',
     component: PdfToWordComponent,
-    title: 'PDF to Word Converter Online | PDF flow'
+    title: 'PDF to Word Converter Online | PDFTailor'
   },
   {
     path: 'pdf-to-powerpoint',
     loadComponent: () => import('./pages/pdf-to-powerpoint/pdf-to-powerpoint.component').then(m => m.PdfToPowerPointComponent),
-    title: 'PDF to PowerPoint Converter Online | PDF flow'
+    title: 'PDF to PowerPoint Converter Online | PDFTailor'
   },
   {
     path: 'pdf-to-excel',
     component: ToolPlaceholderComponent,
-    title: 'PDF to Excel Converter | PDF flow'
+    title: 'PDF to Excel Converter | PDFTailor'
   },
   {
     path: 'word-to-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Word to PDF Converter Online | PDF flow'
+    title: 'Word to PDF Converter Online | PDFTailor'
   },
   {
     path: 'powerpoint-to-pdf',
     component: ToolPlaceholderComponent,
-    title: 'PowerPoint to PDF Converter | PDF flow'
+    title: 'PowerPoint to PDF Converter | PDFTailor'
   },
   {
     path: 'excel-to-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Excel to PDF Converter | PDF flow'
+    title: 'Excel to PDF Converter | PDFTailor'
   },
   {
     path: 'edit-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Edit PDF Online Free | PDF flow'
+    title: 'Edit PDF Online Free | PDFTailor'
   },
   {
     path: 'pdf-to-jpg',
     component: ToolPlaceholderComponent,
-    title: 'PDF to JPG Converter Online | PDF flow'
+    title: 'PDF to JPG Converter Online | PDFTailor'
   },
   {
     path: 'images-to-pdf',
     component: ToolPlaceholderComponent,
-    title: 'JPG to PDF Converter Free Online | PDF flow'
+    title: 'JPG to PDF Converter Free Online | PDFTailor'
   },
   {
     path: 'sign-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Sign PDF Online - Free E-Signatures | PDF flow'
+    title: 'Sign PDF Online - Free E-Signatures | PDFTailor'
   },
   {
     path: 'watermark-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Watermark PDF Online | PDF flow'
+    title: 'Watermark PDF Online | PDFTailor'
   },
   {
     path: 'rotate-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Rotate PDF Online - Permanently Rotate Pages | PDF flow'
+    title: 'Rotate PDF Online - Permanently Rotate Pages | PDFTailor'
   },
   {
     path: 'html-to-pdf',
     component: ToolPlaceholderComponent,
-    title: 'HTML to PDF Converter | PDF flow'
+    title: 'HTML to PDF Converter | PDFTailor'
   },
   {
     path: 'unlock-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Unlock PDF Online - Remove Password | PDF flow'
+    title: 'Unlock PDF Online - Remove Password | PDFTailor'
   },
   {
     path: 'protect-pdf',
     component: ToolPlaceholderComponent,
-    title: 'Protect PDF with Password Online | PDF flow'
+    title: 'Protect PDF with Password Online | PDFTailor'
   },
   {
     path: 'about-us',
     loadComponent: () => import('./pages/about-us/about-us.component').then(m => m.AboutUsComponent),
-    title: 'About Us - The Story & Mission Behind PDF flow | Free & Secure PDF Tools'
+    title: 'About Us - The Story & Mission Behind PDFTailor | Free & Secure PDF Tools'
   },
   {
     path: 'about',
@@ -112,7 +112,7 @@ export const routes: Routes = [
   {
     path: 'contact-us',
     loadComponent: () => import('./pages/contact-us/contact-us.component').then(m => m.ContactUsComponent),
-    title: 'Contact - Get in Touch with PDF flow Support & Sales'
+    title: 'Contact - Get in Touch with PDFTailor Support & Sales'
   },
   {
     path: 'contact',
@@ -121,7 +121,7 @@ export const routes: Routes = [
   {
     path: 'privacy-policy',
     loadComponent: () => import('./pages/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
-    title: 'Privacy Policy — PDF flow Document Processing & Data Protection'
+    title: 'Privacy Policy — PDFTailor Document Processing & Data Protection'
   },
   {
     path: 'privacy',
@@ -130,7 +130,7 @@ export const routes: Routes = [
   {
     path: 'terms-and-conditions',
     loadComponent: () => import('./pages/terms-and-conditions/terms-and-conditions.component').then(m => m.TermsAndConditionsComponent),
-    title: 'Terms & Conditions — PDF flow Document Processing & Service Terms'
+    title: 'Terms & Conditions — PDFTailor Document Processing & Service Terms'
   },
   {
     path: 'terms',
@@ -143,7 +143,7 @@ export const routes: Routes = [
   {
     path: 'gdpr-compliance',
     loadComponent: () => import('./pages/gdpr-compliance/gdpr-compliance.component').then(m => m.GdprComplianceComponent),
-    title: 'GDPR Compliance & Data Protection — PDF flow'
+    title: 'GDPR Compliance & Data Protection — PDFTailor'
   },
   {
     path: 'gdpr',
@@ -152,7 +152,7 @@ export const routes: Routes = [
   {
     path: 'security-whitepaper',
     loadComponent: () => import('./pages/security-whitepaper/security-whitepaper.component').then(m => m.SecurityWhitepaperComponent),
-    title: 'Security Architecture & Document Processing Whitepaper — PDF flow'
+    title: 'Security Architecture & Document Processing Whitepaper — PDFTailor'
   },
   {
     path: 'security',
@@ -165,7 +165,7 @@ export const routes: Routes = [
   {
     path: 'cookie-settings',
     loadComponent: () => import('./pages/cookie-settings/cookie-settings.component').then(m => m.CookieSettingsComponent),
-    title: 'Cookie Settings & Privacy Preferences — PDF flow'
+    title: 'Cookie Settings & Privacy Preferences — PDFTailor'
   },
   {
     path: 'cookies',
@@ -178,7 +178,7 @@ export const routes: Routes = [
   {
     path: 'press-media-kit',
     loadComponent: () => import('./pages/press-media-kit/press-media-kit.component').then(m => m.PressMediaKitComponent),
-    title: 'Press & Media Kit — Official Brand Assets & Resources | PDF flow'
+    title: 'Press & Media Kit — Official Brand Assets & Resources | PDFTailor'
   },
   {
     path: 'press',

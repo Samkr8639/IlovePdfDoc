@@ -481,7 +481,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         },
         {
           question: 'Are my confidential documents uploaded to any remote server?',
-          answer: 'Never. PDF flow processes your documents 100% inside your browser memory using WebAssembly. Your files are never uploaded.'
+          answer: 'Never. PDFTailor processes your documents 100% inside your browser memory using WebAssembly. Your files are never uploaded.'
         },
         {
           question: 'Which compression level should I choose?',
@@ -502,7 +502,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         },
         {
           question: 'Are my split files uploaded to any server?',
-          answer: 'No. PDF flow processes your documents 100% inside your browser memory. Your files never leave your device.'
+          answer: 'No. PDFTailor processes your documents 100% inside your browser memory. Your files never leave your device.'
         }
       ];
     }
@@ -518,7 +518,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
       },
       {
         question: 'Can I use this tool on mobile or tablet devices?',
-        answer: 'Yes, PDF flow is fully responsive and optimized for touch screens, tablets, laptops, and desktop computers.'
+        answer: 'Yes, PDFTailor is fully responsive and optimized for touch screens, tablets, laptops, and desktop computers.'
       }
     ];
   });
@@ -531,7 +531,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         name: 'Merge PDF',
         desc: 'Combine multiple PDF files in order',
         route: '/merge-pdf',
-        bgColor: '#E53238',
+        bgColor: '#0F766E',
         iconPath: 'M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2'
       },
       {
@@ -539,7 +539,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         name: 'Split PDF',
         desc: 'Separate one page or whole sets',
         route: '/split-pdf',
-        bgColor: '#E53238',
+        bgColor: '#0F766E',
         iconPath: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'
       },
       {

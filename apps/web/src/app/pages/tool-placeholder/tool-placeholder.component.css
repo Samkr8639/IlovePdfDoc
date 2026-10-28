@@ -216,11 +216,11 @@
     }
     .step-num {
       font-size: 32px;
-      font-weight: 900;
-      color: #E53238;
+      font-weight: 700;
+      color: var(--pt-teal-700, #0F766E);
       opacity: 0.9;
       margin-bottom: 14px;
-      font-family: 'Segoe UI', Roboto, monospace;
+      font-family: var(--pt-font-heading);
     }
     .step-title {
       font-size: 18px;
@@ -299,9 +299,9 @@
       transition: all 0.2s ease;
     }
     .related-card:hover {
-      border-color: #E53238;
+      border-color: var(--pt-teal-100, #CCEBE6);
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px -2px rgba(229, 50, 56, 0.1);
+      box-shadow: 0 6px 16px -2px rgba(15, 118, 110, 0.1);
     }
     .related-icon-box {
       width: 44px;
@@ -629,19 +629,19 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: #E53238;
+      background: var(--pt-teal-700, #0F766E);
       color: #ffffff;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(229, 50, 56, 0.3);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
     .floating-circle-btn:hover {
-      background: #d3282e;
+      background: var(--pt-teal-800, #0B5D57);
       transform: scale(1.1);
       box-shadow: 0 6px 16px rgba(229, 50, 56, 0.45);
     }
@@ -830,8 +830,8 @@
     }
     .ilove-toggle-btn.active {
       background: #ffffff;
-      border: 1.5px solid #E53238;
-      color: #E53238;
+      border: 1.5px solid var(--pt-teal-700, #0F766E);
+      color: var(--pt-teal-700, #0F766E);
       font-weight: 700;
     }
     .ilove-input-group {
@@ -856,8 +856,8 @@
       transition: border-color 0.2s ease;
     }
     .ilove-text-input:focus {
-      border-color: #E53238;
-      box-shadow: 0 0 0 3px rgba(229, 50, 56, 0.1);
+      border-color: var(--pt-teal-700, #0F766E);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
     }
 
     /* CUSTOM RANGES LIST & DUAL INPUT CARDS (MATCHING REFERENCE) */
@@ -939,8 +939,8 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .range-cell:focus-within {
-      border-color: #E53238;
-      box-shadow: 0 0 0 2px rgba(229, 50, 56, 0.1);
+      border-color: var(--pt-teal-700, #0F766E);
+      box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.1);
     }
     .range-cell.cell-error {
       border-color: #ef4444;
@@ -1013,18 +1013,18 @@
       gap: 8px;
       padding: 9px 16px;
       background: #ffffff;
-      border: 1.5px solid #E53238;
+      border: 1.5px solid var(--pt-teal-700, #0F766E);
       border-radius: 6px;
-      color: #E53238;
+      color: var(--pt-teal-700, #0F766E);
       font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .add-range-btn:hover {
-      background: #fef2f2;
-      border-color: #dc2626;
-      color: #dc2626;
+      background: var(--pt-teal-50, #ECF7F5);
+      border-color: var(--pt-teal-800, #0B5D57);
+      color: var(--pt-teal-800, #0B5D57);
     }
 
     .ilove-checkbox-row {
@@ -1099,8 +1099,8 @@
     }
     .compression-card.selected {
       background: #ffffff;
-      border-color: #E53238;
-      box-shadow: 0 4px 12px rgba(229, 50, 56, 0.08);
+      border-color: var(--pt-teal-700, #0F766E);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.08);
     }
     .comp-radio-circle {
       width: 20px;
@@ -1113,13 +1113,13 @@
       flex-shrink: 0;
     }
     .compression-card.selected .comp-radio-circle {
-      border-color: #E53238;
+      border-color: var(--pt-teal-700, #0F766E);
     }
     .comp-radio-dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: #E53238;
+      background: var(--pt-teal-700, #0F766E);
     }
     .comp-card-title {
       font-size: 14.5px;
@@ -1153,7 +1153,7 @@
       gap: 14px;
       padding: 14px 16px;
       background: #ffffff;
-      border: 2px solid #E53238;
+      border: 2px solid var(--pt-teal-700, #0F766E);
       border-radius: 12px;
     }
     .format-icon {
@@ -1245,25 +1245,26 @@
     .giant-action-submit-btn {
       width: 100%;
       height: 56px;
-      border-radius: 12px;
-      background: #E53238;
+      border-radius: var(--pt-radius-md, 8px);
+      background: var(--pt-teal-700, #0F766E);
       color: #ffffff;
       border: none;
+      font-family: var(--pt-font-heading);
       font-size: 17px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.01em;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       cursor: pointer;
-      box-shadow: 0 8px 20px -2px rgba(229, 50, 56, 0.35);
+      box-shadow: 0 8px 20px -2px rgba(15, 118, 110, 0.35);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .giant-action-submit-btn:hover:not(:disabled) {
-      background: #d02a30;
+      background: var(--pt-teal-800, #0B5D57);
       transform: translateY(-2px);
-      box-shadow: 0 12px 28px -2px rgba(229, 50, 56, 0.45);
+      box-shadow: 0 12px 28px -2px rgba(15, 118, 110, 0.45);
     }
     .giant-action-submit-btn.btn-disabled {
       background: #cbd5e1;
