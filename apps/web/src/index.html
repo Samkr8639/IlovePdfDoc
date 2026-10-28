@@ -37,7 +37,7 @@
   <meta name="twitter:image" content="https://pdftailor.in/og-image.webp">
 
   <!-- Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://translate.googleapis.com https://www.gstatic.com; font-src 'self' data: https://fonts.gstatic.com https://www.gstatic.com; img-src 'self' data: blob: https: https://www.google.com https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; frame-src 'self' blob: https://translate.google.com; child-src 'self' blob:; object-src 'self' blob:; connect-src 'self' http://localhost:4000 https://localhost:4000 ws: https://translate.googleapis.com https://translate.google.com https://translate-pa.googleapis.com; worker-src 'self' blob:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' blob:; child-src 'self' blob:; object-src 'self' blob:; connect-src 'self' http://localhost:4000 https://localhost:4000 ws:; worker-src 'self' blob:;">
 
   <!-- Schema.org JSON-LD Structured Data -->
   <script type="application/ld+json">
@@ -67,7 +67,6 @@
 
 </head>
 <body>
-  <div id="google_translate_element" aria-hidden="true"></div>
   <app-root></app-root>
 </body>
 </html>

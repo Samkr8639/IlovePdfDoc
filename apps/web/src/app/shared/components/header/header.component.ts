@@ -1,12 +1,13 @@
 import { Component, ElementRef, HostListener, inject, signal, computed } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ToolRegistryService } from '../../../core/services/tool-registry.service';
 import { ToolDefinition } from '@paperflow/contracts';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })

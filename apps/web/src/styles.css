@@ -391,43 +391,7 @@ button {
   border: 1px solid var(--pt-teal-100);
 }
 
-/* ==========================================================================
-   GOOGLE TRANSLATE SEAMLESS EMBED & CLEANUP
-   ========================================================================== */
-#google_translate_element {
-  position: absolute;
-  top: -9999px;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0.01;
-  pointer-events: none;
-}
 
-.goog-te-banner-frame.skiptranslate,
-.goog-te-banner-frame,
-iframe.goog-te-banner-frame {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-body {
-  top: 0px !important;
-  position: static !important;
-}
-
-.goog-tooltip,
-.goog-tooltip:hover,
-#goog-gt-tt,
-.goog-te-balloon-frame {
-  display: none !important;
-}
-
-.goog-text-highlight {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
 
 /* ==========================================================================
    WORKSPACE / ORGANIZE VIEWPORT LOCK

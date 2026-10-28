@@ -13,7 +13,7 @@
           />
         </a>
         <p class="footer-tagline">
-          The elegant, privacy-first PDF tailoring workspace. Ephemeral zero-retention processing directly in your browser and secure edge runtimes.
+          {{ 'FOOTER.TAGLINE' | translate }}
         </p>
       </div>
 
@@ -22,65 +22,64 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span>Zero Server Retention</span>
+          <span>{{ 'FOOTER.ZERO_RETENTION' | translate }}</span>
         </div>
         <div class="compliance-badge">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
-          <span>End-to-End TLS Encrypted</span>
+          <span>{{ 'FOOTER.TLS_ENCRYPTED' | translate }}</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 5-COLUMN MAIN GRID -->
+  <!-- 3-COLUMN MAIN GRID -->
   <div class="container footer-main-grid">
     <!-- Col 1: PRODUCT -->
     <div class="footer-nav-col">
       <button type="button" class="footer-col-toggle" (click)="toggleSection('product')" [attr.aria-expanded]="openSection() === 'product'">
-        <h4 class="footer-col-head">PRODUCT</h4>
+        <h4 class="footer-col-head">{{ 'FOOTER.COL_PRODUCT' | translate }}</h4>
         <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'product'"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'product'">
-        <li><a routerLink="/" class="footer-item">PDFTailor Home</a></li>
-        <li><a routerLink="/merge-pdf" class="footer-item">Merge PDF</a></li>
-        <li><a routerLink="/split-pdf" class="footer-item">Split PDF</a></li>
-        <li><a routerLink="/compress-pdf" class="footer-item">Compress PDF</a></li>
-        <li><a routerLink="/pdf-to-word" class="footer-item">PDF to Word</a></li>
-        <li><a routerLink="/pdf-to-powerpoint" class="footer-item">PDF to PowerPoint</a></li>
-        <li><a routerLink="/protect-pdf" class="footer-item">PDF Security</a></li>
+        <li><a routerLink="/" class="footer-item">{{ 'FOOTER.LINK_HOME' | translate }}</a></li>
+        <li><a routerLink="/merge-pdf" class="footer-item">{{ 'FOOTER.LINK_MERGE' | translate }}</a></li>
+        <li><a routerLink="/split-pdf" class="footer-item">{{ 'FOOTER.LINK_SPLIT' | translate }}</a></li>
+        <li><a routerLink="/compress-pdf" class="footer-item">{{ 'FOOTER.LINK_COMPRESS' | translate }}</a></li>
+        <li><a routerLink="/pdf-to-word" class="footer-item">{{ 'FOOTER.LINK_WORD' | translate }}</a></li>
+        <li><a routerLink="/pdf-to-powerpoint" class="footer-item">{{ 'FOOTER.LINK_PPT' | translate }}</a></li>
+        <li><a routerLink="/protect-pdf" class="footer-item">{{ 'FOOTER.LINK_SECURITY' | translate }}</a></li>
       </ul>
     </div>
 
-
-    <!-- Col 4: LEGAL -->
+    <!-- Col 2: LEGAL -->
     <div class="footer-nav-col">
       <button type="button" class="footer-col-toggle" (click)="toggleSection('legal')" [attr.aria-expanded]="openSection() === 'legal'">
-        <h4 class="footer-col-head">LEGAL</h4>
+        <h4 class="footer-col-head">{{ 'FOOTER.COL_LEGAL' | translate }}</h4>
         <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'legal'"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'legal'">
-        <li><a routerLink="/privacy-policy" class="footer-item">Privacy Policy</a></li>
-        <li><a routerLink="/terms-and-conditions" class="footer-item">Terms & Conditions</a></li>
-        <li><a routerLink="/gdpr-compliance" class="footer-item">GDPR Compliance</a></li>
-        <li><a routerLink="/security-whitepaper" class="footer-item">Security Whitepaper</a></li>
-        <li><a routerLink="/cookie-settings" class="footer-item">Cookie Settings</a></li>
+        <li><a routerLink="/privacy-policy" class="footer-item">{{ 'FOOTER.LINK_PRIVACY' | translate }}</a></li>
+        <li><a routerLink="/terms-and-conditions" class="footer-item">{{ 'FOOTER.LINK_TERMS' | translate }}</a></li>
+        <li><a routerLink="/gdpr-compliance" class="footer-item">{{ 'FOOTER.LINK_GDPR' | translate }}</a></li>
+        <li><a routerLink="/security-whitepaper" class="footer-item">{{ 'FOOTER.LINK_WHITEPAPER' | translate }}</a></li>
+        <li><a routerLink="/cookie-settings" class="footer-item">{{ 'FOOTER.LINK_COOKIES' | translate }}</a></li>
       </ul>
     </div>
 
-    <!-- Col 5: COMPANY -->
+    <!-- Col 3: COMPANY -->
     <div class="footer-nav-col">
       <button type="button" class="footer-col-toggle" (click)="toggleSection('company')" [attr.aria-expanded]="openSection() === 'company'">
-        <h4 class="footer-col-head">COMPANY</h4>
+        <h4 class="footer-col-head">{{ 'FOOTER.COL_COMPANY' | translate }}</h4>
         <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'company'"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'company'">
-        <li><a routerLink="/about-us" class="footer-item">About us</a></li>
-        <li><a routerLink="/contact-us" class="footer-item">Contact & Support</a></li>
-        <li><a routerLink="/" class="footer-item">Blog & Guides</a></li>
-        <li><a routerLink="/press-media-kit" class="footer-item">Press & Media Kit</a></li>
+        <li><a routerLink="/about-us" class="footer-item">{{ 'FOOTER.LINK_ABOUT' | translate }}</a></li>
+        <li><a routerLink="/contact-us" class="footer-item">{{ 'FOOTER.LINK_CONTACT' | translate }}</a></li>
+        <li><a routerLink="/" class="footer-item">{{ 'FOOTER.LINK_BLOG' | translate }}</a></li>
+        <li><a routerLink="/press-media-kit" class="footer-item">{{ 'FOOTER.LINK_PRESS' | translate }}</a></li>
       </ul>
     </div>
   </div>
@@ -171,7 +170,7 @@
       </div>
 
       <div class="copyright-text">
-        © {{ currentYear }} PDFTailor. All rights reserved. 100% In-Browser Privacy Guarantee.
+        {{ 'FOOTER.COPYRIGHT' | translate }}
       </div>
 
       <div class="social-icons-row" aria-label="Social media links">

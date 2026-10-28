@@ -68,8 +68,8 @@
             </svg>
           </div>
           <div class="card-text">
-            <span class="card-title">Instant In-Browser</span>
-            <span class="card-sub">0s Upload Wait · Client-Side</span>
+            <span class="card-title">{{ 'HERO.CARD_INSTANT' | translate }}</span>
+            <span class="card-sub">{{ 'HERO.CARD_INSTANT_DESC' | translate }}</span>
           </div>
           <span class="card-pulse-indicator"></span>
         </div>
@@ -84,8 +84,8 @@
             </svg>
           </div>
           <div class="card-text">
-            <span class="card-title">Zero Server Storage</span>
-            <span class="card-sub">Files Never Leave Your Device</span>
+            <span class="card-title">{{ 'HERO.CARD_STORAGE' | translate }}</span>
+            <span class="card-sub">{{ 'HERO.CARD_STORAGE_DESC' | translate }}</span>
           </div>
           <span class="card-shield-check">✓</span>
         </div>
@@ -95,9 +95,7 @@
       <div class="hero-kicker-wrap">
         <div class="hero-kicker-badge">
           <span class="kicker-pulse-beacon" aria-hidden="true"></span>
-          <span class="kicker-tag">Next-Gen PDF Engine</span>
-          <span class="kicker-sep" aria-hidden="true">•</span>
-          <span class="kicker-text">100% Free &amp; Private Forever</span>
+          <span class="kicker-tag">{{ 'HERO.ENGINE_TAG' | translate }}</span>
           <svg class="kicker-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
@@ -106,15 +104,14 @@
 
       <!-- MAIN HEADLINE -->
       <h1 class="hero-headline">
-        Every tool you need to
-        <span class="headline-gradient">tailor PDFs</span>
-        in one place
+        {{ 'HERO.TITLE_MAIN' | translate }}
+        <span class="headline-gradient">{{ 'HERO.TITLE_HIGHLIGHT' | translate }}</span>
+        {{ 'HERO.TITLE_SUFFIX' | translate }}
       </h1>
 
       <!-- SUBTITLE -->
       <p class="hero-subhead">
-        Merge, split, compress, convert, and protect documents with zero server storage.
-        Professional client-side document utilities — 100% free with no sign-ups or file size limits.
+        {{ 'HERO.SUBTITLE' | translate }}
       </p>
 
       <!-- TRUST & VALUE HIGHLIGHTS -->
@@ -123,27 +120,27 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
           </svg>
-          <span>100% Client-Side</span>
+          <span>{{ 'HERO.BADGE_CLIENT_SIDE' | translate }}</span>
         </div>
         <div class="trust-chip">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <span>Zero Server Storage</span>
+          <span>{{ 'HERO.BADGE_ZERO_STORAGE' | translate }}</span>
         </div>
         <div class="trust-chip">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>No File Size Limits</span>
+          <span>{{ 'HERO.BADGE_NO_LIMITS' | translate }}</span>
         </div>
         <div class="trust-chip">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
-          <span>Free · No Signup</span>
+          <span>{{ 'HERO.BADGE_FREE' | translate }}</span>
         </div>
       </div>
 
@@ -166,7 +163,7 @@
             <rect x="14" y="14" width="7" height="7"></rect>
             <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
-          <span>All Tools</span>
+          <span>{{ 'FILTERS.ALL' | translate }}</span>
         </button>
         <button
           type="button"
@@ -179,7 +176,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
           </svg>
-          <span>Workflows</span>
+          <span>{{ 'FILTERS.WORKFLOWS' | translate }}</span>
           <span class="pill-badge-sparkle">Auto</span>
         </button>
         <button
@@ -195,7 +192,7 @@
             <polyline points="2 17 12 22 22 17"></polyline>
             <polyline points="2 12 12 17 22 12"></polyline>
           </svg>
-          <span>Organize PDF</span>
+          <span>{{ 'FILTERS.ORGANIZE' | translate }}</span>
         </button>
         <button
           type="button"
@@ -209,7 +206,7 @@
             <circle cx="12" cy="12" r="10"></circle>
             <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
           </svg>
-          <span>Optimize PDF</span>
+          <span>{{ 'FILTERS.OPTIMIZE' | translate }}</span>
         </button>
         <button
           type="button"
@@ -226,7 +223,7 @@
             <line x1="15" y1="15" x2="21" y2="21"></line>
             <line x1="4" y1="4" x2="9" y2="9"></line>
           </svg>
-          <span>Convert PDF</span>
+          <span>{{ 'FILTERS.CONVERT' | translate }}</span>
         </button>
         <button
           type="button"
@@ -240,7 +237,7 @@
             <path d="M12 20h9"></path>
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
           </svg>
-          <span>Edit PDF</span>
+          <span>{{ 'FILTERS.EDIT' | translate }}</span>
         </button>
         <button
           type="button"
@@ -254,7 +251,7 @@
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <span>PDF Security</span>
+          <span>{{ 'FILTERS.SECURITY' | translate }}</span>
         </button>
         <button
           type="button"
@@ -267,7 +264,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
             <path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.58 3.25 3.93L11 12H9v2h2v2H9v2h2v2h2v-2h2v-2h-2v-2h2v-2h-2l-.25-2.07A4.002 4.002 0 0 0 16 6a4 4 0 0 0-4-4z"></path>
           </svg>
-          <span>PDF Intelligence</span>
+          <span>{{ 'FILTERS.INTELLIGENCE' | translate }}</span>
         </button>
       </nav>
       </div>
@@ -447,17 +444,17 @@
               </div>
 
               @if (isLive(tool.id)) {
-                <span class="card-status-pill pill-live">Live</span>
+                <span class="card-status-pill pill-live">{{ 'TOOLS.LIVE' | translate }}</span>
               } @else {
-                <span class="card-status-pill pill-soon">Soon</span>
+                <span class="card-status-pill pill-soon">{{ 'TOOLS.SOON' | translate }}</span>
               }
             </div>
 
-            <h3 class="card-title">{{ tool.name }}</h3>
-            <p class="card-desc">{{ tool.shortDescription }}</p>
+            <h3 class="card-title">{{ getToolName(tool) }}</h3>
+            <p class="card-desc">{{ getToolDesc(tool) }}</p>
 
             <div class="card-footer-cue" aria-hidden="true">
-              <span>{{ isLive(tool.id) ? 'Open Tool' : 'Coming Soon' }}</span>
+              <span>{{ isLive(tool.id) ? ('TOOLS.OPEN_TOOL' | translate) : ('TOOLS.COMING_SOON' | translate) }}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -685,15 +682,15 @@
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
-              <span>Coming Soon</span>
+              <span>{{ 'MEDIA.SOON_BADGE' | translate }}</span>
             </span>
           </div>
-          <h3 class="media-title">Image tailoring made simple with PDFTailor Media</h3>
+          <h3 class="media-title">{{ 'MEDIA.TITLE' | translate }}</h3>
           <p class="media-desc">
-            Crop, resize, compress, and convert PNG, JPG, and SVG assets into vector PDFs with lossless quality. All running in WebAssembly with zero permanent cloud storage.
+            {{ 'MEDIA.DESC' | translate }}
           </p>
           <button type="button" class="media-cta-soon-btn" disabled aria-disabled="true">
-            <span>Coming Soon</span>
+            <span>{{ 'MEDIA.CTA_SOON' | translate }}</span>
           </button>
         </div>
       </div>

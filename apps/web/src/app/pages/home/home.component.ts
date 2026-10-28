@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
 import { AnimationService } from '../../core/services/animation.service';
-import { ToolCategory } from '@paperflow/contracts';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslationService } from '../../core/services/translation.service';
+import { ToolDefinition, ToolCategory } from '@paperflow/contracts';
 import { PtSectionHeaderComponent } from '../../shared/components/pt-section-header/pt-section-header.component';
 import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 
@@ -12,7 +14,7 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, FormsModule, PtSectionHeaderComponent, PtAdSlotComponent],
+  imports: [RouterLink, FormsModule, PtSectionHeaderComponent, PtAdSlotComponent, TranslatePipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -21,7 +23,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private seo = inject(SeoService);
   private animationService = inject(AnimationService);
   private elementRef = inject(ElementRef);
+  private translate = inject(TranslateService);
+  private translationService = inject(TranslationService);
   private animCtx: any = null;
+
+  readonly currentLang = this.translationService.currentLanguage;
 
   selectedTab = signal<ExtendedFilterCategory>('all');
   isWorkflowModalOpen = signal<boolean>(false);
@@ -57,6 +63,20 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLive(toolId: string): boolean {
     return this.liveToolIds.has(toolId);
+  }
+
+  getToolName(tool: ToolDefinition): string {
+    this.currentLang();
+    const key = 'TOOLS.' + tool.id.toUpperCase().replace(/-/g, '_') + '_NAME';
+    const translated = this.translate.instant(key);
+    return translated && translated !== key ? translated : tool.name;
+  }
+
+  getToolDesc(tool: ToolDefinition): string {
+    this.currentLang();
+    const key = 'TOOLS.' + tool.id.toUpperCase().replace(/-/g, '_') + '_DESC';
+    const translated = this.translate.instant(key);
+    return translated && translated !== key ? translated : tool.shortDescription;
   }
 
   onSelectCategory(tab: ExtendedFilterCategory): void {

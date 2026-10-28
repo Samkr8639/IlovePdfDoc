@@ -15,15 +15,15 @@
     <nav class="nav-links" aria-label="Main Navigation">
       <!-- Fast Primary Live Tools in Title Case -->
       <a routerLink="/merge-pdf" class="nav-link" (click)="closeMenu()">
-        <span>Merge PDF</span>
+        <span>{{ 'NAV.MERGE_PDF' | translate }}</span>
       </a>
 
       <a routerLink="/split-pdf" class="nav-link" (click)="closeMenu()">
-        <span>Split PDF</span>
+        <span>{{ 'NAV.SPLIT_PDF' | translate }}</span>
       </a>
 
       <a routerLink="/compress-pdf" class="nav-link" (click)="closeMenu()">
-        <span>Compress PDF</span>
+        <span>{{ 'NAV.COMPRESS_PDF' | translate }}</span>
       </a>
 
       <!-- CONVERT PDF DROPDOWN -->
@@ -40,7 +40,7 @@
           aria-haspopup="true"
           (click)="toggleMenu('convert')"
         >
-          <span>Convert PDF</span>
+          <span>{{ 'NAV.CONVERT_PDF' | translate }}</span>
           <svg
             width="13"
             height="13"
@@ -209,7 +209,7 @@
             <rect x="14" y="14" width="7" height="7"/>
             <rect x="3" y="14" width="7" height="7"/>
           </svg>
-          <span>All PDF Tools</span>
+          <span>{{ 'NAV.ALL_TOOLS' | translate }}</span>
           <svg
             width="13"
             height="13"
@@ -503,14 +503,14 @@
             #searchInput
             type="text"
             class="header-search-input"
-            placeholder="Search PDF tools..."
+            [placeholder]="'NAV.SEARCH_PLACEHOLDER' | translate"
             [value]="searchQuery()"
             (input)="onSearchInput($event)"
             (focus)="onSearchFocus()"
             (keydown)="onKeydown($event)"
             autocomplete="off"
             spellcheck="false"
-            aria-label="Search PDF tools"
+            [attr.aria-label]="'NAV.SEARCH_PLACEHOLDER' | translate"
           />
           @if (searchQuery().length > 0) {
             <button

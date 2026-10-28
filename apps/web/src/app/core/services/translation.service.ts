@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface SupportedLanguage {
   code: string;
@@ -42,133 +43,44 @@ export const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
   { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili', flag: '🇰🇪' }
 ];
 
-declare global {
-  interface Window {
-    googleTranslateElementInit?: () => void;
-    google?: any;
-  }
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class TranslationService {
+  private readonly translate = inject(TranslateService);
   readonly languages = SUPPORTED_LANGUAGES;
   readonly currentLanguage = signal<SupportedLanguage>(SUPPORTED_LANGUAGES[0]);
-  private isInitialized = false;
 
   constructor() {
     this.initFromStorage();
-    this.injectGoogleTranslateScript();
   }
 
   private initFromStorage(): void {
     if (typeof window === 'undefined') return;
 
-    // Check cookie first or localStorage
-    const savedLangCode = localStorage.getItem('user_language');
-    const cookieMatch = document.cookie.match(/googtrans=\/(?:en|auto)\/([a-zA-Z-]+)/);
-    const activeCode = savedLangCode || (cookieMatch ? cookieMatch[1] : 'en');
-
-    const matched = this.languages.find(l => l.code.toLowerCase() === activeCode.toLowerCase());
-    if (matched) {
-      this.currentLanguage.set(matched);
-      if (matched.dir === 'rtl') {
-        document.documentElement.dir = 'rtl';
-      }
-    }
+    const savedLangCode = localStorage.getItem('user_language') || 'en';
+    const matched = this.languages.find(l => l.code.toLowerCase() === savedLangCode.toLowerCase()) || this.languages[0];
+    this.setLanguage(matched.code, false);
   }
 
-  private injectGoogleTranslateScript(): void {
-    if (typeof window === 'undefined') return;
-
-    window.googleTranslateElementInit = () => {
-      if (window.google?.translate?.TranslateElement) {
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: 'en',
-            autoDisplay: false,
-            includedLanguages: this.languages.map(l => l.code).join(',')
-          },
-          'google_translate_element'
-        );
-        this.isInitialized = true;
-      }
-    };
-
-    // Ensure container exists
-    if (!document.getElementById('google_translate_element')) {
-      const div = document.createElement('div');
-      div.id = 'google_translate_element';
-      document.body.appendChild(div);
-    }
-
-    // Check if script already injected
-    if (!document.getElementById('google-translate-script')) {
-      const script = document.createElement('script');
-      script.id = 'google-translate-script';
-      script.type = 'text/javascript';
-      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      script.async = true;
-      document.head.appendChild(script);
-    }
-  }
-
-  setLanguage(langCode: string): void {
-    const target = this.languages.find(l => l.code === langCode) || this.languages[0];
+  setLanguage(langCode: string, persist = true): void {
+    const target = this.languages.find(l => l.code.toLowerCase() === langCode.toLowerCase()) || this.languages[0];
     this.currentLanguage.set(target);
 
-    if (typeof window === 'undefined') return;
-
-    localStorage.setItem('user_language', target.code);
-
-    if (target.dir === 'rtl') {
-      document.documentElement.dir = 'rtl';
-    } else {
-      document.documentElement.dir = 'ltr';
+    if (persist && typeof window !== 'undefined') {
+      localStorage.setItem('user_language', target.code);
     }
 
-    if (target.code === 'en') {
-      this.clearCookies();
-      const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
-      if (combo) {
-        combo.value = '';
-        combo.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-      window.location.reload();
-      return;
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = target.code;
+      document.documentElement.dir = target.dir === 'rtl' ? 'rtl' : 'ltr';
     }
 
-    // Set cookies for Google Translate (both /en/ and /auto/ prefixes)
-    this.setCookie('googtrans', `/en/${target.code}`);
-    this.setCookie('googtrans', `/auto/${target.code}`);
-
-    const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
-    if (combo) {
-      combo.value = target.code;
-      combo.dispatchEvent(new Event('change', { bubbles: true }));
-    } else {
-      // Reload so Google Translate translates the document on load
-      window.location.reload();
-    }
+    this.translate.use(target.code);
   }
 
-  private setCookie(name: string, value: string): void {
-    const host = window.location.hostname;
-    document.cookie = `${name}=${value}; path=/;`;
-    if (host && host !== 'localhost' && !host.includes('127.0.0.1')) {
-      document.cookie = `${name}=${value}; path=/; domain=.${host};`;
-      document.cookie = `${name}=${value}; path=/; domain=${host};`;
-    }
-  }
-
-  private clearCookies(): void {
-    const host = window.location.hostname;
-    const past = 'Thu, 01 Jan 1970 00:00:00 UTC';
-    document.cookie = `googtrans=; expires=${past}; path=/;`;
-    if (host && host !== 'localhost' && !host.includes('127.0.0.1')) {
-      document.cookie = `googtrans=; expires=${past}; path=/; domain=.${host};`;
-      document.cookie = `googtrans=; expires=${past}; path=/; domain=${host};`;
-    }
+  instant(key: string, interpolateParams?: Record<string, any>): string {
+    return this.translate.instant(key, interpolateParams);
   }
 }
+

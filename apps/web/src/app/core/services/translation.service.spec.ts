@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 import { TranslationService, SUPPORTED_LANGUAGES } from './translation.service';
 
 describe('TranslationService', () => {
@@ -6,7 +7,10 @@ describe('TranslationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [TranslationService]
+      providers: [
+        provideTranslateService({ fallbackLang: 'en' }),
+        TranslationService
+      ]
     });
     service = TestBed.inject(TranslationService);
   });

@@ -1,11 +1,12 @@
 import { Component, inject, signal, ElementRef, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { TranslationService } from '../../../core/services/translation.service';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.css'
 })
