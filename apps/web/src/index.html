@@ -2,39 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>PDF flow - Online PDF Converter & Document Tools</title>
+  <title>PDFTailor - Online PDF Converter & Document Tools</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="PDF flow is a modern, privacy-focused online document toolkit. Merge, split, compress, and organize documents in your browser, or convert PDF to Word with ephemeral, zero-retention processing.">
+  <meta name="description" content="PDFTailor is an elegant, privacy-first document workspace. Merge, split, compress, and convert PDF to Word or PowerPoint with zero server retention.">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://pdfflow.app">
+  <link rel="canonical" href="https://pdftailor.in">
+
+  <!-- Favicon & Web Manifest -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.ico">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#14213D">
+
+  <!-- Self-Hosted Font Preloads -->
+  <link rel="preload" href="/fonts/sora-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Open Graph / Social Sharing -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://pdfflow.app">
-  <meta property="og:title" content="PDF flow - Online PDF Converter & Document Tools">
-  <meta property="og:description" content="Privacy-first PDF tools: convert PDF to Word, merge, compress, and split documents right in your browser or with ephemeral zero-retention processing.">
-  <meta property="og:site_name" content="PDF flow">
+  <meta property="og:url" content="https://pdftailor.in">
+  <meta property="og:title" content="PDFTailor - Online PDF Converter & Document Tools">
+  <meta property="og:description" content="Privacy-first PDF tools: convert PDF to Word, PowerPoint, merge, compress, and split documents right in your browser or with ephemeral zero-retention processing.">
+  <meta property="og:site_name" content="PDFTailor">
+  <meta property="og:image" content="https://pdftailor.in/og-image.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/webp">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PDF flow - Online PDF Converter & Document Tools">
+  <meta name="twitter:title" content="PDFTailor - Online PDF Converter & Document Tools">
   <meta name="twitter:description" content="Fast, private PDF tools with zero permanent storage.">
+  <meta name="twitter:image" content="https://pdftailor.in/og-image.webp">
 
   <!-- Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; frame-src 'self' blob:; child-src 'self' blob:; object-src 'self' blob:; connect-src 'self' http://localhost:4000 https://localhost:4000 ws:; worker-src 'self' blob:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; frame-src 'self' blob:; child-src 'self' blob:; object-src 'self' blob:; connect-src 'self' http://localhost:4000 https://localhost:4000 ws:; worker-src 'self' blob:;">
 
   <!-- Schema.org JSON-LD Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "PDF flow",
-    "url": "https://pdfflow.app",
+    "name": "PDFTailor",
+    "url": "https://pdftailor.in",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "All",
     "browserRequirements": "Requires JavaScript. Requires HTML5.",
-    "description": "Fast, private online PDF toolkit to convert, merge, compress, split, and edit PDF documents.",
+    "description": "Fast, private online PDF toolkit to convert, merge, compress, split, and tailor PDF documents.",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -42,17 +57,13 @@
     },
     "featureList": [
       "PDF to Word Conversion with Layout Preservation",
-      "Client-Side Merge and Compress PDF",
-      "Zero Server Retention Guarantee",
-      "OCR Text Recognition"
+      "PDF to PowerPoint Editable Presentation Conversion",
+      "Client-Side Merge and Split PDF",
+      "Effective PDF Compression with Three Presets",
+      "Zero Server Retention Guarantee"
     ]
   }
   </script>
-
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <app-root></app-root>

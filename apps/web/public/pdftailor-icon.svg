@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" fill="none">
+  <!-- Document base with folded corner -->
+  <path d="M10 5C8.89543 5 8 5.89543 8 7V33C8 34.1046 8.89543 35 10 35H30C31.1046 35 32 34.1046 32 33V13L24 5H10Z" fill="#ECF7F5" stroke="#14213D" stroke-width="2.2" stroke-linejoin="round"/>
+  <!-- Folded corner flap -->
+  <path d="M24 5V13H32" fill="#CCEBE6" stroke="#14213D" stroke-width="2.2" stroke-linejoin="round"/>
+  <!-- Precision tailor stitch lines -->
+  <path d="M14 19H26" stroke="#0F766E" stroke-width="2" stroke-linecap="round" stroke-dasharray="3.5 2"/>
+  <path d="M14 24H23" stroke="#0F766E" stroke-width="2" stroke-linecap="round" stroke-dasharray="3.5 2"/>
+  <path d="M14 29H26" stroke="#0F766E" stroke-width="2" stroke-linecap="round" stroke-dasharray="3.5 2"/>
+  <!-- Tailor stitch origin node -->
+  <circle cx="24" cy="13" r="1.5" fill="#0F766E"/>
+</svg>

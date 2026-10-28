@@ -1,0 +1,17 @@
+{
+  "name": "PDFTailor",
+  "short_name": "PDFTailor",
+  "description": "Every PDF, tailored to fit. Fast, private, and precise PDF toolkit.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#14213D",
+  "icons": [
+    {
+      "src": "/pdftailor-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
