@@ -65,13 +65,14 @@
   flex-shrink: 0;
 }
 
-/* 5-COLUMN MAIN GRID */
+/* 3-COLUMN MAIN GRID */
 .footer-main-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 36px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
   padding-top: 48px;
   padding-bottom: 48px;
+  max-width: 960px;
 }
 
 .footer-nav-col {
