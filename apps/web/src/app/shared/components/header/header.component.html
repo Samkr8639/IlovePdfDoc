@@ -1,6 +1,6 @@
 <header class="header">
   <div class="header-inner">
-    <!-- 1. BRAND LOGO -->
+    <!-- 1. BRAND LOGO (SAME LOGO PRESERVED) -->
     <a routerLink="/" class="brand-logo" (click)="closeMenu()" aria-label="PDFTailor Home">
       <img
         src="/pdftailor-logo.svg"
@@ -11,16 +11,20 @@
       />
     </a>
 
-    <!-- 2. MAIN NAVIGATION LINKS -->
+    <!-- 2. MAIN NAVIGATION -->
     <nav class="nav-links" aria-label="Main Navigation">
-      <!-- MERGE PDF -->
-      <a routerLink="/merge-pdf" class="nav-link" (click)="closeMenu()">MERGE PDF</a>
+      <!-- Fast Primary Live Tools in Title Case -->
+      <a routerLink="/merge-pdf" class="nav-link" (click)="closeMenu()">
+        <span>Merge PDF</span>
+      </a>
 
-      <!-- SPLIT PDF -->
-      <a routerLink="/split-pdf" class="nav-link" (click)="closeMenu()">SPLIT PDF</a>
+      <a routerLink="/split-pdf" class="nav-link" (click)="closeMenu()">
+        <span>Split PDF</span>
+      </a>
 
-      <!-- COMPRESS PDF -->
-      <a routerLink="/compress-pdf" class="nav-link" (click)="closeMenu()">COMPRESS PDF</a>
+      <a routerLink="/compress-pdf" class="nav-link" (click)="closeMenu()">
+        <span>Compress PDF</span>
+      </a>
 
       <!-- CONVERT PDF DROPDOWN -->
       <div
@@ -36,10 +40,10 @@
           aria-haspopup="true"
           (click)="toggleMenu('convert')"
         >
-          <span>CONVERT PDF</span>
+          <span>Convert PDF</span>
           <svg
-            width="12"
-            height="12"
+            width="13"
+            height="13"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -54,7 +58,7 @@
           </svg>
         </button>
 
-        <!-- CONVERT PDF 2-COLUMN PANEL -->
+        <!-- CONVERT PDF 2-COLUMN FLOATING PANEL -->
         @if (activeMenu() === 'convert') {
           <div
             class="convert-dropdown-pane"
@@ -62,11 +66,13 @@
             (mouseenter)="cancelCloseMenu()"
             (mouseleave)="closeMenu()"
           >
-            <div class="dropdown-top-arrow convert-arrow" aria-hidden="true"></div>
             <div class="convert-grid">
               <!-- Column 1: CONVERT TO PDF -->
               <div class="convert-col">
-                <h4 class="convert-col-title">CONVERT TO PDF</h4>
+                <div class="dropdown-col-header">
+                  <span class="dropdown-col-kicker">IMPORT &amp; CREATE</span>
+                  <h4 class="dropdown-col-title">Convert to PDF</h4>
+                </div>
                 <ul class="convert-list" role="none">
                   <li role="none">
                     <a routerLink="/images-to-pdf" (click)="closeMenu()" class="menu-item-link" role="menuitem">
@@ -82,7 +88,7 @@
                       <span class="icon-tile tile-teal">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                       </span>
-                      <span class="item-name">WORD to PDF</span>
+                      <span class="item-name">Word to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
@@ -91,7 +97,7 @@
                       <span class="icon-tile tile-teal">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                       </span>
-                      <span class="item-name">POWERPOINT to PDF</span>
+                      <span class="item-name">PowerPoint to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
@@ -100,7 +106,7 @@
                       <span class="icon-tile tile-teal">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
                       </span>
-                      <span class="item-name">EXCEL to PDF</span>
+                      <span class="item-name">Excel to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
@@ -118,8 +124,29 @@
 
               <!-- Column 2: CONVERT FROM PDF -->
               <div class="convert-col">
-                <h4 class="convert-col-title">CONVERT FROM PDF</h4>
+                <div class="dropdown-col-header">
+                  <span class="dropdown-col-kicker">EXPORT &amp; EXTRACT</span>
+                  <h4 class="dropdown-col-title">Convert from PDF</h4>
+                </div>
                 <ul class="convert-list" role="none">
+                  <li role="none">
+                    <a routerLink="/pdf-to-word" (click)="closeMenu()" class="menu-item-link highlight-item" role="menuitem">
+                      <span class="icon-tile tile-navy">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                      </span>
+                      <span class="item-name">PDF to Word</span>
+                      <span class="live-badge">Live</span>
+                    </a>
+                  </li>
+                  <li role="none">
+                    <a routerLink="/pdf-to-powerpoint" (click)="closeMenu()" class="menu-item-link highlight-item" role="menuitem">
+                      <span class="icon-tile tile-navy">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      </span>
+                      <span class="item-name">PDF to PowerPoint</span>
+                      <span class="live-badge">Live</span>
+                    </a>
+                  </li>
                   <li role="none">
                     <a routerLink="/pdf-to-jpg" (click)="closeMenu()" class="menu-item-link" role="menuitem">
                       <span class="icon-tile tile-teal">
@@ -130,29 +157,11 @@
                     </a>
                   </li>
                   <li role="none">
-                    <a routerLink="/pdf-to-word" (click)="closeMenu()" class="menu-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-navy">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                      </span>
-                      <span class="item-name">PDF to WORD</span>
-                      <span class="live-badge">Live</span>
-                    </a>
-                  </li>
-                  <li role="none">
-                    <a routerLink="/pdf-to-powerpoint" (click)="closeMenu()" class="menu-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-navy">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                      </span>
-                      <span class="item-name">PDF to POWERPOINT</span>
-                      <span class="live-badge">Live</span>
-                    </a>
-                  </li>
-                  <li role="none">
                     <a routerLink="/pdf-to-excel" (click)="closeMenu()" class="menu-item-link" role="menuitem">
                       <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
                       </span>
-                      <span class="item-name">PDF to EXCEL</span>
+                      <span class="item-name">PDF to Excel</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
@@ -168,11 +177,19 @@
                 </ul>
               </div>
             </div>
+
+            <!-- Subtle Dropdown Security Footer -->
+            <div class="dropdown-footer-bar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>100% Client-Side Conversion • No files uploaded to servers</span>
+            </div>
           </div>
         }
       </div>
 
-      <!-- ALL PDF TOOLS MEGA MENU -->
+      <!-- ALL PDF TOOLS MEGA MENU DROPDOWN -->
       <div
         class="nav-dropdown-wrap mega-wrap"
         (mouseenter)="openMenu('all')"
@@ -186,10 +203,16 @@
           aria-haspopup="true"
           (click)="toggleMenu('all')"
         >
-          <span>ALL PDF TOOLS</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="grid-icon">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>All PDF Tools</span>
           <svg
-            width="12"
-            height="12"
+            width="13"
+            height="13"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -204,7 +227,7 @@
           </svg>
         </button>
 
-        <!-- 7-COLUMN MEGA-MENU PANEL -->
+        <!-- FULL-WIDTH FLOATING MEGA MENU PANE -->
         @if (activeMenu() === 'all') {
           <div
             class="mega-menu-pane"
@@ -212,63 +235,45 @@
             (mouseenter)="cancelCloseMenu()"
             (mouseleave)="closeMenu()"
           >
-            <div class="dropdown-top-arrow mega-arrow" aria-hidden="true"></div>
             <div class="mega-grid">
               <!-- COL 1: ORGANIZE PDF -->
               <div class="mega-col">
-                <h4 class="mega-col-title">ORGANIZE PDF</h4>
+                <div class="mega-col-header">
+                  <h4 class="mega-col-title">Organize PDF</h4>
+                </div>
                 <ul class="mega-list" role="none">
                   <li role="none">
                     <a routerLink="/merge-pdf" (click)="closeMenu()" class="mega-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="10" height="10" rx="2"/><rect x="12" y="12" width="10" height="10" rx="2"/></svg>
-                      </span>
+                      <span class="icon-tile tile-navy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></span>
                       <span class="mega-name">Merge PDF</span>
                       <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/split-pdf" (click)="closeMenu()" class="mega-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="18" rx="2"/><rect x="13" y="3" width="8" height="18" rx="2"/></svg>
-                      </span>
+                      <span class="icon-tile tile-navy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></span>
                       <span class="mega-name">Split PDF</span>
                       <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/split-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-                      </span>
-                      <span class="mega-name">Remove pages</span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                      <span class="mega-name">Remove Pages</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/split-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="12 18 12 12 9 15"/></svg>
-                      </span>
-                      <span class="mega-name">Extract pages</span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                      <span class="mega-name">Extract Pages</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/merge-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                      </span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
                       <span class="mega-name">Organize PDF</span>
-                      <span class="soon-badge">Soon</span>
-                    </a>
-                  </li>
-                  <li role="none">
-                    <a routerLink="/images-to-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                      </span>
-                      <span class="mega-name">Scan to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
@@ -277,32 +282,28 @@
 
               <!-- COL 2: OPTIMIZE PDF -->
               <div class="mega-col">
-                <h4 class="mega-col-title">OPTIMIZE PDF</h4>
+                <div class="mega-col-header">
+                  <h4 class="mega-col-title">Optimize PDF</h4>
+                </div>
                 <ul class="mega-list" role="none">
                   <li role="none">
                     <a routerLink="/compress-pdf" (click)="closeMenu()" class="mega-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6m-6 4h10M4 10h16M4 6h16"/><polyline points="15 15 18 12 21 15"/></svg>
-                      </span>
+                      <span class="icon-tile tile-navy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg></span>
                       <span class="mega-name">Compress PDF</span>
                       <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/compress-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                      </span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
                       <span class="mega-name">Repair PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
-                    <a routerLink="/pdf-to-word" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10M12 7v10"/></svg>
-                      </span>
-                      <span class="mega-name">OCR PDF</span>
+                    <a routerLink="/compress-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>
+                      <span class="mega-name">Flatten PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
@@ -311,39 +312,41 @@
 
               <!-- COL 3: CONVERT TO PDF -->
               <div class="mega-col">
-                <h4 class="mega-col-title">CONVERT TO PDF</h4>
+                <div class="mega-col-header">
+                  <h4 class="mega-col-title">Convert to PDF</h4>
+                </div>
                 <ul class="mega-list" role="none">
                   <li role="none">
                     <a routerLink="/images-to-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
                       <span class="mega-name">JPG to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/word-to-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
                       <span class="mega-name">WORD to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/powerpoint-to-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
                       <span class="mega-name">POWERPOINT to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/excel-to-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span>
                       <span class="mega-name">EXCEL to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/html-to-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
                       <span class="mega-name">HTML to PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
@@ -353,81 +356,71 @@
 
               <!-- COL 4: CONVERT FROM PDF -->
               <div class="mega-col">
-                <h4 class="mega-col-title">CONVERT FROM PDF</h4>
+                <div class="mega-col-header">
+                  <h4 class="mega-col-title">Convert from PDF</h4>
+                </div>
                 <ul class="mega-list" role="none">
                   <li role="none">
-                    <a routerLink="/pdf-to-jpg" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
-                      <span class="mega-name">PDF to JPG</span>
-                      <span class="soon-badge">Soon</span>
-                    </a>
-                  </li>
-                  <li role="none">
                     <a routerLink="/pdf-to-word" (click)="closeMenu()" class="mega-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-navy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
-                      <span class="mega-name">PDF to WORD</span>
+                      <span class="icon-tile tile-navy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+                      <span class="mega-name">PDF to Word</span>
                       <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/pdf-to-powerpoint" (click)="closeMenu()" class="mega-item-link highlight-item" role="menuitem">
-                      <span class="icon-tile tile-navy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
-                      <span class="mega-name">PDF to POWERPOINT</span>
+                      <span class="icon-tile tile-navy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+                      <span class="mega-name">PDF to PowerPoint</span>
                       <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
-                    <a routerLink="/pdf-to-excel" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></span>
-                      <span class="mega-name">PDF to EXCEL</span>
+                    <a routerLink="/pdf-to-jpg" (click)="closeMenu()" class="mega-item-link" role="menuitem">
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+                      <span class="mega-name">PDF to JPG</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
-                    <a routerLink="/pdf-to-word" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/></svg></span>
-                      <span class="mega-name">PDF to PDF/A</span>
+                    <a routerLink="/pdf-to-excel" (click)="closeMenu()" class="mega-item-link" role="menuitem">
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span>
+                      <span class="mega-name">PDF to Excel</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                 </ul>
               </div>
 
-              <!-- COL 5: EDIT PDF -->
+              <!-- COL 5: EDIT & ENHANCE -->
               <div class="mega-col">
-                <h4 class="mega-col-title">EDIT PDF</h4>
+                <div class="mega-col-header">
+                  <h4 class="mega-col-title">Edit &amp; Page Tools</h4>
+                </div>
                 <ul class="mega-list" role="none">
                   <li role="none">
                     <a routerLink="/rotate-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
                       <span class="mega-name">Rotate PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/edit-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></span>
-                      <span class="mega-name">Add page numbers</span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></span>
+                      <span class="mega-name">Add Page Numbers</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/watermark-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg></span>
-                      <span class="mega-name">Add watermark</span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg></span>
+                      <span class="mega-name">Add Watermark</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/edit-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></span>
-                      <span class="mega-name">Crop PDF</span>
-                      <span class="soon-badge">Soon</span>
-                    </a>
-                  </li>
-                  <li role="none">
-                    <a routerLink="/edit-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
                       <span class="mega-name">Edit PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
@@ -435,74 +428,61 @@
                 </ul>
               </div>
 
-              <!-- COL 6: PDF SECURITY -->
+              <!-- COL 6: SECURITY & AI INTELLIGENCE -->
               <div class="mega-col">
-                <h4 class="mega-col-title">PDF SECURITY</h4>
+                <div class="mega-col-header">
+                  <h4 class="mega-col-title">Security &amp; AI</h4>
+                </div>
                 <ul class="mega-list" role="none">
                   <li role="none">
                     <a routerLink="/unlock-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></span>
                       <span class="mega-name">Unlock PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/protect-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
                       <span class="mega-name">Protect PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/sign-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
                       <span class="mega-name">Sign PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
-                    <a routerLink="/protect-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></span>
-                      <span class="mega-name">Redact PDF</span>
-                      <span class="soon-badge">Soon</span>
-                    </a>
-                  </li>
-                  <li role="none">
-                    <a routerLink="/merge-pdf" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg></span>
-                      <span class="mega-name">Compare PDF</span>
-                      <span class="soon-badge">Soon</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- COL 7: PDF INTELLIGENCE -->
-              <div class="mega-col">
-                <h4 class="mega-col-title">PDF INTELLIGENCE</h4>
-                <ul class="mega-list" role="none">
-                  <li role="none">
                     <a routerLink="/pdf-to-word" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
                       <span class="mega-name">AI Summarizer</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
                   <li role="none">
                     <a routerLink="/pdf-to-word" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+                      <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
                       <span class="mega-name">Translate PDF</span>
                       <span class="soon-badge">Soon</span>
                     </a>
                   </li>
-                  <li role="none">
-                    <a routerLink="/pdf-to-word" (click)="closeMenu()" class="mega-item-link" role="menuitem">
-                      <span class="icon-tile tile-teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M7 15V9l3 3 3-3v6"/><path d="M17 9v6"/></svg></span>
-                      <span class="mega-name">PDF to Markdown</span>
-                      <span class="soon-badge">Soon</span>
-                    </a>
-                  </li>
                 </ul>
+              </div>
+            </div>
+
+            <!-- Mega Menu Trust Banner -->
+            <div class="mega-trust-bar">
+              <div class="trust-bar-item">
+                <span class="pulse-indicator" aria-hidden="true"></span>
+                <span><strong>Zero Cloud Retention:</strong> All files processed ephemeral and in-browser</span>
+              </div>
+              <div class="trust-bar-badges">
+                <span class="trust-chip">ISO/IEC 27001</span>
+                <span class="trust-chip">GDPR Compliant</span>
+                <span class="trust-chip">TLS 1.3</span>
               </div>
             </div>
           </div>
@@ -510,10 +490,28 @@
       </div>
     </nav>
 
-    <!-- 3. RIGHT HEADER ITEMS (Login, Sign up) -->
+    <!-- 3. RIGHT HEADER ITEMS (Login & Signup commented out as requested) -->
     <div class="header-right">
-      <a routerLink="/" class="pt-btn-ghost nav-login-btn">Login</a>
-      <a routerLink="/" class="pt-btn-primary nav-signup-btn">Sign up</a>
+      <!-- Privacy Indicator Pill -->
+      <div class="header-privacy-badge" title="100% In-Browser Document Processing">
+        <span class="privacy-pulse" aria-hidden="true"></span>
+        <span class="privacy-text">Private &amp; Secure</span>
+      </div>
+
+      <!-- Quick Explore Link -->
+      <a routerLink="/" fragment="tools" class="nav-explore-btn" (click)="closeMenu()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <span>Explore Tools</span>
+      </a>
+
+      <!--
+        Login and Sign up buttons commented out for now as requested
+        <a routerLink="/" class="pt-btn-ghost nav-login-btn">Login</a>
+        <a routerLink="/" class="pt-btn-primary nav-signup-btn">Sign up</a>
+      -->
 
       <!-- Mobile Hamburger Toggle -->
       <button
@@ -521,51 +519,42 @@
         class="mobile-toggle"
         (click)="toggleMobileMenu()"
         [attr.aria-expanded]="mobileMenuOpen()"
-        aria-label="Toggle navigation menu"
+        aria-label="Toggle Navigation Menu"
       >
-        @if (!mobileMenuOpen()) {
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        } @else {
+        @if (mobileMenuOpen()) {
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        } @else {
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         }
       </button>
     </div>
   </div>
 
-  <!-- MOBILE DRAWER -->
+  <!-- 4. MOBILE SLIDE-DOWN DRAWER -->
   @if (mobileMenuOpen()) {
-    <div class="mobile-drawer" role="dialog" aria-label="Mobile Navigation">
+    <div class="mobile-drawer" role="navigation" aria-label="Mobile Navigation">
       <div class="mobile-links-list">
-        <!-- Direct Quick Links -->
-        <a routerLink="/merge-pdf" (click)="closeMobileMenu()" class="mobile-link">
-          <span>MERGE PDF</span>
+        <a routerLink="/merge-pdf" class="mobile-link" (click)="closeMobileMenu()">
+          <span>Merge PDF</span>
           <span class="live-badge">Live</span>
         </a>
-        <a routerLink="/split-pdf" (click)="closeMobileMenu()" class="mobile-link">
-          <span>SPLIT PDF</span>
+        <a routerLink="/split-pdf" class="mobile-link" (click)="closeMobileMenu()">
+          <span>Split PDF</span>
           <span class="live-badge">Live</span>
         </a>
-        <a routerLink="/compress-pdf" (click)="closeMobileMenu()" class="mobile-link">
-          <span>COMPRESS PDF</span>
-          <span class="live-badge">Live</span>
-        </a>
-        <a routerLink="/pdf-to-word" (click)="closeMobileMenu()" class="mobile-link">
-          <span>PDF TO WORD</span>
-          <span class="live-badge">Live</span>
-        </a>
-        <a routerLink="/pdf-to-powerpoint" (click)="closeMobileMenu()" class="mobile-link">
-          <span>PDF TO POWERPOINT</span>
+        <a routerLink="/compress-pdf" class="mobile-link" (click)="closeMobileMenu()">
+          <span>Compress PDF</span>
           <span class="live-badge">Live</span>
         </a>
 
-        <!-- Mobile Accordion: Convert PDF -->
+        <!-- Mobile Convert PDF Accordion -->
         <div class="mobile-accordion">
           <button
             type="button"
@@ -573,32 +562,42 @@
             (click)="toggleMobileSection('convert')"
             [attr.aria-expanded]="mobileConvertOpen()"
           >
-            <span>CONVERT PDF</span>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              [class.chevron-up]="mobileConvertOpen()"
-            >
+            <span>Convert PDF</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [class.rotated]="mobileConvertOpen()">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           @if (mobileConvertOpen()) {
             <div class="mobile-accordion-body">
-              <a routerLink="/images-to-pdf" (click)="closeMobileMenu()" class="mobile-sublink">JPG to PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/word-to-pdf" (click)="closeMobileMenu()" class="mobile-sublink">WORD to PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/powerpoint-to-pdf" (click)="closeMobileMenu()" class="mobile-sublink">POWERPOINT to PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/excel-to-pdf" (click)="closeMobileMenu()" class="mobile-sublink">EXCEL to PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/pdf-to-jpg" (click)="closeMobileMenu()" class="mobile-sublink">PDF to JPG <span class="soon-badge">Soon</span></a>
-              <a routerLink="/pdf-to-excel" (click)="closeMobileMenu()" class="mobile-sublink">PDF to EXCEL <span class="soon-badge">Soon</span></a>
+              <a routerLink="/pdf-to-word" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>PDF to Word</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/pdf-to-powerpoint" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>PDF to PowerPoint</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/images-to-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>JPG to PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
+              <a routerLink="/word-to-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Word to PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
+              <a routerLink="/powerpoint-to-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>PowerPoint to PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
+              <a routerLink="/excel-to-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Excel to PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
             </div>
           }
         </div>
 
-        <!-- Mobile Accordion: All Tools -->
+        <!-- Mobile All PDF Tools Accordion -->
         <div class="mobile-accordion">
           <button
             type="button"
@@ -606,36 +605,57 @@
             (click)="toggleMobileSection('all')"
             [attr.aria-expanded]="mobileAllOpen()"
           >
-            <span>ALL PDF TOOLS</span>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              [class.chevron-up]="mobileAllOpen()"
-            >
+            <span>All PDF Tools</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [class.rotated]="mobileAllOpen()">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           @if (mobileAllOpen()) {
             <div class="mobile-accordion-body">
-              <a routerLink="/rotate-pdf" (click)="closeMobileMenu()" class="mobile-sublink">Rotate PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/protect-pdf" (click)="closeMobileMenu()" class="mobile-sublink">Protect PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/unlock-pdf" (click)="closeMobileMenu()" class="mobile-sublink">Unlock PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/sign-pdf" (click)="closeMobileMenu()" class="mobile-sublink">Sign PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/watermark-pdf" (click)="closeMobileMenu()" class="mobile-sublink">Watermark PDF <span class="soon-badge">Soon</span></a>
-              <a routerLink="/edit-pdf" (click)="closeMobileMenu()" class="mobile-sublink">Edit PDF <span class="soon-badge">Soon</span></a>
+              <a routerLink="/merge-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Merge PDF</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/split-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Split PDF</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/compress-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Compress PDF</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/pdf-to-word" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>PDF to Word</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/pdf-to-powerpoint" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>PDF to PowerPoint</span>
+                <span class="live-badge">Live</span>
+              </a>
+              <a routerLink="/edit-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Edit PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
+              <a routerLink="/protect-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Protect PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
+              <a routerLink="/unlock-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
+                <span>Unlock PDF</span>
+                <span class="soon-badge">Soon</span>
+              </a>
             </div>
           }
         </div>
       </div>
 
-      <div class="mobile-auth-row">
-        <a routerLink="/" (click)="closeMobileMenu()" class="pt-btn-secondary mobile-login-btn">Login</a>
-        <a routerLink="/" (click)="closeMobileMenu()" class="pt-btn-primary mobile-signup-btn">Sign up</a>
-      </div>
+      <!--
+        Mobile Auth Buttons commented out for now as requested
+        <div class="mobile-auth-row">
+          <a routerLink="/" class="pt-btn-ghost mobile-login-btn" (click)="closeMobileMenu()">Login</a>
+          <a routerLink="/" class="pt-btn-primary mobile-signup-btn" (click)="closeMobileMenu()">Sign up</a>
+        </div>
+      -->
     </div>
   }
 </header>
