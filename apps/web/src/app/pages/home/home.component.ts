@@ -84,4 +84,24 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return this.toolRegistry.filteredTools();
   }
+
+  onHeroMouseMove(event: MouseEvent): void {
+    const heroEl = this.elementRef.nativeElement.querySelector('.hero-section') as HTMLElement | null;
+    if (!heroEl) return;
+
+    const rect = heroEl.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const normX = (event.clientX - centerX) / (rect.width / 2);
+    const normY = (event.clientY - centerY) / (rect.height / 2);
+
+    this.animationService.updateHeroMouseParallax(heroEl, normX, normY);
+  }
+
+  onHeroMouseLeave(): void {
+    const heroEl = this.elementRef.nativeElement.querySelector('.hero-section') as HTMLElement | null;
+    if (!heroEl) return;
+
+    this.animationService.resetHeroMouseParallax(heroEl);
+  }
 }

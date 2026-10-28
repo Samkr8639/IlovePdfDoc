@@ -1,96 +1,252 @@
 <div class="home-unified-canvas">
-  <!-- 1. HERO HEADER AREA -->
-  <header class="container hero-header">
-    <h1 class="hero-title">Every tool you need to tailor PDFs in one place</h1>
-    <p class="hero-subtitle">
-      Professional, privacy-first document tools at your fingertips. All are 100% free and easy to use.
-      Merge, split, compress, convert, and tailor documents with zero server storage.
-    </p>
+  <!-- 1. MODERN PREMIUM HERO SECTION -->
+  <section class="hero-section" #heroSection (mousemove)="onHeroMouseMove($event)" (mouseleave)="onHeroMouseLeave()">
+    <!-- Ambient Aurora Glow Effects & Grid Backdrop -->
+    <div class="hero-aurora-glow glow-1" aria-hidden="true"></div>
+    <div class="hero-aurora-glow glow-2" aria-hidden="true"></div>
+    <div class="hero-grid-pattern" aria-hidden="true"></div>
 
-    <!-- CATEGORY FILTER PILLS -->
-    <div class="filter-pills-row" role="tablist" aria-label="Tool Categories">
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'all'"
-        [attr.aria-selected]="selectedTab() === 'all'"
-        role="tab"
-        (click)="onSelectCategory('all')"
-      >
-        All Tools
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'workflows'"
-        [attr.aria-selected]="selectedTab() === 'workflows'"
-        role="tab"
-        (click)="onSelectCategory('workflows')"
-      >
-        Workflows
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'organize'"
-        [attr.aria-selected]="selectedTab() === 'organize'"
-        role="tab"
-        (click)="onSelectCategory('organize')"
-      >
-        Organize PDF
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'optimize'"
-        [attr.aria-selected]="selectedTab() === 'optimize'"
-        role="tab"
-        (click)="onSelectCategory('optimize')"
-      >
-        Optimize PDF
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'convert'"
-        [attr.aria-selected]="selectedTab() === 'convert'"
-        role="tab"
-        (click)="onSelectCategory('convert')"
-      >
-        Convert PDF
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'edit'"
-        [attr.aria-selected]="selectedTab() === 'edit'"
-        role="tab"
-        (click)="onSelectCategory('edit')"
-      >
-        Edit PDF
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'security'"
-        [attr.aria-selected]="selectedTab() === 'security'"
-        role="tab"
-        (click)="onSelectCategory('security')"
-      >
-        PDF Security
-      </button>
-      <button
-        type="button"
-        class="cat-pill"
-        [class.active]="selectedTab() === 'intelligence'"
-        [attr.aria-selected]="selectedTab() === 'intelligence'"
-        role="tab"
-        (click)="onSelectCategory('intelligence')"
-      >
-        PDF Intelligence
-      </button>
+    <div class="container hero-inner-container">
+      <!-- FLOATING PARALLAX GLASS CARDS -->
+      <div class="hero-float-card card-left" aria-hidden="true">
+        <div class="card-glass-body">
+          <div class="card-icon-wrap icon-teal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <div class="card-text">
+            <span class="card-title">Instant In-Browser</span>
+            <span class="card-sub">0s Upload Wait · Client-Side</span>
+          </div>
+          <span class="card-pulse-indicator"></span>
+        </div>
+      </div>
+
+      <div class="hero-float-card card-right" aria-hidden="true">
+        <div class="card-glass-body">
+          <div class="card-icon-wrap icon-emerald">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polyline points="9 12 11 14 15 10"></polyline>
+            </svg>
+          </div>
+          <div class="card-text">
+            <span class="card-title">Zero Server Storage</span>
+            <span class="card-sub">Files Never Leave Your Device</span>
+          </div>
+          <span class="card-shield-check">✓</span>
+        </div>
+      </div>
+
+      <!-- KICKER / ANNOUNCEMENT BADGE -->
+      <div class="hero-kicker-wrap">
+        <div class="hero-kicker-badge">
+          <span class="kicker-pulse-beacon" aria-hidden="true"></span>
+          <span class="kicker-tag">Next-Gen PDF Engine</span>
+          <span class="kicker-sep" aria-hidden="true">•</span>
+          <span class="kicker-text">100% Free &amp; Private Forever</span>
+          <svg class="kicker-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- MAIN HEADLINE -->
+      <h1 class="hero-headline">
+        Every tool you need to
+        <span class="headline-gradient">tailor PDFs</span>
+        in one place
+      </h1>
+
+      <!-- SUBTITLE -->
+      <p class="hero-subhead">
+        Merge, split, compress, convert, and protect documents with zero server storage.
+        Professional client-side document utilities — 100% free with no sign-ups or file size limits.
+      </p>
+
+      <!-- TRUST & VALUE HIGHLIGHTS -->
+      <div class="hero-trust-row" aria-label="Key Platform Guarantees">
+        <div class="trust-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>100% Client-Side</span>
+        </div>
+        <div class="trust-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Zero Server Storage</span>
+        </div>
+        <div class="trust-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>No File Size Limits</span>
+        </div>
+        <div class="trust-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Free · No Signup</span>
+        </div>
+      </div>
+
+      <!-- QUICK ACTION SHORTCUTS (POPULAR TOOLS) -->
+      <div class="hero-quick-row">
+        <span class="quick-row-label">Popular Live Tools:</span>
+        <div class="quick-chips-group">
+          <a routerLink="/merge-pdf" class="quick-tool-link">
+            <span>Merge PDF</span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a routerLink="/split-pdf" class="quick-tool-link">
+            <span>Split PDF</span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a routerLink="/compress-pdf" class="quick-tool-link">
+            <span>Compress PDF</span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a routerLink="/pdf-to-word" class="quick-tool-link">
+            <span>PDF to Word</span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a routerLink="/pdf-to-powerpoint" class="quick-tool-link">
+            <span>PDF to PowerPoint</span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- REDESIGNED CATEGORY FILTER PILLS -->
+      <nav class="hero-filter-nav" role="tablist" aria-label="Tool Categories">
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'all'"
+          [attr.aria-selected]="selectedTab() === 'all'"
+          role="tab"
+          (click)="onSelectCategory('all')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>All Tools</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill pill-workflows"
+          [class.active]="selectedTab() === 'workflows'"
+          [attr.aria-selected]="selectedTab() === 'workflows'"
+          role="tab"
+          (click)="onSelectCategory('workflows')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Workflows</span>
+          <span class="pill-badge-sparkle">Auto</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'organize'"
+          [attr.aria-selected]="selectedTab() === 'organize'"
+          role="tab"
+          (click)="onSelectCategory('organize')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Organize PDF</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'optimize'"
+          [attr.aria-selected]="selectedTab() === 'optimize'"
+          role="tab"
+          (click)="onSelectCategory('optimize')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+          </svg>
+          <span>Optimize PDF</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'convert'"
+          [attr.aria-selected]="selectedTab() === 'convert'"
+          role="tab"
+          (click)="onSelectCategory('convert')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+          <span>Convert PDF</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'edit'"
+          [attr.aria-selected]="selectedTab() === 'edit'"
+          role="tab"
+          (click)="onSelectCategory('edit')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          <span>Edit PDF</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'security'"
+          [attr.aria-selected]="selectedTab() === 'security'"
+          role="tab"
+          (click)="onSelectCategory('security')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>PDF Security</span>
+        </button>
+        <button
+          type="button"
+          class="cat-pill"
+          [class.active]="selectedTab() === 'intelligence'"
+          [attr.aria-selected]="selectedTab() === 'intelligence'"
+          role="tab"
+          (click)="onSelectCategory('intelligence')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.58 3.25 3.93L11 12H9v2h2v2H9v2h2v2h2v-2h2v-2h-2v-2h2v-2h-2l-.25-2.07A4.002 4.002 0 0 0 16 6a4 4 0 0 0-4-4z"></path>
+          </svg>
+          <span>PDF Intelligence</span>
+        </button>
+      </nav>
     </div>
-  </header>
+  </section>
 
   <!-- ZERO-CLS ADVERTISEMENT BANNER -->
   <div class="container">
