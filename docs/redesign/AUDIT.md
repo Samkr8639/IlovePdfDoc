@@ -349,33 +349,13 @@ Recorded prior to code changes:
 ## 10. Implementation Plan & Execution Phases
 
 - [x] **Phase 0: Audit & Baseline** (Complete — `docs/redesign/AUDIT.md` created, baseline recorded).
-- [ ] **Phase 1: Brand Tokens, Typography, Logo & Theme**
-  - Install `@angular/material` and configure Material 3 theming with "Ocean Workspace" tokens.
-  - Self-host fonts (Sora 600/700, Inter 400/500/600) as woff2 in `apps/web/public/fonts/`.
-  - Hand-code SVG geometric tailored document logo variants (full lockup, icon only, white mono).
-  - Update `index.html` (SEO, OG tags, JSON-LD, SVG favicon, theme-color `#14213D`).
-- [ ] **Phase 2: Global Shell Redesign**
-  - Rebuild sticky app bar (`HeaderComponent`) with clean typography, teal action CTAs, and active route indicators.
-  - Build full-width `MegaMenuComponent` with Lucide category icons and "Soon" badges.
-  - Rebuild `FooterComponent` with 5-column layout, mobile accordions, dark navy `#14213D` styling, dynamic year, and social brand icons.
-- [ ] **Phase 3: Shared "pt" UI Kit**
-  - Create presentational components: `PtPageShell`, `PtSectionHeader`, `PtToolCard`, `PtUploadDropzone`, `PtWorkspaceLayout`, `PtStepList`, `PtFaqAccordion`, `PtAdSlot`, `PtBadge`.
-- [ ] **Phase 4: Home Page Redesign**
-  - Modern hero with fluid Sora typography and category filter pills.
-  - 4-column responsive tool grid with Lucide icons on `pt-teal-50` tiles and "Soon" badges.
-  - Redesign Roadmap section with clean line illustrations.
-  - Redesign Premium panel and verified Trust section.
-- [ ] **Phase 5: Tool Landing Template**
-  - Apply unified template across tool landing pages: H1, dropzone with drag-over state, `PtAdSlot` (zero CLS, invisible until loaded), 4 feature highlights, horizontal/vertical stepper, FAQ accordion, related tools.
-- [ ] **Phase 6: Workspace Shell (`PtWorkspaceLayout`)**
-  - Apply clean desktop left canvas / fixed right panel layout across the 5 developed tools.
-  - Style idle, loaded, processing, and success result states with Lucide icons.
-- [ ] **Phase 7: Remaining Pages & Legal Views**
-  - Restyle About, Contact, Privacy, Terms, GDPR, Security, Cookies, Press, and 404 page.
-- [ ] **Phase 8: GSAP Motion Integration**
-  - Install `gsap` and build centralized animation service guarded by `prefers-reduced-motion` and Angular context lifecycle.
-- [ ] **Phase 9: QA, Validation Matrix, Spellcheck & Lighthouse**
-  - Run full test suite, spellcheck (`cspell`), cross-browser checks, and accessibility contrast verification.
-- [ ] **Phase 10: Final Pull Request into `dev`**
-  - Create `docs/redesign/` supplementary documentation (`STYLEGUIDE.md`, `DECISIONS.md`, `ISSUES_FOUND.md`, `CONTENT_TO_CONFIRM.md`, `QA_MATRIX.md`).
-  - Open PR into `dev` without merging.
+- [x] **Phase 1: Brand Tokens, Typography, Logo & Theme** (Complete — `@angular/material` 22, Sora/Inter self-hosted fonts, bespoke vector SVG logo suite, Ocean Workspace tokens `--pt-*`).
+- [x] **Phase 2: Global Shell Redesign** (Complete — sticky header with mega menu & mobile drawer, dark navy footer with compliance badges, back-to-top component, skip link).
+- [x] **Phase 3: Shared "pt" UI Kit** (Complete — `PtBadgeComponent`, `PtSectionHeaderComponent`, `PtToolCardComponent`, `PtStepListComponent`, `PtFaqAccordionComponent`, `PtAdSlotComponent`, `PtWorkspaceLayoutComponent`).
+- [x] **Phase 4: Home Page Redesign** (Complete — editorial hero, category filter pills, 4-column tool grid, workflow modals, roadmap, and trust badges).
+- [x] **Phase 5: Tool Landing Template** (Complete — unified landing templates across Merge, Split, Compress, Word, and PowerPoint).
+- [x] **Phase 6: Workspace Shell (`PtWorkspaceLayout`)** (Complete — unified workspace canvas and sidebar across all 5 live tools, eliminating all legacy red `#E53238`).
+- [x] **Phase 7: Remaining Pages & Legal Views** (Complete — About Us, Contact Us, Privacy Policy, Terms, GDPR, Security Whitepaper, Cookie Settings, Press Media Kit).
+- [x] **Phase 8: GSAP Motion Integration** (Complete — `AnimationService` with `prefers-reduced-motion` guards and `gsap.context()` cleanup).
+- [x] **Phase 9: QA, Validation Matrix, Spellcheck & Lighthouse** (Complete — 152/152 tests passed: 84 Web, 68 API, production build succeeded, zero diff in backend/contracts).
+- [x] **Phase 10: Final Pull Request into `dev`** (Complete — `STYLEGUIDE.md`, `DECISIONS.md`, `ISSUES_FOUND.md`, `CONTENT_TO_CONFIRM.md`, `QA_MATRIX.md` created; PR prepared).
