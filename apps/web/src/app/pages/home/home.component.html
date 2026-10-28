@@ -1,10 +1,59 @@
 <div class="home-unified-canvas">
-  <!-- 1. MODERN PREMIUM HERO SECTION -->
-  <section class="hero-section" #heroSection (mousemove)="onHeroMouseMove($event)" (mouseleave)="onHeroMouseLeave()">
-    <!-- Ambient Aurora Glow Effects & Grid Backdrop -->
-    <div class="hero-aurora-glow glow-1" aria-hidden="true"></div>
-    <div class="hero-aurora-glow glow-2" aria-hidden="true"></div>
-    <div class="hero-grid-pattern" aria-hidden="true"></div>
+  <!-- CONTINUOUS HERO-TO-TOOLS BACKDROP ZONE -->
+  <div class="hero-tools-canvas-zone">
+    <!-- Continuous Subtle SVG Vector Mesh & Flowing Wave Pattern -->
+    <div class="canvas-vector-backdrop" aria-hidden="true">
+      <svg class="canvas-vector-svg" viewBox="0 0 1440 1800" preserveAspectRatio="xMidYMin slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="waveGradTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0F766E" stop-opacity="0.14" />
+            <stop offset="50%" stop-color="#14B8A6" stop-opacity="0.08" />
+            <stop offset="100%" stop-color="#10B981" stop-opacity="0.03" />
+          </linearGradient>
+          <linearGradient id="waveGradEmerald" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#10B981" stop-opacity="0.12" />
+            <stop offset="65%" stop-color="#0F766E" stop-opacity="0.06" />
+            <stop offset="100%" stop-color="#0284C7" stop-opacity="0.02" />
+          </linearGradient>
+          <pattern id="canvasDotMatrix" width="36" height="36" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.25" fill="#0F766E" fill-opacity="0.12" />
+          </pattern>
+          <pattern id="canvasTechGrid" width="144" height="144" patternUnits="userSpaceOnUse">
+            <path d="M 144 0 L 0 0 0 144" fill="none" stroke="#0F766E" stroke-width="0.75" stroke-opacity="0.04" />
+            <path d="M 72 68 L 72 76 M 68 72 L 76 72" stroke="#0F766E" stroke-width="1" stroke-opacity="0.08" />
+          </pattern>
+        </defs>
+
+        <!-- Technical Grid & Dot Matrix Layer -->
+        <rect width="100%" height="100%" fill="url(#canvasTechGrid)" />
+        <rect width="100%" height="100%" fill="url(#canvasDotMatrix)" opacity="0.85" />
+
+        <!-- Flowing Vector Mesh Waves (Top Left to Bottom Right Flow) -->
+        <path d="M-100,120 C320,180 500,40 850,160 C1200,280 1380,140 1600,220" stroke="url(#waveGradTeal)" stroke-width="2" stroke-linecap="round" />
+        <path d="M-80,180 C340,240 520,100 870,220 C1220,340 1400,200 1620,280" stroke="url(#waveGradEmerald)" stroke-width="1.5" stroke-dasharray="6 6" />
+
+        <!-- Mid-canvas flank curves framing tools grid -->
+        <path d="M-120,550 C180,620 220,850 -60,1100" stroke="url(#waveGradTeal)" stroke-width="2" />
+        <path d="M-90,590 C210,660 250,890 -30,1140" stroke="url(#waveGradEmerald)" stroke-width="1.2" stroke-dasharray="4 8" />
+
+        <path d="M1560,480 C1260,580 1220,840 1500,1150" stroke="url(#waveGradTeal)" stroke-width="2" />
+        <path d="M1530,520 C1230,620 1190,880 1470,1190" stroke="url(#waveGradEmerald)" stroke-width="1.5" stroke-dasharray="8 6" />
+
+        <!-- Gentle sweeping cross-curves in tools grid background -->
+        <path d="M-50,920 C420,800 780,1080 1520,860" stroke="url(#waveGradTeal)" stroke-width="1.8" />
+        <path d="M-30,970 C440,850 800,1130 1540,910" stroke="url(#waveGradEmerald)" stroke-width="1.2" stroke-dasharray="5 5" />
+
+        <!-- Lower basin curves sweeping towards bottom border -->
+        <path d="M-100,1350 C380,1480 820,1320 1550,1420" stroke="url(#waveGradTeal)" stroke-width="2" />
+        <path d="M-80,1400 C400,1530 840,1370 1570,1470" stroke="url(#waveGradEmerald)" stroke-width="1.5" stroke-dasharray="6 6" />
+      </svg>
+    </div>
+
+    <!-- 1. MODERN PREMIUM HERO SECTION -->
+    <section class="hero-section" #heroSection (mousemove)="onHeroMouseMove($event)" (mouseleave)="onHeroMouseLeave()">
+      <!-- Ambient Aurora Glow Effects -->
+      <div class="hero-aurora-glow glow-1" aria-hidden="true"></div>
+      <div class="hero-aurora-glow glow-2" aria-hidden="true"></div>
 
     <div class="container hero-inner-container">
       <!-- FLOATING PARALLAX GLASS CARDS -->
@@ -442,6 +491,20 @@
       </div>
     }
   </main>
+
+    <!-- TOOLS GRID BOTTOM BORDER & TRANSITION DIVIDER -->
+    <div class="tools-bottom-border-divider" aria-hidden="true">
+      <div class="divider-line"></div>
+      <div class="divider-pill-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <polyline points="9 12 11 14 15 10"></polyline>
+        </svg>
+        <span>20+ Document Tools • 100% In-Browser Privacy</span>
+      </div>
+      <div class="divider-line"></div>
+    </div>
+  </div>
 
   <!-- 3. "WORK YOUR WAY" (Roadmap Section) -->
   <section class="work-your-way-section">
