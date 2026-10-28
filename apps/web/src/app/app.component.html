@@ -1,6 +1,7 @@
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="app-layout" [class.workspace-active]="!layoutService.isFooterVisible()">
   <app-header></app-header>
-  <main class="app-main">
+  <main id="main-content" class="app-main">
     <router-outlet></router-outlet>
   </main>
   <app-footer [class.workspace-hidden]="!layoutService.isFooterVisible()"></app-footer>

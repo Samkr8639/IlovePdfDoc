@@ -40,11 +40,11 @@ import { Component, HostListener, signal } from '@angular/core';
     }
 
     .global-back-to-top:hover {
-      background-color: var(--coral-600, #e53935);
+      background-color: var(--pt-teal-700, #0F766E);
       color: #ffffff;
-      border-color: var(--coral-600, #e53935);
+      border-color: var(--pt-teal-700, #0F766E);
       transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 8px 20px rgba(229, 57, 53, 0.3), 0 16px 32px rgba(229, 57, 53, 0.15);
+      box-shadow: 0 8px 20px rgba(15, 118, 110, 0.3), 0 16px 32px rgba(15, 118, 110, 0.15);
     }
 
     .global-back-to-top:active {
@@ -52,7 +52,7 @@ import { Component, HostListener, signal } from '@angular/core';
     }
 
     .global-back-to-top:focus-visible {
-      box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.35);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.35);
     }
 
     @media (max-width: 640px) {

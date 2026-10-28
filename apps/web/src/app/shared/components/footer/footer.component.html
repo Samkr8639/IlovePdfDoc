@@ -1,22 +1,66 @@
-<footer class="footer-enterprise">
+<footer class="footer-enterprise" role="contentinfo">
+  <!-- FOOTER TOP BRANDING ROW -->
+  <div class="footer-top-brand">
+    <div class="container footer-brand-container">
+      <div class="footer-brand-info">
+        <a routerLink="/" class="footer-brand-link" aria-label="PDFTailor Home">
+          <img
+            src="/pdftailor-logo-white.svg"
+            alt="PDFTailor"
+            class="footer-brand-logo"
+            width="168"
+            height="36"
+          />
+        </a>
+        <p class="footer-tagline">
+          The elegant, privacy-first PDF tailoring workspace. Ephemeral zero-retention processing directly in your browser and secure edge runtimes.
+        </p>
+      </div>
+
+      <div class="footer-compliance-badges">
+        <div class="compliance-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Zero Server Retention</span>
+        </div>
+        <div class="compliance-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>End-to-End TLS Encrypted</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5-COLUMN MAIN GRID -->
   <div class="container footer-main-grid">
     <!-- Col 1: PRODUCT -->
     <div class="footer-nav-col">
-      <h4 class="footer-col-head">PRODUCT</h4>
-      <ul class="footer-nav-list">
-        <li><a routerLink="/" class="footer-item">PDF flow Home</a></li>
+      <button type="button" class="footer-col-toggle" (click)="toggleSection('product')" [attr.aria-expanded]="openSection() === 'product'">
+        <h4 class="footer-col-head">PRODUCT</h4>
+        <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'product'"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'product'">
+        <li><a routerLink="/" class="footer-item">PDFTailor Home</a></li>
         <li><a routerLink="/merge-pdf" class="footer-item">Merge PDF</a></li>
         <li><a routerLink="/split-pdf" class="footer-item">Split PDF</a></li>
         <li><a routerLink="/compress-pdf" class="footer-item">Compress PDF</a></li>
         <li><a routerLink="/pdf-to-word" class="footer-item">PDF to Word</a></li>
+        <li><a routerLink="/pdf-to-powerpoint" class="footer-item">PDF to PowerPoint</a></li>
         <li><a routerLink="/protect-pdf" class="footer-item">PDF Security</a></li>
       </ul>
     </div>
 
     <!-- Col 2: RESOURCE -->
     <div class="footer-nav-col">
-      <h4 class="footer-col-head">RESOURCE</h4>
-      <ul class="footer-nav-list">
+      <button type="button" class="footer-col-toggle" (click)="toggleSection('resource')" [attr.aria-expanded]="openSection() === 'resource'">
+        <h4 class="footer-col-head">RESOURCE</h4>
+        <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'resource'"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'resource'">
         <li><a routerLink="/" class="footer-item">Web PDF Studio</a></li>
         <li><a routerLink="/" class="footer-item">Client-Side Engine</a></li>
         <li><a routerLink="/" class="footer-item">Browser Extensions</a></li>
@@ -28,8 +72,11 @@
 
     <!-- Col 3: SOLUTIONS -->
     <div class="footer-nav-col">
-      <h4 class="footer-col-head">SOLUTIONS</h4>
-      <ul class="footer-nav-list">
+      <button type="button" class="footer-col-toggle" (click)="toggleSection('solutions')" [attr.aria-expanded]="openSection() === 'solutions'">
+        <h4 class="footer-col-head">SOLUTIONS</h4>
+        <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'solutions'"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'solutions'">
         <li><a routerLink="/" class="footer-item">Individual & Freelance</a></li>
         <li><a routerLink="/" class="footer-item">Education & Students</a></li>
         <li><a routerLink="/" class="footer-item">Legal & Contracts</a></li>
@@ -41,8 +88,11 @@
 
     <!-- Col 4: LEGAL -->
     <div class="footer-nav-col">
-      <h4 class="footer-col-head">LEGAL</h4>
-      <ul class="footer-nav-list">
+      <button type="button" class="footer-col-toggle" (click)="toggleSection('legal')" [attr.aria-expanded]="openSection() === 'legal'">
+        <h4 class="footer-col-head">LEGAL</h4>
+        <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'legal'"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'legal'">
         <li><a routerLink="/privacy-policy" class="footer-item">Privacy Policy</a></li>
         <li><a routerLink="/terms-and-conditions" class="footer-item">Terms & Conditions</a></li>
         <li><a routerLink="/gdpr-compliance" class="footer-item">GDPR Compliance</a></li>
@@ -53,8 +103,11 @@
 
     <!-- Col 5: COMPANY -->
     <div class="footer-nav-col">
-      <h4 class="footer-col-head">COMPANY</h4>
-      <ul class="footer-nav-list">
+      <button type="button" class="footer-col-toggle" (click)="toggleSection('company')" [attr.aria-expanded]="openSection() === 'company'">
+        <h4 class="footer-col-head">COMPANY</h4>
+        <svg class="col-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.rotated]="openSection() === 'company'"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <ul class="footer-nav-list" [class.mobile-open]="openSection() === 'company'">
         <li><a routerLink="/about-us" class="footer-item">About us</a></li>
         <li><a routerLink="/contact-us" class="footer-item">Contact & Support</a></li>
         <li><a routerLink="/" class="footer-item">Blog & Guides</a></li>
@@ -66,7 +119,7 @@
   <!-- FOOTER BOTTOM BAR (Language selector, Copyright, Socials) -->
   <div class="footer-sub-bar">
     <div class="container sub-bar-inner">
-      <!-- Real Language Dropup Selector (Exact UI matching Reference) -->
+      <!-- Language Dropup Selector -->
       <div class="lang-dropup-container notranslate skiptranslate" translate="no">
         <button
           type="button"
@@ -74,6 +127,8 @@
           translate="no"
           (click)="toggleMenu($event)"
           [class.active]="isMenuOpen()"
+          [attr.aria-expanded]="isMenuOpen()"
+          aria-haspopup="true"
           aria-label="Select Language"
         >
           <svg class="globe-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -89,7 +144,7 @@
 
         <!-- 3-Column Upward Flyout Dropdown -->
         @if (isMenuOpen()) {
-          <div class="lang-dropup-menu notranslate skiptranslate" translate="no" (click)="$event.stopPropagation()">
+          <div class="lang-dropup-menu notranslate skiptranslate" translate="no" role="menu" (click)="$event.stopPropagation()">
             <div class="lang-dropup-grid notranslate" translate="no">
               <!-- Column 1 -->
               <div class="lang-menu-col notranslate" translate="no">
@@ -98,6 +153,7 @@
                     type="button"
                     class="lang-menu-item notranslate skiptranslate"
                     translate="no"
+                    role="menuitem"
                     [class.active-item]="currentLang().code === lang.code"
                     (click)="selectLanguage(lang.code)"
                   >
@@ -114,6 +170,7 @@
                     type="button"
                     class="lang-menu-item notranslate skiptranslate"
                     translate="no"
+                    role="menuitem"
                     [class.active-item]="currentLang().code === lang.code"
                     (click)="selectLanguage(lang.code)"
                   >
@@ -130,6 +187,7 @@
                     type="button"
                     class="lang-menu-item notranslate skiptranslate"
                     translate="no"
+                    role="menuitem"
                     [class.active-item]="currentLang().code === lang.code"
                     (click)="selectLanguage(lang.code)"
                   >
@@ -144,10 +202,10 @@
       </div>
 
       <div class="copyright-text">
-        © 2026 PDF flow. All rights reserved. 100% In-Browser Privacy Guarantee.
+        © {{ currentYear }} PDFTailor. All rights reserved. 100% In-Browser Privacy Guarantee.
       </div>
 
-      <div class="social-icons-row">
+      <div class="social-icons-row" aria-label="Social media links">
         <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="X Twitter">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>

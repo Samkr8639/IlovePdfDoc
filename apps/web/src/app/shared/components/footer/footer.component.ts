@@ -13,14 +13,26 @@ export class FooterComponent {
   private translationService = inject(TranslationService);
   private elementRef = inject(ElementRef);
   isMenuOpen = signal<boolean>(false);
+  readonly currentYear = new Date().getFullYear();
 
-  // Exact 3 columns matching reference image
+  // Mobile accordion state for footer columns
+  openSection = signal<string | null>(null);
+
+  // Exact 3 columns matching reference design
   readonly col1 = this.translationService.languages.slice(0, 9);
   readonly col2 = this.translationService.languages.slice(9, 18);
   readonly col3 = this.translationService.languages.slice(18, 26);
 
   get currentLang() {
     return this.translationService.currentLanguage;
+  }
+
+  toggleSection(section: string): void {
+    if (this.openSection() === section) {
+      this.openSection.set(null);
+    } else {
+      this.openSection.set(section);
+    }
   }
 
   toggleMenu(event: MouseEvent): void {
@@ -38,5 +50,10 @@ export class FooterComponent {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.isMenuOpen.set(false);
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.isMenuOpen.set(false);
   }
 }
