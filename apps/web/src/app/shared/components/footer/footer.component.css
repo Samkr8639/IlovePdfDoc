@@ -7,35 +7,35 @@
 /* TOP BRANDING ROW */
 .footer-top-brand {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 44px 0 32px;
+  padding: 24px 0 18px;
 }
 
 .footer-brand-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .footer-brand-info {
-  max-width: 520px;
+  max-width: 540px;
 }
 
 .footer-brand-link {
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .footer-brand-logo {
-  height: 34px;
+  height: 30px;
   width: auto;
   display: block;
 }
 
 .footer-tagline {
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13.5px;
+  line-height: 1.5;
   color: #94a3b8;
   margin: 0;
 }
@@ -51,7 +51,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px;
+  padding: 5px 14px;
   border-radius: var(--pt-radius-full, 9999px);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -68,11 +68,11 @@
 /* 3-COLUMN MAIN GRID */
 .footer-main-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 48px;
-  padding-top: 48px;
-  padding-bottom: 48px;
-  max-width: 960px;
+  padding-top: 26px;
+  padding-bottom: 26px;
+  width: 100%;
 }
 
 .footer-nav-col {
@@ -105,7 +105,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #ffffff;
-  margin: 0 0 18px;
+  margin: 0 0 12px;
 }
 
 .footer-nav-list {
@@ -114,7 +114,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .footer-item {
@@ -133,7 +133,7 @@
 /* FOOTER SUB BAR */
 .footer-sub-bar {
   background: var(--pt-navy-deep, #0D1629);
-  padding: 20px 0;
+  padding: 14px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
