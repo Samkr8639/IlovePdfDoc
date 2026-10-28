@@ -431,25 +431,36 @@
   font-weight: 500;
 }
 
-/* FLOATING RED TOOLS STACK (Right edge of canvas - Matching screenshot) */
-.floating-tools-stack {
+/* FLOATING MULTI-DOCUMENT UPLOAD PILL (MATCHING USER SCREENSHOT) */
+.floating-tools-dock {
   position: absolute;
-  top: 40px;
+  top: 36px;
   right: 20px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 14px;
-  z-index: 20;
+  background: #ffffff;
+  padding: 8px 6px 14px;
+  border-radius: 28px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 10px 28px -4px rgba(11, 18, 32, 0.12), 0 2px 6px -1px rgba(11, 18, 32, 0.04);
+  z-index: 25;
+  width: 58px;
 }
-.floating-btn-wrap {
+
+.dock-btn-wrap {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
-.floating-circle-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+
+/* TOP TEAL SQUIRCLE '+' BUTTON */
+.dock-square-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
   background: var(--pt-teal-700, #0F766E);
   color: #ffffff;
   border: none;
@@ -457,61 +468,98 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.floating-circle-btn:hover {
+
+.dock-square-btn:hover {
   background: var(--pt-teal-800, #0B5D57);
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(15, 118, 110, 0.45);
 }
-.floating-count-badge {
+
+/* TOP-RIGHT BADGE WITH COUNT */
+.dock-count-badge {
   position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 18px;
-  height: 18px;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: #0f172a;
+  background: #0B1220;
   color: #ffffff;
+  font-family: var(--pt-font-body);
   font-size: 11px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  line-height: 1;
 }
-.floating-tooltip-label {
+
+/* ACTION BUTTONS (PC, GOOGLE DRIVE, DROPBOX) */
+.dock-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.18s ease;
+}
+
+.dock-icon-btn:hover {
+  background: #F1F5F9;
+  transform: scale(1.1);
+}
+
+.dock-icon-btn.pc-action:hover {
+  color: var(--pt-teal-700, #0F766E);
+}
+
+/* TOOLTIP ON HOVER */
+.dock-tooltip-label {
   position: absolute;
-  right: 52px;
-  white-space: nowrap;
-  background: #1e293b;
+  right: calc(100% + 12px);
+  background: #0F172A;
   color: #ffffff;
+  font-family: var(--pt-font-body);
   font-size: 12px;
   font-weight: 600;
-  padding: 6px 12px;
+  white-space: nowrap;
+  padding: 5px 10px;
   border-radius: 6px;
-  pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.2s ease;
+  transform: translateX(4px);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
 }
-.floating-tooltip-label::after {
+
+.dock-tooltip-label::after {
   content: '';
   position: absolute;
   top: 50%;
   right: -4px;
   transform: translateY(-50%);
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 4px solid #1e293b;
+  border-width: 4px 0 4px 4px;
+  border-style: solid;
+  border-color: transparent transparent transparent #0F172A;
 }
-.floating-circle-btn:hover + .floating-tooltip-label {
+
+.dock-btn-wrap:hover .dock-tooltip-label {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-8px);
+  transform: translateX(0);
 }
 
 /* RIGHT SIDEBAR ACTION PANEL */
@@ -745,6 +793,15 @@
   .canvas-main-area {
     padding: 32px 24px;
     min-height: 400px;
+  }
+  .floating-tools-dock {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    flex-direction: row;
+    width: auto;
+    padding: 6px 12px;
+    border-radius: 9999px;
   }
   .features-grid,
   .steps-grid {
