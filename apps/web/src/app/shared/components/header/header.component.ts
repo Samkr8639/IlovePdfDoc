@@ -21,71 +21,74 @@ export class HeaderComponent {
   mobileAllOpen = signal<boolean>(false);
   private closeTimer: any = null;
 
-  // Spotlight Command Palette Modal State
-  searchModalOpen = signal<boolean>(false);
-  searchModalQuery = signal<string>('');
-  activeCategory = signal<string>('all');
+  // In-place Header Search State
+  isSearchOpen = signal<boolean>(false);
+  searchQuery = signal<string>('');
   selectedIndex = signal<number>(0);
 
-  openSearchModal(): void {
-    this.searchModalQuery.set('');
-    this.activeCategory.set('all');
-    this.selectedIndex.set(0);
-    this.searchModalOpen.set(true);
-    setTimeout(() => {
-      const input = document.querySelector('.palette-search-input') as HTMLInputElement | null;
-      input?.focus();
-    }, 40);
-  }
+  readonly filteredTools = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const all = this.toolRegistry.allTools();
+    if (!q) {
+      // When opened without typing, show popular/live tools first
+      return all.slice(0, 8);
+    }
+    return all.filter(tool =>
+      tool.name.toLowerCase().includes(q) ||
+      tool.shortDescription.toLowerCase().includes(q) ||
+      tool.category.toLowerCase().includes(q)
+    );
+  });
 
-  closeSearchModal(): void {
-    this.searchModalOpen.set(false);
+  onSearchFocus(): void {
+    this.isSearchOpen.set(true);
+    this.closeMenu();
   }
 
   onSearchInput(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
-    this.searchModalQuery.set(val);
+    this.searchQuery.set(val);
     this.selectedIndex.set(0);
+    this.isSearchOpen.set(true);
   }
 
-  clearSearchQuery(): void {
-    this.searchModalQuery.set('');
+  clearSearch(event?: Event): void {
+    event?.stopPropagation();
+    this.searchQuery.set('');
     this.selectedIndex.set(0);
-    const input = document.querySelector('.palette-search-input') as HTMLInputElement | null;
+    const input = this.elementRef.nativeElement.querySelector('.header-search-input') as HTMLInputElement | null;
     input?.focus();
   }
 
-  setCategory(cat: string): void {
-    this.activeCategory.set(cat);
+  closeSearch(): void {
+    this.isSearchOpen.set(false);
     this.selectedIndex.set(0);
   }
 
-  readonly filteredModalTools = computed(() => {
-    const q = this.searchModalQuery().toLowerCase().trim();
-    const cat = this.activeCategory();
-    const all = this.toolRegistry.allTools();
+  openSearch(): void {
+    this.isSearchOpen.set(true);
+  }
 
-    return all.filter(tool => {
-      const matchCat = cat === 'all' || tool.category === cat;
-      const matchQuery = !q ||
-        tool.name.toLowerCase().includes(q) ||
-        tool.shortDescription.toLowerCase().includes(q) ||
-        tool.category.toLowerCase().includes(q);
-      return matchCat && matchQuery;
-    });
-  });
+  onKeydown(event: KeyboardEvent): void {
+    if (!this.isSearchOpen()) {
+      if (event.key === 'ArrowDown' || event.key === 'Enter') {
+        this.openSearch();
+        return;
+      }
+    }
 
-  onPaletteKeydown(event: KeyboardEvent): void {
-    const list = this.filteredModalTools();
+    const list = this.filteredTools();
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       if (list.length > 0) {
         this.selectedIndex.set((this.selectedIndex() + 1) % list.length);
+        this.scrollToSelectedItem();
       }
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       if (list.length > 0) {
         this.selectedIndex.set((this.selectedIndex() - 1 + list.length) % list.length);
+        this.scrollToSelectedItem();
       }
     } else if (event.key === 'Enter') {
       event.preventDefault();
@@ -94,13 +97,22 @@ export class HeaderComponent {
       }
     } else if (event.key === 'Escape') {
       event.preventDefault();
-      this.closeSearchModal();
+      this.closeSearch();
+      const input = this.elementRef.nativeElement.querySelector('.header-search-input') as HTMLInputElement | null;
+      input?.blur();
     }
+  }
+
+  private scrollToSelectedItem(): void {
+    setTimeout(() => {
+      const selectedEl = this.elementRef.nativeElement.querySelector('.dropdown-item.selected') as HTMLElement | null;
+      selectedEl?.scrollIntoView({ block: 'nearest' });
+    }, 0);
   }
 
   selectTool(tool: ToolDefinition): void {
     if (tool && tool.route) {
-      this.closeSearchModal();
+      this.closeSearch();
       this.closeMenu();
       this.closeMobileMenu();
       this.router.navigateByUrl(tool.route);
@@ -114,15 +126,14 @@ export class HeaderComponent {
       (event.key === '/' && !['INPUT', 'TEXTAREA'].includes((event.target as HTMLElement).tagName))
     ) {
       event.preventDefault();
-      if (this.searchModalOpen()) {
-        this.closeSearchModal();
-      } else {
-        this.openSearchModal();
-      }
+      this.openSearch();
+      const input = this.elementRef.nativeElement.querySelector('.header-search-input') as HTMLInputElement | null;
+      input?.focus();
+      input?.select();
     } else if (event.key === 'Escape') {
       this.closeMenu();
       this.closeMobileMenu();
-      this.closeSearchModal();
+      this.closeSearch();
     }
   }
 
@@ -177,7 +188,12 @@ export class HeaderComponent {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
+    const target = event.target as HTMLElement;
+    const searchWrap = this.elementRef.nativeElement.querySelector('.header-search-wrap');
+    if (searchWrap && !searchWrap.contains(target)) {
+      this.closeSearch();
+    }
+    if (!this.elementRef.nativeElement.contains(target)) {
       this.closeMenu();
     }
   }
