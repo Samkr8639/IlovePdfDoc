@@ -1,26 +1,29 @@
 .dropzone-area {
   position: relative;
   width: 100%;
-  min-height: 380px;
+  max-width: 960px;
+  margin: 0 auto;
+  min-height: 340px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px dashed var(--pt-outline, #D0D5DD);
-  border-radius: var(--pt-radius-2xl, 20px);
-  background: var(--pt-bg, #ffffff);
-  padding: 56px 32px;
+  border: 1.5px dashed #CBD5E1;
+  border-radius: 24px;
+  background: #ffffff;
+  padding: 44px 32px 36px;
   text-align: center;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
+  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
 }
 
 .dropzone-area:hover,
 .dropzone-area.active {
   border-color: var(--pt-teal-700, #0F766E);
-  background: var(--pt-teal-50, #ECF7F5);
+  background: #FAFDFD;
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px -6px rgba(15, 118, 110, 0.12);
+  box-shadow: 0 20px 48px -12px rgba(15, 118, 110, 0.16), 0 2px 8px -1px rgba(15, 118, 110, 0.06);
 }
 
 .dropzone-area:focus-visible {
@@ -36,38 +39,60 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
 }
 
-/* ACTION ROW: SELECT BUTTON + CLOUD BUTTONS */
+/* MODERN UPLOAD ICON BADGE */
+.dropzone-icon-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--pt-teal-700, #0F766E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.08);
+}
+
+.dropzone-area:hover .dropzone-icon-badge,
+.dropzone-area.active .dropzone-icon-badge {
+  transform: translateY(-3px) scale(1.05);
+  background: rgba(15, 118, 110, 0.14);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.16);
+}
+
+/* ACTION ROW: ELEVATED CTA + COHESIVE SIDECAR GROUP */
 .upload-action-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   flex-wrap: wrap;
 }
 
-/* PDFTAILOR TEAL HERO SELECT BUTTON */
+/* PRIMARY ELEVATED SELECT BUTTON */
 .select-file-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   background: var(--pt-teal-700, #0F766E);
   color: #ffffff;
-  font-family: var(--pt-font-heading);
-  font-size: 20px;
+  font-family: var(--pt-font-heading, 'Inter', sans-serif);
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  padding: 0 44px;
-  height: 68px;
-  min-width: 290px;
-  border-radius: var(--pt-radius-lg, 12px);
+  padding: 0 38px;
+  height: 60px;
+  min-width: 270px;
+  border-radius: 14px;
   border: 1px solid transparent;
-  box-shadow: 0 6px 20px -2px rgba(15, 118, 110, 0.35);
+  box-shadow: 0 8px 22px -3px rgba(15, 118, 110, 0.38);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
@@ -75,7 +100,7 @@
 .select-file-btn:hover {
   background: var(--pt-teal-800, #0B5D57);
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px -2px rgba(15, 118, 110, 0.45);
+  box-shadow: 0 12px 28px -3px rgba(15, 118, 110, 0.48);
 }
 
 .select-file-btn:active {
@@ -83,52 +108,160 @@
   box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
 }
 
-/* CLOUD BUTTONS (Google Drive & Dropbox) */
-.cloud-buttons-group {
+.btn-upload-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.select-file-btn:hover .btn-upload-icon {
+  transform: translateY(-1px);
+}
+
+/* COHESIVE SIDECAR CLUSTER (Google Drive & Dropbox) */
+.cloud-sidecar-group {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.cloud-btn {
+.cloud-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cloud-sidecar-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
   background: #ffffff;
-  border: 1px solid var(--pt-outline, #D0D5DD);
-  box-shadow: var(--pt-shadow-xs, 0 1px 2px rgba(16, 24, 40, 0.05));
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
-.cloud-btn:hover {
-  transform: translateY(-2px) scale(1.06);
-  box-shadow: var(--pt-shadow-md, 0 4px 8px -2px rgba(16, 24, 40, 0.1));
-  border-color: var(--pt-teal-700, #0F766E);
+.cloud-sidecar-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
 }
 
 .google-drive-btn:hover {
-  border-color: #2684FC;
+  border-color: #CBD5E1;
+  background: #FCFDFE;
 }
 
 .dropbox-btn:hover {
-  border-color: #0061FF;
+  border-color: #CBD5E1;
+  background: #F8FBFF;
 }
 
+/* HOVER TOOLTIPS FOR SIDECAR BUTTONS */
+.cloud-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #0F172A;
+  color: #ffffff;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+.cloud-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: #0F172A transparent transparent transparent;
+}
+
+.cloud-btn-wrapper:hover .cloud-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* DROP HINT TEXT */
 .drop-hint {
-  font-family: var(--pt-font-body);
-  font-size: 15px;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 14.5px;
   font-weight: 500;
-  color: var(--pt-muted, #475467);
-  margin: 4px 0 0;
+  color: #64748B;
+  margin: 4px 0 2px;
 }
 
-.dropzone-limits {
-  font-family: var(--pt-font-body);
-  font-size: 13px;
-  color: var(--pt-muted-light, #667085);
-  margin: 0;
+/* PRIVACY & SECURITY TRUST ROW */
+.dropzone-trust-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #F1F5F9;
+  width: 100%;
+  max-width: 640px;
+}
+
+.trust-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 9999px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.trust-badge-chip svg {
+  color: var(--pt-teal-700, #0F766E);
+}
+
+.trust-badge-chip:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+  color: #1E293B;
+}
+
+@media (max-width: 640px) {
+  .dropzone-area {
+    padding: 36px 20px 28px;
+    min-height: auto;
+  }
+  .select-file-btn {
+    width: 100%;
+    min-width: auto;
+  }
+  .cloud-sidecar-group {
+    width: 100%;
+    justify-content: center;
+  }
+  .dropzone-trust-row {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
