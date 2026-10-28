@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { PdfToWordMode, PdfDocumentAnalysis } from '@paperflow/contracts';
 import { ValidatedPdfFile, MergeResult } from '../../core/services/browser-pdf.service';
 import { PdfToWordService, ConvertedWordResult } from '../../core/services/pdf-to-word.service';
@@ -17,7 +16,6 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   selector: 'app-pdf-to-word',
   standalone: true,
   imports: [
-    RouterLink,
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent

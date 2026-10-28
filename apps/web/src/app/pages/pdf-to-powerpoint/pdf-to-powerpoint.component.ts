@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import {
   PdfToPowerPointMode,
   PdfToPowerPointSlideSize,
@@ -24,7 +23,6 @@ import { LayoutService } from '../../core/services/layout.service';
   selector: 'app-pdf-to-powerpoint',
   standalone: true,
   imports: [
-    RouterLink,
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent
