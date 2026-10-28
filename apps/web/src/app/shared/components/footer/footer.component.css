@@ -315,11 +315,21 @@
 
 @media (max-width: 768px) {
   .lang-dropup-menu {
-    width: calc(100vw - 32px);
-    padding: 18px 20px;
+    position: fixed;
+    bottom: 16px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: 75vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    padding: 16px 18px;
+    z-index: 1200;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
   }
   .lang-dropup-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 6px 12px;
   }
   .footer-main-grid {
     grid-template-columns: 1fr;

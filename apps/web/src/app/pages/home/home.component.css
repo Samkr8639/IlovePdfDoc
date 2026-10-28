@@ -483,34 +483,115 @@
 
 @media (max-width: 768px) {
   .hero-section {
-    padding: 44px 14px 28px;
+    padding: 32px 14px 20px;
+  }
+  .hero-kicker-badge {
+    font-size: 11.5px;
+    padding: 5px 12px;
+    gap: 6px;
+    max-width: 100%;
   }
   .hero-headline {
-    font-size: 32px;
+    font-size: 30px;
+    line-height: 1.16;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
   }
   .hero-subhead {
-    font-size: 15px;
-    margin-bottom: 22px;
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 20px;
+    padding: 0 4px;
   }
   .hero-trust-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto 22px;
   }
   .trust-chip {
+    width: 100%;
+    justify-content: center;
     font-size: 11.5px;
-    padding: 5px 11px;
+    padding: 6px 8px;
+    gap: 6px;
   }
   .hero-quick-row {
     flex-direction: column;
     gap: 8px;
   }
+  .hero-filter-bar-wrapper {
+    width: calc(100% + 28px);
+    margin: 0 -14px 12px;
+    padding: 4px 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .hero-filter-bar-wrapper::-webkit-scrollbar {
+    display: none;
+  }
   .hero-filter-nav {
-    border-radius: 18px;
-    padding: 6px;
+    flex-wrap: nowrap;
+    border-radius: 9999px;
+    padding: 4px;
     gap: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(16, 24, 40, 0.08);
+  }
+  .cat-pill {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 26px 12px 16px;
+  }
+  .hero-kicker-badge {
+    font-size: 10.5px;
+    padding: 4px 10px;
+    gap: 5px;
+  }
+  .hero-headline {
+    font-size: 26px;
+    line-height: 1.18;
+  }
+  .hero-subhead {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .hero-trust-row {
+    max-width: 330px;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .trust-chip {
+    font-size: 11px;
+    padding: 5px 6px;
+    gap: 5px;
+  }
+  .trust-chip svg {
+    width: 13px;
+    height: 13px;
+  }
+  .hero-filter-bar-wrapper {
+    width: calc(100% + 24px);
+    margin: 0 -12px 12px;
+    padding: 4px 12px;
   }
   .cat-pill {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 11.5px;
   }
 }
 
