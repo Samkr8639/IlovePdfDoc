@@ -39,9 +39,9 @@ export class PressMediaKitComponent implements OnInit {
   readonly copiedId = signal<string | null>(null);
 
   readonly officialInfo = {
-    name: 'PDF flow (also known as PDF&Doc)',
-    url: 'https://pdfflow.app',
-    tagline: 'Private, High-Speed Document Processing Without the Cloud Drag',
+    name: 'PDFTailor',
+    url: 'https://pdftailor.in',
+    tagline: 'Private, High-Speed Document Processing in Your Browser',
     founded: 'Production Architecture Active 2026',
     headquarters: 'Distributed / Cloud Edge & Client-Side Execution',
     pressContact: 'jhonesjr01@gmail.com',
@@ -49,42 +49,42 @@ export class PressMediaKitComponent implements OnInit {
   };
 
   readonly shortBoilerplate = 
-    `PDF flow (PDF&Doc) is a privacy-first web document processing platform providing fast, browser-based PDF utilities. Built with modern WebAssembly and minimal server footprint, PDF flow empowers users to merge, split, compress, and convert documents without forced accounts, file retention, or invasive ad-tracking networks.`;
+    `PDFTailor is a privacy-first web document processing platform providing fast, browser-based PDF utilities. Built with modern WebAssembly and minimal server footprint, PDFTailor empowers users to merge, split, compress, and convert documents without forced accounts, file retention, or invasive ad-tracking networks.`;
 
   readonly extendedBoilerplate = 
-    `PDF flow (PDF&Doc) is a modern web-based document platform engineered for privacy, speed, and usability. By executing supported file manipulations directly inside the user's browser sandbox via WebAssembly and limiting complex conversions to ephemeral, RAM-only processing without permanent disk storage, PDF flow sets a new standard for document utility confidentiality. The platform provides over twenty specialized PDF workflows—including conversion, page extraction, password encryption, and compression—free of mandatory account signups and third-party advertising trackers.`;
+    `PDFTailor is a bespoke web-based document platform engineered for privacy, speed, and usability. By executing supported file manipulations directly inside the user's browser sandbox via WebAssembly and limiting complex conversions to ephemeral, RAM-only processing without permanent disk storage, PDFTailor sets a new standard for document utility confidentiality. The platform provides specialized PDF workflows—including conversion, page extraction, password encryption, and compression—free of mandatory account signups and third-party advertising trackers.`;
 
   readonly colorTokens: ColorToken[] = [
     {
-      name: 'Coral Primary',
-      role: 'Core brand identity, key buttons, and active accent elements',
-      hex: '#E53935',
-      rgb: 'rgb(229, 57, 53)',
-      cmyk: 'C:0 M:75 Y:77 K:10',
+      name: 'Primary Navy',
+      role: 'Core brand identity, key navigation bars, and high-contrast containers',
+      hex: '#14213D',
+      rgb: 'rgb(20, 33, 61)',
+      cmyk: 'C:67 M:46 Y:0 K:76',
       isDarkText: false
     },
     {
-      name: 'Coral Warm',
-      role: 'Gradients, highlight badges, and hover focus states',
-      hex: '#FF553E',
-      rgb: 'rgb(255, 85, 62)',
-      cmyk: 'C:0 M:67 Y:76 K:0',
+      name: 'Teal Accent',
+      role: 'Action buttons, active highlights, links, and focal interactive elements',
+      hex: '#0F766E',
+      rgb: 'rgb(15, 118, 110)',
+      cmyk: 'C:87 M:0 Y:7 K:54',
       isDarkText: false
     },
     {
-      name: 'Deep Slate',
-      role: 'Primary headlines, high-contrast containers, and dark-mode bars',
-      hex: '#0F172A',
-      rgb: 'rgb(15, 23, 42)',
-      cmyk: 'C:64 M:45 Y:0 K:84',
+      name: 'Teal Hover',
+      role: 'Hover elevation states and darker active button borders',
+      hex: '#0B5D57',
+      rgb: 'rgb(11, 93, 87)',
+      cmyk: 'C:88 M:0 Y:6 K:64',
       isDarkText: false
     },
     {
-      name: 'Muted Slate',
-      role: 'Subtitles, secondary labels, borders, and metadata text',
-      hex: '#475569',
-      rgb: 'rgb(100, 116, 139)',
-      cmyk: 'C:28 M:16 Y:0 K:45',
+      name: 'Deep Ink',
+      role: 'Primary typography, readable headlines, and deep text contrast',
+      hex: '#0B1220',
+      rgb: 'rgb(11, 18, 32)',
+      cmyk: 'C:66 M:44 Y:0 K:87',
       isDarkText: false
     },
     {
@@ -96,11 +96,11 @@ export class PressMediaKitComponent implements OnInit {
       isDarkText: true
     },
     {
-      name: 'Emerald Verified',
-      role: 'Security badges, operational confirmations, and privacy indicators',
-      hex: '#059669',
-      rgb: 'rgb(5, 150, 105)',
-      cmyk: 'C:97 M:0 Y:30 K:41',
+      name: 'Amber Highlight',
+      role: 'Status badges, live indicators, and special highlights',
+      hex: '#D98E04',
+      rgb: 'rgb(217, 142, 4)',
+      cmyk: 'C:0 M:35 Y:98 K:15',
       isDarkText: false
     }
   ];
@@ -188,7 +188,7 @@ export class PressMediaKitComponent implements OnInit {
     },
     {
       title: 'No Third-Party Ad Trackers',
-      detail: 'PDF flow contains zero Meta pixels, Google AdSense tags, or behavioral remarketing beacons. We do not sell user data.'
+      detail: 'PDFTailor contains zero Meta pixels, Google AdSense tags, or behavioral remarketing beacons. We do not sell user data.'
     },
     {
       title: '20+ Specialized Utilities',
@@ -202,17 +202,17 @@ export class PressMediaKitComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'Press & Media Kit — Official Brand Assets & Resources | PDF flow',
-      description: 'Download official high-resolution logos, brand guidelines, color palettes, and verified product information for PDF flow / PDF&Doc.',
+      title: 'Press & Media Kit — Official Brand Assets & Resources | PDFTailor',
+      description: 'Download official high-resolution logos, brand guidelines, color palettes, and verified product information for PDFTailor.',
       keywords: [
-        'pdf flow press kit',
-        'pdf flow media kit',
-        'pdf flow logo download',
+        'pdftailor press kit',
+        'pdftailor media kit',
+        'pdftailor logo download',
         'brand assets',
         'official press resources',
-        'pdf and doc brand kit'
+        'pdftailor brand kit'
       ],
-      canonical: 'https://pdfflow.app/press-media-kit',
+      canonical: 'https://pdftailor.in/press-media-kit',
       faqs: []
     });
   }

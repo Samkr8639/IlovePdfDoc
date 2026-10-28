@@ -28,7 +28,7 @@ export class CookieSettingsComponent implements OnInit {
   readonly inventoryRows: CookieInventoryRow[] = [
     {
       name: 'pdf_flow_cookie_consent',
-      provider: 'PDF flow (First-Party)',
+      provider: 'PDFTailor (First-Party)',
       category: 'Strictly Necessary',
       mechanism: 'Browser LocalStorage',
       duration: '1 Year (Persistent)',
@@ -36,7 +36,7 @@ export class CookieSettingsComponent implements OnInit {
     },
     {
       name: 'user_language',
-      provider: 'PDF flow (First-Party)',
+      provider: 'PDFTailor (First-Party)',
       category: 'Functional / Preference',
       mechanism: 'Browser LocalStorage',
       duration: '1 Year (Persistent)',
@@ -44,7 +44,7 @@ export class CookieSettingsComponent implements OnInit {
     },
     {
       name: 'googtrans',
-      provider: 'Google Translate / PDF flow',
+      provider: 'Google Translate / PDFTailor',
       category: 'Functional / Preference',
       mechanism: 'HTTP Cookie',
       duration: 'Session / 30 Days',
@@ -54,16 +54,16 @@ export class CookieSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'Cookie Settings & Privacy Preferences — PDF flow',
-      description: 'Manage your cookie settings and privacy preferences on PDF flow. Configure functional, analytics, and advertising preferences with instant client persistence.',
+      title: 'Cookie Settings & Privacy Preferences — PDFTailor',
+      description: 'Manage your cookie settings and privacy preferences on PDFTailor. Configure functional, analytics, and advertising preferences with instant client persistence.',
       keywords: [
-        'pdf flow cookie settings',
+        'pdftailor cookie settings',
         'cookie preferences',
         'privacy consent manager',
         'manage cookies',
         'local storage preferences'
       ],
-      canonical: 'https://pdfflow.app/cookie-settings',
+      canonical: 'https://pdftailor.in/cookie-settings',
       faqs: []
     });
   }

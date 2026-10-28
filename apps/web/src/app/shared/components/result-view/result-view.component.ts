@@ -133,7 +133,7 @@ export class ResultViewComponent {
   }
 
   shareOnTwitter(): void {
-    const text = encodeURIComponent('Just merged multiple PDFs instantly and privately in browser with PDF flow! Check it out:');
+    const text = encodeURIComponent('Just merged multiple PDFs instantly and privately in browser with PDFTailor! Check it out:');
     const url = encodeURIComponent(window.location.origin);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer');
   }
@@ -149,7 +149,7 @@ export class ResultViewComponent {
   }
 
   shareOnWhatsApp(): void {
-    const text = encodeURIComponent('Merge PDFs privately and free with PDF flow: ' + window.location.origin);
+    const text = encodeURIComponent('Merge PDFs privately and free with PDFTailor: ' + window.location.origin);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank', 'noopener,noreferrer');
   }
 }

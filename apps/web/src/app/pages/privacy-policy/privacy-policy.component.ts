@@ -129,17 +129,17 @@ export class PrivacyPolicyComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'Privacy Policy — PDF flow Document Processing & Data Protection',
-      description: 'Read the PDF flow Privacy Policy. Learn how our client-side WebAssembly architecture and ephemeral conversion pipelines protect your files and personal data.',
+      title: 'Privacy Policy — PDFTailor Document Processing & Data Protection',
+      description: 'Read the PDFTailor Privacy Policy. Learn how our client-side WebAssembly architecture and ephemeral conversion pipelines protect your files and personal data.',
       keywords: [
-        'pdf flow privacy policy',
+        'pdftailor privacy policy',
         'document privacy',
         'client-side data protection',
         'pdf security',
         'gdpr compliance',
         'file privacy'
       ],
-      canonical: 'https://pdfflow.app/privacy-policy',
+      canonical: 'https://pdftailor.in/privacy-policy',
       faqs: []
     });
 
@@ -176,12 +176,12 @@ export class PrivacyPolicyComponent implements OnInit {
       '@graph': [
         {
           '@type': 'WebPage',
-          '@id': 'https://pdfflow.app/privacy-policy#webpage',
-          'url': 'https://pdfflow.app/privacy-policy',
-          'name': 'Privacy Policy — PDF flow',
-          'description': 'Comprehensive privacy policy and document retention disclosure for PDF flow services.',
+          '@id': 'https://pdftailor.in/privacy-policy#webpage',
+          'url': 'https://pdftailor.in/privacy-policy',
+          'name': 'Privacy Policy — PDFTailor',
+          'description': 'Comprehensive privacy policy and document retention disclosure for PDFTailor services.',
           'publisher': {
-            '@id': 'https://pdfflow.app/#organization'
+            '@id': 'https://pdftailor.in/#organization'
           }
         }
       ]

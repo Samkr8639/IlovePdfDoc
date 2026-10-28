@@ -84,7 +84,7 @@ export class TermsAndConditionsComponent implements OnInit {
     {
       title: 'User Indemnification',
       scope: 'Third-Party Infringement Defense',
-      description: 'You agree to defend and indemnify PDF flow against any claims arising from your breach of these terms or processing copyrighted content without authorization.'
+      description: 'You agree to defend and indemnify PDFTailor against any claims arising from your breach of these terms or processing copyrighted content without authorization.'
     },
     {
       title: 'Access Throttling & Anti-Abuse',
@@ -109,7 +109,7 @@ export class TermsAndConditionsComponent implements OnInit {
       subtitle: 'Complete copyright sovereignty and limited technical execution license',
       items: [
         'You retain 100% complete, exclusive ownership, title, copyright, and IP rights in and to all uploaded documents',
-        'You grant PDF flow strictly a limited, non-exclusive, transient technical license solely to execute conversion and deliver output',
+        'You grant PDFTailor strictly a limited, non-exclusive, transient technical license solely to execute conversion and deliver output',
         'Zero AI Ingestion: We never feed, index, train, benchmark, or expose your documents or text to AI or LLM models',
         'You represent and warrant that you own the files or possess all lawful licenses and permissions to process them'
       ]
@@ -118,7 +118,7 @@ export class TermsAndConditionsComponent implements OnInit {
       title: 'Platform Intellectual Property & Assets',
       subtitle: 'Proprietary marks, UI design, codebases, and open-source acknowledgments',
       items: [
-        'PDF flow, PDF&Doc, logos, branding, UI designs, stylesheets, and custom code are proprietary property of PDF flow',
+        'PDFTailor, logos, branding, UI designs, stylesheets, and custom code are proprietary property of PDFTailor',
         'You may not copy, mirror, reverse engineer, republish, or frame any proprietary platform assets without permission',
         'Underlying open-source components (e.g., pdf-lib, Angular, Node.js) remain subject to their respective MIT/Apache licenses',
         'No white-labeling or unauthorized commercial resale of our microservices is permitted without written consent'
@@ -138,10 +138,10 @@ export class TermsAndConditionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'Terms & Conditions — PDF flow Document Processing & Service Terms',
-      description: 'Review the Terms and Conditions for PDF flow. Engineered with complete user document ownership, zero AI training, and transparent client-side document processing.',
+      title: 'Terms & Conditions — PDFTailor Document Processing & Service Terms',
+      description: 'Review the Terms and Conditions for PDFTailor. Engineered with complete user document ownership, zero AI training, and transparent client-side document processing.',
       keywords: [
-        'pdf flow terms and conditions',
+        'pdftailor terms and conditions',
         'terms of service',
         'pdf tools terms',
         'document processing terms',
@@ -149,7 +149,7 @@ export class TermsAndConditionsComponent implements OnInit {
         'acceptable use policy',
         'user document ownership'
       ],
-      canonical: 'https://pdfflow.app/terms-and-conditions',
+      canonical: 'https://pdftailor.in/terms-and-conditions',
       faqs: []
     });
   }

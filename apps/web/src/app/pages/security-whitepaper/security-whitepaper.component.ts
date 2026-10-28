@@ -181,10 +181,10 @@ export class SecurityWhitepaperComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'Security Architecture & Document Processing Whitepaper — PDF flow',
-      description: 'Review the technical security whitepaper for PDF flow. Explore our client-side WebAssembly execution, volatile RAM conversion buffers, and threat mitigations.',
+      title: 'Security Architecture & Document Processing Whitepaper — PDFTailor',
+      description: 'Review the technical security whitepaper for PDFTailor. Explore our client-side WebAssembly execution, volatile RAM conversion buffers, and threat mitigations.',
       keywords: [
-        'pdf flow security whitepaper',
+        'pdftailor security whitepaper',
         'pdf security architecture',
         'document processing security',
         'client-side webassembly pdf',
@@ -192,7 +192,7 @@ export class SecurityWhitepaperComponent implements OnInit {
         'pdf privacy controls',
         'threat model pdf'
       ],
-      canonical: 'https://pdfflow.app/security-whitepaper',
+      canonical: 'https://pdftailor.in/security-whitepaper',
       faqs: []
     });
   }

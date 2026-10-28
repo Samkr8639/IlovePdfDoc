@@ -49,10 +49,10 @@ export class ContactUsComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'Contact Us - Get in Touch with PDF flow Support & Sales',
-      description: 'Contact PDF flow to report a problem, get support, inquire about volume licensing, or ask about our 100% in-browser document privacy.',
-      keywords: ['contact pdf flow', 'support', 'pdf tools help', 'enterprise licensing'],
-      canonical: 'https://paperflow.app/contact-us',
+      title: 'Contact Us - Get in Touch with PDFTailor Support & Sales',
+      description: 'Contact PDFTailor to report a problem, get support, inquire about volume licensing, or ask about our 100% in-browser document privacy.',
+      keywords: ['contact pdftailor', 'support', 'pdf tools help', 'enterprise licensing'],
+      canonical: 'https://pdftailor.in/contact-us',
       faqs: [
         {
           question: 'How fast will I receive a reply?',

@@ -46,7 +46,7 @@ export class GdprComplianceComponent implements OnInit {
       number: '01',
       title: 'Site Visit & Tool Selection',
       actor: 'User Web Browser',
-      description: 'The user accesses PDF flow and selects a document tool (e.g., Merge, Split, Compress, or PDF to Word).',
+      description: 'The user accesses PDFTailor and selects a document tool (e.g., Merge, Split, Compress, or PDF to Word).',
       technicalReality: 'Static WebAssembly binaries and UI scripts are downloaded to the browser cache. No tracking pixels or profiling cookies are dispatched.'
     },
     {
@@ -203,10 +203,10 @@ export class GdprComplianceComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'GDPR Compliance & Data Protection — PDF flow',
-      description: 'Explore the PDF flow GDPR compliance framework. Verified disclosures on data flows, client-side processing, Art. 5 principles, and data subject rights.',
+      title: 'GDPR Compliance & Data Protection — PDFTailor',
+      description: 'Explore the PDFTailor GDPR compliance framework. Verified disclosures on data flows, client-side processing, Art. 5 principles, and data subject rights.',
       keywords: [
-        'pdf flow gdpr compliance',
+        'pdftailor gdpr compliance',
         'data protection',
         'gdpr pdf tools',
         'client-side data privacy',
@@ -214,7 +214,7 @@ export class GdprComplianceComponent implements OnInit {
         'article 5 principles',
         'privacy architecture'
       ],
-      canonical: 'https://pdfflow.app/gdpr-compliance',
+      canonical: 'https://pdftailor.in/gdpr-compliance',
       faqs: []
     });
   }

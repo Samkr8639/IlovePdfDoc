@@ -51,16 +51,16 @@ export class AboutUsComponent implements OnInit {
       answer: 'For complex layout reconstruction that requires deep geometry parsing and DOCX XML synthesis, files are transmitted over an encrypted TLS connection directly to our conversion engine. The file is processed strictly in ephemeral RAM and the resulting document is returned to you. The temporary memory is immediately purged upon response completion. We do not store files on persistent disk, do not inspect document content, and never use user files to train AI models.'
     },
     {
-      question: 'Is PDF flow free, and are there file limits?',
-      answer: 'Yes, PDF flow is completely free for everyday use without forced watermarks or mandatory account signups. To ensure smooth browser performance and prevent browser tab crashes on personal computers, we set practical limits (for example, up to 30 files or 50 MB per task for merging).'
+      question: 'Is PDFTailor free, and are there file limits?',
+      answer: 'Yes, PDFTailor is completely free for everyday use without forced watermarks or mandatory account signups. To ensure smooth browser performance and prevent browser tab crashes on personal computers, we set practical limits (for example, up to 30 files or 50 MB per task for merging).'
     },
     {
-      question: 'Does PDF flow work across desktop, tablet, and mobile devices?',
-      answer: 'Yes. Because PDF flow is built entirely on modern web standards (HTML5, WebAssembly, and Canvas APIs), it works uniformly across Google Chrome, Apple Safari, Mozilla Firefox, and Microsoft Edge on macOS, Windows, Linux, iOS, and Android without requiring software downloads or browser extensions.'
+      question: 'Does PDFTailor work across desktop, tablet, and mobile devices?',
+      answer: 'Yes. Because PDFTailor is built entirely on modern web standards (HTML5, WebAssembly, and Canvas APIs), it works uniformly across Google Chrome, Apple Safari, Mozilla Firefox, and Microsoft Edge on macOS, Windows, Linux, iOS, and Android without requiring software downloads or browser extensions.'
     },
     {
-      question: 'Why does PDF flow offer 26+ languages?',
-      answer: 'Document workflows are universal. We localized PDF flow into 26+ native languages so students, legal professionals, and teams worldwide can manipulate sensitive documents with confidence in their native language.'
+      question: 'Why does PDFTailor offer 26+ languages?',
+      answer: 'Document workflows are universal. We localized PDFTailor into 26+ native languages so students, legal professionals, and teams worldwide can manipulate sensitive documents with confidence in their native language.'
     }
   ];
 
@@ -124,17 +124,17 @@ export class AboutUsComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.setSeoData({
-      title: 'About PDF flow — Straightforward, Privacy-First Document Tools',
-      description: 'PDF flow provides straightforward, browser-first PDF utilities. Learn how our client-side WebAssembly architecture and ephemeral processing keep your documents private.',
+      title: 'About PDFTailor — Straightforward, Privacy-First Document Tools',
+      description: 'PDFTailor provides straightforward, browser-first PDF utilities. Learn how our client-side WebAssembly architecture and ephemeral processing keep your documents private.',
       keywords: [
-        'about pdf flow',
+        'about pdftailor',
         'browser pdf tools',
         'client-side pdf processing',
         'private pdf tools',
         'pdf security and privacy',
         'webassembly pdf'
       ],
-      canonical: 'https://pdfflow.app/about-us',
+      canonical: 'https://pdftailor.in/about-us',
       faqs: this.faqs
     });
 
@@ -161,19 +161,19 @@ export class AboutUsComponent implements OnInit {
       '@graph': [
         {
           '@type': 'AboutPage',
-          '@id': 'https://pdfflow.app/about-us#webpage',
-          'url': 'https://pdfflow.app/about-us',
-          'name': 'About Us — PDF flow',
+          '@id': 'https://pdftailor.in/about-us#webpage',
+          'url': 'https://pdftailor.in/about-us',
+          'name': 'About Us — PDFTailor',
           'description': 'Straightforward, browser-native PDF tools built with client-side privacy.',
           'publisher': {
-            '@id': 'https://pdfflow.app/#organization'
+            '@id': 'https://pdftailor.in/#organization'
           }
         },
         {
           '@type': 'Organization',
-          '@id': 'https://pdfflow.app/#organization',
-          'name': 'PDF flow',
-          'url': 'https://pdfflow.app/',
+          '@id': 'https://pdftailor.in/#organization',
+          'name': 'PDFTailor',
+          'url': 'https://pdftailor.in/',
           'description': 'Privacy-first document productivity utilities running in your browser.',
           'sameAs': []
         }
