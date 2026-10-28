@@ -67,7 +67,7 @@ export class TranslationService {
 
     // Check cookie first or localStorage
     const savedLangCode = localStorage.getItem('user_language');
-    const cookieMatch = document.cookie.match(/googtrans=\/en\/([a-zA-Z-]+)/);
+    const cookieMatch = document.cookie.match(/googtrans=\/(?:en|auto)\/([a-zA-Z-]+)/);
     const activeCode = savedLangCode || (cookieMatch ? cookieMatch[1] : 'en');
 
     const matched = this.languages.find(l => l.code.toLowerCase() === activeCode.toLowerCase());
@@ -100,7 +100,6 @@ export class TranslationService {
     if (!document.getElementById('google_translate_element')) {
       const div = document.createElement('div');
       div.id = 'google_translate_element';
-      div.style.display = 'none';
       document.body.appendChild(div);
     }
 
@@ -134,39 +133,42 @@ export class TranslationService {
       const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
       if (combo) {
         combo.value = '';
-        combo.dispatchEvent(new Event('change'));
+        combo.dispatchEvent(new Event('change', { bubbles: true }));
       }
-      // Reload to ensure clean pristine English DOM
       window.location.reload();
       return;
     }
 
-    // Set cookies for Google Translate
+    // Set cookies for Google Translate (both /en/ and /auto/ prefixes)
     this.setCookie('googtrans', `/en/${target.code}`);
-    this.setCookie('googtrans', `/en/${target.code}`, window.location.hostname);
+    this.setCookie('googtrans', `/auto/${target.code}`);
 
     const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
     if (combo) {
       combo.value = target.code;
-      combo.dispatchEvent(new Event('change'));
+      combo.dispatchEvent(new Event('change', { bubbles: true }));
     } else {
-      // Reload so Google Translate picks up the cookie on boot
+      // Reload so Google Translate translates the document on load
       window.location.reload();
     }
   }
 
-  private setCookie(name: string, value: string, domain?: string): void {
-    let cookie = `${name}=${value}; path=/;`;
-    if (domain && domain !== 'localhost') {
-      cookie += ` domain=${domain};`;
+  private setCookie(name: string, value: string): void {
+    const host = window.location.hostname;
+    document.cookie = `${name}=${value}; path=/;`;
+    if (host && host !== 'localhost' && !host.includes('127.0.0.1')) {
+      document.cookie = `${name}=${value}; path=/; domain=.${host};`;
+      document.cookie = `${name}=${value}; path=/; domain=${host};`;
     }
-    document.cookie = cookie;
   }
 
   private clearCookies(): void {
-    const domains = ['', `.${window.location.hostname}`, window.location.hostname];
-    for (const d of domains) {
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; ${d ? 'domain=' + d : ''}`;
+    const host = window.location.hostname;
+    const past = 'Thu, 01 Jan 1970 00:00:00 UTC';
+    document.cookie = `googtrans=; expires=${past}; path=/;`;
+    if (host && host !== 'localhost' && !host.includes('127.0.0.1')) {
+      document.cookie = `googtrans=; expires=${past}; path=/; domain=.${host};`;
+      document.cookie = `googtrans=; expires=${past}; path=/; domain=${host};`;
     }
   }
 }

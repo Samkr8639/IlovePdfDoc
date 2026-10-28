@@ -394,9 +394,19 @@ button {
 /* ==========================================================================
    GOOGLE TRANSLATE SEAMLESS EMBED & CLEANUP
    ========================================================================== */
-#google_translate_element,
+#google_translate_element {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0.01;
+  pointer-events: none;
+}
+
 .goog-te-banner-frame.skiptranslate,
-.goog-te-banner-frame {
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame {
   display: none !important;
   visibility: hidden !important;
 }
@@ -407,7 +417,9 @@ body {
 }
 
 .goog-tooltip,
-.goog-tooltip:hover {
+.goog-tooltip:hover,
+#goog-gt-tt,
+.goog-te-balloon-frame {
   display: none !important;
 }
 
@@ -415,11 +427,6 @@ body {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-}
-
-.skiptranslate iframe {
-  display: none !important;
-  visibility: hidden !important;
 }
 
 /* ==========================================================================

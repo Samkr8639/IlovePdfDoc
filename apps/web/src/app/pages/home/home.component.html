@@ -679,13 +679,22 @@
           </div>
         </div>
         <div class="media-info-block">
+          <div class="media-status-badge-row">
+            <span class="media-soon-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>Coming Soon</span>
+            </span>
+          </div>
           <h3 class="media-title">Image tailoring made simple with PDFTailor Media</h3>
           <p class="media-desc">
             Crop, resize, compress, and convert PNG, JPG, and SVG assets into vector PDFs with lossless quality. All running in WebAssembly with zero permanent cloud storage.
           </p>
-          <a routerLink="/images-to-pdf" class="pt-btn-primary media-cta-btn">
-            Explore Media Tools
-          </a>
+          <button type="button" class="media-cta-soon-btn" disabled aria-disabled="true">
+            <span>Coming Soon</span>
+          </button>
         </div>
       </div>
     </div>

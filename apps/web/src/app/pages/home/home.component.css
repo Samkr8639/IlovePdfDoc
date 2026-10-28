@@ -1360,6 +1360,28 @@
   flex: 1;
 }
 
+.media-status-badge-row {
+  margin-bottom: 12px;
+}
+
+.media-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--pt-radius-full, 9999px);
+  background: var(--pt-amber-50, #FFFBEB);
+  color: var(--pt-amber-700, #B45309);
+  border: 1px solid var(--pt-amber-100, #FEF3C7);
+  letter-spacing: 0.02em;
+}
+
+.media-soon-badge svg {
+  color: var(--pt-amber-600, #D97706);
+}
+
 .media-title {
   font-family: var(--pt-font-heading);
   font-size: 24px;
@@ -1378,6 +1400,22 @@
 
 .media-cta-btn {
   display: inline-flex;
+}
+
+.media-cta-soon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--pt-radius-md, 8px);
+  background: #E2E8F0;
+  color: #64748B;
+  border: 1px solid #CBD5E1;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: not-allowed;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 /* 6. TRUST & COMPLIANCE SECTION */
