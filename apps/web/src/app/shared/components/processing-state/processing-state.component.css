@@ -17,9 +17,9 @@
 .processing-title {
   font-size: 32px;
   font-weight: 700;
-  color: #1E293B;
+  color: var(--pt-navy, #14213D);
   letter-spacing: -0.01em;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--pt-font-heading);
   margin: 0 0 44px 0;
 }
 
@@ -39,11 +39,11 @@
 }
 
 .spinner-track {
-  stroke: #E5E7EB;
+  stroke: var(--pt-soft-outline, #E4E7EC);
 }
 
 .spinner-arc {
-  stroke: #E53238;
+  stroke: var(--pt-teal-700, #0F766E);
 }
 
 @keyframes spin {

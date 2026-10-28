@@ -21,8 +21,8 @@
   transition: all 0.2s ease;
 }
 .dribbble-file-row:hover {
-  border-color: var(--coral-300);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border-color: var(--pt-teal-100, #CCEBE6);
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06);
 }
 .file-info-left {
   display: flex;

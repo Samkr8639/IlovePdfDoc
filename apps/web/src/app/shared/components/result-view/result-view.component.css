@@ -92,12 +92,13 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #fef2f2;
+  background: var(--pt-teal-50, #ECF7F5);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid #fee2e2;
+  border: 1px solid var(--pt-teal-100, #CCEBE6);
+  color: var(--pt-teal-700, #0F766E);
 }
 .doc-file-info {
   display: flex;
@@ -213,7 +214,7 @@
   width: 100%;
 }
 
-/* Refined Red Download CTA */
+/* Refined Ocean Workspace Teal Download CTA */
 .prime-download-btn {
   display: inline-flex;
   align-items: center;
@@ -224,21 +225,21 @@
   min-width: 260px;
   max-width: 420px;
   border-radius: 10px;
-  background: #E53238;
+  background: var(--pt-teal-700, #0F766E);
   color: #ffffff;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(229, 50, 56, 0.32);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.32);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 .prime-download-btn:hover {
-  background: #d02a30;
+  background: var(--pt-teal-800, #0B5D57);
   transform: translateY(-1.5px);
-  box-shadow: 0 6px 20px rgba(229, 50, 56, 0.42);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.42);
 }
 .prime-download-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(229, 50, 56, 0.25);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
 }
 .btn-title {
   font-size: 16px;
@@ -423,8 +424,8 @@
   transition: all 0.15s ease;
 }
 .item-dl-btn:hover {
-  background: #E53238;
-  border-color: #E53238;
+  background: var(--pt-teal-700, #0F766E);
+  border-color: var(--pt-teal-700, #0F766E);
   color: #ffffff;
 }
 
@@ -637,9 +638,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 .tool-recommend-card:hover {
-  border-color: #fca5a5;
+  border-color: var(--pt-teal-100, #CCEBE6);
   transform: translateY(-3px);
-  box-shadow: 0 10px 24px -4px rgba(229, 50, 56, 0.12);
+  box-shadow: 0 10px 24px -4px rgba(15, 118, 110, 0.12);
 }
 .tool-icon-box {
   width: 44px;
@@ -651,7 +652,7 @@
   flex-shrink: 0;
 }
 .emerald-box { background: #ecfdf5; }
-.coral-box   { background: #fef2f2; }
+.coral-box   { background: var(--pt-teal-50, #ECF7F5); }
 .word-box    { background: #eff6ff; }
 .purple-box  { background: #f5f3ff; }
 .navy-box    { background: #eff6ff; }
@@ -683,7 +684,7 @@
 }
 .tool-recommend-card:hover .tool-arrow-icon {
   transform: translateX(4px);
-  color: #E53238;
+  color: var(--pt-teal-700, #0F766E);
 }
 
 /* 5. ADSENSE CARD */

@@ -5,29 +5,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #d1d5db;
-  border-radius: var(--radius-2xl, 20px);
-  background: #f8fafc;
-  padding: 64px 32px;
+  border: 2px dashed var(--pt-outline, #D0D5DD);
+  border-radius: var(--pt-radius-2xl, 20px);
+  background: var(--pt-bg, #ffffff);
+  padding: 56px 32px;
   text-align: center;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
 }
+
 .dropzone-area:hover,
 .dropzone-area.active {
-  border-color: #E53238;
-  background: #fef2f2;
+  border-color: var(--pt-teal-700, #0F766E);
+  background: var(--pt-teal-50, #ECF7F5);
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px -6px rgba(229, 50, 56, 0.12);
+  box-shadow: 0 16px 36px -6px rgba(15, 118, 110, 0.12);
 }
+
 .dropzone-area:focus-visible {
-  border-color: #E53238;
-  box-shadow: 0 0 0 4px rgba(229, 50, 56, 0.18);
+  border-color: var(--pt-teal-700, #0F766E);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.18);
 }
+
 .hidden-input {
   display: none;
 }
+
 .dropzone-content {
   display: flex;
   flex-direction: column;
@@ -36,7 +40,7 @@
   width: 100%;
 }
 
-/* ACTION ROW: GIANT SELECT BUTTON + CLOUD BUTTONS */
+/* ACTION ROW: SELECT BUTTON + CLOUD BUTTONS */
 .upload-action-row {
   display: flex;
   align-items: center;
@@ -46,34 +50,37 @@
   flex-wrap: wrap;
 }
 
-/* GIANT RED SELECT BUTTON (Exact iLovePDF signature button) */
+/* PDFTAILOR TEAL HERO SELECT BUTTON */
 .select-file-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background: #E53238;
+  background: var(--pt-teal-700, #0F766E);
   color: #ffffff;
-  font-size: 22px;
+  font-family: var(--pt-font-heading);
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.01em;
   padding: 0 44px;
-  height: 72px;
+  height: 68px;
   min-width: 290px;
-  border-radius: 14px;
-  border: none;
-  box-shadow: 0 6px 20px -2px rgba(229, 50, 56, 0.4);
+  border-radius: var(--pt-radius-lg, 12px);
+  border: 1px solid transparent;
+  box-shadow: 0 6px 20px -2px rgba(15, 118, 110, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
+
 .select-file-btn:hover {
-  background: #d3282e;
+  background: var(--pt-teal-800, #0B5D57);
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px -2px rgba(229, 50, 56, 0.48);
+  box-shadow: 0 10px 26px -2px rgba(15, 118, 110, 0.45);
 }
+
 .select-file-btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 14px rgba(229, 50, 56, 0.3);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
 }
 
 /* CLOUD BUTTONS (Google Drive & Dropbox) */
@@ -82,6 +89,7 @@
   align-items: center;
   gap: 10px;
 }
+
 .cloud-btn {
   display: inline-flex;
   align-items: center;
@@ -90,31 +98,37 @@
   height: 52px;
   border-radius: 50%;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--pt-outline, #D0D5DD);
+  box-shadow: var(--pt-shadow-xs, 0 1px 2px rgba(16, 24, 40, 0.05));
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
+
 .cloud-btn:hover {
-  transform: translateY(-2px) scale(1.08);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  border-color: #cbd5e1;
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: var(--pt-shadow-md, 0 4px 8px -2px rgba(16, 24, 40, 0.1));
+  border-color: var(--pt-teal-700, #0F766E);
 }
+
 .google-drive-btn:hover {
   border-color: #2684FC;
 }
+
 .dropbox-btn:hover {
   border-color: #0061FF;
 }
 
 .drop-hint {
-  font-size: 16px;
-  font-weight: 600;
-  color: #475569;
+  font-family: var(--pt-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--pt-muted, #475467);
   margin: 4px 0 0;
 }
+
 .dropzone-limits {
-  font-size: 13.5px;
-  color: #94a3b8;
+  font-family: var(--pt-font-body);
+  font-size: 13px;
+  color: var(--pt-muted-light, #667085);
   margin: 0;
 }
