@@ -13,9 +13,21 @@
 
 .tool-page .container {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1720px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 48px;
+}
+
+@media (max-width: 1024px) {
+  .tool-page .container {
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-page .container {
+    padding: 0 16px;
+  }
 }
 
 /* VISUALLY HIDDEN UTILITY FOR ACCESSIBILITY (1 h1 PER STATE) */
@@ -47,7 +59,7 @@
   padding: 14px 20px;
   border-radius: 12px;
   margin: 0 auto 16px;
-  max-width: 860px;
+  max-width: 1040px;
   width: 100%;
   font-size: 14px;
   box-shadow: 0 2px 8px rgba(153, 27, 27, 0.08);
@@ -79,7 +91,7 @@
 }
 .hero-content {
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -128,7 +140,7 @@
 }
 .hero-dropzone-wrap {
   width: 100%;
-  max-width: 860px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 

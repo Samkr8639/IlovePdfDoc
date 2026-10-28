@@ -189,12 +189,25 @@ button {
   outline: 2px solid var(--pt-teal-700);
 }
 
-/* PDFTailor Container */
+/* PDFTailor Container - Expansive full-width workspace */
 .pt-container, .container {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1760px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 48px;
+}
+
+@media (max-width: 1440px) {
+  .pt-container, .container {
+    max-width: 1400px;
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .pt-container, .container {
+    padding: 0 24px;
+  }
 }
 
 @media (max-width: 768px) {
