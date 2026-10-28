@@ -1,19 +1,16 @@
-import { Component, ElementRef, HostListener, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, signal, computed } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { ToolRegistryService } from '../../../core/services/tool-registry.service';
 import { ToolDefinition } from '@paperflow/contracts';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, MatAutocompleteModule],
+  imports: [RouterLink],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent {
   private readonly elementRef = inject(ElementRef);
   private readonly router = inject(Router);
   readonly toolRegistry = inject(ToolRegistryService);
@@ -24,61 +21,108 @@ export class HeaderComponent implements OnInit, OnDestroy {
   mobileAllOpen = signal<boolean>(false);
   private closeTimer: any = null;
 
-  readonly searchControl = new FormControl('');
-  readonly searchQuery = signal<string>('');
-  private searchSub?: Subscription;
+  // Spotlight Command Palette Modal State
+  searchModalOpen = signal<boolean>(false);
+  searchModalQuery = signal<string>('');
+  activeCategory = signal<string>('all');
+  selectedIndex = signal<number>(0);
 
-  ngOnInit(): void {
-    this.searchSub = this.searchControl.valueChanges.subscribe(val => {
-      this.searchQuery.set(val || '');
-    });
+  openSearchModal(): void {
+    this.searchModalQuery.set('');
+    this.activeCategory.set('all');
+    this.selectedIndex.set(0);
+    this.searchModalOpen.set(true);
+    setTimeout(() => {
+      const input = document.querySelector('.palette-search-input') as HTMLInputElement | null;
+      input?.focus();
+    }, 40);
   }
 
-  ngOnDestroy(): void {
-    this.searchSub?.unsubscribe();
+  closeSearchModal(): void {
+    this.searchModalOpen.set(false);
   }
 
-  readonly filteredTools = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
+  onSearchInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.searchModalQuery.set(val);
+    this.selectedIndex.set(0);
+  }
+
+  clearSearchQuery(): void {
+    this.searchModalQuery.set('');
+    this.selectedIndex.set(0);
+    const input = document.querySelector('.palette-search-input') as HTMLInputElement | null;
+    input?.focus();
+  }
+
+  setCategory(cat: string): void {
+    this.activeCategory.set(cat);
+    this.selectedIndex.set(0);
+  }
+
+  readonly filteredModalTools = computed(() => {
+    const q = this.searchModalQuery().toLowerCase().trim();
+    const cat = this.activeCategory();
     const all = this.toolRegistry.allTools();
-    if (!q) {
-      return all.slice(0, 8); // show popular tools on focus
-    }
-    return all.filter(t =>
-      t.name.toLowerCase().includes(q) ||
-      t.shortDescription.toLowerCase().includes(q) ||
-      t.category.toLowerCase().includes(q)
-    );
+
+    return all.filter(tool => {
+      const matchCat = cat === 'all' || tool.category === cat;
+      const matchQuery = !q ||
+        tool.name.toLowerCase().includes(q) ||
+        tool.shortDescription.toLowerCase().includes(q) ||
+        tool.category.toLowerCase().includes(q);
+      return matchCat && matchQuery;
+    });
   });
 
-  onToolSelected(event: MatAutocompleteSelectedEvent): void {
-    const tool = event.option.value as ToolDefinition;
-    if (tool && tool.route) {
-      this.searchControl.setValue('', { emitEvent: false });
-      this.searchQuery.set('');
-      this.router.navigateByUrl(tool.route);
-      this.closeMenu();
-      this.closeMobileMenu();
+  onPaletteKeydown(event: KeyboardEvent): void {
+    const list = this.filteredModalTools();
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (list.length > 0) {
+        this.selectedIndex.set((this.selectedIndex() + 1) % list.length);
+      }
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (list.length > 0) {
+        this.selectedIndex.set((this.selectedIndex() - 1 + list.length) % list.length);
+      }
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      if (list.length > 0 && list[this.selectedIndex()]) {
+        this.selectTool(list[this.selectedIndex()]);
+      }
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeSearchModal();
     }
   }
 
-  clearSearch(event?: Event): void {
-    if (event) {
-      event.stopPropagation();
+  selectTool(tool: ToolDefinition): void {
+    if (tool && tool.route) {
+      this.closeSearchModal();
+      this.closeMenu();
+      this.closeMobileMenu();
+      this.router.navigateByUrl(tool.route);
     }
-    this.searchControl.setValue('');
-    this.searchQuery.set('');
   }
 
   @HostListener('document:keydown', ['$event'])
-  handleKeyboardShortcut(event: KeyboardEvent): void {
+  handleGlobalShortcuts(event: KeyboardEvent): void {
     if (
       (event.key === 'k' && (event.metaKey || event.ctrlKey)) ||
-      (event.key === '/' && (event.target as HTMLElement).tagName !== 'INPUT')
+      (event.key === '/' && !['INPUT', 'TEXTAREA'].includes((event.target as HTMLElement).tagName))
     ) {
       event.preventDefault();
-      const input = this.elementRef.nativeElement.querySelector('.header-search-input') as HTMLInputElement | null;
-      input?.focus();
+      if (this.searchModalOpen()) {
+        this.closeSearchModal();
+      } else {
+        this.openSearchModal();
+      }
+    } else if (event.key === 'Escape') {
+      this.closeMenu();
+      this.closeMobileMenu();
+      this.closeSearchModal();
     }
   }
 
@@ -129,12 +173,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     } else {
       this.mobileAllOpen.set(!this.mobileAllOpen());
     }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    this.closeMenu();
-    this.closeMobileMenu();
   }
 
   @HostListener('document:click', ['$event'])
