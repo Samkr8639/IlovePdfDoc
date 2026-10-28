@@ -635,41 +635,62 @@
 }
 
 .premium-badge-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--pt-teal-100, #CCEBE6);
-  background: rgba(204, 235, 230, 0.15);
-  padding: 4px 12px;
+  color: #5EEAD4;
+  background: rgba(45, 212, 191, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  padding: 5px 14px;
   border-radius: var(--pt-radius-full, 9999px);
   margin-bottom: 16px;
 }
 
+.badge-sparkle {
+  color: #FBBF24;
+  font-size: 13px;
+}
+
 .premium-title {
   font-family: var(--pt-font-heading);
-  font-size: clamp(26px, 3.5vw, 36px);
-  font-weight: 700;
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 800;
   color: #ffffff;
+  margin: 0 0 12px;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.premium-lead {
+  font-size: 16px;
+  color: #94A3B8;
+  line-height: 1.6;
   margin: 0 0 24px;
-  letter-spacing: -0.02em;
+  max-width: 560px;
 }
 
 .premium-perks-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 32px;
+  margin: 0 0 28px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .premium-perks-list li {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 15px;
-  color: #e2e8f0;
+  font-size: 14.5px;
+  color: #E2E8F0;
+}
+
+.premium-perks-list li strong {
+  color: #FFFFFF;
 }
 
 .perk-check {
@@ -684,6 +705,14 @@
   font-size: 12px;
   font-weight: 800;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.4);
+}
+
+.premium-action-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 .get-premium-cta-btn {
@@ -692,21 +721,32 @@
   gap: 10px;
   background: var(--pt-teal-700, #0F766E);
   color: #ffffff;
-  font-family: var(--pt-font-body);
+  font-family: var(--pt-font-heading);
   font-size: 16px;
   font-weight: 700;
-  padding: 14px 32px;
-  border-radius: var(--pt-radius-md, 8px);
+  padding: 14px 30px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.4);
-  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
 }
 
 .get-premium-cta-btn:hover {
   background: var(--pt-teal-800, #0B5D57);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.5);
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.5);
+  color: #ffffff;
+}
+
+.free-guarantee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #A7F3D0;
 }
 
 .premium-visual-col {
@@ -715,50 +755,68 @@
 }
 
 .signed-doc-mockup {
-  width: 280px;
+  width: 290px;
   background: #ffffff;
   color: #0f172a;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .doc-mock-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .mock-tag {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--pt-navy, #14213D);
 }
 
 .mock-status {
   font-size: 10px;
+  font-weight: 800;
+  color: #047857;
+  background: #D1FAE5;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.mock-feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.mock-pill {
+  font-size: 10px;
   font-weight: 700;
-  color: #15803d;
-  background: #dcfce7;
-  padding: 2px 6px;
+  color: #0F766E;
+  background: #F0FDFA;
+  border: 1px solid #CCFBF1;
+  padding: 2px 7px;
   border-radius: 4px;
 }
 
 .mock-body-lines {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 6px;
+  margin-bottom: 18px;
 }
 
 .mock-p-line {
-  height: 6px;
-  background: #e2e8f0;
+  height: 5px;
+  background: #F1F5F9;
   border-radius: 3px;
 }
 
-.mock-p-line.half { width: 50%; }
+.mock-p-line.half { width: 55%; }
 
 .mock-sign-row {
   display: flex;

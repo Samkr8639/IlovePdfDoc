@@ -498,14 +498,56 @@
         <span class="privacy-text">Private &amp; Secure</span>
       </div>
 
-      <!-- Quick Explore Link -->
-      <a routerLink="/" fragment="tools" class="nav-explore-btn" (click)="closeMenu()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <span>Explore Tools</span>
-      </a>
+      <!-- Angular Material Autocomplete Search Filter -->
+      <div class="header-search-wrap">
+        <div class="search-input-box">
+          <svg class="search-lens-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            class="header-search-input"
+            placeholder="Search PDF tools..."
+            [formControl]="searchControl"
+            [matAutocomplete]="auto"
+            aria-label="Search all PDF tools"
+          />
+          @if (searchQuery().length > 0) {
+            <button
+              type="button"
+              class="search-clear-btn"
+              (click)="clearSearch($event)"
+              aria-label="Clear search query"
+            >
+              ✕
+            </button>
+          } @else {
+            <span class="search-key-hint" aria-hidden="true">/</span>
+          }
+        </div>
+
+        <mat-autocomplete
+          #auto="matAutocomplete"
+          (optionSelected)="onToolSelected($event)"
+          class="header-tools-autocomplete-dropdown"
+        >
+          @for (tool of filteredTools(); track tool.id) {
+            <mat-option [value]="tool" class="tool-option-item">
+              <div class="tool-option-content">
+                <span class="tool-cat-tag">{{ tool.category }}</span>
+                <span class="tool-name-text">{{ tool.name }}</span>
+                <span class="tool-desc-text">{{ tool.shortDescription }}</span>
+              </div>
+            </mat-option>
+          }
+          @if (filteredTools().length === 0) {
+            <mat-option disabled class="no-tools-option">
+              No tools found matching "{{ searchQuery() }}"
+            </mat-option>
+          }
+        </mat-autocomplete>
+      </div>
 
       <!--
         Login and Sign up buttons commented out for now as requested
