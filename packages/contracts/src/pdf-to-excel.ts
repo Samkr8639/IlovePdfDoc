@@ -55,6 +55,7 @@ export interface PdfToExcelTableFile {
   downloadUrl?: string;
   sizeBytes?: number;
   formattedSize?: string;
+  coverage?: number;
 }
 
 export interface PdfToExcelResponse {
@@ -67,4 +68,5 @@ export interface PdfToExcelResponse {
   files: PdfToExcelTableFile[];
   tables: PdfToExcelTable[];
   warnings: string[];
+  coverage?: number;
 }

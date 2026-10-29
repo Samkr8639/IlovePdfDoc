@@ -13,6 +13,7 @@ export interface BuildWorkbookOptions {
 
 export interface BuildWorkbookResult {
   buffer: Buffer;
+  workbook: ExcelJS.Workbook;
   sheetCount: number;
   tableCount: number;
   rowCount: number;
@@ -361,6 +362,7 @@ export async function buildExcelWorkbook(
 
   return {
     buffer,
+    workbook: wb,
     sheetCount: wb.worksheets.length,
     tableCount: tables.length,
     rowCount: totalRowsWritten,

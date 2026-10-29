@@ -3,6 +3,7 @@ import { analyzePdf, LayoutPage, LayoutSegment } from '../pdf-layout';
 import { extractPdfWithOcr } from '../ocr';
 import { detectTablesOnPage, mergeCrossPageTables, DetectedTable } from './detect';
 import { buildExcelWorkbook, BuildWorkbookResult } from './build';
+import { applyCoverageGuard } from './coverage';
 import { PdfToExcelOptions, PdfToExcelTable } from '@paperflow/contracts';
 import { AppError } from '../../middleware/errorHandler';
 
@@ -19,6 +20,7 @@ export interface ConvertPdfToExcelResult {
   cellCount: number;
   tables: PdfToExcelTable[];
   warnings: string[];
+  coverage: number;
 }
 
 /**
@@ -95,6 +97,7 @@ export async function convertPdfToExcel(
 
   const pageTables: { pageNumber: number; tables: DetectedTable[] }[] = [];
   const outsideTextByPage: { page: number; text: string }[] = [];
+  const allPdfTextByPage: { page: number; text: string }[] = [];
 
   if (options.mode === 'ocr') {
     // OCR Mode: Process selected pages through OCR engine
@@ -135,6 +138,11 @@ export async function convertPdfToExcel(
           images: [],
           segments
         };
+
+        allPdfTextByPage.push({
+          page: pageNum,
+          text: (ocrResult.lines || []).map(l => l.text).join('\n')
+        });
 
         const tables = detectTablesOnPage(mockPage, pageNum);
         // Mark tables method as 'ocr'
@@ -179,6 +187,10 @@ export async function convertPdfToExcel(
 
       // Collect text outside tables for optional 'Text' sheet or fallback
       const segments = page.segments || [];
+      allPdfTextByPage.push({
+        page: pageNum,
+        text: segments.map(s => s.text).join('\n')
+      });
       const outsideSegs = segments.filter(seg =>
         !tables.some(t =>
           seg.x >= t.bbox.x0 - 2 && seg.x <= t.bbox.x1 + 2 &&
@@ -242,6 +254,10 @@ export async function convertPdfToExcel(
     warnings.push(...workbookResult.warnings);
   }
 
+  // Coverage guard: check coverage, append missing text to Text sheet if < 98%
+  const coverageResult = await applyCoverageGuard(workbookResult.workbook, allPdfTextByPage, warnings);
+  const finalBuffer = Buffer.from(await workbookResult.workbook.xlsx.writeBuffer());
+
   // Construct table preview models for response
   const tablesResponse: PdfToExcelTable[] = validTables.map((t, idx) => {
     const previewRows = Math.min(15, t.rows);
@@ -270,13 +286,14 @@ export async function convertPdfToExcel(
   });
 
   return {
-    xlsxBuffer: workbookResult.buffer,
-    sheetCount: workbookResult.sheetCount,
+    xlsxBuffer: finalBuffer,
+    sheetCount: workbookResult.workbook.worksheets.length,
     tableCount: workbookResult.tableCount,
     rowCount: workbookResult.rowCount,
     cellCount: workbookResult.cellCount,
     tables: tablesResponse,
-    warnings: Array.from(new Set(warnings))
+    warnings: Array.from(new Set(warnings)),
+    coverage: coverageResult.coverage
   };
 }
 
@@ -292,6 +309,7 @@ export interface ConvertMultiplePdfsResult extends ConvertPdfToExcelResult {
     tables: number;
     rows: number;
     cells: number;
+    coverage?: number;
   }>;
 }
 
@@ -305,6 +323,7 @@ export async function convertMultiplePdfsToOneWorkbook(
   const warnings: string[] = [];
   const allValidTables: DetectedTable[] = [];
   const outsideTextByPage: { page: number; text: string }[] = [];
+  const allPdfTextByPage: { page: number; text: string }[] = [];
   const fileStats: ConvertMultiplePdfsResult['fileStats'] = [];
 
   for (const file of files) {
@@ -328,6 +347,10 @@ export async function convertMultiplePdfsToOneWorkbook(
         if (!ocrResult) continue;
 
         try {
+          allPdfTextByPage.push({
+            page: pageNum,
+            text: (ocrResult.lines || []).map(l => l.text).join('\n')
+          });
           const segments: LayoutSegment[] = (ocrResult.lines || []).map(line => ({
             x: line.xPt,
             y: line.yPt,
@@ -398,6 +421,10 @@ export async function convertMultiplePdfsToOneWorkbook(
         pageTables.push({ pageNumber: pageNum, tables });
 
         const segments = page.segments || [];
+        allPdfTextByPage.push({
+          page: pageNum,
+          text: segments.map(s => s.text).join('\n')
+        });
         const outsideSegs = segments.filter(seg =>
           !tables.some(t =>
             seg.x >= t.bbox.x0 - 2 && seg.x <= t.bbox.x1 + 2 &&
@@ -466,6 +493,10 @@ export async function convertMultiplePdfsToOneWorkbook(
     warnings.push(...workbookResult.warnings);
   }
 
+  // Coverage guard: check coverage, append missing text to Text sheet if < 98%
+  const coverageResult = await applyCoverageGuard(workbookResult.workbook, allPdfTextByPage, warnings);
+  const finalBuffer = Buffer.from(await workbookResult.workbook.xlsx.writeBuffer());
+
   const tablesResponse: PdfToExcelTable[] = allValidTables.map((t, idx) => {
     const previewRows = Math.min(15, t.rows);
     const previewCols = Math.min(10, t.cols);
@@ -493,13 +524,14 @@ export async function convertMultiplePdfsToOneWorkbook(
   });
 
   return {
-    xlsxBuffer: workbookResult.buffer,
-    sheetCount: workbookResult.sheetCount,
+    xlsxBuffer: finalBuffer,
+    sheetCount: workbookResult.workbook.worksheets.length,
     tableCount: workbookResult.tableCount,
     rowCount: workbookResult.rowCount,
     cellCount: workbookResult.cellCount,
     tables: tablesResponse,
     fileStats,
-    warnings: Array.from(new Set(warnings))
+    warnings: Array.from(new Set(warnings)),
+    coverage: coverageResult.coverage
   };
 }

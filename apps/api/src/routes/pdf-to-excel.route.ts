@@ -45,6 +45,7 @@ export interface ExcelOutputFileResult {
   buffer: Buffer;
   warnings: string[];
   downloadUrl: string;
+  coverage?: number;
 }
 
 export interface PdfToExcelJob {
@@ -232,7 +233,8 @@ pdfToExcelRouter.post(
             cells: stat.cells,
             buffer: result.xlsxBuffer,
             warnings: [],
-            downloadUrl: `/api/v1/pdf-to-excel/jobs/${jobId}/download`
+            downloadUrl: `/api/v1/pdf-to-excel/jobs/${jobId}/download`,
+            coverage: stat.coverage || result.coverage
           });
         }
       } else {
@@ -275,7 +277,8 @@ pdfToExcelRouter.post(
             cells: result.cellCount,
             buffer: result.xlsxBuffer,
             warnings: result.warnings,
-            downloadUrl: `/api/v1/pdf-to-excel/jobs/${jobId}/download/${fileId}`
+            downloadUrl: `/api/v1/pdf-to-excel/jobs/${jobId}/download/${fileId}`,
+            coverage: result.coverage
           });
 
           await new Promise(resolve => setImmediate(resolve));
@@ -327,6 +330,7 @@ pdfToExcelRouter.post(
         cells: f.cells,
         sizeBytes: f.xlsxSize,
         formattedSize: formatBytes(f.xlsxSize),
+        coverage: f.coverage,
         downloadUrl: outputFiles.length === 1 || options.multiFileOutput === 'one_workbook'
           ? `/api/v1/pdf-to-excel/jobs/${jobId}/download`
           : f.downloadUrl
@@ -341,7 +345,8 @@ pdfToExcelRouter.post(
         formattedSize: formatBytes(totalXlsxSize),
         files: tableFiles,
         tables: allTables,
-        warnings: job.warnings
+        warnings: job.warnings,
+        coverage: outputFiles.length === 1 ? outputFiles[0].coverage : undefined
       };
 
       const response: ApiResponse<PdfToExcelResponse> = {
