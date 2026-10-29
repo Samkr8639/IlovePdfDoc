@@ -37,7 +37,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     'split-pdf',
     'compress-pdf',
     'pdf-to-word',
-    'pdf-to-powerpoint'
+    'pdf-to-powerpoint',
+    'pdf-to-excel'
   ]);
 
   ngOnInit(): void {
