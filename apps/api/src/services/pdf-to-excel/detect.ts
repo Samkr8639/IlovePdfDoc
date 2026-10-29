@@ -849,6 +849,28 @@ function detectHeaderRow(
  * Search for table title text immediately above the table bounding box
  */
 function findTableTitle(page: LayoutPage, tableTopY: number, tableX0: number, tableX1: number): string | undefined {
+  if (page.blocks && page.blocks.length > 0) {
+    const candidateBlocks = page.blocks
+      .filter(b => {
+        if (b.y >= tableTopY || b.y < tableTopY - 120) return false;
+        const text = b.lines.map(l => l.map(r => r.text).join('')).join(' ').trim();
+        if (!text || text.length > 40) return false;
+        if (/[.,;:]$/.test(text)) return false;
+        const isBold = b.lines.some(l => l.some(r => r.bold));
+        const isHeading = (b.fs && b.fs >= 12.5) || isBold;
+        return isHeading;
+      })
+      .sort((a, b) => b.y - a.y);
+
+    if (candidateBlocks.length > 0) {
+      const text = candidateBlocks[0].lines.map(l => l.map(r => r.text).join('')).join(' ').trim();
+      const clean = text.replace(/[\[\]:*?/\\]/g, ' ').trim();
+      if (clean.length > 0 && clean.length <= 31) {
+        return clean;
+      }
+    }
+  }
+
   const segments = page.segments || [];
   const candidateSegments = segments.filter(seg => {
     const sy = seg.yb || seg.y;
@@ -858,10 +880,12 @@ function findTableTitle(page: LayoutPage, tableTopY: number, tableX0: number, ta
 
   if (candidateSegments.length > 0) {
     candidateSegments.sort((a, b) => (b.yb || b.y) - (a.yb || a.y));
-    const titleText = candidateSegments[0].text || candidateSegments[0].runs?.map(r => r.text).join('') || '';
-    const clean = titleText.replace(/[\[\]:*?/\\]/g, ' ').trim();
-    if (clean.length > 0 && clean.length <= 60) {
-      return clean;
+    for (const cand of candidateSegments) {
+      const titleText = cand.text || cand.runs?.map(r => r.text).join('') || '';
+      const clean = titleText.replace(/[\[\]:*?/\\]/g, ' ').trim();
+      if (clean.length > 0 && clean.length <= 40 && !/[.,;:]$/.test(clean)) {
+        return clean;
+      }
     }
   }
 
