@@ -33,13 +33,28 @@ export interface BuildWorkbookResult {
 }
 
 /**
- * Sanitize sheet name: <= 31 chars, strip forbidden characters []:*?/\, fallback to default
+ * Truncates a string to maxLength without cutting mid-word
+ */
+export function cutAtWordBoundary(str: string, maxLength: number): string {
+  if (str.length <= maxLength) return str;
+  const cut = str.substring(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  if (lastSpace > 3) {
+    return cut.substring(0, lastSpace).trim();
+  }
+  return cut.trim();
+}
+
+/**
+ * Sanitize sheet name: <= 31 chars, strip forbidden characters []:*?/\, cut at word boundary, fallback to default
  */
 export function sanitizeSheetName(name: string, fallback = 'Sheet'): string {
   if (!name) return fallback;
   let clean = name.replace(/[\[\]:*?/\\]/g, ' ').replace(/\s+/g, ' ').trim();
   if (clean.length === 0) clean = fallback;
-  if (clean.length > 31) clean = clean.substring(0, 31).trim();
+  if (clean.length > 31) {
+    clean = cutAtWordBoundary(clean, 31);
+  }
   return clean || fallback;
 }
 
@@ -56,7 +71,8 @@ export function getUniqueSheetName(base: string, existingNames: Set<string>): st
   let counter = 2;
   while (true) {
     const suffix = ` (${counter})`;
-    const truncatedBase = name.length + suffix.length > 31 ? name.substring(0, 31 - suffix.length) : name;
+    const maxBaseLen = 31 - suffix.length;
+    const truncatedBase = name.length > maxBaseLen ? cutAtWordBoundary(name, maxBaseLen) : name;
     const candidate = `${truncatedBase}${suffix}`;
     if (!existingNames.has(candidate.toLowerCase())) {
       existingNames.add(candidate.toLowerCase());
@@ -158,8 +174,22 @@ export async function buildExcelWorkbook(
       byPage.set(key, entry);
     }
     for (const [pageKey, data] of byPage.entries()) {
+      const pageNum = data.tables[0]?.page || data.blocks[0]?.page || 1;
+      let sheetTitle = '';
+      const tableWithTitle = data.tables.find(t => t.title);
+      if (tableWithTitle?.title) {
+        sheetTitle = tableWithTitle.title;
+      } else {
+        const headingBlock = data.blocks.find(b => b.isHeading);
+        if (headingBlock?.text) {
+          sheetTitle = headingBlock.text.split('\n')[0].trim();
+        }
+      }
+      if (!sheetTitle) {
+        sheetTitle = `P${pageNum} – Table 1`;
+      }
       sheetGroups.push({
-        sheetTitle: pageKey,
+        sheetTitle,
         tables: data.tables,
         outsideBlocks: data.blocks
       });
@@ -169,7 +199,7 @@ export async function buildExcelWorkbook(
     for (let i = 0; i < tables.length; i++) {
       const t = tables[i];
       const prefix = t.file ? `${t.file} - ` : '';
-      const sheetName = t.title ? `${prefix}${t.title}` : `${prefix}Table ${i + 1}`;
+      const sheetName = t.title ? `${prefix}${t.title}` : `${prefix}P${t.page} – Table ${i + 1}`;
       sheetGroups.push({
         sheetTitle: sheetName,
         tables: [t],
