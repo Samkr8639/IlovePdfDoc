@@ -704,10 +704,22 @@
   color: var(--pt-teal-600, #0D9488);
 }
 
-.pt-home-card:hover {
+.pt-home-card.card-is-live:hover {
   border-color: var(--pt-teal-100, #CCEBE6);
   transform: translateY(-3px);
   box-shadow: var(--pt-shadow-card-hover, 0 10px 20px -3px rgba(15, 118, 110, 0.1));
+}
+
+.pt-home-card.card-is-soon,
+.pt-home-card:not(.card-is-live) {
+  cursor: default;
+  pointer-events: none;
+}
+
+.pt-home-card:not(.card-is-live):hover {
+  transform: none;
+  border-color: var(--pt-soft-outline, #E4E7EC);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
 }
 
 .card-header-row {

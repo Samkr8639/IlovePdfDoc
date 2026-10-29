@@ -388,6 +388,15 @@
   letter-spacing: 0.02em;
 }
 
+.item-disabled,
+.menu-item-link.item-disabled,
+.mega-item-link.item-disabled,
+.mobile-sublink.item-disabled {
+  opacity: 0.65;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
 @keyframes dropdownSlideIn {
   from {
     opacity: 0;

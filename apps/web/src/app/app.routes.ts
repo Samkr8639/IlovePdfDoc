@@ -40,65 +40,54 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/pdf-to-excel/pdf-to-excel.component').then(m => m.PdfToExcelComponent),
     title: 'PDF to Excel Converter Online - Extract Tables to XLSX | PDFTailor'
   },
+  // COMING SOON / UNRELEASED TOOLS -> Redirect to home so users cannot navigate to them
   {
     path: 'word-to-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Word to PDF Converter Online | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'powerpoint-to-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'PowerPoint to PDF Converter | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'excel-to-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Excel to PDF Converter | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'edit-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Edit PDF Online Free | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'pdf-to-jpg',
-    component: ToolPlaceholderComponent,
-    title: 'PDF to JPG Converter Online | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'images-to-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'JPG to PDF Converter Free Online | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'sign-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Sign PDF Online - Free E-Signatures | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'watermark-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Watermark PDF Online | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'rotate-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Rotate PDF Online - Permanently Rotate Pages | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'html-to-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'HTML to PDF Converter | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'unlock-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Unlock PDF Online - Remove Password | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'protect-pdf',
-    component: ToolPlaceholderComponent,
-    title: 'Protect PDF with Password Online | PDFTailor'
+    redirectTo: ''
   },
   {
     path: 'about-us',

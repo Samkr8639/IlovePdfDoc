@@ -113,11 +113,18 @@ export class HeaderComponent {
 
   selectTool(tool: ToolDefinition): void {
     if (tool && tool.route) {
+      if (!this.toolRegistry.isLive(tool.id)) {
+        return;
+      }
       this.closeSearch();
       this.closeMenu();
       this.closeMobileMenu();
       this.router.navigateByUrl(tool.route);
     }
+  }
+
+  isLive(toolId: string): boolean {
+    return this.toolRegistry.isLive(toolId);
   }
 
   @HostListener('document:keydown', ['$event'])

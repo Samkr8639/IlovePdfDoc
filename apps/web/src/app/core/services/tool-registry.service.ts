@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { TOOL_REGISTRY, ToolDefinition, ToolCategory, ApiResponse } from '@paperflow/contracts';
 import { environment } from '../../../environments/environment';
 
+export const LIVE_TOOL_IDS = new Set<string>([
+  'merge-pdf',
+  'split-pdf',
+  'compress-pdf',
+  'pdf-to-word',
+  'pdf-to-powerpoint',
+  'pdf-to-excel'
+]);
+
 @Injectable({
   providedIn: 'root'
 })
@@ -69,6 +78,10 @@ export class ToolRegistryService {
 
   getToolById(id: string): ToolDefinition | undefined {
     return this.tools().find(t => t.id === id);
+  }
+
+  isLive(id: string): boolean {
+    return LIVE_TOOL_IDS.has(id);
   }
 
   setCategory(category: ToolCategory | 'all'): void {

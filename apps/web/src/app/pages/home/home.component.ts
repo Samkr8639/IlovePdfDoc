@@ -32,15 +32,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedTab = signal<ExtendedFilterCategory>('all');
   isWorkflowModalOpen = signal<boolean>(false);
 
-  private readonly liveToolIds = new Set([
-    'merge-pdf',
-    'split-pdf',
-    'compress-pdf',
-    'pdf-to-word',
-    'pdf-to-powerpoint',
-    'pdf-to-excel'
-  ]);
-
   ngOnInit(): void {
     this.seo.setSeoData({
       title: 'PDFTailor - Online PDF Converter & Document Tools Free',
@@ -63,7 +54,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isLive(toolId: string): boolean {
-    return this.liveToolIds.has(toolId);
+    return this.toolRegistry.isLive(toolId);
   }
 
   getToolName(tool: ToolDefinition): string {
