@@ -492,114 +492,52 @@
   }
 
   <!-- ===================================================================
-       4. COMPLETED STATE: RESULT VIEW & TABLE PREVIEW
+       4. COMPLETED RESULT SCREEN
        =================================================================== -->
-  @if (currentState() === 'completed' && mergeResult()) {
-    <div class="completed-result-wrapper">
-      <app-result-view
-        [result]="mergeResult()!"
-        title="PDF Converted to Excel Successfully!"
-        subtitle="Your tables have been converted into an editable Microsoft Excel workbook (.xlsx)."
-        downloadLabel="Download Excel Workbook"
-        restartLabel="Convert Another PDF"
-        (reset)="resetWorkspace()"
-      ></app-result-view>
-
-      <!-- ACTIVE WARNINGS BANNER -->
-      @if (activeWarnings().length > 0) {
-        <div class="container warnings-container">
-          <div class="warning-callout-card" role="region" aria-label="Conversion notices">
-            <div class="warning-callout-header">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" aria-hidden="true">
+  @if (currentState() === 'completed' && mergeResult(); as res) {
+    <div class="result-screen-wrapper">
+      <h1 class="visually-hidden">Excel Workbook Ready</h1>
+      <div class="container result-container">
+        <!-- Warnings Banner -->
+        @if (activeWarnings().length > 0) {
+          <div class="result-warnings-banner" role="status">
+            <div class="warning-icon-wrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
               </svg>
-              <strong>Notices & Warnings ({{ activeWarnings().length }})</strong>
-              <button
-                type="button"
-                class="warning-dismiss-btn"
-                (click)="dismissWarningBanner()"
-                aria-label="Dismiss warnings"
-              >
-                ✕
-              </button>
             </div>
-            <ul class="warning-list">
-              @for (warn of activeWarnings(); track $index) {
-                <li>{{ warn }}</li>
-              }
-            </ul>
-          </div>
-        </div>
-      }
-
-      <!-- TABLE PREVIEW GRID SECTION -->
-      @if (conversionResult()?.tables && conversionResult()!.tables.length > 0) {
-        <section class="table-preview-section container" aria-label="Extracted Table Preview">
-          <div class="table-preview-card">
-            <div class="table-preview-header">
-              <div class="table-preview-title-group">
-                <h2 class="table-preview-h2">
-                  Table Preview ({{ activeTableIndex() + 1 }} of {{ conversionResult()!.tables.length }})
-                </h2>
-                <div class="table-chips-nav" role="tablist" aria-label="Detected Tables">
-                  @for (t of conversionResult()!.tables; track $index) {
-                    <button
-                      type="button"
-                      role="tab"
-                      class="table-chip-btn"
-                      [class.active]="activeTableIndex() === $index"
-                      [attr.aria-selected]="activeTableIndex() === $index"
-                      (click)="selectPreviewTable($index)"
-                    >
-                      {{ t.sheet || 'Table ' + ($index + 1) }}
-                    </button>
-                  }
-                </div>
-              </div>
-
-              @if (activeTable()) {
-                <div class="table-meta-badges">
-                  <span class="badge method-badge" [class.ocr-badge]="activeTable()!.method === 'ocr'">
-                    {{ activeTable()!.method === 'lattice' ? 'Ruled (Lattice)' : activeTable()!.method === 'stream' ? 'Borderless (Stream)' : 'OCR' }}
-                  </span>
-                  <span class="badge confidence-badge">
-                    {{ Math.round(activeTable()!.confidence * 100) }}% confidence
-                  </span>
-                  <span class="badge size-badge">
-                    {{ activeTable()!.rows }} rows × {{ activeTable()!.cols }} cols
-                  </span>
-                </div>
-              }
+            <div class="warning-content">
+              <strong>Conversion Notes &amp; Recommendations:</strong>
+              <ul>
+                @for (w of activeWarnings(); track w) {
+                  <li>{{ w }}</li>
+                }
+              </ul>
             </div>
-
-            <!-- ACCESSIBLE HTML TABLE -->
-            @if (activeTable() && activeTable()!.preview.length > 0) {
-              <div class="table-scroll-viewport" tabindex="0" role="region" aria-label="Table data">
-                <table class="accessible-preview-table">
-                  <thead>
-                    <tr>
-                      @for (headerCell of activeTable()!.preview[0]; track $index) {
-                        <th scope="col">{{ headerCell || 'Column ' + ($index + 1) }}</th>
-                      }
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of activeTable()!.preview.slice(1); track $index) {
-                      <tr>
-                        @for (cell of row; track $index) {
-                          <td>{{ cell }}</td>
-                        }
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
+            <button
+              type="button"
+              class="warning-close-btn"
+              aria-label="Dismiss conversion notes"
+              (click)="dismissWarningBanner()"
+            >
+              ✕
+            </button>
           </div>
-        </section>
-      }
+        }
+
+        <app-result-view
+          [result]="res"
+          [previewPdfUrl]="sourcePdfPreviewUrl()"
+          [title]="'PDF has been converted to EXCEL!'"
+          [subtitle]="'Your genuine editable Excel workbook is ready for download.'"
+          [downloadLabel]="conversionResult()?.isZip ? 'Download Excel Workbooks (ZIP)' : 'Download EXCEL (.xlsx)'"
+          [savingsText]="'Converted into genuine Microsoft Excel workbook'"
+          [restartLabel]="'Convert another PDF'"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
+      </div>
     </div>
   }
 </div>

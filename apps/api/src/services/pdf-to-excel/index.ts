@@ -166,7 +166,7 @@ export async function convertPdfToExcel(
     // Standard Vector / Selectable Text Mode
     const layout = await analyzePdf(pdfBuffer, { title: options.title || options.originalFilename });
     if (layout.warnings && layout.warnings.length > 0) {
-      warnings.push(...layout.warnings);
+      warnings.push(...layout.warnings.filter(w => !w.toLowerCase().includes('vector shapes skipped')));
     }
 
     for (let pIdx = 0; pIdx < layout.pages.length; pIdx++) {
@@ -386,7 +386,7 @@ export async function convertMultiplePdfsToOneWorkbook(
     } else {
       const layout = await analyzePdf(file.buffer, { title: file.filename });
       if (layout.warnings && layout.warnings.length > 0) {
-        warnings.push(...layout.warnings);
+        warnings.push(...layout.warnings.filter(w => !w.toLowerCase().includes('vector shapes skipped')));
       }
 
       for (let pIdx = 0; pIdx < layout.pages.length; pIdx++) {
