@@ -747,13 +747,27 @@ export async function analyzePdf(buffer, opts = {}) {
       consolidatedLines.push(vl);
     }
 
+    const pageSegments = processedSegments.map(seg => ({
+      x: seg.x,
+      y: seg.y,
+      x0: seg.x,
+      x1: seg.right,
+      yb: seg.y,
+      width: seg.width,
+      right: seg.right,
+      fs: seg.fs,
+      text: seg.runs.map(r => r.text).join(''),
+      runs: seg.runs
+    }));
+
     pages.push({
       width: pageWidth,
       height: pageHeight,
       blocks,
       lines: consolidatedLines,
       boxes,
-      images
+      images,
+      segments: pageSegments
     });
 
     try {

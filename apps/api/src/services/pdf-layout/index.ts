@@ -20,6 +20,19 @@ export interface TextBlock {
   lines: TextRun[][];
 }
 
+export interface LayoutSegment {
+  x: number;
+  y: number; // baseline Y
+  x0: number;
+  x1: number;
+  yb: number;
+  width: number;
+  right: number;
+  fs: number;
+  text: string;
+  runs: TextRun[];
+}
+
 export interface LayoutLine {
   x: number;
   y: number;
@@ -56,6 +69,7 @@ export interface LayoutPage {
   lines: LayoutLine[];
   boxes: LayoutBox[];
   images: LayoutImage[];
+  segments?: LayoutSegment[];
 }
 
 export interface PdfLayoutModel {
