@@ -269,9 +269,7 @@
           <h2 class="sidebar-heading">PDF to Excel</h2>
 
           <!-- Mode Selection Radio Cards -->
-          <div class="options-section">
-            <span class="options-section-label">OCR & TEXT EXTRACTION</span>
-            <div class="mode-options-group" role="radiogroup" aria-label="OCR Mode">
+          <div class="mode-options-group" role="radiogroup" aria-label="OCR Mode">
               <!-- Option 1: No OCR (Default) -->
               <label
                 class="mode-card"
@@ -317,7 +315,9 @@
                 <div class="mode-content">
                   <div class="mode-title-row">
                     <span class="mode-title">OCR Mode</span>
-                    <span class="premium-badge">PREMIUM</span>
+                    <span class="premium-badge">
+                      <span class="crown-icon">👑</span> Premium
+                    </span>
                   </div>
                   <p class="mode-desc">
                     Scan images and non-selectable PDFs using optical character recognition.
@@ -330,56 +330,71 @@
                 </div>
               </label>
             </div>
-          </div>
 
-          <!-- Sheet Layout Option -->
-          <div class="options-section">
-            <label for="sheetLayoutSelect" class="options-section-label">SHEET LAYOUT</label>
-            <div class="select-dropdown-wrap">
-              <select
-                id="sheetLayoutSelect"
-                class="custom-select"
-                [value]="selectedSheetLayout()"
-                (change)="selectedSheetLayout.set($any($event.target).value)"
-              >
-                <option value="sheet_per_table">Sheet per table (default)</option>
-                <option value="sheet_per_page">Sheet per page</option>
-                <option value="single_sheet">Single sheet (stacked tables)</option>
-              </select>
-            </div>
-          </div>
+          <!-- Space-Optimized Collapsible Table & Sheet Options Accordion -->
+          <details class="advanced-settings-accordion">
+            <summary class="advanced-settings-summary">
+              <span class="summary-left">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Table &amp; Sheet Settings</span>
+              </span>
+              <svg class="accordion-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
 
-          <!-- Multi-file output (When multiple PDFs selected) -->
-          @if (selectedFiles().length > 1) {
-            <div class="options-section">
-              <label for="multiFileOutputSelect" class="options-section-label">OUTPUT FILES</label>
-              <div class="select-dropdown-wrap">
-                <select
-                  id="multiFileOutputSelect"
-                  class="custom-select"
-                  [value]="selectedMultiFileOutput()"
-                  (change)="selectedMultiFileOutput.set($any($event.target).value)"
-                >
-                  <option value="separate_workbooks">Separate workbooks (.zip)</option>
-                  <option value="one_workbook">One workbook (prefixed sheets)</option>
-                </select>
+            <div class="advanced-settings-content">
+              <!-- Sheet Layout Option -->
+              <div class="options-section">
+                <label for="sheetLayoutSelect" class="options-section-label">SHEET LAYOUT</label>
+                <div class="select-dropdown-wrap">
+                  <select
+                    id="sheetLayoutSelect"
+                    class="custom-select"
+                    [value]="selectedSheetLayout()"
+                    (change)="selectedSheetLayout.set($any($event.target).value)"
+                  >
+                    <option value="sheet_per_table">Sheet per table (default)</option>
+                    <option value="sheet_per_page">Sheet per page</option>
+                    <option value="single_sheet">Single sheet (stacked tables)</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          }
 
-          <!-- Page Range -->
-          <div class="options-section">
-            <label for="pageRangeInput" class="options-section-label">PAGE RANGE</label>
-            <input
-              id="pageRangeInput"
-              type="text"
-              class="custom-text-input"
-              placeholder="All pages (e.g. 1-3, 5)"
-              [value]="pageRange()"
-              (input)="pageRange.set($any($event.target).value)"
-            />
-            <span class="input-helper-text">Leave blank to process all {{ totalPagesCount() }} pages.</span>
-          </div>
+              <!-- Multi-file output (When multiple PDFs selected) -->
+              @if (selectedFiles().length > 1) {
+                <div class="options-section">
+                  <label for="multiFileOutputSelect" class="options-section-label">OUTPUT FILES</label>
+                  <div class="select-dropdown-wrap">
+                    <select
+                      id="multiFileOutputSelect"
+                      class="custom-select"
+                      [value]="selectedMultiFileOutput()"
+                      (change)="selectedMultiFileOutput.set($any($event.target).value)"
+                    >
+                      <option value="separate_workbooks">Separate workbooks (.zip)</option>
+                      <option value="one_workbook">One workbook (prefixed sheets)</option>
+                    </select>
+                  </div>
+                </div>
+              }
+
+              <!-- Page Range -->
+              <div class="options-section">
+                <label for="pageRangeInput" class="options-section-label">PAGE RANGE</label>
+                <input
+                  id="pageRangeInput"
+                  type="text"
+                  class="custom-text-input"
+                  placeholder="All pages (e.g. 1-3, 5)"
+                  [value]="pageRange()"
+                  (input)="pageRange.set($any($event.target).value)"
+                />
+                <span class="input-helper-text">Leave blank to process all {{ totalPagesCount() }} pages.</span>
+              </div>
 
           <!-- Feature Checkboxes -->
           <div class="options-section checkboxes-section">
@@ -424,35 +439,36 @@
               <span class="checkbox-box"></span>
               <span class="checkbox-label-text">Include text outside tables</span>
             </label>
+            </div>
           </div>
+        </details>
 
-          <!-- Privacy Security Note -->
-          <div class="sidebar-privacy-box">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        <!-- Dedicated Sidebar AdSense Slot -->
+        <div class="sidebar-adsense-slot" aria-label="Advertisement">
+          <span class="adsense-label">Advertisement</span>
+          <div class="sidebar-ad-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
-            <p>
-              Your PDF is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes.
-            </p>
+            <span>Google AdSense (300 × 250)</span>
           </div>
         </div>
+      </div>
 
-        <!-- Sticky Convert Action Button -->
-        <div class="sidebar-footer">
-          <button
-            type="button"
-            class="convert-submit-btn excel-theme-btn"
-            [disabled]="isProcessing() || selectedFiles().length === 0"
-            (click)="startConversion()"
-          >
-            <span>Convert to Excel</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-        </div>
+      <!-- Sticky Convert Action Button -->
+      <div class="sidebar-footer">
+        <button
+          type="button"
+          class="convert-submit-btn excel-theme-btn"
+          [disabled]="isProcessing() || selectedFiles().length === 0"
+          (click)="startConversion()"
+        >
+          <span>Convert to Excel</span>
+          <span class="action-arrow">➔</span>
+        </button>
+      </div>
       </aside>
     </div>
   }
