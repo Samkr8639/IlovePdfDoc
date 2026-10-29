@@ -37,8 +37,8 @@ export const routes: Routes = [
   },
   {
     path: 'pdf-to-excel',
-    component: ToolPlaceholderComponent,
-    title: 'PDF to Excel Converter | PDFTailor'
+    loadComponent: () => import('./pages/pdf-to-excel/pdf-to-excel.component').then(m => m.PdfToExcelComponent),
+    title: 'PDF to Excel Converter Online - Extract Tables to XLSX | PDFTailor'
   },
   {
     path: 'word-to-pdf',

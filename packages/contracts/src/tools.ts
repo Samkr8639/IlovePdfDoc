@@ -178,10 +178,10 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     icon: 'doc-excel',
     processingMode: 'hybrid',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
-    maxFiles: 5,
+    maxFiles: 10,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    status: 'available',
+    badgeText: 'Live',
     seo: {
       title: 'PDF to Excel Converter | PDF flow',
       description: 'Extract tables from PDF to editable Excel spreadsheets.',

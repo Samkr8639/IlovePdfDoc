@@ -1,0 +1,589 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- ===================================================================
+       GLOBAL TOP ERROR BANNER (Visible across all states)
+       =================================================================== -->
+  @if (errorMessage()) {
+    <div class="global-error-banner-container" role="alert" aria-live="assertive">
+      <div class="container">
+        <div class="error-banner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span class="error-text">{{ errorMessage() }}</span>
+          <button
+            type="button"
+            class="error-close"
+            aria-label="Dismiss error notification"
+            (click)="errorMessage.set(null)"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================
+       1. UPLOAD STATE: HERO & DROPZONE
+       =================================================================== -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <h1 class="tool-h1">PDF to Excel Converter</h1>
+        <p class="tool-lead">
+          Extract tables and numbers from PDF documents into editable Microsoft Excel spreadsheets (.xlsx). Numbers stay numeric, dates stay dates, and columns stay aligned.
+        </p>
+
+        <!-- UPLOADER COMPONENT -->
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            title="Select PDF files"
+            subtitle="or drop PDFs here"
+            acceptedTypes=".pdf,application/pdf"
+            [multiple]="true"
+            limitInfo=""
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section" aria-label="Advertisement">
+      <div class="container">
+        <div class="adsense-card">
+          <span class="ad-label">ADVERTISEMENT</span>
+          <div class="ad-placeholder-content">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDITORIAL / SEO CONTENT SECTION -->
+    <section class="editorial-features-section">
+      <div class="container">
+        <div class="section-title-wrap">
+          <h2 class="editorial-heading">Turn PDF tables into real, usable Excel spreadsheets</h2>
+          <p class="editorial-subheading">
+            Dual lattice & stream table detection engine. Preserves column alignments, merged header spans, formulas, and numeric types for seamless analysis in Excel or Google Sheets.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-box excel-green-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="3" y1="15" x2="21" y2="15"></line>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+                <line x1="15" y1="3" x2="15" y2="21"></line>
+              </svg>
+            </div>
+            <h3>Real Numbers & SUM Works</h3>
+            <p>Numeric values, currencies, percentages, and dates are stored as native Excel types. Your formulas like =SUM() and =AVERAGE() work immediately without text cleanup.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box teal-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+            <h3>Ruled & Borderless Tables</h3>
+            <p>Smart dual detection combines vector line intersection (lattice) with whitespace projection and baseline clustering (stream) to capture both bordered and borderless financial statements.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box red-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3>10-Minute Automatic Deletion</h3>
+            <p>Your PDF is sent over an encrypted TLS connection, converted securely in memory, and automatically deleted from our servers after 10 minutes. Zero permanent storage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ===================================================================
+       2. ORGANIZE STATE: CANVAS & OPTIONS SIDEBAR
+       =================================================================== -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-layout">
+      <!-- MAIN CANVAS: FILE CARDS & FLOATING TOOLS DOCK -->
+      <main class="canvas-main-area" aria-label="PDF Document Workspace">
+        <!-- Hidden file input for adding more files -->
+        <input
+          #addMoreInput
+          type="file"
+          accept=".pdf,application/pdf"
+          multiple
+          class="hidden-file-input"
+          aria-hidden="true"
+          (change)="onMoreFilesAdded($event)"
+        />
+
+        <h1 class="visually-hidden">Configure PDF to Excel Conversion</h1>
+
+        <!-- CENTERED SELECTED PDF DOCUMENT CARDS -->
+        <div class="pdf-cards-canvas">
+          @for (fileItem of selectedFiles(); track fileItem.id; let idx = $index) {
+            <div class="pdf-document-card" tabindex="0">
+              <!-- Remove file action -->
+              <div class="card-hover-actions">
+                <button
+                  type="button"
+                  class="card-action-btn delete-btn"
+                  title="Remove file"
+                  aria-label="Remove file"
+                  (click)="removeFile(fileItem.id)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Document Page Sheet Graphic with Excel Badge -->
+              <div class="pdf-page-sheet">
+                <div class="sheet-corner-fold"></div>
+                <div class="excel-badge-overlay" aria-hidden="true">
+                  <span class="excel-icon-letter">X</span>
+                </div>
+                <div class="sheet-lines-preview" aria-hidden="true">
+                  <div class="line-skeleton title-line"></div>
+                  <div class="grid-skeleton-box">
+                    <div class="grid-skeleton-row"></div>
+                    <div class="grid-skeleton-row"></div>
+                    <div class="grid-skeleton-row"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- File Info Label -->
+              <div class="card-file-info">
+                <span class="pdf-file-name" [title]="fileItem.name">
+                  {{ fileItem.name }}
+                </span>
+                <span class="pdf-file-meta">
+                  {{ fileItem.pageCount }} {{ fileItem.pageCount === 1 ? 'page' : 'pages' }} • {{ fileItem.formattedSize }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING MULTI-DOCUMENT UPLOAD PILL -->
+        <div class="floating-tools-dock" role="toolbar" aria-label="Add more documents">
+          <!-- 1. Add More Files (+ in teal rounded-square with count badge) -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-square-btn add-more-action"
+              (click)="addMoreInput.click()"
+              title="Add more files"
+              aria-label="Add more files"
+            >
+              <span class="dock-count-badge">{{ selectedFiles().length }}</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Add more files</span>
+          </div>
+
+          <!-- 2. Computer / Laptop Upload -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn pc-action"
+              (click)="addMoreInput.click()"
+              title="Upload from computer"
+              aria-label="Upload from computer"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="3"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Upload from PC</span>
+          </div>
+
+          <!-- 3. Google Drive -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn drive-action"
+              (click)="openGoogleDrive($event)"
+              title="Google Drive"
+              aria-label="Add from Google Drive"
+            >
+              <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none" aria-hidden="true">
+                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
+                <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
+                <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Google Drive</span>
+          </div>
+
+          <!-- 4. Dropbox -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn dropbox-action"
+              (click)="openDropbox($event)"
+              title="Dropbox"
+              aria-label="Add from Dropbox"
+            >
+              <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF" aria-hidden="true">
+                <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Dropbox</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT SIDEBAR: PDF TO EXCEL OPTIONS -->
+      <aside class="sidebar-action-panel" aria-label="Conversion Options">
+        <div class="sidebar-body">
+          <h2 class="sidebar-heading">PDF to Excel</h2>
+
+          <!-- Mode Selection Radio Cards -->
+          <div class="options-section">
+            <span class="options-section-label">OCR & TEXT EXTRACTION</span>
+            <div class="mode-options-group" role="radiogroup" aria-label="OCR Mode">
+              <!-- Option 1: No OCR (Default) -->
+              <label
+                class="mode-card"
+                [class.selected]="selectedMode() === 'no_ocr'"
+              >
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="pdfToExcelMode"
+                    value="no_ocr"
+                    [checked]="selectedMode() === 'no_ocr'"
+                    (change)="selectedMode.set('no_ocr')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">No OCR</span>
+                  </div>
+                  <p class="mode-desc">
+                    Extract tables from PDFs with selectable text. Fast and precise.
+                  </p>
+                </div>
+              </label>
+
+              <!-- Option 2: OCR with Premium Badge -->
+              <label
+                class="mode-card"
+                [class.selected]="selectedMode() === 'ocr'"
+                [class.disabled]="!ocrAvailable()"
+              >
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="pdfToExcelMode"
+                    value="ocr"
+                    [disabled]="!ocrAvailable()"
+                    [checked]="selectedMode() === 'ocr'"
+                    (change)="selectedMode.set('ocr')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">OCR Mode</span>
+                    <span class="premium-badge">PREMIUM</span>
+                  </div>
+                  <p class="mode-desc">
+                    Scan images and non-selectable PDFs using optical character recognition.
+                  </p>
+                  @if (!ocrAvailable()) {
+                    <p class="mode-disabled-hint">
+                      Premium feature. Enable OCR in server configuration to unlock.
+                    </p>
+                  }
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sheet Layout Option -->
+          <div class="options-section">
+            <label for="sheetLayoutSelect" class="options-section-label">SHEET LAYOUT</label>
+            <div class="select-dropdown-wrap">
+              <select
+                id="sheetLayoutSelect"
+                class="custom-select"
+                [value]="selectedSheetLayout()"
+                (change)="selectedSheetLayout.set($any($event.target).value)"
+              >
+                <option value="sheet_per_table">Sheet per table (default)</option>
+                <option value="sheet_per_page">Sheet per page</option>
+                <option value="single_sheet">Single sheet (stacked tables)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Multi-file output (When multiple PDFs selected) -->
+          @if (selectedFiles().length > 1) {
+            <div class="options-section">
+              <label for="multiFileOutputSelect" class="options-section-label">OUTPUT FILES</label>
+              <div class="select-dropdown-wrap">
+                <select
+                  id="multiFileOutputSelect"
+                  class="custom-select"
+                  [value]="selectedMultiFileOutput()"
+                  (change)="selectedMultiFileOutput.set($any($event.target).value)"
+                >
+                  <option value="separate_workbooks">Separate workbooks (.zip)</option>
+                  <option value="one_workbook">One workbook (prefixed sheets)</option>
+                </select>
+              </div>
+            </div>
+          }
+
+          <!-- Page Range -->
+          <div class="options-section">
+            <label for="pageRangeInput" class="options-section-label">PAGE RANGE</label>
+            <input
+              id="pageRangeInput"
+              type="text"
+              class="custom-text-input"
+              placeholder="All pages (e.g. 1-3, 5)"
+              [value]="pageRange()"
+              (input)="pageRange.set($any($event.target).value)"
+            />
+            <span class="input-helper-text">Leave blank to process all {{ totalPagesCount() }} pages.</span>
+          </div>
+
+          <!-- Feature Checkboxes -->
+          <div class="options-section checkboxes-section">
+            <span class="options-section-label">DETECTION SETTINGS</span>
+
+            <label class="custom-checkbox-row">
+              <input
+                type="checkbox"
+                [checked]="detectTypes()"
+                (change)="detectTypes.set($any($event.target).checked)"
+              />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label-text">Detect numbers & dates</span>
+            </label>
+
+            <label class="custom-checkbox-row">
+              <input
+                type="checkbox"
+                [checked]="keepFormatting()"
+                (change)="keepFormatting.set($any($event.target).checked)"
+              />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label-text">Keep original formatting</span>
+            </label>
+
+            <label class="custom-checkbox-row">
+              <input
+                type="checkbox"
+                [checked]="mergeAcrossPages()"
+                (change)="mergeAcrossPages.set($any($event.target).checked)"
+              />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label-text">Merge tables across pages</span>
+            </label>
+
+            <label class="custom-checkbox-row">
+              <input
+                type="checkbox"
+                [checked]="includeText()"
+                (change)="includeText.set($any($event.target).checked)"
+              />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label-text">Include text outside tables</span>
+            </label>
+          </div>
+
+          <!-- Privacy Security Note -->
+          <div class="sidebar-privacy-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <p>
+              Your PDF is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sticky Convert Action Button -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="convert-submit-btn excel-theme-btn"
+            [disabled]="isProcessing() || selectedFiles().length === 0"
+            (click)="startConversion()"
+          >
+            <span>Convert to Excel</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ===================================================================
+       3. PROCESSING STATE
+       =================================================================== -->
+  @if (currentState() === 'processing') {
+    <div class="processing-wrapper">
+      <app-processing-state
+        [title]="'Converting PDF to EXCEL...'"
+        [message]="processingMessage()"
+        [percent]="processingProgress()"
+      ></app-processing-state>
+      <div class="cancel-processing-wrap">
+        <button type="button" class="cancel-btn" (click)="cancelConversion()">
+          Cancel Conversion
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================
+       4. COMPLETED STATE: RESULT VIEW & TABLE PREVIEW
+       =================================================================== -->
+  @if (currentState() === 'completed' && mergeResult()) {
+    <div class="completed-result-wrapper">
+      <app-result-view
+        [result]="mergeResult()!"
+        title="PDF Converted to Excel Successfully!"
+        subtitle="Your tables have been converted into an editable Microsoft Excel workbook (.xlsx)."
+        downloadLabel="Download Excel Workbook"
+        restartLabel="Convert Another PDF"
+        (reset)="resetWorkspace()"
+      ></app-result-view>
+
+      <!-- ACTIVE WARNINGS BANNER -->
+      @if (activeWarnings().length > 0) {
+        <div class="container warnings-container">
+          <div class="warning-callout-card" role="region" aria-label="Conversion notices">
+            <div class="warning-callout-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <strong>Notices & Warnings ({{ activeWarnings().length }})</strong>
+              <button
+                type="button"
+                class="warning-dismiss-btn"
+                (click)="dismissWarningBanner()"
+                aria-label="Dismiss warnings"
+              >
+                ✕
+              </button>
+            </div>
+            <ul class="warning-list">
+              @for (warn of activeWarnings(); track $index) {
+                <li>{{ warn }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+
+      <!-- TABLE PREVIEW GRID SECTION -->
+      @if (conversionResult()?.tables && conversionResult()!.tables.length > 0) {
+        <section class="table-preview-section container" aria-label="Extracted Table Preview">
+          <div class="table-preview-card">
+            <div class="table-preview-header">
+              <div class="table-preview-title-group">
+                <h2 class="table-preview-h2">
+                  Table Preview ({{ activeTableIndex() + 1 }} of {{ conversionResult()!.tables.length }})
+                </h2>
+                <div class="table-chips-nav" role="tablist" aria-label="Detected Tables">
+                  @for (t of conversionResult()!.tables; track $index) {
+                    <button
+                      type="button"
+                      role="tab"
+                      class="table-chip-btn"
+                      [class.active]="activeTableIndex() === $index"
+                      [attr.aria-selected]="activeTableIndex() === $index"
+                      (click)="selectPreviewTable($index)"
+                    >
+                      {{ t.sheet || 'Table ' + ($index + 1) }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              @if (activeTable()) {
+                <div class="table-meta-badges">
+                  <span class="badge method-badge" [class.ocr-badge]="activeTable()!.method === 'ocr'">
+                    {{ activeTable()!.method === 'lattice' ? 'Ruled (Lattice)' : activeTable()!.method === 'stream' ? 'Borderless (Stream)' : 'OCR' }}
+                  </span>
+                  <span class="badge confidence-badge">
+                    {{ Math.round(activeTable()!.confidence * 100) }}% confidence
+                  </span>
+                  <span class="badge size-badge">
+                    {{ activeTable()!.rows }} rows × {{ activeTable()!.cols }} cols
+                  </span>
+                </div>
+              }
+            </div>
+
+            <!-- ACCESSIBLE HTML TABLE -->
+            @if (activeTable() && activeTable()!.preview.length > 0) {
+              <div class="table-scroll-viewport" tabindex="0" role="region" aria-label="Table data">
+                <table class="accessible-preview-table">
+                  <thead>
+                    <tr>
+                      @for (headerCell of activeTable()!.preview[0]; track $index) {
+                        <th scope="col">{{ headerCell || 'Column ' + ($index + 1) }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of activeTable()!.preview.slice(1); track $index) {
+                      <tr>
+                        @for (cell of row; track $index) {
+                          <td>{{ cell }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
