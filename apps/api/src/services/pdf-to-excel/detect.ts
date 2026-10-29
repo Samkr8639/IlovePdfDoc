@@ -571,7 +571,7 @@ export function detectStreamTables(
     const prevRow = currentGroup[currentGroup.length - 1];
     const currRow = rows[multiColRowIndices[i]];
     const gap = currRow.y - prevRow.y;
-    const maxGap = 2.5 * Math.max(prevRow.fs, currRow.fs);
+    const maxGap = Math.max(38, 3.5 * Math.max(prevRow.fs, currRow.fs));
 
     if (gap <= maxGap) {
       currentGroup.push(currRow);
