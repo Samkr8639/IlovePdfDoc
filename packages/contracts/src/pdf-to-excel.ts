@@ -15,15 +15,24 @@ export interface PdfToExcelOptions {
   mergeAcrossPages: boolean;
 }
 
+const booleanLike = (defaultValue: boolean) =>
+  z.preprocess(val => {
+    if (typeof val === 'string') {
+      if (val.toLowerCase() === 'true' || val === '1') return true;
+      if (val.toLowerCase() === 'false' || val === '0') return false;
+    }
+    return val;
+  }, z.boolean()).default(defaultValue);
+
 export const PdfToExcelOptionsSchema = z.object({
   mode: z.enum(['no_ocr', 'ocr']).default('no_ocr'),
   sheetLayout: z.enum(['sheet_per_table', 'sheet_per_page', 'single_sheet']).default('sheet_per_table'),
   multiFileOutput: z.enum(['separate_workbooks', 'one_workbook']).default('separate_workbooks'),
   pages: z.string().optional(),
-  detectTypes: z.boolean().default(true),
-  keepFormatting: z.boolean().default(true),
-  includeText: z.boolean().default(false),
-  mergeAcrossPages: z.boolean().default(true)
+  detectTypes: booleanLike(true),
+  keepFormatting: booleanLike(true),
+  includeText: booleanLike(false),
+  mergeAcrossPages: booleanLike(true)
 });
 
 export interface PdfToExcelTable {

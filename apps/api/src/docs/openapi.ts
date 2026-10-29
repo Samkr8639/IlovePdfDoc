@@ -28,7 +28,8 @@ export const openApiSpec = {
     { name: 'Contact', description: 'Customer support inquiries' },
     { name: 'Compress', description: 'PDF compression services' },
     { name: 'PDF to Word', description: 'Layout-preserving PDF to DOCX conversion' },
-    { name: 'PDF to PowerPoint', description: 'Layout-preserving PDF to PowerPoint (PPTX) conversion' }
+    { name: 'PDF to PowerPoint', description: 'Layout-preserving PDF to PowerPoint (PPTX) conversion' },
+    { name: 'PDF to Excel', description: 'Table-preserving PDF to Excel (XLSX) conversion' }
   ],
   paths: {
     '/api/v1/health': {
@@ -496,6 +497,68 @@ export const openApiSpec = {
             }
           }
         }
+      }
+    },
+        '/api/v1/pdf-to-excel/convert': {
+      post: {
+        tags: ['PDF to Excel'],
+        summary: 'Extract tables from uploaded PDFs and generate XLSX workbooks',
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['files'],
+                properties: {
+                  files: { type: 'array', items: { type: 'string', format: 'binary' } },
+                  mode: { type: 'string', enum: ['no_ocr', 'ocr'], default: 'no_ocr' },
+                  sheetLayout: { type: 'string', enum: ['sheet_per_table', 'sheet_per_page', 'single_sheet'], default: 'sheet_per_table' },
+                  multiFileOutput: { type: 'string', enum: ['separate_workbooks', 'one_workbook'], default: 'separate_workbooks' },
+                  pages: { type: 'string' },
+                  detectTypes: { type: 'boolean', default: true },
+                  keepFormatting: { type: 'boolean', default: true },
+                  includeText: { type: 'boolean', default: false },
+                  mergeAcrossPages: { type: 'boolean', default: true }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Conversion successful' },
+          '400': { description: 'Invalid options or PDF header' },
+          '403': { description: 'Premium required for OCR' },
+          '413': { description: 'Too many pages or cells' },
+          '422': { description: 'No tables found or corrupted PDF' }
+        }
+      }
+    },
+    '/api/v1/pdf-to-excel/jobs/{jobId}': {
+      get: {
+        tags: ['PDF to Excel'],
+        summary: 'Get job status',
+        parameters: [{ name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { '200': { description: 'Job status' }, '404': { description: 'Not found' } }
+      }
+    },
+    '/api/v1/pdf-to-excel/jobs/{jobId}/download': {
+      get: {
+        tags: ['PDF to Excel'],
+        summary: 'Download XLSX or ZIP. Deletes job on download.',
+        parameters: [{ name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { '200': { description: 'Binary stream' }, '404': { description: 'Not found' } }
+      }
+    },
+    '/api/v1/pdf-to-excel/jobs/{jobId}/download/{fileId}': {
+      get: {
+        tags: ['PDF to Excel'],
+        summary: 'Download individual XLSX file',
+        parameters: [
+          { name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'fileId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: { '200': { description: 'Binary stream' }, '404': { description: 'Not found' } }
       }
     },
     '/api/v1/pdf-to-powerpoint/jobs/{jobId}/download': {

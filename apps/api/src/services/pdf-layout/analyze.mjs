@@ -227,9 +227,29 @@ export async function analyzePdf(buffer, opts = {}) {
           const w = Math.max(0.1, maxX - minX);
           const h = Math.max(0.1, maxY - minY);
 
-          // Check if axis-aligned rect (4-5 points without curves)
+          // Check if axis-aligned rect (4-5 points without curves) or single stroke line (2 points)
           const isAxisAligned = !hasCurves && (pts.length >= 4 && pts.length <= 6);
           const isRoundedBox = hasCurves && pts.length >= 4 && w > 8 && h > 8;
+          const isHorizLine = isStroke && !hasCurves && h <= 2.5 && w >= 2;
+          const isVertLine = isStroke && !hasCurves && w <= 2.5 && h >= 2;
+
+          if (isHorizLine || isVertLine) {
+            const effectiveLw = Math.max(0.5, lineWidth * Math.sqrt(Math.abs(det(ctm))));
+            rawRects.push({
+              x: minX,
+              y: minY,
+              w: isVertLine ? effectiveLw : w,
+              h: isHorizLine ? effectiveLw : h,
+              isFill: false,
+              fillColor: null,
+              isStroke: true,
+              strokeColor,
+              lineWidth: effectiveLw,
+              isStraightLine: true,
+              vertical: isVertLine
+            });
+            continue;
+          }
 
           if (isAxisAligned || isRoundedBox) {
             // console.log('Pushing to rawRects:', minX, minY, w, h);
@@ -319,6 +339,20 @@ export async function analyzePdf(buffer, opts = {}) {
     const tinyDotFragments = [];
 
     for (const r of rawRects) {
+      if (r.isStraightLine) {
+        lines.push({
+          x: r.x,
+          y: r.y,
+          w: r.w,
+          h: r.h,
+          vertical: r.vertical,
+          color: r.strokeColor,
+          style: 'solid',
+          thickness: r.lineWidth
+        });
+        continue;
+      }
+
       // Skip white background fills
       if (r.isFill && (r.fillColor === '#FFFFFF' || r.fillColor === '#FFF') && !r.isStroke) {
         continue;

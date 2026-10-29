@@ -126,15 +126,16 @@ export async function buildExcelWorkbook(
       tables
     });
   } else if (options.sheetLayout === 'sheet_per_page') {
-    const byPage = new Map<number, DetectedTable[]>();
+    const byPage = new Map<string, DetectedTable[]>();
     for (const t of tables) {
-      const list = byPage.get(t.page) || [];
+      const key = t.file ? `${t.file} - Page ${t.page}` : `Page ${t.page}`;
+      const list = byPage.get(key) || [];
       list.push(t);
-      byPage.set(t.page, list);
+      byPage.set(key, list);
     }
-    for (const [page, pageTables] of byPage.entries()) {
+    for (const [pageKey, pageTables] of byPage.entries()) {
       sheetGroups.push({
-        sheetTitle: `Page ${page}`,
+        sheetTitle: pageKey,
         tables: pageTables
       });
     }
@@ -142,7 +143,8 @@ export async function buildExcelWorkbook(
     // sheet_per_table (default)
     for (let i = 0; i < tables.length; i++) {
       const t = tables[i];
-      const sheetName = t.title || `Table ${i + 1}`;
+      const prefix = t.file ? `${t.file} - ` : '';
+      const sheetName = t.title ? `${prefix}${t.title}` : `${prefix}Table ${i + 1}`;
       sheetGroups.push({
         sheetTitle: sheetName,
         tables: [t]
