@@ -26,12 +26,12 @@ const booleanLike = (defaultValue: boolean) =>
 
 export const PdfToExcelOptionsSchema = z.object({
   mode: z.enum(['no_ocr', 'ocr']).default('no_ocr'),
-  sheetLayout: z.enum(['sheet_per_table', 'sheet_per_page', 'single_sheet']).default('sheet_per_table'),
+  sheetLayout: z.enum(['sheet_per_table', 'sheet_per_page', 'single_sheet']).default('sheet_per_page'),
   multiFileOutput: z.enum(['separate_workbooks', 'one_workbook']).default('separate_workbooks'),
   pages: z.string().optional(),
   detectTypes: booleanLike(true),
   keepFormatting: booleanLike(true),
-  includeText: booleanLike(false),
+  includeText: booleanLike(true),
   mergeAcrossPages: booleanLike(true)
 });
 

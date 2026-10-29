@@ -39,12 +39,12 @@ describe('PdfToExcelComponent Integration Test', () => {
     expect(component.currentState()).toBe('upload');
     expect(component.selectedFiles().length).toBe(0);
     expect(component.selectedMode()).toBe('no_ocr');
-    expect(component.selectedSheetLayout()).toBe('sheet_per_table');
+    expect(component.selectedSheetLayout()).toBe('sheet_per_page');
     expect(component.selectedMultiFileOutput()).toBe('separate_workbooks');
     expect(component.detectTypes()).toBe(true);
     expect(component.keepFormatting()).toBe(true);
     expect(component.mergeAcrossPages()).toBe(true);
-    expect(component.includeText()).toBe(false);
+    expect(component.includeText()).toBe(true);
     expect(component.conversionResult()).toBeNull();
     expect(component.mergeResult()).toBeNull();
   });
@@ -81,11 +81,11 @@ describe('PdfToExcelComponent Integration Test', () => {
     await component.onFilesAdded([file]);
     fixture.detectChanges();
 
-    expect(component.selectedSheetLayout()).toBe('sheet_per_table');
-
-    component.selectedSheetLayout.set('sheet_per_page');
-    fixture.detectChanges();
     expect(component.selectedSheetLayout()).toBe('sheet_per_page');
+
+    component.selectedSheetLayout.set('sheet_per_table');
+    fixture.detectChanges();
+    expect(component.selectedSheetLayout()).toBe('sheet_per_table');
 
     component.selectedSheetLayout.set('single_sheet');
     fixture.detectChanges();

@@ -48,12 +48,12 @@ export class PdfToExcelComponent implements OnInit, OnDestroy {
 
   // Options
   readonly selectedMode = signal<PdfToExcelMode>('no_ocr');
-  readonly selectedSheetLayout = signal<SheetLayout>('sheet_per_table');
+  readonly selectedSheetLayout = signal<SheetLayout>('sheet_per_page');
   readonly selectedMultiFileOutput = signal<MultiFileOutput>('separate_workbooks');
   readonly pageRange = signal<string>('');
   readonly detectTypes = signal<boolean>(true);
   readonly keepFormatting = signal<boolean>(true);
-  readonly includeText = signal<boolean>(false);
+  readonly includeText = signal<boolean>(true);
   readonly mergeAcrossPages = signal<boolean>(true);
   readonly dismissedWarnings = signal<boolean>(false);
 

@@ -2,7 +2,7 @@ import { PDFDocument } from 'pdf-lib';
 import { analyzePdf, LayoutPage, LayoutSegment } from '../pdf-layout';
 import { extractPdfWithOcr } from '../ocr';
 import { detectTablesOnPage, mergeCrossPageTables, DetectedTable } from './detect';
-import { buildExcelWorkbook, BuildWorkbookResult } from './build';
+import { buildExcelWorkbook, BuildWorkbookResult, OutsideTextBlock } from './build';
 import { applyCoverageGuard } from './coverage';
 import { PdfToExcelOptions, PdfToExcelTable } from '@paperflow/contracts';
 import { AppError } from '../../middleware/errorHandler';
@@ -98,6 +98,7 @@ export async function convertPdfToExcel(
   const pageTables: { pageNumber: number; tables: DetectedTable[] }[] = [];
   const outsideTextByPage: { page: number; text: string }[] = [];
   const allPdfTextByPage: { page: number; text: string }[] = [];
+  const outsideBlocks: OutsideTextBlock[] = [];
 
   if (options.mode === 'ocr') {
     // OCR Mode: Process selected pages through OCR engine
@@ -204,6 +205,55 @@ export async function convertPdfToExcel(
         });
       }
 
+      // Collect outside blocks for reading-order merged emission
+      if (page.blocks && page.blocks.length > 0) {
+        for (const block of page.blocks) {
+          const inside = tables.some(t =>
+            block.x >= t.bbox.x0 - 2 && block.x <= t.bbox.x1 + 2 &&
+            block.y >= t.bbox.y0 - 2 && block.y <= t.bbox.y1 + 2
+          );
+          if (!inside) {
+            const blockText = block.lines.map(line => line.map(r => r.text).join('')).join('\n').trim();
+            if (blockText) {
+              const isBold = block.lines.some(l => l.some(r => r.bold));
+              const isHeading = (block.fs && block.fs >= 13) || (isBold && blockText.length < 80);
+              outsideBlocks.push({
+                page: pageNum,
+                y0: block.y,
+                text: blockText,
+                fs: block.fs,
+                bold: isBold,
+                align: block.align,
+                isHeading
+              });
+            }
+          }
+        }
+      } else if (outsideSegs.length > 0) {
+        const yGroups = new Map<number, typeof outsideSegs>();
+        for (const seg of outsideSegs) {
+          const key = Math.round((seg.yb || seg.y) / 6) * 6;
+          const list = yGroups.get(key) || [];
+          list.push(seg);
+          yGroups.set(key, list);
+        }
+        for (const [yKey, segs] of yGroups.entries()) {
+          segs.sort((a, b) => a.x - b.x);
+          const lineText = segs.map(s => s.text).join(' ').trim();
+          if (!lineText) continue;
+          const maxFs = Math.max(...segs.map(s => s.fs || 10));
+          const hasBold = segs.some(s => s.runs?.some(r => r.bold));
+          outsideBlocks.push({
+            page: pageNum,
+            y0: yKey,
+            text: lineText,
+            fs: maxFs,
+            bold: hasBold,
+            isHeading: maxFs >= 13 || (hasBold && lineText.length < 80)
+          });
+        }
+      }
+
       // Cooperative yield between pages
       await new Promise(resolve => setImmediate(resolve));
     }
@@ -247,7 +297,8 @@ export async function convertPdfToExcel(
     options,
     title: options.title,
     originalFilename: options.originalFilename,
-    outsideTextByPage
+    outsideTextByPage,
+    outsideBlocks
   });
 
   if (workbookResult.warnings && workbookResult.warnings.length > 0) {

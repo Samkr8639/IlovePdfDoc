@@ -4,11 +4,22 @@ import { typeColumnCells, TypedCell } from './typing';
 import { PdfToExcelOptions } from '@paperflow/contracts';
 import { AppError } from '../../middleware/errorHandler';
 
+export interface OutsideTextBlock {
+  page: number;
+  y0: number;
+  text: string;
+  fs?: number;
+  bold?: boolean;
+  align?: 'left' | 'right' | 'center';
+  isHeading?: boolean;
+}
+
 export interface BuildWorkbookOptions {
   options: PdfToExcelOptions;
   title?: string;
   originalFilename?: string;
   outsideTextByPage?: { page: number; text: string }[];
+  outsideBlocks?: OutsideTextBlock[];
 }
 
 export interface BuildWorkbookResult {
@@ -117,38 +128,52 @@ export async function buildExcelWorkbook(
   let totalRowsWritten = 0;
   let totalCellsWritten = 0;
 
-  // Group tables based on sheetLayout:
+  // Group tables and text blocks based on sheetLayout:
   // 'sheet_per_table' | 'sheet_per_page' | 'single_sheet'
-  const sheetGroups: { sheetTitle: string; tables: DetectedTable[] }[] = [];
+  interface SheetGroup {
+    sheetTitle: string;
+    tables: DetectedTable[];
+    outsideBlocks: OutsideTextBlock[];
+  }
+  const sheetGroups: SheetGroup[] = [];
 
   if (options.sheetLayout === 'single_sheet') {
     sheetGroups.push({
       sheetTitle: title || originalFilename?.replace(/\.[^.]+$/, '') || 'Data',
-      tables
+      tables,
+      outsideBlocks: opts.outsideBlocks || []
     });
   } else if (options.sheetLayout === 'sheet_per_page') {
-    const byPage = new Map<string, DetectedTable[]>();
+    const byPage = new Map<string, { tables: DetectedTable[]; blocks: OutsideTextBlock[] }>();
     for (const t of tables) {
       const key = t.file ? `${t.file} - Page ${t.page}` : `Page ${t.page}`;
-      const list = byPage.get(key) || [];
-      list.push(t);
-      byPage.set(key, list);
+      const entry = byPage.get(key) || { tables: [], blocks: [] };
+      entry.tables.push(t);
+      byPage.set(key, entry);
     }
-    for (const [pageKey, pageTables] of byPage.entries()) {
+    for (const b of (opts.outsideBlocks || [])) {
+      const key = `Page ${b.page}`;
+      const entry = byPage.get(key) || { tables: [], blocks: [] };
+      entry.blocks.push(b);
+      byPage.set(key, entry);
+    }
+    for (const [pageKey, data] of byPage.entries()) {
       sheetGroups.push({
         sheetTitle: pageKey,
-        tables: pageTables
+        tables: data.tables,
+        outsideBlocks: data.blocks
       });
     }
   } else {
-    // sheet_per_table (default)
+    // sheet_per_table
     for (let i = 0; i < tables.length; i++) {
       const t = tables[i];
       const prefix = t.file ? `${t.file} - ` : '';
       const sheetName = t.title ? `${prefix}${t.title}` : `${prefix}Table ${i + 1}`;
       sheetGroups.push({
         sheetTitle: sheetName,
-        tables: [t]
+        tables: [t],
+        outsideBlocks: []
       });
     }
   }
@@ -159,15 +184,65 @@ export async function buildExcelWorkbook(
     const ws = wb.addWorksheet(sheetName);
 
     let startRow = 1;
-    let maxColsInSheet = 0;
+    let maxColsInSheet = Math.max(1, ...group.tables.map(t => t.cols));
     const colMaxWidths = new Map<number, number>();
 
-    for (let tIdx = 0; tIdx < group.tables.length; tIdx++) {
-      const table = group.tables[tIdx];
+    type SheetItem =
+      | { type: 'table'; y0: number; table: DetectedTable }
+      | { type: 'text'; y0: number; block: OutsideTextBlock };
+
+    const sheetItems: SheetItem[] = [
+      ...group.tables.map(t => ({ type: 'table' as const, y0: t.bbox.y0, table: t }))
+    ];
+
+    if (options.includeText && group.outsideBlocks.length > 0) {
+      for (const b of group.outsideBlocks) {
+        sheetItems.push({ type: 'text' as const, y0: b.y0, block: b });
+      }
+    }
+
+    sheetItems.sort((a, b) => a.y0 - b.y0);
+
+    let tableIndexInSheet = 0;
+    for (const item of sheetItems) {
+      if (item.type === 'text') {
+        const wsRow = ws.getRow(startRow);
+        const cell = wsRow.getCell(1);
+        cell.value = sanitizeFormulaInjection(item.block.text);
+
+        if (maxColsInSheet > 1) {
+          try {
+            ws.mergeCells(startRow, 1, startRow, maxColsInSheet);
+          } catch {
+            // Ignore overlap if any
+          }
+        }
+
+        const isHeading = item.block.isHeading || (item.block.fs !== undefined && item.block.fs >= 13) || item.block.bold;
+        const fontSize = isHeading ? Math.max(12, Math.min(18, Math.round(item.block.fs || 13))) : 11;
+        cell.font = {
+          name: 'Calibri',
+          size: fontSize,
+          bold: isHeading,
+          color: isHeading ? { argb: 'FF14213D' } : undefined
+        };
+        cell.alignment = {
+          vertical: 'top',
+          horizontal: item.block.align || 'left',
+          wrapText: true
+        };
+        startRow++;
+        totalRowsWritten++;
+        totalCellsWritten++;
+        continue;
+      }
+
+      const table = item.table;
+      tableIndexInSheet++;
 
       // If multiple tables in one sheet, add title banner and blank space
       if (group.tables.length > 1) {
-        if (tIdx > 0) {
+        if (tableIndexInSheet > 1) {
           startRow += 2; // blank rows between tables
         }
         if (table.title) {
@@ -332,7 +407,12 @@ export async function buildExcelWorkbook(
     }
   }
 
-  if (options.includeText && outsideTextByPage && outsideTextByPage.length > 0) {
+  if (
+    options.includeText &&
+    options.sheetLayout === 'sheet_per_table' &&
+    outsideTextByPage &&
+    outsideTextByPage.length > 0
+  ) {
     const textSheetName = getUniqueSheetName('Text', existingSheetNames);
     const textWs = wb.addWorksheet(textSheetName);
 
