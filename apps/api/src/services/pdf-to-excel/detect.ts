@@ -17,6 +17,9 @@ export interface DetectedCell {
   bold?: boolean;
   italic?: boolean;
   align?: 'left' | 'right' | 'center';
+  fontName?: string;
+  fontSize?: number;
+  color?: string;
 }
 
 export interface TableBoundingBox {
@@ -464,7 +467,7 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
       continue;
     }
 
-    assignTextToGrid(cells, page.segments || []);
+    assignTextToGrid(cells, page.segments || [], page);
 
     // Reject table if any column is completely empty (Step 5 detection failure)
     if (hasEntirelyEmptyColumn(grid)) {
@@ -505,7 +508,7 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
 /**
  * Assign text segments to cells with proper line wrapping & de-hyphenation
  */
-function assignTextToGrid(cells: DetectedCell[], segments: LayoutSegment[]): void {
+function assignTextToGrid(cells: DetectedCell[], segments: LayoutSegment[], page?: LayoutPage): void {
   const sortedSegments = [...segments].sort((a, b) => a.y - b.y || a.x - b.x);
   const prevSegByCell = new Map<DetectedCell, LayoutSegment>();
 
@@ -548,12 +551,43 @@ function assignTextToGrid(cells: DetectedCell[], segments: LayoutSegment[]): voi
       if (seg.runs && seg.runs.length > 0) {
         if (seg.runs[0].bold) matchedCell.bold = true;
         if (seg.runs[0].italic) matchedCell.italic = true;
+        const primaryRun = seg.runs.find(r => r.font) || seg.runs[0];
+        if (!matchedCell.fontName && primaryRun.font) {
+          matchedCell.fontName = primaryRun.font;
+        }
+        if (!matchedCell.fontSize && primaryRun.fs) {
+          matchedCell.fontSize = primaryRun.fs;
+        }
+        if (!matchedCell.color && primaryRun.color) {
+          matchedCell.color = primaryRun.color;
+        }
       }
     }
   }
 
   for (const c of cells) {
     c.text = c.text.trim();
+  }
+
+  if (page?.boxes && page.boxes.length > 0) {
+    for (const cell of cells) {
+      if (!cell.bgColor) {
+        const matchingBox = page.boxes.find((b: LayoutBox) => {
+          if (!b.fill) return false;
+          const fillNorm = b.fill.toUpperCase().replace('#', '').trim();
+          if (fillNorm === 'FFFFFF' || fillNorm === 'FFF' || fillNorm === 'WHITE') return false;
+          const bx1 = b.x + b.w;
+          const by1 = b.y + b.h;
+          const overlapX = Math.max(0, Math.min(cell.x1, bx1) - Math.max(cell.x0, b.x));
+          const overlapY = Math.max(0, Math.min(cell.y1, by1) - Math.max(cell.y0, b.y));
+          const cellArea = (cell.x1 - cell.x0) * (cell.y1 - cell.y0);
+          return cellArea > 0 && (overlapX * overlapY) >= 0.35 * cellArea;
+        });
+        if (matchingBox && matchingBox.fill) {
+          cell.bgColor = matchingBox.fill;
+        }
+      }
+    }
   }
 }
 
@@ -706,6 +740,7 @@ export function detectStreamTables(
 
         const cellText = segsInCol.map(s => s.text || s.runs?.map(rn => rn.text).join('') || '').join(' ').trim();
         const cellRuns = segsInCol.flatMap(s => s.runs || []);
+        const primaryRun = cellRuns.find(rn => rn.font) || cellRuns[0];
 
         const cell: DetectedCell = {
           row: r,
@@ -717,7 +752,10 @@ export function detectStreamTables(
           text: cellText,
           runs: cellRuns,
           bold: cellRuns.some(rn => rn.bold),
-          italic: cellRuns.some(rn => rn.italic)
+          italic: cellRuns.some(rn => rn.italic),
+          fontName: primaryRun?.font,
+          fontSize: primaryRun?.fs,
+          color: primaryRun?.color
         };
 
         grid[r][c] = cell;

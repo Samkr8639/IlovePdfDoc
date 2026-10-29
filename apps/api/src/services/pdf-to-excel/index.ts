@@ -217,6 +217,7 @@ export async function convertPdfToExcel(
             if (blockText) {
               const isBold = block.lines.some(l => l.some(r => r.bold));
               const isHeading = (block.fs && block.fs >= 13) || (isBold && blockText.length < 80);
+              const blockFont = block.lines[0]?.find(r => r.font)?.font;
               outsideBlocks.push({
                 page: pageNum,
                 y0: block.y,
@@ -224,7 +225,8 @@ export async function convertPdfToExcel(
                 fs: block.fs,
                 bold: isBold,
                 align: block.align,
-                isHeading
+                isHeading,
+                fontName: blockFont
               });
             }
           }

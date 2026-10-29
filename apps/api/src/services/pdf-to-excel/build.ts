@@ -7,11 +7,13 @@ import { AppError } from '../../middleware/errorHandler';
 export interface OutsideTextBlock {
   page: number;
   y0: number;
+  y1?: number;
   text: string;
   fs?: number;
   bold?: boolean;
   align?: 'left' | 'right' | 'center';
   isHeading?: boolean;
+  fontName?: string;
 }
 
 export interface BuildWorkbookOptions {
@@ -111,6 +113,34 @@ function toArgb(hex?: string, defaultArgb = 'FF000000'): string {
     return h.toUpperCase();
   }
   return defaultArgb;
+}
+
+/**
+ * Map source font names / generics to standard fonts (fallback Calibri)
+ */
+export function resolveFont(fontName?: string, generic?: string, fallbackFont = 'Calibri'): string {
+  if (!fontName) return fallbackFont;
+  const lower = fontName.toLowerCase();
+  if (/century\s*gothic/i.test(lower)) return 'Century Gothic';
+  if (/century/i.test(lower)) return 'Century';
+  if (/league\s*gothic/i.test(lower)) return 'Arial Narrow';
+  if (/montserrat|roboto|open\s*sans|poppins/i.test(lower)) return 'Segoe UI';
+  if (/inter|lato|calibri/i.test(lower)) return 'Calibri';
+  if (/arial|helvetica/i.test(lower)) return 'Arial';
+  if (/times|libertine|roman/i.test(lower)) return 'Times New Roman';
+  if (/courier|consolas|source\s*code|monaco/i.test(lower)) return 'Courier New';
+  if (/georgia/i.test(lower)) return 'Georgia';
+  if (/garamond/i.test(lower)) return 'Garamond';
+  if (/verdana/i.test(lower)) return 'Verdana';
+  if (/tahoma/i.test(lower)) return 'Tahoma';
+  if (/trebuchet/i.test(lower)) return 'Trebuchet MS';
+  if (/cambria/i.test(lower)) return 'Cambria';
+
+  if (generic === 'sans-serif' || /sans/i.test(lower)) return 'Calibri';
+  if (generic === 'serif' || /serif/i.test(lower)) return 'Times New Roman';
+  if (generic === 'monospace' || /mono/i.test(lower)) return 'Courier New';
+
+  return fontName || fallbackFont;
 }
 
 /**
@@ -249,9 +279,12 @@ export async function buildExcelWorkbook(
         }
 
         const isHeading = item.block.isHeading || (item.block.fs !== undefined && item.block.fs >= 13) || item.block.bold;
-        const fontSize = isHeading ? Math.max(12, Math.min(18, Math.round(item.block.fs || 13))) : 11;
+        const fontSize = item.block.fs ? Math.max(9, Math.round(item.block.fs * 2) / 2) : (isHeading ? 14 : 11);
+        const fontName = (options.keepFormatting && item.block.fontName)
+          ? resolveFont(item.block.fontName, undefined, 'Calibri')
+          : 'Calibri';
         cell.font = {
-          name: 'Calibri',
+          name: fontName,
           size: fontSize,
           bold: isHeading,
           color: isHeading ? { argb: 'FF14213D' } : undefined
@@ -261,6 +294,11 @@ export async function buildExcelWorkbook(
           horizontal: item.block.align || 'left',
           wrapText: true
         };
+
+        const lines = String(item.block.text || '').split('\n').length;
+        const blockPt = (item.block.y1 ? item.block.y1 - item.block.y0 : 0);
+        wsRow.height = Math.max(18, Math.max(lines * 15, Math.round(blockPt)));
+
         startRow++;
         totalRowsWritten++;
         totalCellsWritten++;
@@ -305,6 +343,25 @@ export async function buildExcelWorkbook(
       for (let r = 0; r < table.rows; r++) {
         const wsRow = ws.getRow(startRow + r);
         const isHeaderRow = table.hasHeader && r < (table.headerRows || 1);
+
+        let maxLinesInRow = 1;
+        let maxCellPt = 0;
+        for (let colIdx = 0; colIdx < table.cols; colIdx++) {
+          const cObj = table.grid[r]?.[colIdx];
+          if (!cObj || cObj.row !== r) continue;
+          const lCount = String(cObj.text || '').split('\n').length;
+          if (lCount > maxLinesInRow) maxLinesInRow = lCount;
+          const pt = (cObj.y1 - cObj.y0) || 0;
+          if (pt > maxCellPt) maxCellPt = pt;
+        }
+
+        if (maxLinesInRow > 1 || maxCellPt > 20) {
+          wsRow.height = Math.max(20, Math.max(maxLinesInRow * 15, Math.round(maxCellPt)));
+        } else if (isHeaderRow) {
+          wsRow.height = 24;
+        } else {
+          wsRow.height = 18;
+        }
 
         for (let c = 0; c < table.cols; c++) {
           const cell = table.grid[r]?.[c];
@@ -365,18 +422,41 @@ export async function buildExcelWorkbook(
           };
 
           const isBold = isHeaderRow || cell.bold;
+          let fontName = 'Calibri';
+          let fontSize = isHeaderRow ? 11 : 10.5;
+          let fontColor: string | undefined;
+
+          if (options.keepFormatting) {
+            const rawFont = cell.fontName || cell.runs?.find(rn => rn.font)?.font;
+            if (rawFont) {
+              fontName = resolveFont(rawFont, cell.runs?.[0]?.generic, 'Calibri');
+            }
+            const sourceFs = cell.fontSize || cell.runs?.find(rn => rn.fs)?.fs;
+            if (sourceFs && sourceFs > 0) {
+              fontSize = Math.round(sourceFs * 2) / 2;
+            }
+            const sourceColor = cell.color || cell.runs?.find(rn => rn.color)?.color;
+            if (sourceColor && sourceColor !== '#000000' && sourceColor !== '000000') {
+              fontColor = toArgb(sourceColor);
+            }
+          }
+
           wsCell.font = {
-            name: 'Calibri',
-            size: isHeaderRow ? 11 : 10.5,
+            name: fontName,
+            size: fontSize,
             bold: isBold,
-            italic: cell.italic
+            italic: cell.italic,
+            color: fontColor ? { argb: fontColor } : undefined
           };
 
           if (isHeaderRow) {
+            const headerFill = (options.keepFormatting && cell.bgColor)
+              ? toArgb(cell.bgColor)
+              : 'FFF1F5F9';
             wsCell.fill = {
               type: 'pattern',
               pattern: 'solid',
-              fgColor: { argb: 'FFF1F5F9' }
+              fgColor: { argb: headerFill }
             };
             wsCell.border = {
               top: { style: 'thin', color: { argb: 'FFCBD5E1' } },

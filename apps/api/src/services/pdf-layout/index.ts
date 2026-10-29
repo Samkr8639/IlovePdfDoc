@@ -86,7 +86,10 @@ function nativeImport(url: string): Promise<any> {
   return new Function('s', 'return import(s)')(url);
 }
 
+let cachedScanner: any = null;
+
 async function getScanner() {
+  if (cachedScanner) return cachedScanner;
   let analyzePath = path.resolve(__dirname, 'analyze.mjs');
   if (!fs.existsSync(analyzePath)) {
     analyzePath = path.resolve(__dirname, '../../../src/services/pdf-layout/analyze.mjs');
@@ -95,8 +98,8 @@ async function getScanner() {
     analyzePath = path.resolve(__dirname, '../../src/services/pdf-layout/analyze.mjs');
   }
   const url = pathToFileURL(analyzePath).href;
-  const targetUrl = process.env.JEST_WORKER_ID ? `${url}?jest=${Date.now()}_${Math.random()}` : url;
-  return nativeImport(targetUrl);
+  cachedScanner = await nativeImport(url);
+  return cachedScanner;
 }
 
 export async function analyzePdf(buffer: Buffer | Uint8Array, opts: any = {}): Promise<PdfLayoutModel> {
