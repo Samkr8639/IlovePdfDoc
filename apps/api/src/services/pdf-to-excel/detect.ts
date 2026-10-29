@@ -225,6 +225,132 @@ function hasVBorder(vLines: InternalLine[], x: number, y0: number, y1: number, t
 }
 
 /**
+ * Clusters intersecting ruling lines into connected components
+ */
+function findConnectedLineComponents(
+  hLines: InternalLine[],
+  vLines: InternalLine[],
+  tol = 3.0
+): { h: InternalLine[]; v: InternalLine[] }[] {
+  const H = hLines.length;
+  const V = vLines.length;
+  const total = H + V;
+  const adj: number[][] = Array.from({ length: total }, () => []);
+
+  for (let i = 0; i < H; i++) {
+    const hl = hLines[i];
+    for (let j = 0; j < V; j++) {
+      const vl = vLines[j];
+      if (
+        vl.x0 >= hl.x0 - tol &&
+        vl.x0 <= hl.x1 + tol &&
+        hl.y0 >= vl.y0 - tol &&
+        hl.y0 <= vl.y1 + tol
+      ) {
+        adj[i].push(H + j);
+        adj[H + j].push(i);
+      }
+    }
+  }
+
+  const visited = new Set<number>();
+  const components: { h: InternalLine[]; v: InternalLine[] }[] = [];
+
+  for (let i = 0; i < total; i++) {
+    if (visited.has(i)) continue;
+    const compH: InternalLine[] = [];
+    const compV: InternalLine[] = [];
+    const queue = [i];
+    visited.add(i);
+
+    while (queue.length > 0) {
+      const curr = queue.shift()!;
+      if (curr < H) {
+        compH.push(hLines[curr]);
+      } else {
+        compV.push(vLines[curr - H]);
+      }
+
+      for (const neighbor of adj[curr]) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    if (compH.length >= 2 && compV.length >= 2) {
+      components.push({ h: compH, v: compV });
+    }
+  }
+
+  return components;
+}
+
+/**
+ * Checks if any column in a table grid is 100% empty
+ */
+export function hasEntirelyEmptyColumn(grid: (DetectedCell | null | { text?: string })[][]): boolean {
+  if (!grid || grid.length === 0) return false;
+  const numRows = grid.length;
+  const numCols = grid[0]?.length || 0;
+  if (numCols <= 1) return false;
+
+  for (let c = 0; c < numCols; c++) {
+    let hasAnyText = false;
+    for (let r = 0; r < numRows; r++) {
+      const cell = grid[r]?.[c];
+      if (cell && cell.text && cell.text.trim().length > 0) {
+        hasAnyText = true;
+        break;
+      }
+    }
+    if (!hasAnyText) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Joins wrapped cell lines with a space, de-hyphenates words (server- + driven -> server-driven),
+ * and preserves newlines for bullets/numbered lists or paragraph line pitch.
+ */
+export function joinCellText(
+  prevText: string,
+  nextText: string,
+  prevSeg?: LayoutSegment,
+  currSeg?: LayoutSegment
+): string {
+  const p = prevText.trimEnd();
+  const n = nextText.trim();
+  if (!p) return n;
+  if (!n) return p;
+
+  const isBulletOrNumbered = /^([•·*\-]|[\d]+[.)])\s/u.test(n);
+  let isParagraphBreak = false;
+  if (prevSeg && currSeg) {
+    const prevY = prevSeg.yb || prevSeg.y;
+    const currY = currSeg.yb || currSeg.y;
+    const fs = prevSeg.fs || currSeg.fs || 10;
+    const pitch = currY - prevY;
+    if (pitch > 1.55 * fs) {
+      isParagraphBreak = true;
+    }
+  }
+
+  if (isBulletOrNumbered || isParagraphBreak) {
+    return p + '\n' + n;
+  }
+
+  if (/[a-zA-Z]-$/u.test(p)) {
+    return p + n;
+  }
+
+  return p + ' ' + n;
+}
+
+/**
  * LATTICE (ruled tables) detection
  */
 export function detectLatticeTables(page: LayoutPage, pageNumber: number): DetectedTable[] {
@@ -233,137 +359,38 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
     return [];
   }
 
-  // Find line intersection points
-  const intersections: { x: number; y: number }[] = [];
-  for (const hl of hLines) {
-    for (const vl of vLines) {
-      if (
-        vl.x0 >= hl.x0 - 2.5 &&
-        vl.x0 <= hl.x1 + 2.5 &&
-        hl.y0 >= vl.y0 - 2.5 &&
-        hl.y0 <= vl.y1 + 2.5
-      ) {
-        intersections.push({ x: vl.x0, y: hl.y0 });
-      }
-    }
-  }
-
-  if (intersections.length < 4) return [];
-
-  const allX = Array.from(new Set(intersections.map(p => p.x))).sort((a, b) => a - b);
-  const allY = Array.from(new Set(intersections.map(p => p.y))).sort((a, b) => a - b);
-
-  const clusteredX: number[] = [];
-  for (const x of allX) {
-    const existing = clusteredX.find(cx => Math.abs(cx - x) <= 2.0);
-    if (!existing) clusteredX.push(x);
-  }
-  clusteredX.sort((a, b) => a - b);
-
-  const clusteredY: number[] = [];
-  for (const y of allY) {
-    const existing = clusteredY.find(cy => Math.abs(cy - y) <= 2.0);
-    if (!existing) clusteredY.push(y);
-  }
-  clusteredY.sort((a, b) => a - b);
-
-  if (clusteredX.length < 2 || clusteredY.length < 2) return [];
-
-  interface RawGridCell {
-    c: number;
-    r: number;
-    x0: number;
-    y0: number;
-    x1: number;
-    y1: number;
-    top: boolean;
-    bottom: boolean;
-    left: boolean;
-    right: boolean;
-  }
-
-  const rawCells: RawGridCell[] = [];
-  for (let r = 0; r < clusteredY.length - 1; r++) {
-    const y0 = clusteredY[r];
-    const y1 = clusteredY[r + 1];
-    if (y1 - y0 < 5) continue;
-
-    for (let c = 0; c < clusteredX.length - 1; c++) {
-      const x0 = clusteredX[c];
-      const x1 = clusteredX[c + 1];
-      if (x1 - x0 < 8) continue;
-
-      const top = hasHBorder(hLines, y0, x0, x1);
-      const bottom = hasHBorder(hLines, y1, x0, x1);
-      const left = hasVBorder(vLines, x0, y0, y1);
-      const right = hasVBorder(vLines, x1, y0, y1);
-
-      const hasSide = (left || right);
-      const hasHoriz = (top || bottom);
-      const borderCount = (top ? 1 : 0) + (bottom ? 1 : 0) + (left ? 1 : 0) + (right ? 1 : 0);
-
-      // Must have both horizontal and vertical bounds to be part of a real table grid
-      if (borderCount >= 3 || (borderCount === 2 && hasSide && hasHoriz)) {
-        rawCells.push({ c, r, x0, y0, x1, y1, top, bottom, left, right });
-      }
-    }
-  }
-
-  if (rawCells.length < 4) return [];
-
-  // Cluster raw cells into connected table components
-  const visited = new Set<number>();
-  const tableComponents: RawGridCell[][] = [];
-
-  for (let i = 0; i < rawCells.length; i++) {
-    if (visited.has(i)) continue;
-    const comp: RawGridCell[] = [];
-    const queue = [i];
-    visited.add(i);
-
-    while (queue.length > 0) {
-      const currIdx = queue.shift()!;
-      const curr = rawCells[currIdx];
-      comp.push(curr);
-
-      for (let j = 0; j < rawCells.length; j++) {
-        if (visited.has(j)) continue;
-        const other = rawCells[j];
-        // Adjacent cells in the grid: either same row and adjacent cols, or same col and adjacent rows
-        const isHorizNeighbor = Math.abs(curr.y0 - other.y0) <= 2 && Math.abs(curr.y1 - other.y1) <= 2 &&
-          (Math.abs(curr.x1 - other.x0) <= 3 || Math.abs(other.x1 - curr.x0) <= 3);
-        const isVertNeighbor = Math.abs(curr.x0 - other.x0) <= 2 && Math.abs(curr.x1 - other.x1) <= 2 &&
-          (Math.abs(curr.y1 - other.y0) <= 3 || Math.abs(other.y1 - curr.y0) <= 3);
-
-        if (isHorizNeighbor || isVertNeighbor) {
-          visited.add(j);
-          queue.push(j);
-        }
-      }
-    }
-
-    if (comp.length >= 4) {
-      tableComponents.push(comp);
-    }
-  }
-
+  const lineComponents = findConnectedLineComponents(hLines, vLines, 3.0);
   const detectedTables: DetectedTable[] = [];
 
-  for (let tIdx = 0; tIdx < tableComponents.length; tIdx++) {
-    const comp = tableComponents[tIdx];
+  for (let cIdx = 0; cIdx < lineComponents.length; cIdx++) {
+    const comp = lineComponents[cIdx];
+    const compAllX = Array.from(new Set(comp.v.map(p => p.x0))).sort((a, b) => a - b);
+    const compAllY = Array.from(new Set(comp.h.map(p => p.y0))).sort((a, b) => a - b);
 
-    const tableX = Array.from(new Set(comp.flatMap(cell => [cell.x0, cell.x1]))).sort((a, b) => a - b);
-    const tableY = Array.from(new Set(comp.flatMap(cell => [cell.y0, cell.y1]))).sort((a, b) => a - b);
+    const clusteredX: number[] = [];
+    for (const x of compAllX) {
+      const existing = clusteredX.find(cx => Math.abs(cx - x) <= 2.5);
+      if (!existing) clusteredX.push(x);
+    }
+    clusteredX.sort((a, b) => a - b);
 
-    const numRows = tableY.length - 1;
-    const numCols = tableX.length - 1;
+    const clusteredY: number[] = [];
+    for (const y of compAllY) {
+      const existing = clusteredY.find(cy => Math.abs(cy - y) <= 2.5);
+      if (!existing) clusteredY.push(y);
+    }
+    clusteredY.sort((a, b) => a - b);
 
+    if (clusteredX.length < 2 || clusteredY.length < 2) continue;
+
+    const numRows = clusteredY.length - 1;
+    const numCols = clusteredX.length - 1;
     if (numRows < 2 || numCols < 2) continue;
 
-    const minX = tableX[0];
-    const maxX = tableX[tableX.length - 1];
-    const minY = tableY[0];
-    const maxY = tableY[tableY.length - 1];
+    const minX = clusteredX[0];
+    const maxX = clusteredX[clusteredX.length - 1];
+    const minY = clusteredY[0];
+    const maxY = clusteredY[clusteredY.length - 1];
 
     const grid: (DetectedCell | null)[][] = Array.from({ length: numRows }, () =>
       Array.from({ length: numCols }, () => null)
@@ -377,13 +404,13 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
       for (let c = 0; c < numCols; c++) {
         if (cellCovered[r][c]) continue;
 
-        const x0 = tableX[c];
-        const y0 = tableY[r];
+        const x0 = clusteredX[c];
+        const y0 = clusteredY[r];
 
         let colSpan = 1;
         while (c + colSpan < numCols) {
-          const rightX = tableX[c + colSpan];
-          if (hasVBorder(vLines, rightX, y0, tableY[r + 1], 2.0)) {
+          const rightX = clusteredX[c + colSpan];
+          if (hasVBorder(comp.v, rightX, y0, clusteredY[r + 1], 2.0)) {
             break;
           }
           colSpan++;
@@ -391,20 +418,20 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
 
         let rowSpan = 1;
         while (r + rowSpan < numRows) {
-          const bottomY = tableY[r + rowSpan];
-          if (hasHBorder(hLines, bottomY, x0, tableX[c + colSpan], 2.0)) {
+          const bottomY = clusteredY[r + rowSpan];
+          if (hasHBorder(comp.h, bottomY, x0, clusteredX[c + colSpan], 2.0)) {
             break;
           }
           rowSpan++;
         }
 
-        const x1 = tableX[c + colSpan];
-        const y1 = tableY[r + rowSpan];
+        const x1 = clusteredX[c + colSpan];
+        const y1 = clusteredY[r + rowSpan];
 
-        const hasTop = hasHBorder(hLines, y0, x0, x1);
-        const hasBottom = hasHBorder(hLines, y1, x0, x1);
-        const hasLeft = hasVBorder(vLines, x0, y0, y1);
-        const hasRight = hasVBorder(vLines, x1, y0, y1);
+        const hasTop = hasHBorder(comp.h, y0, x0, x1);
+        const hasBottom = hasHBorder(comp.h, y1, x0, x1);
+        const hasLeft = hasVBorder(comp.v, x0, y0, y1);
+        const hasRight = hasVBorder(comp.v, x1, y0, y1);
         if (hasTop && hasBottom && hasLeft && hasRight) {
           enclosedCellCount += colSpan * rowSpan;
         }
@@ -433,11 +460,21 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
 
     const totalSlots = numRows * numCols;
     const enclosureRatio = enclosedCellCount / Math.max(1, totalSlots);
-    if (enclosureRatio < 0.5) {
+    if (enclosureRatio < 0.45) {
       continue;
     }
 
     assignTextToGrid(cells, page.segments || []);
+
+    // Reject table if any column is completely empty (Step 5 detection failure)
+    if (hasEntirelyEmptyColumn(grid)) {
+      continue;
+    }
+
+    if (hasEntirelyEmptyColumn(grid)) {
+      continue;
+    }
+
     const { hasHeader, headerRows } = detectHeaderRow(grid, page);
 
     const filledCells = cells.filter(cell => cell.text.trim().length > 0).length;
@@ -446,7 +483,7 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
     const title = findTableTitle(page, minY, minX, maxX);
 
     detectedTables.push({
-      id: `table_p${pageNumber}_l${tIdx + 1}`,
+      id: `table_p${pageNumber}_l${cIdx + 1}`,
       page: pageNumber,
       bbox: { x0: minX, y0: minY, x1: maxX, y1: maxY },
       rows: numRows,
@@ -458,7 +495,7 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
       confidence,
       headerRows,
       hasHeader,
-      colWidths: tableX.slice(1).map((x, i) => x - tableX[i])
+      colWidths: clusteredX.slice(1).map((x, i) => x - clusteredX[i])
     });
   }
 
@@ -466,10 +503,11 @@ export function detectLatticeTables(page: LayoutPage, pageNumber: number): Detec
 }
 
 /**
- * Assign text segments to cells
+ * Assign text segments to cells with proper line wrapping & de-hyphenation
  */
 function assignTextToGrid(cells: DetectedCell[], segments: LayoutSegment[]): void {
   const sortedSegments = [...segments].sort((a, b) => a.y - b.y || a.x - b.x);
+  const prevSegByCell = new Map<DetectedCell, LayoutSegment>();
 
   for (const seg of sortedSegments) {
     const segText = seg.text || seg.runs?.map(r => r.text).join('') || '';
@@ -481,26 +519,29 @@ function assignTextToGrid(cells: DetectedCell[], segments: LayoutSegment[]): voi
     const segCenterX = (segX0 + segX1) / 2;
 
     let matchedCell = cells.find(c =>
-      segCenterX >= c.x0 - 2 &&
-      segCenterX <= c.x1 + 2 &&
-      segY >= c.y0 - 2 &&
+      segCenterX >= c.x0 - 3 &&
+      segCenterX <= c.x1 + 3 &&
+      segY >= c.y0 - 3 &&
       segY <= c.y1 + 4
     );
 
     if (!matchedCell) {
       matchedCell = cells.find(c => {
         const xOverlap = Math.max(0, Math.min(segX1, c.x1) - Math.max(segX0, c.x0));
-        const yOverlap = segY >= c.y0 - 1 && segY <= c.y1 + 3;
+        const yOverlap = segY >= c.y0 - 2 && segY <= c.y1 + 4;
         return yOverlap && xOverlap >= 0.5 * (segX1 - segX0);
       });
     }
 
     if (matchedCell) {
+      const prevSeg = prevSegByCell.get(matchedCell);
       if (matchedCell.text) {
-        matchedCell.text += '\n' + segText.trim();
+        matchedCell.text = joinCellText(matchedCell.text, segText, prevSeg, seg);
       } else {
         matchedCell.text = segText.trim();
       }
+      prevSegByCell.set(matchedCell, seg);
+
       if (!matchedCell.runs) matchedCell.runs = [];
       if (seg.runs) matchedCell.runs.push(...seg.runs);
 
@@ -826,14 +867,17 @@ export function mergeCrossPageTables(
 
     for (const currTable of tables) {
       if (result.length > 0) {
-        const prevTable = result[result.length - 1];
-        const isConsecutivePage = (pageNumber === prevTable.page + 1);
+        const matchingPrev = result.slice().reverse().find(pt =>
+          (pt.page === pageNumber - 1 || pt.page === pageNumber) &&
+          pt.cols === currTable.cols &&
+          (!currTable.colWidths || !pt.colWidths || currTable.colWidths.every((w, idx) => Math.abs(w - (pt.colWidths?.[idx] || 0)) <= 5.0))
+        );
+
+        const isConsecutivePage = !!matchingPrev;
+        const prevTable = matchingPrev || result[result.length - 1];
         const sameColCount = (currTable.cols === prevTable.cols);
-
-        const colPosMatch = !currTable.colWidths || !prevTable.colWidths ||
-          currTable.colWidths.every((w, idx) => Math.abs(w - (prevTable.colWidths?.[idx] || 0)) <= 4.0);
-
-        const startsNearTop = currTable.bbox.y0 <= 150;
+        const colPosMatch = true;
+        const startsNearTop = currTable.bbox.y0 <= 200;
 
         if (isConsecutivePage && sameColCount && colPosMatch && startsNearTop) {
           const prevHeaderTexts = prevTable.grid[0]?.map(c => c?.text.trim().toLowerCase() || '') || [];
