@@ -175,6 +175,15 @@ pdfToExcelRouter.post(
         throw new AppError(400, 'NO_FILES_UPLOADED', 'Please select at least one PDF file to convert.');
       }
 
+      // Decode filenames from Latin-1 to UTF-8 to preserve en-dashes and special chars
+      for (const file of files) {
+        try {
+          file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+        } catch {
+          // Preserve as is if decoding fails
+        }
+      }
+
       // Validate body parameters using Zod schema
       const parseResult = PdfToExcelOptionsSchema.safeParse(req.body);
       if (!parseResult.success) {

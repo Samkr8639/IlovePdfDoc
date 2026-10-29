@@ -137,8 +137,8 @@ export async function buildExcelWorkbook(
   }
 
   const wb = new ExcelJS.Workbook();
-  wb.title = title || originalFilename || 'PDF Export';
-  wb.creator = ''; // Empty creator as specified
+  wb.title = title || originalFilename?.replace(/\.[^.]+$/, '') || 'PDF Export';
+  wb.creator = 'PDFTailor';
 
   const existingSheetNames = new Set<string>();
   let totalRowsWritten = 0;
