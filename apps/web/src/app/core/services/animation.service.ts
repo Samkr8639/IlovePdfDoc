@@ -27,6 +27,7 @@ export class AnimationService {
   /**
    * Modern SaaS Hero Entrance Animation with GSAP Timeline, Stagger, and ScrollTrigger.
    * Scoped via gsap.context for easy cleanup on ngOnDestroy.
+   * Uses opacity-only fades for in-flow text elements to maintain 0.00 Cumulative Layout Shift (CLS).
    */
   animateHero(container: HTMLElement): gsap.Context | null {
     if (!this.isBrowser || this.prefersReducedMotion || !container) {
@@ -34,11 +35,9 @@ export class AnimationService {
     }
 
     const ctx = gsap.context(() => {
-      // Kicker badge drop-in
+      // Kicker badge fade-in
       gsap.from('.hero-kicker-badge', {
         opacity: 0,
-        y: -14,
-        scale: 0.95,
         duration: 0.5,
         ease: 'power2.out',
         clearProps: 'all'
@@ -47,17 +46,15 @@ export class AnimationService {
       // Main headline smooth rise
       gsap.from('.hero-headline', {
         opacity: 0,
-        y: 22,
         duration: 0.6,
         delay: 0.08,
         ease: 'power2.out',
         clearProps: 'all'
       });
 
-      // Subtitle fade & rise
+      // Subtitle fade
       gsap.from('.hero-subhead', {
         opacity: 0,
-        y: 18,
         duration: 0.55,
         delay: 0.15,
         ease: 'power2.out',
@@ -67,7 +64,6 @@ export class AnimationService {
       // Trust highlights stagger
       gsap.from('.trust-chip', {
         opacity: 0,
-        y: 12,
         duration: 0.45,
         stagger: 0.04,
         delay: 0.2,
@@ -78,7 +74,6 @@ export class AnimationService {
       // Quick action tool links
       gsap.from('.quick-tool-link', {
         opacity: 0,
-        y: 10,
         duration: 0.45,
         stagger: 0.03,
         delay: 0.25,
@@ -89,7 +84,6 @@ export class AnimationService {
       // Category filter pills row
       gsap.from('.cat-pill', {
         opacity: 0,
-        y: 14,
         duration: 0.45,
         stagger: 0.03,
         delay: 0.3,
@@ -97,7 +91,7 @@ export class AnimationService {
         clearProps: 'all'
       });
 
-      // Floating decorative document cards
+      // Floating decorative document cards (absolute positioned, no in-flow layout shift)
       gsap.from('.hero-float-card', {
         opacity: 0,
         scale: 0.88,
@@ -218,7 +212,6 @@ export class AnimationService {
     const ctx = gsap.context(() => {
       gsap.from(selector, {
         opacity: 0,
-        y: 24,
         duration: 0.55,
         stagger: 0.05,
         ease: 'power2.out',
@@ -239,7 +232,6 @@ export class AnimationService {
 
     return gsap.from(element, {
       opacity: 0,
-      y,
       duration,
       delay,
       ease: 'power2.out',
