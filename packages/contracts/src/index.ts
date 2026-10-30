@@ -3,3 +3,4 @@ export * from './api';
 export * from './pdf-to-word';
 export * from './pdf-to-powerpoint';
 export * from './pdf-to-excel';
+export * from './word-to-pdf';
