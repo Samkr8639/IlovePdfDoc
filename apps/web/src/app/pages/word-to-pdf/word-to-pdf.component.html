@@ -343,6 +343,10 @@
         [subtitle]="'Your clean, high-fidelity PDF document is ready for download.'"
         [downloadLabel]="conversionResult()?.isZip ? 'Download PDFs (ZIP)' : 'Download PDF'"
         [savingsText]="'Converted to high-fidelity PDF'" [restartLabel]="'Convert another document'"
+        [isClientSide]="false"
+        [privacyTitle]="'Zero Server Retention'"
+        [privacyMessage]="'Your document was converted securely over an encrypted connection, converted on our server and deleted automatically after 10 minutes.'"
+        [nextActionHint]="'Choose another operation to perform on your PDF'"
         (reset)="resetWorkspace()"></app-result-view>
     </div>
   </div>

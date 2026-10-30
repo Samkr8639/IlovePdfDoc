@@ -917,9 +917,9 @@
   padding: 48px 0 72px;
 }
 .result-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100%;
+  max-width: 1020px;
+  margin: 0 auto;
 }
 .result-warnings-banner {
   display: flex;

@@ -20,7 +20,27 @@ export class ResultViewComponent {
   savingsText = input<string | null>(null);
   savingsReason = input<string | null>(null);
   restartLabel = input<string>('Process Another File');
+  isClientSide = input<boolean>(true);
+  privacyTitle = input<string | null>(null);
+  privacyMessage = input<string | null>(null);
+  nextActionHint = input<string>('Choose another operation to perform on your PDF');
   reset = output<void>();
+
+  effectivePrivacyTitle = computed<string>(() => {
+    if (this.privacyTitle()) return this.privacyTitle()!;
+    return this.isClientSide() ? 'Zero Server Storage' : 'Zero Server Retention';
+  });
+
+  effectivePrivacyMessage = computed<string>(() => {
+    if (this.privacyMessage()) return this.privacyMessage()!;
+    return this.isClientSide()
+      ? "Your documents were processed directly inside your browser's private memory. No files are uploaded to our servers, keeping your data confidential."
+      : "Your document was converted securely over an encrypted connection, converted on our server and deleted automatically after 10 minutes.";
+  });
+
+  securityBadgeText = computed<string>(() => {
+    return this.isClientSide() ? '100% In-Browser' : 'Encrypted & Ephemeral';
+  });
 
   formattedOriginalSize = computed<string | null>(() => {
     return (this.result() as any)?.formattedOriginalSize || null;
