@@ -42,10 +42,6 @@ export class WordToPdfComponent implements OnInit, OnDestroy {
 
   // Conversion options
   readonly outputFormat = signal<WordToPdfOutput>('pdf');
-  readonly imageQuality = signal<WordToPdfImageQuality>('standard');
-  readonly embedBookmarks = signal<boolean>(true);
-  readonly useTaggedPdf = signal<boolean>(false);
-  readonly exportHyperlinks = signal<boolean>(true);
 
   // Processing state
   readonly isProcessing = signal<boolean>(false);
@@ -165,11 +161,7 @@ export class WordToPdfComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
 
     const options: WordToPdfOptions = {
-      output: this.outputFormat(),
-      imageQuality: this.imageQuality(),
-      embedBookmarks: this.embedBookmarks(),
-      useTaggedPdf: this.useTaggedPdf(),
-      exportHyperlinks: this.exportHyperlinks()
+      output: this.outputFormat()
     };
 
     try {
@@ -234,11 +226,8 @@ export class WordToPdfComponent implements OnInit, OnDestroy {
     this.conversionResult.set(null);
     this.errorMessage.set(null);
     this.outputFormat.set('pdf');
-    this.imageQuality.set('standard');
-    this.embedBookmarks.set(true);
-    this.useTaggedPdf.set(false);
-    this.exportHyperlinks.set(true);
     this.currentState.set('upload');
     this.layoutService.showFooter();
   }
 }
+

@@ -34,8 +34,6 @@ describe('WordToPdfComponent Integration Test', () => {
     expect(component.currentState()).toBe('upload');
     expect(component.selectedFiles().length).toBe(0);
     expect(component.outputFormat()).toBe('pdf');
-    expect(component.imageQuality()).toBe('standard');
-    expect(component.embedBookmarks()).toBe(true);
     expect(component.conversionResult()).toBeNull();
   });
 
@@ -136,3 +134,4 @@ describe('WordToPdfComponent Integration Test', () => {
     expect(component.conversionResult()).toBeNull();
   });
 });
+

@@ -776,82 +776,39 @@
   border-radius: 4px;
 }
 
-/* CHECKBOX GROUP */
-.checkbox-group {
+/* SIDEBAR ADSENSE SLOT */
+.sidebar-adsense-slot {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.checkbox-item {
-  display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13.5px;
-  color: var(--pt-text-main, #0f172a);
-  cursor: pointer;
-  user-select: none;
+  margin-top: 12px;
 }
 
-.checkbox-item input[type="checkbox"] {
-  display: none;
+.sidebar-adsense-slot .adsense-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  text-align: center;
 }
 
-.custom-checkbox {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 1.5px solid #cbd5e1;
+.sidebar-ad-box {
+  width: 100%;
+  height: 250px;
+  border: 1px dashed var(--pt-border-subtle, #cbd5e1);
+  border-radius: 8px;
+  background: #fafafa;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
-  background: var(--pt-teal-700, #0F766E);
-  border-color: var(--pt-teal-700, #0F766E);
-}
-
-.checkbox-item input[type="checkbox"]:checked + .custom-checkbox::after {
-  content: '';
-  width: 5px;
-  height: 9px;
-  border: solid #ffffff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  margin-bottom: 2px;
-}
-
-.checkbox-label {
-  font-size: 13px;
-  color: #334155;
-  font-weight: 500;
-}
-
-/* PRIVACY NOTICE BOX */
-.privacy-notice-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: var(--pt-teal-50, #ECF7F5);
-  border: 1px solid rgba(15, 118, 110, 0.2);
-  border-radius: 8px;
-  padding: 12px 14px;
-  color: var(--pt-teal-800, #0F766E);
+  gap: 8px;
   font-size: 12.5px;
-  line-height: 1.45;
-}
-
-.privacy-notice-box svg {
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.privacy-notice-box p {
-  margin: 0;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 /* ACTION FOOTER */
@@ -947,3 +904,4 @@
     grid-template-columns: 1fr;
   }
 }
+
