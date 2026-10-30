@@ -22,7 +22,6 @@ describe('App Routes: Live vs Coming Soon Navigation', () => {
   });
 
   const comingSoonPaths = [
-    'word-to-pdf',
     'powerpoint-to-pdf',
     'excel-to-pdf',
     'edit-pdf',
@@ -42,6 +41,11 @@ describe('App Routes: Live vs Coming Soon Navigation', () => {
       expect(location.path()).toBe('');
     });
   }
+
+  it('should allow navigation to live tool /word-to-pdf', async () => {
+    await router.navigateByUrl('/word-to-pdf');
+    expect(location.path()).toBe('/word-to-pdf');
+  });
 
   it('should allow navigation to live tool /pdf-to-excel', async () => {
     await router.navigateByUrl('/pdf-to-excel');
