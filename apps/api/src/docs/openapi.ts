@@ -29,7 +29,8 @@ export const openApiSpec = {
     { name: 'Compress', description: 'PDF compression services' },
     { name: 'PDF to Word', description: 'Layout-preserving PDF to DOCX conversion' },
     { name: 'PDF to PowerPoint', description: 'Layout-preserving PDF to PowerPoint (PPTX) conversion' },
-    { name: 'PDF to Excel', description: 'Table-preserving PDF to Excel (XLSX) conversion' }
+    { name: 'PDF to Excel', description: 'Table-preserving PDF to Excel (XLSX) conversion' },
+    { name: 'Word to PDF', description: 'High-fidelity Word to PDF conversion' }
   ],
   paths: {
     '/api/v1/health': {
@@ -594,6 +595,26 @@ export const openApiSpec = {
             }
           }
         }
+      }
+    },
+    '/api/v1/word-to-pdf/convert': {
+      post: {
+        tags: ['Word to PDF'],
+        summary: 'Convert Word documents (.docx, .doc, .odt, .rtf) to PDF',
+        responses: {
+          '200': { description: 'Conversion completed successfully' },
+          '400': { description: 'Validation error' },
+          '415': { description: 'Unsupported file type' },
+          '503': { description: 'Engine unavailable' }
+        }
+      }
+    },
+    '/api/v1/word-to-pdf/jobs/{jobId}/download': {
+      get: {
+        tags: ['Word to PDF'],
+        summary: 'Download converted PDF (or ZIP if multiple files)',
+        parameters: [{ name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { '200': { description: 'Binary stream' }, '404': { description: 'Not found' } }
       }
     }
   },
