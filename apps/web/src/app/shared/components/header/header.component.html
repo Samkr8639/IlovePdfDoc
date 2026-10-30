@@ -84,12 +84,12 @@
                     </a>
                   </li>
                   <li role="none">
-                    <a [routerLink]="null" class="menu-item-link item-disabled" role="menuitem" aria-disabled="true">
+                    <a routerLink="/word-to-pdf" (click)="closeMenu()" class="menu-item-link highlight-item" role="menuitem">
                       <span class="icon-tile tile-teal">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                       </span>
                       <span class="item-name">Word to PDF</span>
-                      <span class="soon-badge">Soon</span>
+                      <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
@@ -324,10 +324,10 @@
                     </a>
                   </li>
                   <li role="none">
-                    <a [routerLink]="null" class="mega-item-link item-disabled" role="menuitem" aria-disabled="true">
+                    <a routerLink="/word-to-pdf" (click)="closeMenu()" class="mega-item-link highlight-item" role="menuitem">
                       <span class="icon-tile tile-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
                       <span class="mega-name">WORD to PDF</span>
-                      <span class="soon-badge">Soon</span>
+                      <span class="live-badge">Live</span>
                     </a>
                   </li>
                   <li role="none">
@@ -687,9 +687,9 @@
                 <span>JPG to PDF</span>
                 <span class="soon-badge">Soon</span>
               </a>
-              <a [routerLink]="null" class="mobile-sublink item-disabled" aria-disabled="true">
+              <a routerLink="/word-to-pdf" class="mobile-sublink" (click)="closeMobileMenu()">
                 <span>Word to PDF</span>
-                <span class="soon-badge">Soon</span>
+                <span class="live-badge">Live</span>
               </a>
               <a [routerLink]="null" class="mobile-sublink item-disabled" aria-disabled="true">
                 <span>PowerPoint to PDF</span>

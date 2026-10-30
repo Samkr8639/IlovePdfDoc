@@ -1,0 +1,470 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- GLOBAL ERROR BANNER (Visible in every state) -->
+  @if (errorMessage()) {
+    <div class="global-error-container" role="alert">
+      <div class="error-banner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ errorMessage() }}</span>
+        <button type="button" class="error-close" (click)="errorMessage.set(null)" aria-label="Dismiss error">✕</button>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================
+       1. UPLOAD STATE: HERO & DROPZONE
+       =================================================================== -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <div class="hero-trust-badge">
+          <span class="trust-badge-dot"></span>
+          <span>100% Secure & Ephemeral Server Conversion</span>
+        </div>
+
+        <h1 class="tool-h1">Word to PDF Converter</h1>
+        <p class="tool-lead">
+          Convert Microsoft Word documents (.docx, .doc, .odt, .rtf) to high-fidelity PDF documents with preserved fonts, images, tables, and layouts.
+        </p>
+
+        <!-- UPLOADER COMPONENT -->
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            title="Select Word documents"
+            subtitle="or drop DOC, DOCX, ODT, RTF files here"
+            acceptedTypes=".doc,.docx,.odt,.rtf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/rtf"
+            [multiple]="true"
+            limitInfo="Max 50MB per file • Up to 10 files"
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section">
+      <div class="container">
+        <div class="adsense-card">
+          <span class="ad-label">ADVERTISEMENT</span>
+          <div class="ad-placeholder-content">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDITORIAL / SEO CONTENT SECTION -->
+    <section class="editorial-features-section">
+      <div class="container">
+        <div class="section-title-wrap">
+          <h2 class="editorial-heading">The easiest & most accurate way to convert Word to PDF</h2>
+          <p class="editorial-subheading">
+            Engineered for high fidelity, privacy, and speed. Turn Word documents into universally readable PDFs in seconds.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-box blue-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <h3>Pixel-Accurate Layouts</h3>
+            <p>Retains your original margins, fonts, tables, page breaks, and embedded images exactly as designed.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box teal-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3>10-Minute Volatile Storage</h3>
+            <p>Your document is sent over an encrypted TLS connection, converted securely, and permanently deleted after 10 minutes.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box purple-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
+              </svg>
+            </div>
+            <h3>Universal Document Support</h3>
+            <p>Compatible with DOCX, legacy DOC, OpenDocument Text (ODT), and Rich Text Format (RTF) files.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-STEP HOW TO USE GUIDE -->
+    <section class="how-to-section">
+      <div class="container">
+        <h2 class="section-heading-centered">How to convert Word to PDF online</h2>
+        <div class="steps-grid">
+          <div class="step-card">
+            <span class="step-badge">1</span>
+            <h3>Select Word document</h3>
+            <p>Upload one or more DOCX, DOC, ODT, or RTF files from your computer or cloud storage.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">2</span>
+            <h3>Choose output options</h3>
+            <p>Select standard PDF or archival PDF/A, adjust image compression, and toggle bookmarks or hyperlinks.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">3</span>
+            <h3>Download your PDF</h3>
+            <p>Click Convert to PDF and instantly download your clean, universally readable PDF document.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ===================================================================
+       2. ORGANIZE / CONFIGURE WORKSPACE
+       =================================================================== -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- MAIN CANVAS AREA -->
+      <div class="canvas-main-area">
+        <input
+          #addMoreInput
+          type="file"
+          accept=".doc,.docx,.odt,.rtf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/rtf"
+          multiple
+          class="hidden-file-input"
+          (change)="onMoreFilesAdded($event)"
+        />
+
+        <!-- SELECTED WORD FILE CARDS -->
+        <div class="word-cards-canvas">
+          @for (fileItem of selectedFiles(); track fileItem.id) {
+            <div class="word-document-card">
+              <!-- Remove file action -->
+              <div class="card-hover-actions">
+                <button
+                  type="button"
+                  class="card-action-btn delete-btn"
+                  title="Remove file"
+                  aria-label="Remove file"
+                  (click)="removeFile(fileItem.id)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Word Document Sheet Graphic -->
+              <div class="word-page-sheet">
+                <div class="word-badge">{{ fileItem.extension.replace('.', '').toUpperCase() }}</div>
+                <div class="sheet-corner-fold"></div>
+                <div class="sheet-lines-preview">
+                  <div class="line-skeleton title-line"></div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton half-line"></div>
+                  <div class="table-skeleton">
+                    <div class="table-row-skeleton"></div>
+                    <div class="table-row-skeleton"></div>
+                  </div>
+                  <div class="line-skeleton"></div>
+                  <div class="line-skeleton half-line"></div>
+                </div>
+              </div>
+
+              <!-- File Info Label -->
+              <div class="card-file-info">
+                <span class="word-file-name" [title]="fileItem.name">
+                  {{ fileItem.name }}
+                </span>
+                <span class="word-file-meta">
+                  {{ fileItem.formattedSize }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING MULTI-DOCUMENT UPLOAD PILL -->
+        <div class="floating-tools-dock" role="toolbar" aria-label="Add more documents">
+          <!-- 1. Add More Files -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-square-btn add-more-action"
+              (click)="addMoreInput.click()"
+              title="Add more files"
+              aria-label="Add more files"
+            >
+              <span class="dock-count-badge">{{ selectedFiles().length }}</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Add more files</span>
+          </div>
+
+          <!-- 2. Computer / Laptop Upload -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn pc-action"
+              (click)="addMoreInput.click()"
+              title="Upload from computer"
+              aria-label="Upload from computer"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="3"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Upload from PC</span>
+          </div>
+
+          <!-- 3. Google Drive -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn drive-action"
+              (click)="openGoogleDrive($event)"
+              title="Google Drive"
+              aria-label="Add from Google Drive"
+            >
+              <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none" aria-hidden="true">
+                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
+                <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
+                <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Google Drive</span>
+          </div>
+
+          <!-- 4. Dropbox -->
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn dropbox-action"
+              (click)="openDropbox($event)"
+              title="Dropbox"
+              aria-label="Add from Dropbox"
+            >
+              <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF" aria-hidden="true">
+                <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Dropbox</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR: OPTIONS -->
+      <aside class="sidebar-action-panel">
+        <div class="sidebar-body">
+          <h2 class="sidebar-heading">Word to PDF</h2>
+
+          <!-- Output Format Section -->
+          <div class="option-section">
+            <span class="option-section-label">OUTPUT FORMAT</span>
+            <div class="mode-options-group">
+              <label class="mode-card" [class.selected]="outputFormat() === 'pdf'">
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="outputFormat"
+                    value="pdf"
+                    [checked]="outputFormat() === 'pdf'"
+                    (change)="outputFormat.set('pdf')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">Standard PDF</span>
+                  </div>
+                  <p class="mode-desc">Best for sharing, printing, and general viewing across all devices.</p>
+                </div>
+              </label>
+
+              <label class="mode-card" [class.selected]="outputFormat() === 'pdfa'">
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="outputFormat"
+                    value="pdfa"
+                    [checked]="outputFormat() === 'pdfa'"
+                    (change)="outputFormat.set('pdfa')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">PDF/A</span>
+                    <span class="feature-tag">Archival</span>
+                  </div>
+                  <p class="mode-desc">ISO standard format for long-term document archiving and legal compliance.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Image Quality Section -->
+          <div class="option-section">
+            <span class="option-section-label">IMAGE QUALITY</span>
+            <div class="mode-options-group">
+              <label class="mode-card" [class.selected]="imageQuality() === 'standard'">
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="imageQuality"
+                    value="standard"
+                    [checked]="imageQuality() === 'standard'"
+                    (change)="imageQuality.set('standard')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">Standard Quality</span>
+                  </div>
+                  <p class="mode-desc">Crisp images and original graphics resolution.</p>
+                </div>
+              </label>
+
+              <label class="mode-card" [class.selected]="imageQuality() === 'smaller'">
+                <div class="mode-radio-wrap">
+                  <input
+                    type="radio"
+                    name="imageQuality"
+                    value="smaller"
+                    [checked]="imageQuality() === 'smaller'"
+                    (change)="imageQuality.set('smaller')"
+                  />
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="mode-content">
+                  <div class="mode-title-row">
+                    <span class="mode-title">Smaller File Size</span>
+                  </div>
+                  <p class="mode-desc">Optimizes images for quick email sharing and fast web loading.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Advanced Settings -->
+          <div class="option-section">
+            <span class="option-section-label">DETECTION SETTINGS</span>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input
+                  type="checkbox"
+                  [checked]="embedBookmarks()"
+                  (change)="embedBookmarks.set(!embedBookmarks())"
+                />
+                <span class="custom-checkbox"></span>
+                <span class="checkbox-label">Export headings as PDF bookmarks</span>
+              </label>
+
+              <label class="checkbox-item">
+                <input
+                  type="checkbox"
+                  [checked]="exportHyperlinks()"
+                  (change)="exportHyperlinks.set(!exportHyperlinks())"
+                />
+                <span class="custom-checkbox"></span>
+                <span class="checkbox-label">Preserve clickable web hyperlinks</span>
+              </label>
+
+              <label class="checkbox-item">
+                <input
+                  type="checkbox"
+                  [checked]="useTaggedPdf()"
+                  (change)="useTaggedPdf.set(!useTaggedPdf())"
+                />
+                <span class="custom-checkbox"></span>
+                <span class="checkbox-label">Tagged PDF (Screen reader accessibility)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Privacy Security Notice Banner -->
+          <div class="privacy-notice-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <p>
+              Your document is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes.
+            </p>
+          </div>
+        </div>
+
+        <!-- ACTION FOOTER: PRIMARY CONVERT BUTTON -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="btn-convert-action"
+            [disabled]="selectedFiles().length === 0 || isProcessing()"
+            (click)="startConversion()"
+          >
+            <span>Convert to PDF</span>
+            <span class="action-arrow">➔</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ===================================================================
+       3. PROCESSING STATE
+       =================================================================== -->
+  @if (currentState() === 'processing') {
+    <div class="processing-wrapper">
+      <app-processing-state
+        [title]="'Converting Word to PDF...'"
+      ></app-processing-state>
+    </div>
+  }
+
+  <!-- ===================================================================
+       4. COMPLETED RESULT SCREEN
+       =================================================================== -->
+  @if (currentState() === 'completed' && resultViewModel(); as res) {
+    <div class="result-screen-wrapper">
+      <div class="container result-container">
+        <app-result-view
+          [result]="res"
+          [title]="'Word has been converted to PDF!'"
+          [subtitle]="'Your clean, high-fidelity PDF document is ready for download.'"
+          [downloadLabel]="conversionResult()?.isZip ? 'Download PDFs (ZIP)' : 'Download PDF'"
+          [savingsText]="'Converted to high-fidelity PDF'"
+          [restartLabel]="'Convert another document'"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
+      </div>
+    </div>
+  }
+</div>

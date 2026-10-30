@@ -40,11 +40,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/pdf-to-excel/pdf-to-excel.component').then(m => m.PdfToExcelComponent),
     title: 'PDF to Excel Converter Online - Extract Tables to XLSX | PDFTailor'
   },
-  // COMING SOON / UNRELEASED TOOLS -> Redirect to home so users cannot navigate to them
   {
     path: 'word-to-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/word-to-pdf/word-to-pdf.component').then(m => m.WordToPdfComponent),
+    title: 'Word to PDF Converter Online - Convert DOCX & DOC to PDF | PDFTailor'
   },
+  // COMING SOON / UNRELEASED TOOLS -> Redirect to home so users cannot navigate to them
   {
     path: 'powerpoint-to-pdf',
     redirectTo: ''
