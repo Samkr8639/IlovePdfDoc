@@ -1,5 +1,4 @@
 {
-  "$schema": "https://agent-resource-discovery.org/schemas/v1/ai-catalog.json",
   "specVersion": "1.0",
   "host": {
     "displayName": "PDFTailor",
@@ -7,9 +6,9 @@
   },
   "entries": [
     {
-      "identifier": "urn:ai:pdftailor.com:tools:merge-pdf",
+      "identifier": "urn:air:pdftailor:tools:merge-pdf",
       "displayName": "Merge PDF",
-      "type": "application/pdf",
+      "type": "application/mcp-server-card+json",
       "description": "Combine PDFs in the order you want with the easiest PDF merger available.",
       "url": "https://pdftailor.com/merge-pdf",
       "representativeQueries": [
@@ -26,9 +25,9 @@
       ]
     },
     {
-      "identifier": "urn:ai:pdftailor.com:tools:split-pdf",
+      "identifier": "urn:air:pdftailor:tools:split-pdf",
       "displayName": "Split PDF",
-      "type": "application/pdf",
+      "type": "application/mcp-server-card+json",
       "description": "Separate one page or a whole set for easy conversion into independent PDF files.",
       "url": "https://pdftailor.com/split-pdf",
       "representativeQueries": [
@@ -45,9 +44,9 @@
       ]
     },
     {
-      "identifier": "urn:ai:pdftailor.com:tools:compress-pdf",
+      "identifier": "urn:air:pdftailor:tools:compress-pdf",
       "displayName": "Compress PDF",
-      "type": "application/pdf",
+      "type": "application/mcp-server-card+json",
       "description": "Reduce file size while optimizing for maximal PDF quality.",
       "url": "https://pdftailor.com/compress-pdf",
       "representativeQueries": [
@@ -64,9 +63,9 @@
       ]
     },
     {
-      "identifier": "urn:ai:pdftailor.com:tools:pdf-to-word",
+      "identifier": "urn:air:pdftailor:tools:pdf-to-word",
       "displayName": "PDF to Word",
-      "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "type": "application/mcp-server-card+json",
       "description": "Easily convert your PDF files into easy to edit DOC and DOCX documents. The converted WORD document is almost 100% accurate.",
       "url": "https://pdftailor.com/pdf-to-word",
       "representativeQueries": [
@@ -84,9 +83,9 @@
       ]
     },
     {
-      "identifier": "urn:ai:pdftailor.com:tools:pdf-to-powerpoint",
+      "identifier": "urn:air:pdftailor:tools:pdf-to-powerpoint",
       "displayName": "PDF to PowerPoint",
-      "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "type": "application/mcp-server-card+json",
       "description": "Turn your PDF files into easy to edit PPT and PPTX slide decks.",
       "url": "https://pdftailor.com/pdf-to-powerpoint",
       "representativeQueries": [
@@ -104,9 +103,9 @@
       ]
     },
     {
-      "identifier": "urn:ai:pdftailor.com:tools:pdf-to-excel",
+      "identifier": "urn:air:pdftailor:tools:pdf-to-excel",
       "displayName": "PDF to Excel",
-      "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "type": "application/mcp-server-card+json",
       "description": "Pull data straight from PDFs into Excel spreadsheets in a few short seconds.",
       "url": "https://pdftailor.com/pdf-to-excel",
       "representativeQueries": [
@@ -124,9 +123,9 @@
       ]
     },
     {
-      "identifier": "urn:ai:pdftailor.com:tools:word-to-pdf",
+      "identifier": "urn:air:pdftailor:tools:word-to-pdf",
       "displayName": "Word to PDF",
-      "type": "application/pdf",
+      "type": "application/mcp-server-card+json",
       "description": "Make DOC and DOCX files easy to read by converting them to PDF.",
       "url": "https://pdftailor.com/word-to-pdf",
       "representativeQueries": [

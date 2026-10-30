@@ -6,7 +6,7 @@
 
 ### Merge PDF
 - **URL**: https://pdftailor.com/merge-pdf
-- **Identifier**: merge-pdf
+- **Identifier**: urn:air:pdftailor:tools:merge-pdf
 - **Category**: organize
 - **Processing Mode**: 100% Client-Side (Browser WebAssembly)
 - **Accepted File Types**: .pdf, application/pdf
@@ -16,7 +16,7 @@
 
 ### Split PDF
 - **URL**: https://pdftailor.com/split-pdf
-- **Identifier**: split-pdf
+- **Identifier**: urn:air:pdftailor:tools:split-pdf
 - **Category**: organize
 - **Processing Mode**: 100% Client-Side (Browser WebAssembly)
 - **Accepted File Types**: .pdf, application/pdf
@@ -26,7 +26,7 @@
 
 ### Compress PDF
 - **URL**: https://pdftailor.com/compress-pdf
-- **Identifier**: compress-pdf
+- **Identifier**: urn:air:pdftailor:tools:compress-pdf
 - **Category**: optimize
 - **Processing Mode**: Ephemeral Secure Server Conversion
 - **Accepted File Types**: .pdf, application/pdf
@@ -36,7 +36,7 @@
 
 ### PDF to Word
 - **URL**: https://pdftailor.com/pdf-to-word
-- **Identifier**: pdf-to-word
+- **Identifier**: urn:air:pdftailor:tools:pdf-to-word
 - **Category**: convert
 - **Processing Mode**: Ephemeral Secure Server Conversion
 - **Accepted File Types**: .pdf, application/pdf
@@ -46,7 +46,7 @@
 
 ### PDF to PowerPoint
 - **URL**: https://pdftailor.com/pdf-to-powerpoint
-- **Identifier**: pdf-to-powerpoint
+- **Identifier**: urn:air:pdftailor:tools:pdf-to-powerpoint
 - **Category**: convert
 - **Processing Mode**: Ephemeral Secure Server Conversion
 - **Accepted File Types**: .pdf, application/pdf
@@ -56,7 +56,7 @@
 
 ### PDF to Excel
 - **URL**: https://pdftailor.com/pdf-to-excel
-- **Identifier**: pdf-to-excel
+- **Identifier**: urn:air:pdftailor:tools:pdf-to-excel
 - **Category**: convert
 - **Processing Mode**: Ephemeral Secure Server Conversion
 - **Accepted File Types**: .pdf, application/pdf
@@ -66,7 +66,7 @@
 
 ### Word to PDF
 - **URL**: https://pdftailor.com/word-to-pdf
-- **Identifier**: word-to-pdf
+- **Identifier**: urn:air:pdftailor:tools:word-to-pdf
 - **Category**: convert
 - **Processing Mode**: Ephemeral Secure Server Conversion
 - **Accepted File Types**: .doc, .docx

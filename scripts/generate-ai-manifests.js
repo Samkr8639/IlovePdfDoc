@@ -56,7 +56,7 @@ const llmsFullContent = `# PDFTailor - Comprehensive Tool Documentation for LLMs
 
 ${availableTools.map(tool => `### ${tool.name}
 - **URL**: ${BASE_URL}${tool.route}
-- **Identifier**: ${tool.id}
+- **Identifier**: urn:air:pdftailor:tools:${tool.id}
 - **Category**: ${tool.category}
 - **Processing Mode**: ${tool.processingMode === 'browser' ? '100% Client-Side (Browser WebAssembly)' : 'Ephemeral Secure Server Conversion'}
 - **Accepted File Types**: ${tool.acceptedFileTypes.join(', ')}
@@ -72,7 +72,7 @@ All PDFTailor tools support programmatic browser automation and WebMCP form inte
 fs.writeFileSync(path.join(webPublicDir, 'llms-full.txt'), llmsFullContent.trim() + '\n', 'utf8');
 console.log('✓ Generated apps/web/public/llms-full.txt');
 
-// 3. Generate ai-catalog.json conforming to ARD (Agent Resource Discovery) 1.0 Specification
+// 3. Generate ai-catalog.json strictly conforming to ARD (Agent Resource Discovery) 1.0 Specification
 const queriesMap = {
   'merge-pdf': ['merge pdf files', 'combine multiple pdf documents into one', 'join pdf pages together', 'reorder and combine pdf'],
   'split-pdf': ['split pdf into pages', 'extract pages from pdf', 'separate pdf pages', 'cut pdf document'],
@@ -90,16 +90,15 @@ const defaultQueries = (tool) => [
 ];
 
 const catalog = {
-  $schema: 'https://agent-resource-discovery.org/schemas/v1/ai-catalog.json',
   specVersion: '1.0',
   host: {
     displayName: 'PDFTailor',
     identifier: 'did:web:pdftailor.com'
   },
   entries: availableTools.map(tool => ({
-    identifier: `urn:ai:pdftailor.com:tools:${tool.id}`,
+    identifier: `urn:air:pdftailor:tools:${tool.id}`,
     displayName: tool.name,
-    type: tool.id === 'word-to-pdf' ? 'application/pdf' : (tool.category === 'convert' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf'),
+    type: 'application/mcp-server-card+json',
     description: tool.shortDescription,
     url: `${BASE_URL}${tool.route}`,
     representativeQueries: queriesMap[tool.id] || defaultQueries(tool),

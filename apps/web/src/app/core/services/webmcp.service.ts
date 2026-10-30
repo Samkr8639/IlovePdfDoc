@@ -38,6 +38,27 @@ export class WebMcpService {
    * Initializes WebMCP tool registry from ToolRegistryService
    */
   initWebMcp(): void {
+    // 1. Register global search tool (available across header & home)
+    this.registeredTools.set('search_pdf_tools', {
+      name: 'search_pdf_tools',
+      description: 'Search and filter through all available PDF Tailor tools and utilities',
+      inputSchema: {
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'Search keyword to filter PDF tools (e.g., merge, split, compress, word)'
+          }
+        },
+        required: ['query'],
+        additionalProperties: false
+      },
+      actionUrl: '/',
+      category: 'search'
+    });
+
+    // 2. Register all live tools
     const tools = this.toolRegistry.getAllTools();
     const liveTools = tools.filter(t => t.status === 'available');
 

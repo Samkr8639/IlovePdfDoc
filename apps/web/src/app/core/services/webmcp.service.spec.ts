@@ -36,10 +36,9 @@ describe('WebMcpService', () => {
       expect(tool.inputSchema).toBeDefined();
       expect(tool.inputSchema.$schema).toBe('http://json-schema.org/draft-07/schema#');
       expect(tool.inputSchema.type).toBe('object');
-      expect(tool.inputSchema.required).toContain('files');
+      expect(tool.inputSchema.required.length).toBeGreaterThan(0);
       expect(tool.inputSchema.additionalProperties).toBe(false);
       expect(tool.inputSchema.properties).toBeDefined();
-      expect(tool.inputSchema.properties['files']).toBeDefined();
     }
   });
 

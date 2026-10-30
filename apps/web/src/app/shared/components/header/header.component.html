@@ -494,14 +494,17 @@
     <div class="header-right">
       <!-- In-place Header Search Box with Properly Aligned Dropdown -->
       <div class="header-search-wrap" #searchWrap>
-        <div class="search-input-box" [class.focused]="isSearchOpen()">
+        <form class="search-input-box" [class.focused]="isSearchOpen()" toolname="search_pdf_tools" tooldescription="Search and filter through all available PDF Tailor tools and utilities" role="search" toolautosubmit (submit)="$event.preventDefault()">
           <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input
             #searchInput
-            type="text"
+            type="search"
+            name="query"
+            data-mcp-input="query"
+            data-mcp-description="Search query keyword for PDF tools"
             class="header-search-input"
             [placeholder]="'NAV.SEARCH_PLACEHOLDER' | translate"
             [value]="searchQuery()"
@@ -524,7 +527,7 @@
           } @else {
             <kbd class="search-key-hint">/</kbd>
           }
-        </div>
+        </form>
 
         <!-- IN-PLACE PROPERLY ALIGNED DROPDOWN -->
         @if (isSearchOpen()) {
