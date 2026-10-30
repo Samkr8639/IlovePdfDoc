@@ -1,3 +1,4 @@
+import { normalizeDocx } from './normalize-docx';
 /**
  * Word to PDF conversion service using LibreOffice headless.
  *
@@ -188,10 +189,26 @@ export async function convertWordToPdf(
     await fs.promises.mkdir(tmpDir, { recursive: true });
     await fs.promises.mkdir(profileDir, { recursive: true });
 
-    // Save input file with its proper extension
+    const warnings: string[] = [];
+    let fileBuffer = buffer;
     const ext = path.extname(originalname).toLowerCase() || '.docx';
+
+    // Apply DOCX table fidelity normalizer (resolves exact row height clipping in LibreOffice)
+    if (ext === '.docx') {
+      try {
+        const norm = await normalizeDocx(fileBuffer);
+        fileBuffer = norm.buffer;
+        if (norm.fixes.exactToAtLeast > 0) {
+          warnings.push('Fixed-height table rows were adjusted so borders and shading display correctly.');
+        }
+      } catch {
+        // Fallback to original buffer if normalization fails
+      }
+    }
+
+    // Save input file with its proper extension
     const inputPath = path.join(tmpDir, `input${ext}`);
-    await fs.promises.writeFile(inputPath, buffer);
+    await fs.promises.writeFile(inputPath, fileBuffer);
 
     // Build LibreOffice filter options for PDF export
     const filterString = options.output === 'pdfa'
@@ -262,7 +279,7 @@ export async function convertWordToPdf(
       pdfBuffer,
       pageCount,
       fontsSubstituted: [], // LibreOffice does not easily expose font substitutions
-      warnings: []
+      warnings
     };
   } catch (err: unknown) {
     if (err instanceof AppError) throw err;
