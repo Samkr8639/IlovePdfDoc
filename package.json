@@ -8,10 +8,11 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "build:dev": "npm run build:contracts && npm run build:api && npm run build:web:dev",
-    "build:staging": "npm run build:contracts && npm run build:api && npm run build:web:staging",
-    "build:prod": "npm run build:contracts && npm run build:api && npm run build:web:prod",
+    "manifests:ai": "node scripts/generate-ai-manifests.js",
+    "build": "npm run build:contracts && npm run manifests:ai && npm run build:api && npm run build:web",
+    "build:dev": "npm run build:contracts && npm run manifests:ai && npm run build:api && npm run build:web:dev",
+    "build:staging": "npm run build:contracts && npm run manifests:ai && npm run build:api && npm run build:web:staging",
+    "build:prod": "npm run build:contracts && npm run manifests:ai && npm run build:api && npm run build:web:prod",
     "test": "npm run test --workspaces --if-present",
     "dev:api": "npm --workspace=apps/api run dev",
     "dev:api:staging": "npm --workspace=apps/api run dev:staging",

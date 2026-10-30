@@ -1,0 +1,79 @@
+# PDFTailor - Comprehensive Tool Documentation for LLMs
+
+> Complete technical specifications, accepted file types, and execution modes for PDFTailor tools.
+
+## Available Tools Specification
+
+### Merge PDF
+- **URL**: https://pdftailor.com/merge-pdf
+- **Identifier**: merge-pdf
+- **Category**: organize
+- **Processing Mode**: 100% Client-Side (Browser WebAssembly)
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 30
+- **Max File Size**: 50 MB
+- **Description**: Merge and combine multiple PDF documents into one cleanly formatted PDF. Reorder pages and files visually before processing. Operates 100% locally in your browser for absolute privacy.
+
+### Split PDF
+- **URL**: https://pdftailor.com/split-pdf
+- **Identifier**: split-pdf
+- **Category**: organize
+- **Processing Mode**: 100% Client-Side (Browser WebAssembly)
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 1
+- **Max File Size**: 50 MB
+- **Description**: Extract specific page ranges or split every page into separate PDF documents. Fast, secure, and processed completely on your device.
+
+### Compress PDF
+- **URL**: https://pdftailor.com/compress-pdf
+- **Identifier**: compress-pdf
+- **Category**: optimize
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 20
+- **Max File Size**: 100 MB
+- **Description**: Shrink oversized PDF documents for email attachments and web upload limits using intelligent stream optimization.
+
+### PDF to Word
+- **URL**: https://pdftailor.com/pdf-to-word
+- **Identifier**: pdf-to-word
+- **Category**: convert
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 5
+- **Max File Size**: 50 MB
+- **Description**: Transform PDF documents into editable Microsoft Word files with preserved typography, formatting, and layout structure.
+
+### PDF to PowerPoint
+- **URL**: https://pdftailor.com/pdf-to-powerpoint
+- **Identifier**: pdf-to-powerpoint
+- **Category**: convert
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 10
+- **Max File Size**: 50 MB
+- **Description**: Convert slide-based PDF documents into fully editable Microsoft PowerPoint presentations with preserved layout, vectors, and typography.
+
+### PDF to Excel
+- **URL**: https://pdftailor.com/pdf-to-excel
+- **Identifier**: pdf-to-excel
+- **Category**: convert
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 10
+- **Max File Size**: 50 MB
+- **Description**: Extract tabular data from PDF invoices, financial statements, and reports directly into XLSX spreadsheets.
+
+### Word to PDF
+- **URL**: https://pdftailor.com/word-to-pdf
+- **Identifier**: word-to-pdf
+- **Category**: convert
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .doc, .docx
+- **Max Files Allowed**: 10
+- **Max File Size**: 50 MB
+- **Description**: Convert Microsoft Word files into standardized, read-only PDF documents that display identically on every screen.
+
+
+## Security & Verification
+All PDFTailor tools support programmatic browser automation and WebMCP form interaction. Documents processed client-side remain in sandbox RAM. Server conversions are subject to strict per-request execution limits and instantaneous memory purges.

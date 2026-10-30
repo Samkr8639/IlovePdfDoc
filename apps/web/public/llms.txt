@@ -1,0 +1,24 @@
+# PDFTailor - Online PDF Converter & Document Tools
+
+> Fast, private, and secure online PDF toolkit. PDFTailor runs core operations directly inside the user's browser using WebAssembly and processes conversions in volatile ephemeral memory with zero server file retention.
+
+## Available Tools
+
+- [Merge PDF](https://pdftailor.com/merge-pdf): Combine PDFs in the order you want with the easiest PDF merger available.
+- [Split PDF](https://pdftailor.com/split-pdf): Separate one page or a whole set for easy conversion into independent PDF files.
+- [Compress PDF](https://pdftailor.com/compress-pdf): Reduce file size while optimizing for maximal PDF quality.
+- [PDF to Word](https://pdftailor.com/pdf-to-word): Easily convert your PDF files into easy to edit DOC and DOCX documents. The converted WORD document is almost 100% accurate.
+- [PDF to PowerPoint](https://pdftailor.com/pdf-to-powerpoint): Turn your PDF files into easy to edit PPT and PPTX slide decks.
+- [PDF to Excel](https://pdftailor.com/pdf-to-excel): Pull data straight from PDFs into Excel spreadsheets in a few short seconds.
+- [Word to PDF](https://pdftailor.com/word-to-pdf): Make DOC and DOCX files easy to read by converting them to PDF.
+
+## Privacy & Security Architecture
+
+- **Client-Side Execution**: Browser-native tools (Merge, Split, Compress) execute 100% locally on the client machine via WebAssembly. User files are never uploaded to any remote server.
+- **Ephemeral Server-Assisted Conversions**: Server-assisted tools (Word to PDF, PDF to Office formats) stream documents over TLS into volatile isolated containers and permanently purge all temporary artifacts immediately upon conversion completion.
+- **Zero Document Retention**: PDFTailor retains zero user documents, logs no sensitive document text, and enforces strict zero-retention policies.
+
+## Machine-Readable Resources
+
+- [AI Resource Catalog (ARD Manifest)](https://pdftailor.com/.well-known/ai-catalog.json): Structured JSON listing for autonomous AI agents.
+- [Full LLM Documentation](https://pdftailor.com/llms-full.txt): Comprehensive parameter schemas and format constraints.

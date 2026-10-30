@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "prebuild": "node ../../scripts/generate-ai-manifests.js",
     "start": "ng serve",
     "start:staging": "ng serve --configuration=staging",
     "build": "ng build",

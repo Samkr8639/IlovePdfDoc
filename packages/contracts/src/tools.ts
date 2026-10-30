@@ -1,3 +1,13 @@
+export const LIVE_TOOL_IDS: readonly string[] = [
+  'merge-pdf',
+  'split-pdf',
+  'compress-pdf',
+  'pdf-to-word',
+  'pdf-to-powerpoint',
+  'pdf-to-excel',
+  'word-to-pdf'
+] as const;
+
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
 export type ToolCategory = 'organize' | 'convert' | 'optimize' | 'edit' | 'security' | 'intelligence' | 'workflows';
 export type ToolStatus = 'available' | 'beta' | 'planned';
@@ -126,7 +136,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 5,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
+    status: 'available',
     badgeText: 'Fast',
     seo: {
       title: 'PDF to Word Converter Online | PDF flow',
@@ -204,7 +214,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.doc', '.docx'],
     maxFiles: 10,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
+    status: 'available',
     badgeText: 'Planned',
     seo: {
       title: 'Word to PDF Converter Online | PDF flow',
@@ -314,7 +324,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.jpg', '.jpeg', '.png', '.webp', 'image/jpeg', 'image/png', 'image/webp'],
     maxFiles: 50,
     maxFileSizeBytes: 20 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'Client-side',
     seo: {
       title: 'JPG & Images to PDF Converter Free Online | PDF flow',
@@ -382,7 +392,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'Instant',
     seo: {
       title: 'Rotate PDF Online Free - Permanently Rotate Pages | PDF flow',
@@ -470,7 +480,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'Instant',
     seo: {
       title: 'Organize PDF Pages Online | PDF flow',
@@ -558,7 +568,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['image/*'],
     maxFiles: 10,
     maxFileSizeBytes: 20 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'Instant',
     seo: {
       title: 'Scan to PDF Online | PDF flow',
@@ -668,7 +678,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'New!',
     isNew: true,
     seo: {
@@ -691,7 +701,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'New!',
     isNew: true,
     seo: {
@@ -714,7 +724,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'New!',
     isNew: true,
     seo: {
@@ -737,7 +747,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'available',
+    status: 'planned',
     badgeText: 'New!',
     isNew: true,
     seo: {

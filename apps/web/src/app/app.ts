@@ -4,6 +4,7 @@ import { HeaderComponent } from './shared/components/header/header.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { BackToTopComponent } from './shared/components/back-to-top/back-to-top.component';
 import { LayoutService } from './core/services/layout.service';
+import { WebMcpService } from './core/services/webmcp.service';
 
 @Component({
   selector: 'app-root',
@@ -14,4 +15,5 @@ import { LayoutService } from './core/services/layout.service';
 })
 export class App {
   readonly layoutService = inject(LayoutService);
+  private readonly webMcpService = inject(WebMcpService);
 }

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://agent-resource-discovery.org/schemas/v1/ai-catalog.json",
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "PDFTailor",
+    "identifier": "did:web:pdftailor.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:merge-pdf",
+      "displayName": "Merge PDF",
+      "type": "application/pdf",
+      "description": "Combine PDFs in the order you want with the easiest PDF merger available.",
+      "url": "https://pdftailor.com/merge-pdf",
+      "representativeQueries": [
+        "merge pdf files",
+        "combine multiple pdf documents into one",
+        "join pdf pages together",
+        "reorder and combine pdf"
+      ],
+      "tags": [
+        "pdf",
+        "organize",
+        "merge",
+        "pdf"
+      ]
+    },
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:split-pdf",
+      "displayName": "Split PDF",
+      "type": "application/pdf",
+      "description": "Separate one page or a whole set for easy conversion into independent PDF files.",
+      "url": "https://pdftailor.com/split-pdf",
+      "representativeQueries": [
+        "split pdf into pages",
+        "extract pages from pdf",
+        "separate pdf pages",
+        "cut pdf document"
+      ],
+      "tags": [
+        "pdf",
+        "organize",
+        "split",
+        "pdf"
+      ]
+    },
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:compress-pdf",
+      "displayName": "Compress PDF",
+      "type": "application/pdf",
+      "description": "Reduce file size while optimizing for maximal PDF quality.",
+      "url": "https://pdftailor.com/compress-pdf",
+      "representativeQueries": [
+        "compress pdf file",
+        "reduce pdf size online",
+        "shrink pdf document without losing quality",
+        "make pdf file smaller"
+      ],
+      "tags": [
+        "pdf",
+        "optimize",
+        "compress",
+        "pdf"
+      ]
+    },
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:pdf-to-word",
+      "displayName": "PDF to Word",
+      "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "description": "Easily convert your PDF files into easy to edit DOC and DOCX documents. The converted WORD document is almost 100% accurate.",
+      "url": "https://pdftailor.com/pdf-to-word",
+      "representativeQueries": [
+        "convert pdf to word",
+        "pdf to docx editable",
+        "turn pdf document into editable word document",
+        "export pdf as word"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "pdf",
+        "to",
+        "word"
+      ]
+    },
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:pdf-to-powerpoint",
+      "displayName": "PDF to PowerPoint",
+      "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "description": "Turn your PDF files into easy to edit PPT and PPTX slide decks.",
+      "url": "https://pdftailor.com/pdf-to-powerpoint",
+      "representativeQueries": [
+        "convert pdf to powerpoint",
+        "pdf to pptx presentation",
+        "turn pdf slides into powerpoint deck",
+        "export pdf as ppt"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "pdf",
+        "to",
+        "powerpoint"
+      ]
+    },
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:pdf-to-excel",
+      "displayName": "PDF to Excel",
+      "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "description": "Pull data straight from PDFs into Excel spreadsheets in a few short seconds.",
+      "url": "https://pdftailor.com/pdf-to-excel",
+      "representativeQueries": [
+        "convert pdf to excel",
+        "extract tables from pdf into xlsx",
+        "pdf spreadsheet data to excel",
+        "turn pdf into excel sheet"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "pdf",
+        "to",
+        "excel"
+      ]
+    },
+    {
+      "identifier": "urn:ai:pdftailor.com:tools:word-to-pdf",
+      "displayName": "Word to PDF",
+      "type": "application/pdf",
+      "description": "Make DOC and DOCX files easy to read by converting them to PDF.",
+      "url": "https://pdftailor.com/word-to-pdf",
+      "representativeQueries": [
+        "convert word to pdf",
+        "convert docx to pdf online",
+        "convert doc document to pdf",
+        "word document into pdf"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "word",
+        "to",
+        "pdf"
+      ]
+    }
+  ]
+}

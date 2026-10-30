@@ -1,4 +1,4 @@
-<div
+<form
   class="dropzone-area"
   [class.active]="isDragOver()"
   (dragover)="onDragOver($event)"
@@ -8,15 +8,27 @@
   tabindex="0"
   (keydown.enter)="fileInput.click()"
   (keydown.space)="fileInput.click()"
-  role="button"
+  role="region"
   [attr.aria-label]="ariaLabel()"
+  [attr.toolname]="effectiveToolName()"
+  [attr.tooldescription]="effectiveToolDescription()"
+  [attr.data-mcp-tool]="effectiveToolName()"
+  [attr.data-mcp-description]="effectiveToolDescription()"
+  [attr.action]="currentRoute()"
+  method="POST"
+  enctype="multipart/form-data"
+  toolautosubmit
+  (submit)="$event.preventDefault()"
 >
   <input
     #fileInput
     type="file"
+    name="files"
     class="hidden-input"
     [accept]="acceptedTypes()"
     [multiple]="multiple()"
+    [attr.data-mcp-input]="'files'"
+    [attr.data-mcp-description]="'Document file input for ' + effectiveToolName()"
     (change)="onFileInputChange($event)"
   />
 
@@ -115,4 +127,4 @@
       </div>
     </div>
   </div>
-</div>
+</form>
