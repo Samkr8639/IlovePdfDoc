@@ -22,11 +22,23 @@ const execFileAsync = promisify(execFile);
 // Configuration
 // ──────────────────────────────────────────────────────────────
 
-const SOFFICE_PATH =
-  process.env['SOFFICE_PATH'] ||
-  (process.platform === 'win32'
-    ? 'C:\\Program Files\\LibreOffice\\program\\soffice.exe'
-    : 'soffice');
+function getSofficeBinary(): string {
+  if (process.env['SOFFICE_PATH']) {
+    return process.env['SOFFICE_PATH'];
+  }
+  if (process.platform === 'win32') {
+    const candidates = [
+      'C:\\Program Files\\LibreOffice\\program\\soffice.com',
+      'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+      'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.com',
+      'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe'
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return c;
+    }
+  }
+  return 'soffice';
+}
 
 const CONVERSION_TIMEOUT_MS = parseInt(process.env['WORD_TO_PDF_TIMEOUT_MS'] || '90000', 10);
 
@@ -43,7 +55,8 @@ export async function checkLibreOffice(): Promise<{ available: boolean; version:
     return { available: libreOfficeAvailable, version: libreOfficeVersion };
   }
   try {
-    const { stdout } = await execFileAsync(SOFFICE_PATH, ['--version'], { timeout: 10000 });
+    const binary = getSofficeBinary();
+    const { stdout } = await execFileAsync(binary, ['--version'], { timeout: 10000 });
     libreOfficeVersion = stdout.trim();
     libreOfficeAvailable = true;
   } catch {
@@ -181,15 +194,18 @@ export async function convertWordToPdf(
     await fs.promises.writeFile(inputPath, buffer);
 
     // Build LibreOffice filter options for PDF export
-    const filterOpts = buildFilterOptions(options);
-    const filterString = `pdf:writer_pdf_Export:${JSON.stringify(filterOpts)}`;
+    const filterString = options.output === 'pdfa'
+      ? 'pdf:writer_pdf_Export:SelectPdfVersion=1'
+      : 'pdf:writer_pdf_Export';
+
+    const cleanProfile = profileDir.split(path.sep).join('/');
 
     // Build the LibreOffice command arguments (NO shell string — args array only)
+    // Note: -env:UserInstallation requires a single leading dash (-) in LibreOffice CLI
     const args = [
-      `--env:UserInstallation=file:///${profileDir.replace(/\\/g, '/')}`,
+      `-env:UserInstallation=file:///${cleanProfile}`,
       '--headless',
       '--norestore',
-      '--nofirststartwizard',
       '--convert-to',
       filterString,
       '--outdir',
@@ -197,7 +213,8 @@ export async function convertWordToPdf(
       inputPath
     ];
 
-    await execFileAsync(SOFFICE_PATH, args, {
+    const binary = getSofficeBinary();
+    await execFileAsync(binary, args, {
       timeout: CONVERSION_TIMEOUT_MS,
       env: {
         ...process.env,

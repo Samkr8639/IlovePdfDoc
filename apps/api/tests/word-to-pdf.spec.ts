@@ -22,8 +22,9 @@ async function getSofficePath(): Promise<string | null> {
   if (_sofficePath !== undefined) return _sofficePath;
   const candidates = [
     process.env['SOFFICE_PATH'],
-    'soffice',
-    'C:\\Program Files\\LibreOffice\\program\\soffice.exe'
+    'C:\\Program Files\\LibreOffice\\program\\soffice.com',
+    'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+    'soffice'
   ].filter(Boolean) as string[];
 
   const { execFile } = await import('child_process');
@@ -155,8 +156,8 @@ describe('Word to PDF API — route-level tests (no LibreOffice required)', () =
       .post('/api/v1/word-to-pdf/convert')
       .attach('files', rtf, { filename: 'test.rtf', contentType: 'application/rtf' });
 
-    // 415 = validation failed (wrong); 503 = engine unavailable (expected without LibreOffice); 422 = conversion failed
-    expect([415, 503, 422]).toContain(res.status);
+    // 200 = converted successfully; 503 = engine unavailable; 422 = conversion failed; 415 = invalid type
+    expect([200, 415, 503, 422]).toContain(res.status);
     if (res.status === 415) {
       fail('RTF file should not be rejected by type validation — only by engine availability');
     }

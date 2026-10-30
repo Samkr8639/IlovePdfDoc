@@ -119,6 +119,11 @@ wordToPdfRouter.post(
 
       // Validate each uploaded file first before checking engine
       for (const file of files) {
+        try {
+          file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+        } catch {
+          // keep original
+        }
         validateWordFile(file.buffer, file.originalname, file.mimetype);
       }
 
