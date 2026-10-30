@@ -87,3 +87,4 @@ export async function createTableDocxWithExactHeight(hRule: 'exact' | 'atLeast' 
   zip.file('word/document.xml', docXml);
   return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 }
+

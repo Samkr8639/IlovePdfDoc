@@ -198,7 +198,7 @@ export async function convertWordToPdf(
       try {
         const norm = await normalizeDocx(fileBuffer);
         fileBuffer = norm.buffer;
-        if (norm.fixes.exactToAtLeast > 0) {
+        if (norm.fixes.exactToAtLeast > 0 || (norm.fixes.framesNormalized && norm.fixes.framesNormalized > 0)) {
           warnings.push('Fixed-height table rows were adjusted so borders and shading display correctly.');
         }
       } catch {

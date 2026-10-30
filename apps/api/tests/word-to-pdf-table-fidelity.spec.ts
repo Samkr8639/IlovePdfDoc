@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import JSZip from 'jszip';
 import { normalizeDocx } from '../src/services/word-to-pdf/normalize-docx';
 import { convertWordToPdf, checkLibreOffice } from '../src/services/word-to-pdf';
@@ -61,6 +62,34 @@ describe('Word to PDF Table Fidelity Normalizer', () => {
       expect(shadedBoxes.length).toBeGreaterThanOrEqual(1);
       for (const box of shadedBoxes) {
         expect(box.h).toBeGreaterThanOrEqual(12);
+      }
+    }, 45000);
+
+    it('should expand decoration frames in dev-brief.docx from 5.7 pt to full height (>= 25 pt, header 41.9 pt)', async () => {
+      const { available } = await checkLibreOffice();
+      if (!available) return;
+
+      const fixturePath = 'tests/fixtures/word/dev-brief.docx';
+      if (!fs.existsSync(fixturePath)) return;
+
+      const docxBuf = fs.readFileSync(fixturePath);
+      const conv = await convertWordToPdf(docxBuf, 'dev-brief.docx');
+
+      const layout = await analyzePdf(conv.pdfBuffer);
+      const page2 = layout.pages[1];
+
+      // Page 2 shaded boxes must be ~41.9 pt (not 5.7 pt)
+      const shadedBoxes = page2.boxes.filter(b => b.fill === '#F5F3ED');
+      expect(shadedBoxes.length).toBe(4);
+      for (const box of shadedBoxes) {
+        expect(box.h).toBeGreaterThanOrEqual(40);
+      }
+
+      // Page 2 vertical lines must be >= 25 pt (not 5.7 pt)
+      const vertLines = page2.lines.filter(l => l.color === '#E8E5DC' && (l.vertical || l.h > l.w));
+      expect(vertLines.length).toBeGreaterThanOrEqual(10);
+      for (const line of vertLines) {
+        expect(line.h).toBeGreaterThanOrEqual(25);
       }
     }, 45000);
   });

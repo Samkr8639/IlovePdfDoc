@@ -33,3 +33,4 @@ for (const m of xml.matchAll(/<w:framePr\b([^>]*)\/?>/g)) {
 }
 console.log('framePr heights:', frameTally);
 console.log('total w:hRule="exact" across all elements:', count(/w:hRule="exact"/g));
+
