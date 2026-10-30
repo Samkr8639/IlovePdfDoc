@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { DEFAULT_EN_TRANSLATIONS } from '../i18n/default-en';
 
 export interface SupportedLanguage {
   code: string;
@@ -52,6 +53,8 @@ export class TranslationService {
   readonly currentLanguage = signal<SupportedLanguage>(SUPPORTED_LANGUAGES[0]);
 
   constructor() {
+    this.translate.setTranslation('en', DEFAULT_EN_TRANSLATIONS, true);
+    this.translate.setFallbackLang('en');
     this.initFromStorage();
   }
 
@@ -83,4 +86,3 @@ export class TranslationService {
     return this.translate.instant(key, interpolateParams);
   }
 }
-

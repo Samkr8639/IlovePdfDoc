@@ -1,11 +1,6 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +20,7 @@ export class AnimationService {
   }
 
   /**
-   * Modern SaaS Hero Entrance Animation with GSAP Timeline, Stagger, and ScrollTrigger.
+   * Modern SaaS Hero Entrance Animation with GSAP Timeline and Stagger.
    * Scoped via gsap.context for easy cleanup on ngOnDestroy.
    * Uses opacity-only fades for in-flow text elements to maintain 0.00 Cumulative Layout Shift (CLS).
    */
@@ -91,41 +86,14 @@ export class AnimationService {
         clearProps: 'all'
       });
 
-      // Floating decorative document cards (absolute positioned, no in-flow layout shift)
+      // Floating decorative document cards (absolute positioned, GPU opacity fade)
       gsap.from('.hero-float-card', {
         opacity: 0,
-        scale: 0.88,
-        duration: 0.7,
-        delay: 0.25,
-        ease: 'back.out(1.5)',
-        clearProps: 'opacity,scale'
+        duration: 0.6,
+        delay: 0.2,
+        ease: 'power2.out',
+        clearProps: 'opacity'
       });
-
-      // Infinite subtle organic float for cards
-      const cardLeft = container.querySelector('.card-left');
-      if (cardLeft) {
-        gsap.to(cardLeft, {
-          y: -12,
-          rotation: 1,
-          duration: 3.2,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut'
-        });
-      }
-
-      const cardRight = container.querySelector('.card-right');
-      if (cardRight) {
-        gsap.to(cardRight, {
-          y: 12,
-          rotation: -1,
-          duration: 3.6,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-          delay: 0.3
-        });
-      }
     }, container);
 
     return ctx;

@@ -21,6 +21,11 @@ import { Component, input, signal } from '@angular/core';
     }
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+    }
+
     .pt-ad-container {
       width: 100%;
       display: flex;

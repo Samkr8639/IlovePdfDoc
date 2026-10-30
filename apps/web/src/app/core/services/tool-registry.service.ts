@@ -56,7 +56,9 @@ export class ToolRegistryService {
     this.http.get<ApiResponse<ToolDefinition[]>>(`${environment.apiBaseUrl}/tools`).subscribe({
       next: (res) => {
         if (res && res.success && Array.isArray(res.data)) {
-          this.tools.set(res.data);
+          if (JSON.stringify(res.data) !== JSON.stringify(this.tools())) {
+            this.tools.set(res.data);
+          }
         }
         this.isLoading.set(false);
       },

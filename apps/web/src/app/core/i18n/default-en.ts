@@ -1,0 +1,81 @@
+export const DEFAULT_EN_TRANSLATIONS: Record<string, any> = {
+  "NAV": {
+    "MERGE_PDF": "Merge PDF",
+    "SPLIT_PDF": "Split PDF",
+    "COMPRESS_PDF": "Compress PDF",
+    "CONVERT_PDF": "Convert PDF",
+    "ALL_TOOLS": "All PDF Tools",
+    "SEARCH_PLACEHOLDER": "Search PDF tools...",
+    "CLEAR": "Clear"
+  },
+  "HERO": {
+    "ENGINE_TAG": "Next-Gen PDF Engine • 100% Free & Private Forever",
+    "TITLE_MAIN": "Every tool you need to",
+    "TITLE_HIGHLIGHT": "tailor PDFs",
+    "TITLE_SUFFIX": "in one place",
+    "SUBTITLE": "Merge, split, compress, convert, and protect documents with zero server storage. Professional client-side document utilities — 100% free with no sign-ups or file size limits.",
+    "BADGE_CLIENT_SIDE": "100% Client-Side",
+    "BADGE_ZERO_STORAGE": "Zero Server Storage",
+    "BADGE_NO_LIMITS": "No File Size Limits",
+    "BADGE_FREE": "Free • No Signup",
+    "CARD_INSTANT": "Instant In-Browser",
+    "CARD_INSTANT_DESC": "0s Upload Wait • Client-Side",
+    "CARD_STORAGE": "Zero Server Storage",
+    "CARD_STORAGE_DESC": "Files Never Leave Your Device"
+  },
+  "FILTERS": {
+    "ALL": "All Tools",
+    "WORKFLOWS": "Workflows",
+    "ORGANIZE": "Organize PDF",
+    "OPTIMIZE": "Optimize PDF",
+    "CONVERT": "Convert PDF",
+    "EDIT": "Edit PDF",
+    "SECURITY": "PDF Security",
+    "INTELLIGENCE": "PDF Intelligence"
+  },
+  "TOOLS": {
+    "LIVE": "Live",
+    "SOON": "Soon",
+    "OPEN_TOOL": "Open Tool",
+    "COMING_SOON": "Coming Soon",
+    "MERGE_NAME": "Merge PDF",
+    "MERGE_DESC": "Combine PDFs in the order you want with the easiest PDF merger available.",
+    "MERGE_PDF_NAME": "Merge PDF",
+    "MERGE_PDF_DESC": "Combine PDFs in the order you want with the easiest PDF merger available.",
+    "SPLIT_NAME": "Split PDF",
+    "SPLIT_DESC": "Separate one page or a whole set for easy conversion into independent PDF files.",
+    "SPLIT_PDF_NAME": "Split PDF",
+    "SPLIT_PDF_DESC": "Separate one page or a whole set for easy conversion into independent PDF files.",
+    "COMPRESS_NAME": "Compress PDF",
+    "COMPRESS_DESC": "Reduce file size while optimizing for maximal PDF quality.",
+    "COMPRESS_PDF_NAME": "Compress PDF",
+    "COMPRESS_PDF_DESC": "Reduce file size while optimizing for maximal PDF quality.",
+    "PDF_TO_WORD_NAME": "PDF to Word",
+    "PDF_TO_WORD_DESC": "Easily convert your PDF files into easy to edit DOC and DOCX documents. The converted WORD document is almost 100% accurate.",
+    "PDF_TO_PPT_NAME": "PDF to PowerPoint",
+    "PDF_TO_PPT_DESC": "Turn your PDF files into easy to edit PPT and PPTX slide decks.",
+    "PDF_TO_POWERPOINT_NAME": "PDF to PowerPoint",
+    "PDF_TO_POWERPOINT_DESC": "Turn your PDF files into easy to edit PPT and PPTX slide decks.",
+    "PDF_TO_EXCEL_NAME": "PDF to Excel",
+    "PDF_TO_EXCEL_DESC": "Pull data straight from PDFs into Excel spreadsheets in a few short seconds.",
+    "WORD_TO_PDF_NAME": "Word to PDF",
+    "WORD_TO_PDF_DESC": "Make DOC and DOCX files easy to read by converting them to PDF."
+  },
+  "COMMON": {
+    "CLOSE": "Close",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "PROCESSING": "Processing...",
+    "DOWNLOAD": "Download",
+    "ERROR": "An error occurred",
+    "SUCCESS": "Operation successful"
+  },
+  "FOOTER": {
+    "PRODUCT": "Product",
+    "SOLUTIONS": "Solutions",
+    "COMPANY": "Company",
+    "LEGAL": "Legal",
+    "ALL_RIGHTS": "All rights reserved.",
+    "PRIVACY_FIRST": "100% in-browser processing. Zero file uploads."
+  }
+};
