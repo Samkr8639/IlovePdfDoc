@@ -399,9 +399,8 @@
                     (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
                   >
-                    <input
-                      type="text"
-                      class="canvas-text-input"
+                    <textarea
+                      class="canvas-text-area"
                       [ngModel]="el.text"
                       (ngModelChange)="onTextContentChange(el, $event)"
                       [style.font-family]="el.fontFamily || 'Inter'"
@@ -411,9 +410,10 @@
                       [style.font-style]="el.italic ? 'italic' : 'normal'"
                       [style.text-decoration]="el.underline ? 'underline' : 'none'"
                       [style.text-align]="el.align || 'left'"
+                      [style.line-height]="1.35"
                       (focus)="selectElement(el, $event)"
                       (click)="$event.stopPropagation()"
-                    />
+                    ></textarea>
                     @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) {
                       <div class="ocr-low-conf-badge" title="Confidence: {{ el.ocrConfidence }}%">
                         !

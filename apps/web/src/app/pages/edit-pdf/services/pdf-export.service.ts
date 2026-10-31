@@ -296,28 +296,51 @@ export class PdfExportService {
 
     const color = this.parseColor(el.color || '#14213D');
     const size = el.fontSizePt || 14;
+    const lineHeight = size * 1.35;
+    const lines = (el.text || '').split('\n');
+    const startY = el.baselineY !== undefined ? el.baselineY : (el.yPt + el.heightPt - size);
 
-    const textY = el.baselineY !== undefined ? el.baselineY : el.yPt;
+    for (let i = 0; i < lines.length; i++) {
+      const lineText = lines[i];
+      if (!lineText) continue;
+      const currentY = startY - (i * lineHeight);
 
-    page.drawText(el.text, {
-      x: el.xPt,
-      y: textY,
-      font,
-      size,
-      color
-    });
-
-    if (el.underline) {
       try {
-        const textWidth = font.widthOfTextAtSize(el.text, size);
-        page.drawLine({
-          start: { x: el.xPt, y: textY - 2 },
-          end: { x: el.xPt + textWidth, y: textY - 2 },
-          color,
-          thickness: Math.max(0.75, size / 14)
+        page.drawText(lineText, {
+          x: el.xPt,
+          y: currentY,
+          font,
+          size,
+          color
         });
       } catch {
-        // Fallback if width computation fails on custom characters
+        // Fallback for characters outside standard WinAnsi font charset (e.g. custom bullets or unicode symbols)
+        const sanitized = lineText.replace(/[•●○▪▸]/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ');
+        try {
+          page.drawText(sanitized, {
+            x: el.xPt,
+            y: currentY,
+            font,
+            size,
+            color
+          });
+        } catch {
+          // Fallback ignore if still unencodable
+        }
+      }
+
+      if (el.underline) {
+        try {
+          const textWidth = font.widthOfTextAtSize(lineText, size);
+          page.drawLine({
+            start: { x: el.xPt, y: currentY - 2 },
+            end: { x: el.xPt + textWidth, y: currentY - 2 },
+            color,
+            thickness: Math.max(0.75, size / 14)
+          });
+        } catch {
+          // Fallback if width computation fails on custom characters
+        }
       }
     }
   }

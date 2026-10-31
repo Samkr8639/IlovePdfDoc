@@ -20,7 +20,8 @@ import {
   EditPdfOcrMode,
   SUPPORTED_OCR_LANGUAGES,
   TessdataLanguage,
-  EditPdfOcrResult
+  EditPdfOcrResult,
+  EditPdfOcrLine
 } from '@paperflow/contracts';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
@@ -1490,6 +1491,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   onTextContentChange(el: TextEditElement, newText: string): void {
     el.text = newText;
+    this.elements.update(list => [...list]);
   }
 
   // --- In-Place Page Text Extraction (Character/Line editing) ---
@@ -1498,6 +1500,42 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (mode === 'edit') {
       this.makePageTextEditable();
     }
+  }
+
+  private buildLineSegment(
+    items: Array<{ text: string; x: number; width: number; fontSize: number; height: number }>,
+    baselineY: number
+  ) {
+    let fullText = '';
+    for (let j = 0; j < items.length; j++) {
+      const it = items[j];
+      if (j > 0) {
+        const prev = items[j - 1];
+        const gap = it.x - (prev.x + prev.width);
+        if (gap > 1.5) {
+          fullText += ' ';
+        }
+      }
+      fullText += it.text;
+    }
+
+    const minX = Math.min(...items.map(it => it.x));
+    const maxX = Math.max(...items.map(it => it.x + it.width));
+    const maxFont = Math.max(...items.map(it => it.fontSize));
+    const fontSize = Math.round(maxFont * 10) / 10;
+    const y0 = baselineY - fontSize * 0.25;
+    const y1 = baselineY + fontSize * 0.85;
+
+    return {
+      text: fullText,
+      x0: minX,
+      x1: maxX,
+      width: Math.max(10, maxX - minX),
+      baselineY,
+      fontSize,
+      y0,
+      y1
+    };
   }
 
   async makePageTextEditable(): Promise<void> {
@@ -1531,68 +1569,193 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Group items into lines by baseline Y
-      const lines: Array<{
-        baselineY: number;
-        items: Array<{ text: string; x: number; width: number; fontSize: number; height: number }>;
-      }> = [];
+      // 1. Convert raw PDF items to structured glyph objects
+      interface GlyphItem {
+        text: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        fontSize: number;
+      }
 
-      for (const item of rawItems) {
+      const glyphs: GlyphItem[] = rawItems.map((item: any) => {
         const tx = item.transform[4];
         const ty = item.transform[5];
         const fontSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
         const width = item.width || (fontSize * item.str.length * 0.55);
         const height = item.height || fontSize;
+        return { text: item.str, x: tx, y: ty, width, height, fontSize };
+      });
 
-        let foundLine = lines.find(l => Math.abs(l.baselineY - ty) <= 3.5);
-        if (foundLine) {
-          foundLine.items.push({ text: item.str, x: tx, width, fontSize, height });
+      const baselineRows: Array<{ baselineY: number; items: GlyphItem[] }> = [];
+      for (const g of glyphs) {
+        let row = baselineRows.find(r => Math.abs(r.baselineY - g.y) <= 3.0);
+        if (row) {
+          row.items.push(g);
         } else {
-          lines.push({
-            baselineY: ty,
-            items: [{ text: item.str, x: tx, width, fontSize, height }]
+          baselineRows.push({ baselineY: g.y, items: [g] });
+        }
+      }
+
+      // 2. Within each baseline row, sort left-to-right and split into LineSegments by large horizontal gaps
+      //    (Preserves columns, tables, side-by-side dates/roles)
+      interface LineSegment {
+        text: string;
+        x0: number;
+        x1: number;
+        width: number;
+        baselineY: number;
+        fontSize: number;
+        y0: number;
+        y1: number;
+      }
+
+      const lineSegments: LineSegment[] = [];
+
+      for (const row of baselineRows) {
+        row.items.sort((a, b) => a.x - b.x);
+
+        let currentSegmentItems: GlyphItem[] = [];
+
+        for (let i = 0; i < row.items.length; i++) {
+          const item = row.items[i];
+          if (currentSegmentItems.length === 0) {
+            currentSegmentItems.push(item);
+            continue;
+          }
+
+          const prev = currentSegmentItems[currentSegmentItems.length - 1];
+          const gap = item.x - (prev.x + prev.width);
+
+          // If gap exceeds 2.0x font size or 16pt, it is a separate column or table cell
+          const maxGap = Math.max(16, prev.fontSize * 2.0);
+          if (gap > maxGap) {
+            lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
+            currentSegmentItems = [item];
+          } else {
+            currentSegmentItems.push(item);
+          }
+        }
+
+        if (currentSegmentItems.length > 0) {
+          lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
+        }
+      }
+
+      // Sort line segments from top to bottom (in PDF coordinates, higher baselineY is higher)
+      lineSegments.sort((a, b) => b.baselineY - a.baselineY);
+
+      // 3. Semantic Block Clustering: Group vertically adjacent line segments that share column alignment
+      //    and typographic scale into unified multi-line Paragraph Blocks (matching iLovePDF reference Image 2)
+      interface TextBlock {
+        lines: LineSegment[];
+        x0: number;
+        x1: number;
+        y0: number;
+        y1: number;
+        fontSize: number;
+      }
+
+      const isBulletLine = (text: string) => {
+        const t = text.trim();
+        return /^[•\-\*\u2022\u25cf\u25cb\u25aa\u25b8\u2013\u2014]/.test(t);
+      };
+
+      const isSectionHeading = (text: string) => {
+        const t = text.trim();
+        // All-caps short section titles (e.g. "PROFESSIONAL SUMMARY", "CORE COMPETENCIES", "WORK EXPERIENCE", "INDEPENDENT PROJECTS", "EDUCATION")
+        if (t.length >= 3 && t.length <= 50 && t === t.toUpperCase() && /[A-Z]/.test(t)) {
+          return true;
+        }
+        return false;
+      };
+
+      const textBlocks: TextBlock[] = [];
+
+      for (const seg of lineSegments) {
+        if (!seg.text.trim()) continue;
+
+        const isSegHeading = isSectionHeading(seg.text);
+        const isSegBullet = isBulletLine(seg.text);
+
+        let merged = false;
+
+        // If the current line is a section heading, it should always start its own block (never merge)
+        if (!isSegHeading) {
+          for (const block of textBlocks) {
+            const firstLine = block.lines[0];
+            const lastLine = block.lines[block.lines.length - 1];
+
+            // If the block is a section heading, do not append normal body text to it
+            if (isSectionHeading(firstLine.text)) {
+              continue;
+            }
+
+            // If the block is NOT a bullet list, but the incoming line IS a bullet item (e.g. under a job title),
+            // do not merge them together: let the bullet item start its own list block!
+            const blockHasBullets = block.lines.some(l => isBulletLine(l.text));
+            if (!blockHasBullets && isSegBullet) {
+              continue;
+            }
+
+            const deltaY = lastLine.baselineY - seg.baselineY;
+            const avgFont = (lastLine.fontSize + seg.fontSize) / 2;
+
+            // Normal paragraph / bullet line spacing is between 0.8x and 2.4x font size
+            const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 2.4);
+
+            // Horizontal column overlap / margin alignment
+            const overlap = Math.min(block.x1, seg.x1) - Math.max(block.x0, seg.x0);
+            const minW = Math.min(block.x1 - block.x0, seg.width);
+            const hasColumnOverlap = overlap > 0 && (overlap / minW >= 0.45 || Math.abs(block.x0 - seg.x0) <= 18);
+
+            // Typography consistency (headings must NOT merge with body text)
+            const isSameFontSize = Math.abs(lastLine.fontSize - seg.fontSize) <= 2.2;
+
+            if (isVerticallyAdjacent && hasColumnOverlap && isSameFontSize) {
+              block.lines.push(seg);
+              block.x0 = Math.min(block.x0, seg.x0);
+              block.x1 = Math.max(block.x1, seg.x1);
+              block.y0 = Math.min(block.y0, seg.y0);
+              block.y1 = Math.max(block.y1, seg.y1);
+              merged = true;
+              break;
+            }
+          }
+        }
+
+        if (!merged) {
+          textBlocks.push({
+            lines: [seg],
+            x0: seg.x0,
+            x1: seg.x1,
+            y0: seg.y0,
+            y1: seg.y1,
+            fontSize: seg.fontSize
           });
         }
       }
 
-      // Sort lines from top of document to bottom (in PDF, higher baselineY is higher)
-      lines.sort((a, b) => b.baselineY - a.baselineY);
-
       const generatedElements: EditElement[] = [];
 
-      for (let idx = 0; idx < lines.length; idx++) {
-        const line = lines[idx];
-        line.items.sort((a, b) => a.x - b.x);
+      for (let idx = 0; idx < textBlocks.length; idx++) {
+        const block = textBlocks[idx];
+        const fullBlockText = block.lines.map(l => l.text).join('\n');
+        if (!fullBlockText.trim()) continue;
 
-        let fullText = '';
-        for (let j = 0; j < line.items.length; j++) {
-          const it = line.items[j];
-          if (j > 0) {
-            const prev = line.items[j - 1];
-            const gap = it.x - (prev.x + prev.width);
-            if (gap > 2) {
-              fullText += ' ';
-            }
-          }
-          fullText += it.text;
-        }
-
-        if (!fullText.trim()) continue;
-
-        const minX = Math.min(...line.items.map(it => it.x));
-        const maxX = Math.max(...line.items.map(it => it.x + it.width));
-        const maxFont = Math.max(...line.items.map(it => it.fontSize));
-        const fontSizePt = Math.round(maxFont * 10) / 10;
-        const baselineY = line.baselineY;
-        const yPt = baselineY - fontSizePt * 0.25;
-        const heightPt = Math.max(14, fontSizePt * 1.25);
-        const widthPt = Math.max(24, maxX - minX + 6);
+        const xPt = block.x0;
+        const widthPt = Math.max(30, block.x1 - block.x0 + 6);
+        const heightPt = Math.max(16, block.y1 - block.y0 + 4);
+        const yPt = block.y0 - 2;
+        const baselineY = block.lines[0].baselineY;
+        const fontSizePt = Math.round(block.fontSize * 10) / 10;
 
         const coverEl: WhiteoutEditElement = {
           id: `page-wo-${page.pageIndex}-${idx}-${Date.now()}`,
           pageIndex: page.pageIndex,
           type: 'whiteout',
-          xPt: Math.max(0, minX - 2),
+          xPt: Math.max(0, xPt - 2),
           yPt: Math.max(0, yPt - 1),
           widthPt: widthPt + 4,
           heightPt: heightPt + 2,
@@ -1604,14 +1767,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           pageIndex: page.pageIndex,
           type: 'text',
           isPageTextLine: true,
-          xPt: minX,
-          yPt: yPt,
-          baselineY: baselineY,
-          widthPt: widthPt,
-          heightPt: heightPt,
-          text: fullText,
+          xPt,
+          yPt,
+          baselineY,
+          widthPt,
+          heightPt,
+          text: fullBlockText,
           fontFamily: 'Inter',
-          fontSizePt: fontSizePt,
+          fontSizePt,
           color: 'var(--pt-navy)'
         };
 
@@ -1831,42 +1994,90 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           }
         }
       } else {
-        for (const line of pageResult.lines) {
+        interface OcrBlock {
+          lines: EditPdfOcrLine[];
+          x0: number;
+          x1: number;
+          y0: number;
+          y1: number;
+          fontSizePt: number;
+          baselineY: number;
+          avgConfidence: number;
+        }
+
+        const isBulletLine = (text: string) => {
+          const t = text.trim();
+          return /^[•\-\*\u2022\u25cf\u25cb\u25aa\u25b8\u2013\u2014]/.test(t);
+        };
+
+        const isSectionHeading = (text: string) => {
+          const t = text.trim();
+          if (t.length >= 3 && t.length <= 50 && t === t.toUpperCase() && /[A-Z]/.test(t)) {
+            return true;
+          }
+          return false;
+        };
+
+        const ocrBlocks: OcrBlock[] = [];
+        const sortedLines = [...pageResult.lines].sort((a, b) => b.bbox[1] - a.bbox[1]);
+
+        for (const line of sortedLines) {
           totalLines++;
-          const [x0, y0, x1, y1] = line.bbox;
-          const w = Math.max(12, x1 - x0);
-          const h = Math.max(12, y1 - y0);
+          const [lx0, ly0, lx1, ly1] = line.bbox;
+          const fontSize = line.fontSizePt || 14;
 
-          const coverEl: WhiteoutEditElement = {
-            id: `ocr-cover-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-            pageIndex: actualPageIndex,
-            type: 'whiteout',
-            xPt: Math.max(0, x0 - 2),
-            yPt: Math.max(0, y0 - 1),
-            widthPt: w + 4,
-            heightPt: h + 2,
-            fillColor: 'var(--pt-surface-white)'
-          };
+          const isSegHeading = isSectionHeading(line.text);
+          const isSegBullet = isBulletLine(line.text);
 
-          const textEl: TextEditElement = {
-            id: `ocr-text-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-            pageIndex: actualPageIndex,
-            type: 'text',
-            xPt: x0,
-            yPt: y0,
-            widthPt: w,
-            heightPt: h,
-            text: line.text,
-            fontFamily: 'Inter',
-            fontSizePt: line.fontSizePt || 14,
-            color: 'var(--pt-navy)',
-            baselineY: line.baselineY,
-            isOcrLine: true,
-            isPageTextLine: true,
-            ocrConfidence: line.confidence
-          };
+          let merged = false;
 
-          generatedElements.push(coverEl, textEl);
+          if (!isSegHeading) {
+            for (const b of ocrBlocks) {
+              const firstL = b.lines[0];
+              const lastL = b.lines[b.lines.length - 1];
+
+              if (isSectionHeading(firstL.text)) {
+                continue;
+              }
+
+              const blockHasBullets = b.lines.some(l => isBulletLine(l.text));
+              if (!blockHasBullets && isSegBullet) {
+                continue;
+              }
+
+              const deltaY = lastL.bbox[1] - line.bbox[1];
+              const avgFont = (b.fontSizePt + fontSize) / 2;
+
+              const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 2.4);
+              const overlap = Math.min(b.x1, lx1) - Math.max(b.x0, lx0);
+              const minW = Math.min(b.x1 - b.x0, lx1 - lx0);
+              const hasOverlap = overlap > 0 && (overlap / minW >= 0.45 || Math.abs(b.x0 - lx0) <= 20);
+              const isSameFont = Math.abs(b.fontSizePt - fontSize) <= 2.5;
+
+              if (isVerticallyAdjacent && hasOverlap && isSameFont) {
+                b.lines.push(line);
+                b.x0 = Math.min(b.x0, lx0);
+                b.x1 = Math.max(b.x1, lx1);
+                b.y0 = Math.min(b.y0, ly0);
+                b.y1 = Math.max(b.y1, ly1);
+                merged = true;
+                break;
+              }
+            }
+          }
+
+          if (!merged) {
+            ocrBlocks.push({
+              lines: [line],
+              x0: lx0,
+              x1: lx1,
+              y0: ly0,
+              y1: ly1,
+              fontSizePt: fontSize,
+              baselineY: line.baselineY,
+              avgConfidence: line.confidence
+            });
+          }
 
           for (const word of line.words) {
             if (word.confidence < 60) {
@@ -1878,6 +2089,43 @@ export class EditPdfComponent implements OnInit, OnDestroy {
               });
             }
           }
+        }
+
+        for (const block of ocrBlocks) {
+          const w = Math.max(30, block.x1 - block.x0 + 6);
+          const h = Math.max(16, block.y1 - block.y0 + 4);
+          const fullText = block.lines.map(l => l.text).join('\n');
+
+          const coverEl: WhiteoutEditElement = {
+            id: `ocr-cover-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            pageIndex: actualPageIndex,
+            type: 'whiteout',
+            xPt: Math.max(0, block.x0 - 2),
+            yPt: Math.max(0, block.y0 - 2),
+            widthPt: w + 4,
+            heightPt: h + 4,
+            fillColor: 'var(--pt-surface-white)'
+          };
+
+          const textEl: TextEditElement = {
+            id: `ocr-text-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            pageIndex: actualPageIndex,
+            type: 'text',
+            xPt: block.x0,
+            yPt: block.y0,
+            widthPt: w,
+            heightPt: h,
+            text: fullText,
+            fontFamily: 'Inter',
+            fontSizePt: block.fontSizePt,
+            color: 'var(--pt-navy)',
+            baselineY: block.baselineY,
+            isOcrLine: true,
+            isPageTextLine: true,
+            ocrConfidence: block.avgConfidence
+          };
+
+          generatedElements.push(coverEl, textEl);
         }
       }
     }

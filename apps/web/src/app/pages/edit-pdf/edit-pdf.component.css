@@ -560,32 +560,29 @@
   background: rgba(15, 118, 110, 0.05);
 }
 
-/* In-Place Editable Page Text Box (Matching Reference Image) */
+/* In-Place Editable Page Text Block (Matching iLovePDF reference Image 2) */
 .text-element.page-text-line,
 .text-element.is-ocr-line {
-  border: 1px solid transparent;
+  border: 1px dashed var(--pt-blue-focus);
   background: var(--pt-surface-white);
   border-radius: 2px;
   cursor: text;
-  min-width: max-content;
-  width: auto !important;
-  white-space: nowrap;
-  padding: 0 3px;
+  padding: 1px 3px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   z-index: 5;
 }
 
-/* Hover: show clean dashed boundary */
+/* Hover: highlight with brighter blue dashed boundary */
 .text-element.page-text-line:hover,
 .text-element.is-ocr-line:hover {
-  border: 1px dashed var(--pt-blue-focus);
-  background: var(--pt-surface-white);
+  border: 1.5px dashed var(--pt-blue-hover);
   z-index: 10;
 }
 
-/* Selected or Focused: solid blue border with focus ring */
+/* Selected or Focused: solid blue border with focus ring (matching Image 2) */
 .text-element.page-text-line.selected,
 .text-element.is-ocr-line.selected,
 .text-element.page-text-line:focus-within,
@@ -596,9 +593,28 @@
   z-index: 25;
 }
 
+.canvas-text-area {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.35;
+  font-family: inherit;
+  color: inherit;
+  display: block;
+  box-sizing: border-box;
+}
+
 .canvas-text-input {
   width: 100%;
-  min-width: max-content;
   border: none;
   background: transparent;
   outline: none;
