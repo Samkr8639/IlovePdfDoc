@@ -5,7 +5,8 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'pdf-to-word',
   'pdf-to-powerpoint',
   'pdf-to-excel',
-  'word-to-pdf'
+  'word-to-pdf',
+  'edit-pdf'
 ] as const;
 
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
@@ -271,22 +272,21 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'edit-pdf',
     name: 'Edit PDF',
-    shortDescription: 'Add text, images, shapes or freehand annotations to a PDF document.',
-    longDescription: 'Directly annotate, redact, and highlight text inside your PDF files right in your web browser.',
+    shortDescription: 'Add text, images, shapes, annotations, and make scanned text editable with OCR.',
+    longDescription: 'Directly annotate, redact, highlight, and recognize scanned text in your PDF files with hybrid client-first processing.',
     category: 'edit',
     route: '/edit-pdf',
     icon: 'edit-pen',
-    processingMode: 'browser',
+    processingMode: 'hybrid',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    status: 'available',
     seo: {
-      title: 'Edit PDF Online Free | PDF flow',
-      description: 'Edit PDF documents online. Add text, shapes, comments, and highlights.',
-      keywords: ['edit pdf', 'annotate pdf', 'online pdf editor'],
-      canonical: 'https://pdfflow.app/edit-pdf',
+      title: 'Edit PDF Online Free - Add Text, Shapes, Signatures & OCR | PDFTailor',
+      description: 'Edit PDF documents online. Add text, shapes, comments, highlights, and run OCR to make text editable.',
+      keywords: ['edit pdf', 'annotate pdf', 'online pdf editor', 'pdf ocr', 'make text editable'],
+      canonical: 'https://pdftailor.in/edit-pdf',
       faqs: []
     }
   },

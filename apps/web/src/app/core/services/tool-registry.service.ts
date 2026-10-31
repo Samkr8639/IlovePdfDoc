@@ -10,7 +10,8 @@ export const LIVE_TOOL_IDS = new Set<string>([
   'pdf-to-word',
   'pdf-to-powerpoint',
   'pdf-to-excel',
-  'word-to-pdf'
+  'word-to-pdf',
+  'edit-pdf'
 ]);
 
 @Injectable({

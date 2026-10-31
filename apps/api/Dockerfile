@@ -1,8 +1,21 @@
 FROM node:20-bookworm-slim
 
-# Install LibreOffice Writer and metric-compatible fonts (Carlito/Caladea/Liberation)
+# Install LibreOffice Writer, Tesseract OCR with Indic and English language packs, and metric-compatible fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libreoffice-writer \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-hin \
+    tesseract-ocr-mar \
+    tesseract-ocr-tam \
+    tesseract-ocr-tel \
+    tesseract-ocr-ben \
+    tesseract-ocr-guj \
+    tesseract-ocr-kan \
+    tesseract-ocr-mal \
+    tesseract-ocr-pan \
+    tesseract-ocr-urd \
+    tesseract-ocr-osd \
     fonts-crosextra-carlito \
     fonts-crosextra-caladea \
     fonts-liberation2 \

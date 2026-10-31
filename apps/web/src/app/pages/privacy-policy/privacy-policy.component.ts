@@ -47,6 +47,12 @@ export class PrivacyPolicyComponent implements OnInit {
       disposal: 'Automated memory pruning routine & garbage collection zeroization'
     },
     {
+      category: 'Edit PDF Cloud OCR (Explicit Consent Only)',
+      location: 'Volatile server RAM buffers (selected pages only)',
+      period: 'Max 10 minutes (or immediately after result fetch)',
+      disposal: 'Immediate post-fetch zeroization & automated 10-minute pruning'
+    },
+    {
       category: 'Contact & Support Tickets',
       location: 'Encrypted support ticketing database',
       period: 'Retained until inquiry resolution (or up to 2 years)',

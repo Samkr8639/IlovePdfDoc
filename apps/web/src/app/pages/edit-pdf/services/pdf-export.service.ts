@@ -85,7 +85,7 @@ export class PdfExportService {
     }
 
     const exportedBytes = await pdfDoc.save();
-    return new Blob([exportedBytes], { type: 'application/pdf' });
+    return new Blob([exportedBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
   }
 
   private renderWhiteout(page: PDFPage, el: WhiteoutEditElement): void {

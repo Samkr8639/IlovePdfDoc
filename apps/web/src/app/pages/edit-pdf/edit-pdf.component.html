@@ -1,0 +1,1253 @@
+<div class="tool-page edit-pdf-page">
+  <!-- Global Error Banner -->
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">
+      <div class="error-content">
+        <svg
+          class="lucide-icon error-icon"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+      <button
+        type="button"
+        class="error-dismiss-btn"
+        (click)="errorMessage.set(null)"
+        aria-label="Dismiss error"
+      >
+        <svg
+          class="lucide-icon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+  }
+
+  <!-- Summary Toast -->
+  @if (ocrSummaryToast(); as toast) {
+    <div class="summary-toast" role="status">
+      <div class="toast-header">
+        <div class="toast-title-wrap">
+          <svg
+            class="lucide-icon toast-check-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span class="toast-title">Text Recognition Complete</span>
+        </div>
+        <button
+          type="button"
+          class="toast-close"
+          (click)="dismissToast()"
+          aria-label="Close notification"
+        >
+          ×
+        </button>
+      </div>
+      <div class="toast-stats">
+        <span>{{ toast.pagesCount }} page(s)</span> •
+        <span>{{ toast.linesCount }} lines</span> •
+        <span>{{ toast.avgConfidence }}% avg confidence</span> •
+        <span>{{ toast.language }}</span>
+      </div>
+      @if (toast.warnings.length > 0) {
+        <div class="toast-warning">
+          {{ toast.warnings[0] }}
+        </div>
+      }
+    </div>
+  }
+
+  <!-- VIEW 1: UPLOAD DROPZONE -->
+  @if (viewMode() === 'upload') {
+    <div class="upload-view-container">
+      <div class="tool-hero-header">
+        <h1 class="tool-title">Edit PDF</h1>
+        <p class="tool-subtitle">
+          Add text, shapes, signatures, and annotations directly in your browser with 100% privacy.
+        </p>
+      </div>
+
+      <div class="dropzone-wrapper">
+        <app-dropzone
+          title="Drop your PDF here to edit"
+          subtitle="or browse from your computer"
+          accept=".pdf,application/pdf"
+          [multiple]="false"
+          (filesSelected)="onFilesSelected($event)"
+        />
+      </div>
+
+      <!-- Privacy & Guarantee Features -->
+      <div class="privacy-guarantee-card">
+        <div class="shield-icon-badge" aria-hidden="true">
+          <svg
+            class="lucide-icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <div class="guarantee-text">
+          <h3 class="guarantee-title">100% In-Browser Privacy Guarantee</h3>
+          <p class="guarantee-desc">
+            Editing happens directly in your browser. Only features marked with a cloud icon send the selected pages to our server, after you confirm, and they are deleted automatically after 10 minutes.
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- VIEW 2: FULL-FEATURED CANVAS WORKSPACE -->
+  @if (viewMode() === 'editor') {
+    <div class="editor-workspace">
+      <!-- TOP UNDO / REDO CAPSULE -->
+      <div class="top-history-bar">
+        <div class="history-capsule">
+          <button
+            type="button"
+            class="history-btn"
+            [disabled]="!history.canUndo()"
+            (click)="history.undo()"
+            title="Undo (Ctrl+Z / Cmd+Z)"
+          >
+            <svg
+              class="lucide-icon"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+            </svg>
+            <span>Undo</span>
+          </button>
+          <div class="history-divider"></div>
+          <button
+            type="button"
+            class="history-btn"
+            [disabled]="!history.canRedo()"
+            (click)="history.redo()"
+            title="Redo (Ctrl+Shift+Z / Cmd+Shift+Z)"
+          >
+            <svg
+              class="lucide-icon"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            <span>Redo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN WORKSPACE ROW -->
+      <div class="workspace-main">
+        <!-- 1. LEFT THUMBNAILS STRIP -->
+        <aside
+          class="left-thumbnails-panel"
+          [class.collapsed]="isLeftSidebarCollapsed()"
+          aria-label="Pages navigation"
+        >
+          <div class="thumbnails-header">
+            <span class="thumbnails-count-title">{{ pages().length }} Pages</span>
+            <button
+              type="button"
+              class="collapse-toggle-btn"
+              (click)="toggleLeftSidebar()"
+              [title]="isLeftSidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+            >
+              <svg
+                class="lucide-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                @if (isLeftSidebarCollapsed()) {
+                  <polyline points="9 18 15 12 9 6" />
+                } @else {
+                  <polyline points="15 18 9 12 15 6" />
+                }
+              </svg>
+            </button>
+          </div>
+
+          <div class="thumbnails-scroll-list">
+            @for (page of pages(); track page.pageIndex; let i = $index) {
+              <div
+                class="thumbnail-card"
+                [class.active]="currentPageIndex() === i"
+                (click)="setPageIndex(i)"
+              >
+                <!-- Card Header Overlay Buttons -->
+                <div class="card-overlay-actions">
+                  <button
+                    type="button"
+                    class="card-action-btn"
+                    (click)="rotateCurrentPage(); $event.stopPropagation()"
+                    title="Rotate page"
+                  >
+                    <svg
+                      class="lucide-icon"
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="23 4 23 10 17 10" />
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="card-action-btn danger"
+                    (click)="deleteCurrentPage(); $event.stopPropagation()"
+                    title="Delete page"
+                  >
+                    <svg
+                      class="lucide-icon"
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Page Preview Mini Sheet -->
+                <div class="page-mini-sheet">
+                  <div class="mini-doc-lines">
+                    <span class="mini-line header"></span>
+                    <span class="mini-line accent"></span>
+                    <span class="mini-line body"></span>
+                    <span class="mini-line body short"></span>
+                  </div>
+                </div>
+
+                <div class="page-number-label">{{ i + 1 }}</div>
+              </div>
+            }
+          </div>
+        </aside>
+
+        <!-- 2. CENTER CANVAS VIEWPORT -->
+        <main class="canvas-viewport" (click)="selectedElementId.set(null)">
+          <div
+            class="paper-canvas-container"
+            [style.width.px]="displaySize().width"
+            [style.height.px]="displaySize().height"
+            (click)="onCanvasClick($event); $event.stopPropagation()"
+          >
+            <!-- Rendered PDF Page Canvas -->
+            <canvas
+              #pageCanvas
+              class="pdf-page-canvas"
+              [style.width.px]="displaySize().width"
+              [style.height.px]="displaySize().height"
+            ></canvas>
+
+            <!-- Interactive Annotation Elements Overlay -->
+            <div class="elements-overlay">
+              @for (el of currentPageElements(); track el.id) {
+                @if (el.type === 'text') {
+                  <div
+                    class="canvas-element text-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [class.ocr-line]="el.isOcrLine"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.min-height]="getElementScreenRect(el).height"
+                    (click)="selectElement(el, $event)"
+                  >
+                    <input
+                      type="text"
+                      class="inline-text-input"
+                      [(ngModel)]="el.text"
+                      [style.font-family]="el.fontFamily || 'Inter'"
+                      [style.font-size.pt]="el.fontSizePt"
+                      [style.color]="el.color || 'var(--pt-navy)'"
+                      [style.font-weight]="el.bold ? '700' : '400'"
+                      [style.font-style]="el.italic ? 'italic' : 'normal'"
+                      (click)="$event.stopPropagation()"
+                    />
+                    @if (selectedElementId() === el.id) {
+                      <div class="selection-handles">
+                        <span class="handle nw"></span>
+                        <span class="handle ne"></span>
+                        <span class="handle sw"></span>
+                        <span class="handle se"></span>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (el.type === 'whiteout') {
+                  <div
+                    class="canvas-element whiteout-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    [style.background-color]="el.fillColor || 'var(--pt-surface-white)'"
+                    (click)="selectElement(el, $event)"
+                  ></div>
+                }
+
+                @if (el.type === 'shape') {
+                  <div
+                    class="canvas-element shape-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    [style.border-color]="el.strokeColor || 'var(--pt-navy)'"
+                    [style.border-width.px]="el.strokeWidth || 2"
+                    [style.border-style]="'solid'"
+                    [style.background-color]="el.fillColor || 'transparent'"
+                    [class.circle]="el.shapeType === 'circle'"
+                    (click)="selectElement(el, $event)"
+                  ></div>
+                }
+
+                @if (el.type === 'highlight') {
+                  <div
+                    class="canvas-element highlight-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    [style.background-color]="el.color || 'var(--pt-amber)'"
+                    [style.opacity]="el.opacity || 0.35"
+                    (click)="selectElement(el, $event)"
+                  ></div>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- FLOATING MULTI-DOC DOCK -->
+          <div class="floating-dock-vertical" aria-label="Add sources">
+            <button
+              type="button"
+              class="dock-action-btn primary"
+              title="Add pages from another PDF"
+              (click)="fileInputAppend.click()"
+            >
+              <svg
+                class="lucide-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span class="dock-badge">1</span>
+            </button>
+            <input
+              #fileInputAppend
+              type="file"
+              accept=".pdf,application/pdf"
+              style="display: none"
+              (change)="onFilesSelected($any($event.target).files)"
+            />
+
+            <button
+              type="button"
+              class="dock-action-btn"
+              title="Device upload"
+              (click)="fileInputAppend.click()"
+            >
+              <svg
+                class="lucide-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="dock-action-btn"
+              title="Google Drive (Coming Soon)"
+            >
+              <svg
+                class="lucide-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="dock-action-btn"
+              title="Dropbox (Coming Soon)"
+            >
+              <svg
+                class="lucide-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="12 2 2 8.5 7 12 12 8.5 17 12 22 8.5 12 2" />
+                <polygon points="2 15.5 7 12 12 15.5 17 12 22 15.5 12 22 2 15.5" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- BOTTOM FLOATING CAPSULE BAR -->
+          <div class="bottom-floating-bar" aria-label="Page navigation and zoom controls">
+            <button
+              type="button"
+              class="bar-icon-btn"
+              [disabled]="currentPageIndex() <= 0"
+              (click)="prevPage()"
+              title="Previous Page"
+            >
+              <svg
+                class="lucide-icon"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="bar-icon-btn"
+              [disabled]="currentPageIndex() >= pages().length - 1"
+              (click)="nextPage()"
+              title="Next Page"
+            >
+              <svg
+                class="lucide-icon"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            <div class="page-indicator-wrap">
+              <input
+                type="number"
+                class="page-number-input"
+                [ngModel]="currentPageIndex() + 1"
+                (ngModelChange)="setPageIndex($event - 1)"
+                min="1"
+                [max]="pages().length"
+              />
+              <span class="page-total">/ {{ pages().length }}</span>
+            </div>
+
+            <div class="bar-divider"></div>
+
+            <button
+              type="button"
+              class="bar-icon-btn"
+              (click)="zoomOut()"
+              title="Zoom out"
+            >
+              <svg
+                class="lucide-icon"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="bar-icon-btn"
+              (click)="zoomIn()"
+              title="Zoom in"
+            >
+              <svg
+                class="lucide-icon"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="bar-text-btn"
+              (click)="resetZoom()"
+              title="Reset Zoom"
+            >
+              {{ (zoom() * 100) | number:'1.0-0' }}%
+            </button>
+
+            <button
+              type="button"
+              class="bar-icon-btn"
+              (click)="resetZoom()"
+              title="Fit to Screen"
+            >
+              <svg
+                class="lucide-icon"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            </button>
+          </div>
+        </main>
+
+        <!-- 3. RIGHT SIDEBAR -->
+        <aside class="right-properties-sidebar" [class.mobile-open]="isSidePanelOpenMobile()">
+          <!-- Sidebar Title -->
+          <div class="sidebar-header">
+            <h2 class="sidebar-title">Edit PDF</h2>
+            <button
+              type="button"
+              class="mobile-close-btn"
+              (click)="closeMobilePanel()"
+              aria-label="Close settings"
+            >
+              ×
+            </button>
+          </div>
+
+          <!-- Section: TOOLS Grid -->
+          <div class="sidebar-section">
+            <div class="section-badge-title">TOOLS</div>
+            <div class="tools-grid">
+              <!-- 1. Select -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'select'"
+                (click)="selectTool('select')"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="3 3 10 21 13 13 21 10 3 3" />
+                </svg>
+                <span class="tool-tile-name">Select</span>
+              </button>
+
+              <!-- 2. Text -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'text'"
+                (click)="selectTool('text')"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="4 7 4 4 20 4 20 7" />
+                  <line x1="9" y1="20" x2="15" y2="20" />
+                  <line x1="12" y1="4" x2="12" y2="20" />
+                </svg>
+                <span class="tool-tile-name">Text</span>
+              </button>
+
+              <!-- 3. Image -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'image'"
+                (click)="selectTool('image'); fileInputImage.click()"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <span class="tool-tile-name">Image</span>
+              </button>
+              <input
+                #fileInputImage
+                type="file"
+                accept="image/*"
+                style="display: none"
+              />
+
+              <!-- 4. Draw -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'draw'"
+                (click)="selectTool('draw')"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 19l7-7 3 3-7 7-3-3z" />
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+                  <path d="M2 2l7.586 7.586" />
+                  <circle cx="11" cy="11" r="2" />
+                </svg>
+                <span class="tool-tile-name">Draw</span>
+              </button>
+
+              <!-- 5. Shapes -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'shapes'"
+                (click)="selectTool('shapes')"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                </svg>
+                <span class="tool-tile-name">Shapes</span>
+              </button>
+
+              <!-- 6. Highlight -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'highlight'"
+                (click)="selectTool('highlight')"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m9 11-6 6v3h3l6-6" />
+                  <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" />
+                </svg>
+                <span class="tool-tile-name">Highlight</span>
+              </button>
+
+              <!-- 7. Whiteout -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'whiteout'"
+                (click)="selectTool('whiteout')"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
+                  <path d="M22 21H7" />
+                  <path d="m5 11 9 9" />
+                </svg>
+                <span class="tool-tile-name">Whiteout</span>
+              </button>
+
+              <!-- 8. Sign -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'sign'"
+                (click)="selectTool('sign'); addTextElement(100, 100)"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+                  <line x1="16" y1="8" x2="2" y2="22" />
+                  <line x1="17.5" y1="15" x2="9" y2="15" />
+                </svg>
+                <span class="tool-tile-name">Sign</span>
+              </button>
+
+              <!-- 9. Link -->
+              <button
+                type="button"
+                class="tool-tile"
+                [class.active]="activeTool() === 'link'"
+                (click)="selectTool('link'); addTextElement(100, 100)"
+              >
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                <span class="tool-tile-name">Link</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section: CLOUD TOOLS Group -->
+          <div class="sidebar-section cloud-tools-section">
+            <div class="section-badge-title cloud-badge-title">
+              <svg
+                class="lucide-icon-sm"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+              </svg>
+              <span>CLOUD TOOLS</span>
+            </div>
+
+            <!-- OCR Tile: Make text editable -->
+            <button
+              type="button"
+              class="cloud-tool-tile"
+              [class.active]="activeTool() === 'ocr'"
+              (click)="selectTool('ocr')"
+              title="Sends this PDF to our server"
+            >
+              <div class="cloud-tile-icon-wrap">
+                <svg
+                  class="lucide-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                </svg>
+                <span class="cloud-sub-badge">CLOUD</span>
+              </div>
+              <div class="cloud-tile-info">
+                <span class="cloud-tile-title">Make text editable</span>
+                <span class="cloud-tile-hint">OCR recognition</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Section: PROPERTIES (Contextual) -->
+          <div class="sidebar-section properties-section">
+            <!-- (A) Text Properties Panel -->
+            @if (activeTool() === 'text' || (selectedElement() && selectedElement()?.type === 'text')) {
+              <div class="section-badge-title">TEXT</div>
+              <div class="text-properties-panel">
+                <div class="property-row">
+                  <select
+                    class="font-select"
+                    [ngModel]="textFont()"
+                    (ngModelChange)="textFont.set($event); updateTextProperty('fontFamily', $event)"
+                  >
+                    <option value="Inter">Inter</option>
+                    <option value="Sora">Sora</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Times">Times New Roman</option>
+                  </select>
+                  <input
+                    type="number"
+                    class="font-size-input"
+                    [ngModel]="textSize()"
+                    (ngModelChange)="textSize.set($event); updateTextProperty('fontSizePt', $event)"
+                    min="8"
+                    max="72"
+                  />
+                </div>
+
+                <div class="style-and-color-row">
+                  <div class="style-toggle-group">
+                    <button
+                      type="button"
+                      class="style-toggle-btn"
+                      [class.active]="isTextBold()"
+                      (click)="isTextBold.set(!isTextBold()); updateTextProperty('bold', isTextBold())"
+                    >
+                      B
+                    </button>
+                    <button
+                      type="button"
+                      class="style-toggle-btn"
+                      [class.active]="isTextItalic()"
+                      (click)="isTextItalic.set(!isTextItalic()); updateTextProperty('italic', isTextItalic())"
+                    >
+                      I
+                    </button>
+                  </div>
+
+                  <div class="color-swatches-group">
+                    <button
+                      type="button"
+                      class="color-dot navy"
+                      [class.active]="textColor() === 'var(--pt-navy)'"
+                      (click)="textColor.set('var(--pt-navy)'); updateTextProperty('color', 'var(--pt-navy)')"
+                      aria-label="Navy text color"
+                    ></button>
+                    <button
+                      type="button"
+                      class="color-dot teal"
+                      [class.active]="textColor() === 'var(--pt-teal-700)'"
+                      (click)="textColor.set('var(--pt-teal-700)'); updateTextProperty('color', 'var(--pt-teal-700)')"
+                      aria-label="Teal text color"
+                    ></button>
+                    <button
+                      type="button"
+                      class="color-dot coral"
+                      [class.active]="textColor() === 'var(--pt-coral)'"
+                      (click)="textColor.set('var(--pt-coral)'); updateTextProperty('color', 'var(--pt-coral)')"
+                      aria-label="Coral text color"
+                    ></button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- (B) OCR Properties Panel -->
+            @if (activeTool() === 'ocr') {
+              <div class="section-badge-title">OCR RECOGNITION</div>
+              <div class="ocr-properties-panel">
+                <!-- Page Range -->
+                <div class="property-group">
+                  <label class="property-label">Pages to process</label>
+                  <div class="page-range-selector">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="ocrPageRange"
+                        value="current"
+                        [checked]="ocrPageRange() === 'current'"
+                        (change)="ocrPageRange.set('current'); validateOcrPageRange()"
+                      />
+                      <span>Current page ({{ currentPageIndex() + 1 }})</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="ocrPageRange"
+                        value="all"
+                        [checked]="ocrPageRange() === 'all'"
+                        (change)="ocrPageRange.set('all'); validateOcrPageRange()"
+                      />
+                      <span>All pages ({{ pages().length }})</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="ocrPageRange"
+                        value="custom"
+                        [checked]="ocrPageRange() === 'custom'"
+                        (change)="ocrPageRange.set('custom'); validateOcrPageRange()"
+                      />
+                      <span>Custom range</span>
+                    </label>
+                  </div>
+
+                  @if (ocrPageRange() === 'custom') {
+                    <input
+                      type="text"
+                      class="custom-range-input"
+                      placeholder="e.g. 1-3, 5"
+                      [ngModel]="ocrCustomRange()"
+                      (ngModelChange)="ocrCustomRange.set($event); validateOcrPageRange()"
+                    />
+                    @if (ocrRangeError()) {
+                      <span class="range-error-text">{{ ocrRangeError() }}</span>
+                    }
+                  }
+                </div>
+
+                <!-- Languages Multi-Select -->
+                <div class="property-group">
+                  <label class="property-label">Languages (max 3)</label>
+                  <div class="language-chips-grid">
+                    @for (lang of ocrAvailableLanguages(); track lang.code) {
+                      <button
+                        type="button"
+                        class="lang-chip"
+                        [class.selected]="ocrSelectedLanguages().includes(lang.code)"
+                        (click)="toggleOcrLanguage(lang.code)"
+                      >
+                        {{ lang.name }}
+                        @if (lang.nativeName) {
+                          <span class="native-name">({{ lang.nativeName }})</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Deskew Option -->
+                <div class="property-group">
+                  <label class="checkbox-option">
+                    <input
+                      type="checkbox"
+                      [checked]="ocrDeskew()"
+                      (change)="ocrDeskew.set(!ocrDeskew())"
+                    />
+                    <span>Straighten skewed pages</span>
+                  </label>
+                </div>
+
+                <!-- Result Mode Radio Cards -->
+                <div class="property-group">
+                  <label class="property-label">Result mode</label>
+                  <div class="result-mode-cards">
+                    <label
+                      class="mode-card"
+                      [class.active]="ocrMode() === 'searchable'"
+                    >
+                      <input
+                        type="radio"
+                        name="ocrResultMode"
+                        value="searchable"
+                        [checked]="ocrMode() === 'searchable'"
+                        (change)="ocrMode.set('searchable')"
+                      />
+                      <div class="mode-card-text">
+                        <span class="mode-card-title">Searchable text</span>
+                        <span class="mode-card-desc">Keeps page looking identical with invisible selectable text.</span>
+                      </div>
+                    </label>
+
+                    <label
+                      class="mode-card"
+                      [class.active]="ocrMode() === 'editable'"
+                    >
+                      <input
+                        type="radio"
+                        name="ocrResultMode"
+                        value="editable"
+                        [checked]="ocrMode() === 'editable'"
+                        (change)="ocrMode.set('editable')"
+                      />
+                      <div class="mode-card-text">
+                        <span class="mode-card-title">Editable text boxes</span>
+                        <span class="mode-card-desc">Replaces lines with text boxes you can edit and change.</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Recognize Button -->
+                <button
+                  type="button"
+                  class="btn-recognize"
+                  [disabled]="isOcrRunning() || ocrRangeError() !== null"
+                  (click)="startOcrRecognition()"
+                >
+                  <svg
+                    class="lucide-icon"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                  </svg>
+                  <span>Recognise text</span>
+                </button>
+
+                <!-- Low Confidence Review List -->
+                @if (lowConfidenceReviewWords().length > 0) {
+                  <div class="review-box">
+                    <div class="review-header">
+                      <span class="review-title">Review Flagged Words</span>
+                      <span class="review-badge">{{ lowConfidenceReviewWords().length }}</span>
+                    </div>
+                    <div class="review-list">
+                      @for (w of lowConfidenceReviewWords(); track w.text) {
+                        <button
+                          type="button"
+                          class="review-item-btn"
+                          (click)="jumpToLowConfidenceWord(w)"
+                        >
+                          <span class="review-word-text">"{{ w.text }}"</span>
+                          <span class="review-page-tag">p. {{ w.pageIndex + 1 }} ({{ w.confidence }}%)</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Section: Footer Note & CTA -->
+          <div class="sidebar-footer-area">
+            <p class="trust-notice-text">
+              Every tool is free. No sign-up, no watermark.
+            </p>
+
+            <button
+              type="button"
+              class="btn-save-download"
+              [disabled]="isExporting()"
+              (click)="saveAndDownload()"
+            >
+              @if (isExporting()) {
+                <span>Saving PDF...</span>
+              } @else {
+                <span>Save & Download</span>
+                <svg
+                  class="lucide-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              }
+            </button>
+          </div>
+        </aside>
+      </div>
+
+      <!-- OCR PROCESSING MODAL OVERLAY -->
+      @if (isOcrRunning()) {
+        <div class="ocr-progress-overlay" role="dialog" aria-modal="true" aria-label="OCR Progress">
+          <div class="ocr-progress-card">
+            <div class="progress-spinner-wrap">
+              <svg
+                class="lucide-icon spin"
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            </div>
+            <h3 class="progress-title">Recognizing Text...</h3>
+            <p class="progress-status">{{ ocrStatusText() }}</p>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" [style.width.%]="ocrProgress()"></div>
+            </div>
+            <div class="progress-percent-label">{{ ocrProgress() }}%</div>
+            <button
+              type="button"
+              class="btn-cancel-ocr"
+              (click)="cancelOcr()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

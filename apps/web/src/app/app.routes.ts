@@ -56,7 +56,8 @@ export const routes: Routes = [
   },
   {
     path: 'edit-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/edit-pdf/edit-pdf.component').then(m => m.EditPdfComponent),
+    title: 'Edit PDF Online Free - Add Text, Shapes & OCR | PDFTailor'
   },
   {
     path: 'pdf-to-jpg',
