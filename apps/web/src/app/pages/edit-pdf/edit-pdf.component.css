@@ -650,9 +650,33 @@
   background: rgba(15, 118, 110, 0.05);
 }
 
-/* In-Place Editable Page Text Block (Matching iLovePDF reference Image 2) */
-.text-element.page-text-line,
-.text-element.is-ocr-line {
+/* In Annotate mode: page text elements look completely clean (no dashed borders, no cursor change) */
+.paper-canvas-container:not(.edit-mode) .text-element.page-text-line,
+.paper-canvas-container:not(.edit-mode) .text-element.is-ocr-line {
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
+.paper-canvas-container:not(.edit-mode) .text-element.page-text-line:hover,
+.paper-canvas-container:not(.edit-mode) .text-element.is-ocr-line:hover {
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.paper-canvas-container:not(.edit-mode) .text-element.page-text-line .canvas-text-area,
+.paper-canvas-container:not(.edit-mode) .text-element.is-ocr-line .canvas-text-area {
+  cursor: default !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* In-Place Editable Page Text Block (Matching iLovePDF reference Image 2) - Only active in Edit Mode */
+.paper-canvas-container.edit-mode .text-element.page-text-line,
+.paper-canvas-container.edit-mode .text-element.is-ocr-line,
+.text-element.page-text-line.in-edit-mode,
+.text-element.is-ocr-line.in-edit-mode {
   border: 1px dashed var(--pt-blue-focus);
   background: var(--pt-surface-white);
   border-radius: 2px;
@@ -666,17 +690,23 @@
 }
 
 /* Hover: highlight with brighter blue dashed boundary */
-.text-element.page-text-line:hover,
-.text-element.is-ocr-line:hover {
+.paper-canvas-container.edit-mode .text-element.page-text-line:hover,
+.paper-canvas-container.edit-mode .text-element.is-ocr-line:hover,
+.text-element.page-text-line.in-edit-mode:hover,
+.text-element.is-ocr-line.in-edit-mode:hover {
   border: 1.5px dashed var(--pt-blue-hover);
   z-index: 10;
 }
 
 /* Selected or Focused: solid blue border with focus ring (matching Image 2) */
-.text-element.page-text-line.selected,
-.text-element.is-ocr-line.selected,
-.text-element.page-text-line:focus-within,
-.text-element.is-ocr-line:focus-within {
+.paper-canvas-container.edit-mode .text-element.page-text-line.selected,
+.paper-canvas-container.edit-mode .text-element.is-ocr-line.selected,
+.paper-canvas-container.edit-mode .text-element.page-text-line:focus-within,
+.paper-canvas-container.edit-mode .text-element.is-ocr-line:focus-within,
+.text-element.page-text-line.in-edit-mode.selected,
+.text-element.is-ocr-line.in-edit-mode.selected,
+.text-element.page-text-line.in-edit-mode:focus-within,
+.text-element.is-ocr-line.in-edit-mode:focus-within {
   border: 1.5px solid var(--pt-blue-focus);
   background: var(--pt-surface-white);
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);

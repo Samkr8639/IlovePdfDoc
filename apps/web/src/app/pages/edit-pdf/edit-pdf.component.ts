@@ -410,7 +410,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (index >= 0 && index < this.pages().length) {
       this.currentPageIndex.set(index);
       this.selectedElementId.set(null);
-      setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+      setTimeout(() => {
+        this.renderCurrentPageToCanvas();
+        if (this.editorMode() === 'edit') {
+          this.makePageTextEditable();
+        }
+      }, 20);
     }
   }
 
@@ -757,6 +762,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   onElementMouseDown(el: EditElement, event: MouseEvent): void {
     if (this.activeTool() !== 'select') return;
+    if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event.stopPropagation();
     this.selectedElementId.set(el.id);
     this.isDraggingElement = true;
@@ -1315,6 +1321,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   selectElement(el: EditElement, event?: Event): void {
+    if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event?.stopPropagation();
     this.selectedElementId.set(el.id);
 
@@ -1502,24 +1509,26 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (this.editorMode() === mode) return;
 
     if (mode === 'annotate') {
-      // Remove ALL isPageTextLine elements (text blocks + their whiteout covers)
-      // from every page when leaving Edit Text mode.
-      // This makes the canvas look exactly as it did before "Edit Text" was clicked,
-      // and ensures re-entering Edit Text re-extracts fresh text blocks.
-      const pageTextIds = new Set(
-        this.elements()
-          .filter(e => (e as TextEditElement).isPageTextLine)
-          .map(e => e.id)
-      );
-      if (pageTextIds.size > 0) {
-        this.elements.update(list => list.filter(e => !pageTextIds.has(e.id)));
-      }
-      // Clear selection so no stale element stays highlighted
+      // Clear selection so no element stays highlighted
       this.selectedElementId.set(null);
       this.editorMode.set('annotate');
     } else {
       // Switching to Edit Text
       this.editorMode.set('edit');
+      // If we already have extracted text for this page, activate selection immediately
+      const page = this.currentPage();
+      if (page) {
+        const existingPageText = this.elements().filter(
+          e => e.pageIndex === page.pageIndex && (e as TextEditElement).isPageTextLine
+        );
+        if (existingPageText.length > 0) {
+          this.activeTool.set('select');
+          if (!this.selectedElementId()) {
+            this.selectedElementId.set(existingPageText[0].id);
+          }
+          return;
+        }
+      }
       // Small delay so the slider thumb animation (220ms) completes before
       // the spinner appears — prevents a jarring visual overlap
       setTimeout(() => this.makePageTextEditable(), 80);
