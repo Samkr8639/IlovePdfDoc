@@ -1,0 +1,134 @@
+@if (consentService.state(); as state) {
+  <div
+    class="consent-backdrop"
+    (click)="onBackdropClick($event)"
+    role="presentation"
+  >
+    <div
+      #dialogContainer
+      class="consent-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="consent-title"
+      aria-describedby="consent-desc"
+    >
+      <!-- Dialog Header -->
+      <div class="consent-header">
+        <div class="consent-icon-badge" aria-hidden="true">
+          <svg
+            class="lucide-icon"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+          </svg>
+        </div>
+        <div class="header-text">
+          <h2 id="consent-title" class="consent-title">
+            {{ state.options.title }}
+          </h2>
+          <span class="cloud-badge">Cloud Processing</span>
+        </div>
+        <button
+          type="button"
+          class="close-btn"
+          (click)="cancel()"
+          aria-label="Close dialog"
+        >
+          <svg
+            class="lucide-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Dialog Body -->
+      <div class="consent-body" id="consent-desc">
+        <div class="info-card">
+          <div class="info-row">
+            <span class="info-label">Data to be sent:</span>
+            <span class="info-value highlight-pages">{{ state.options.pageCountDescription }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Purpose:</span>
+            <span class="info-value">{{ state.options.purposeDescription }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Data Retention:</span>
+            <span class="info-value">{{ state.options.retentionDescription }}</span>
+          </div>
+        </div>
+
+        <p class="privacy-note">
+          Your privacy is guaranteed. Non-selected pages are never sent. For full details on encrypted transmission and ephemeral processing, please read our
+          <a
+            [routerLink]="state.options.privacyPolicyUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="privacy-link"
+          >
+            Privacy Policy
+          </a>.
+        </p>
+
+        <label class="session-checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="dontAskAgain()"
+            (change)="toggleDontAskAgain($event)"
+            class="checkbox-input"
+          />
+          <span class="checkbox-text">Don't ask again in this session</span>
+        </label>
+      </div>
+
+      <!-- Dialog Footer -->
+      <div class="consent-footer">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="cancel()"
+        >
+          {{ state.options.cancelText }}
+        </button>
+        <button
+          #confirmButton
+          type="button"
+          class="btn-confirm"
+          (click)="confirm()"
+        >
+          <svg
+            class="lucide-icon-sm"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span>{{ state.options.confirmText }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

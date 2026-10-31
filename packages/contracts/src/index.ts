@@ -4,3 +4,4 @@ export * from './pdf-to-word';
 export * from './pdf-to-powerpoint';
 export * from './pdf-to-excel';
 export * from './word-to-pdf';
+export * from './edit-pdf-ocr';
