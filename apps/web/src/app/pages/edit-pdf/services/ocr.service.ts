@@ -29,6 +29,11 @@ export class OcrService {
   private currentActiveRunId: string | null = null;
   private activeJobId: string | null = null;
 
+  private getBaseUrl(): string {
+    const rawBase = (environment.apiBaseUrl || 'http://localhost:4000/api/v1').replace(/\/+$/, '');
+    return rawBase.endsWith('/api/v1') ? rawBase : `${rawBase}/api/v1`;
+  }
+
   /**
    * Builds a new PDF containing strictly and only the requested page indices
    * Guarantees non-selected pages never leave the client's browser.
@@ -75,7 +80,7 @@ export class OcrService {
     const abortController = new AbortController();
     this.activeAbortController = abortController;
 
-    const apiUrl = environment.apiBaseUrl || 'http://localhost:4000';
+    const baseUrl = this.getBaseUrl();
 
     try {
       onProgress?.({
@@ -90,7 +95,7 @@ export class OcrService {
       formData.append('file', pdfBlob, 'subset.pdf');
       formData.append('options', JSON.stringify(options));
 
-      const submitResponse = await fetch(`${apiUrl}/api/v1/edit-pdf/ocr`, {
+      const submitResponse = await fetch(`${baseUrl}/edit-pdf/ocr`, {
         method: 'POST',
         body: formData,
         signal: abortController.signal
@@ -122,7 +127,7 @@ export class OcrService {
         delayMs = Math.min(2500, Math.round(delayMs * 1.25));
         attempts++;
 
-        const statusResponse = await fetch(`${apiUrl}/api/v1/edit-pdf/ocr/jobs/${jobId}`, {
+        const statusResponse = await fetch(`${baseUrl}/edit-pdf/ocr/jobs/${jobId}`, {
           signal: abortController.signal
         });
 
@@ -160,7 +165,7 @@ export class OcrService {
 
       // 5. Fetch final structured result
       const resultResponse = await fetch(
-        `${apiUrl}/api/v1/edit-pdf/ocr/jobs/${jobId}/result`,
+        `${baseUrl}/edit-pdf/ocr/jobs/${jobId}/result`,
         { signal: abortController.signal }
       );
 
@@ -199,9 +204,9 @@ export class OcrService {
     if (this.activeJobId) {
       const jobId = this.activeJobId;
       this.activeJobId = null;
-      const apiUrl = environment.apiBaseUrl || 'http://localhost:4000';
+      const baseUrl = this.getBaseUrl();
       try {
-        await fetch(`${apiUrl}/api/v1/edit-pdf/ocr/jobs/${jobId}`, {
+        await fetch(`${baseUrl}/edit-pdf/ocr/jobs/${jobId}`, {
           method: 'DELETE'
         });
       } catch {
