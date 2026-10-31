@@ -30,7 +30,8 @@ export const openApiSpec = {
     { name: 'PDF to Word', description: 'Layout-preserving PDF to DOCX conversion' },
     { name: 'PDF to PowerPoint', description: 'Layout-preserving PDF to PowerPoint (PPTX) conversion' },
     { name: 'PDF to Excel', description: 'Table-preserving PDF to Excel (XLSX) conversion' },
-    { name: 'Word to PDF', description: 'High-fidelity Word to PDF conversion' }
+    { name: 'Word to PDF', description: 'High-fidelity Word to PDF conversion' },
+    { name: 'Edit PDF OCR', description: 'OCR text recognition and bounding box extraction for Edit PDF' }
   ],
   paths: {
     '/api/v1/health': {
@@ -615,6 +616,78 @@ export const openApiSpec = {
         summary: 'Download converted PDF (or ZIP if multiple files)',
         parameters: [{ name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         responses: { '200': { description: 'Binary stream' }, '404': { description: 'Not found' } }
+      }
+    },
+    '/api/v1/edit-pdf/ocr/languages': {
+      get: {
+        tags: ['Edit PDF OCR'],
+        summary: 'List available OCR languages',
+        responses: {
+          '200': { description: 'Supported languages array' }
+        }
+      }
+    },
+    '/api/v1/edit-pdf/ocr': {
+      post: {
+        tags: ['Edit PDF OCR'],
+        summary: 'Initiate asynchronous OCR job on a PDF subset',
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  file: { type: 'string', format: 'binary' },
+                  options: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '202': { description: 'Job accepted and queued' },
+          '400': { description: 'Invalid input or options' },
+          '413': { description: 'File too large or too many pages' },
+          '422': { description: 'Encrypted PDF or unparseable' }
+        }
+      }
+    },
+    '/api/v1/edit-pdf/ocr/jobs/{id}': {
+      get: {
+        tags: ['Edit PDF OCR'],
+        summary: 'Get status and progress of an OCR job',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Job status' },
+          '404': { description: 'Job not found' }
+        }
+      },
+      delete: {
+        tags: ['Edit PDF OCR'],
+        summary: 'Cancel an active OCR job and purge data',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Cancelled successfully' }
+        }
+      }
+    },
+    '/api/v1/edit-pdf/ocr/jobs/{id}/result': {
+      get: {
+        tags: ['Edit PDF OCR'],
+        summary: 'Retrieve structured OCR bounding boxes and words (auto-deleted upon fetch)',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'OCR extraction result' },
+          '400': { description: 'Job not ready' },
+          '404': { description: 'Job not found' }
+        }
       }
     }
   },

@@ -236,3 +236,25 @@ export interface TessdataLanguage {
   nativeName?: string;
   isPopular?: boolean;
 }
+
+export const SUPPORTED_OCR_LANGUAGES: readonly TessdataLanguage[] = [
+  { code: 'eng', name: 'English', isPopular: true },
+  { code: 'hin', name: 'Hindi', nativeName: 'हिन्दी', isPopular: true },
+  { code: 'mar', name: 'Marathi', nativeName: 'मराठी', isPopular: true },
+  { code: 'tam', name: 'Tamil', nativeName: 'தமிழ்', isPopular: true },
+  { code: 'tel', name: 'Telugu', nativeName: 'తెలుగు', isPopular: true },
+  { code: 'ben', name: 'Bengali', nativeName: 'বাংলা', isPopular: true },
+  { code: 'guj', name: 'Gujarati', nativeName: 'ગુજરાતી' },
+  { code: 'kan', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+  { code: 'mal', name: 'Malayalam', nativeName: 'മലയാളം' },
+  { code: 'pan', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+  { code: 'urd', name: 'Urdu', nativeName: 'اردو' },
+  { code: 'spa', name: 'Spanish', nativeName: 'Español', isPopular: true },
+  { code: 'fra', name: 'French', nativeName: 'Français' },
+  { code: 'deu', name: 'German', nativeName: 'Deutsch' },
+  { code: 'por', name: 'Portuguese', nativeName: 'Português' },
+  { code: 'ara', name: 'Arabic', nativeName: 'العربية' },
+  { code: 'chi_sim', name: 'Chinese Simplified', nativeName: '简体中文' },
+  { code: 'jpn', name: 'Japanese', nativeName: '日本語' }
+] as const;
+

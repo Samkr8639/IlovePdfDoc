@@ -10,8 +10,9 @@ import { pdfToWordRouter } from './routes/pdf-to-word.route';
 import { pdfToPowerPointRouter } from './routes/pdf-to-powerpoint.route';
 import { pdfToExcelRouter } from './routes/pdf-to-excel.route';
 import { wordToPdfRouter } from './routes/word-to-pdf.route';
+import { editPdfOcrRouter } from './routes/edit-pdf-ocr.route';
 import { errorHandler, AppError } from './middleware/errorHandler';
-import { apiRateLimiter, conversionRateLimiter, contactRateLimiter } from './middleware/rateLimiter';
+import { apiRateLimiter, conversionRateLimiter, contactRateLimiter, ocrRateLimiter } from './middleware/rateLimiter';
 import swaggerUi from 'swagger-ui-express';
 import { openApiSpec } from './docs/openapi';
 
@@ -66,6 +67,7 @@ export function createApp(): Express {
   app.use('/api/v1/pdf-to-powerpoint', conversionRateLimiter, pdfToPowerPointRouter);
   app.use('/api/v1/pdf-to-excel', conversionRateLimiter, pdfToExcelRouter);
   app.use('/api/v1/word-to-pdf', conversionRateLimiter, wordToPdfRouter);
+  app.use('/api/v1/edit-pdf/ocr', ocrRateLimiter, editPdfOcrRouter);
 
   // 404 Route Catch-all
   app.use('*', (req: Request, _res: Response, next) => {

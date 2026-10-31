@@ -58,3 +58,31 @@ export const contactRateLimiter = rateLimit({
   skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit'],
   handler: rateLimitHandler('Too many contact form submissions. Please wait 15 minutes before sending another inquiry.')
 });
+
+/**
+ * Dedicated OCR rate limiter:
+ * 10 OCR requests per hour per IP (configurable)
+ */
+export const ocrRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: (req) =>
+    req.headers['x-test-rate-limit']
+      ? 1
+      : parseInt(process.env.OCR_RATE_LIMIT || '10', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit'],
+  handler: (_req: Request, res: Response): void => {
+    const response: ApiErrorResponse = {
+      success: false,
+      error: {
+        code: 'RATE_LIMITED',
+        message: 'OCR rate limit reached (10 requests per hour). Please wait before submitting more OCR jobs.'
+      },
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    };
+    res.status(429).json(response);
+  }
+});
