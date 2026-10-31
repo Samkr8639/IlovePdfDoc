@@ -449,18 +449,20 @@
   background: var(--pt-subtle-bg);
   overflow: auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   position: relative;
   padding: 3rem 2rem 6rem 2rem;
 }
 
 .paper-canvas-container {
+  margin: auto;
   position: relative;
   background: var(--pt-canvas-pure);
   box-shadow: 0 10px 30px -4px rgba(11, 18, 32, 0.15), 0 4px 10px -2px rgba(11, 18, 32, 0.05);
   border-radius: 2px;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .pdf-page-canvas {
@@ -990,7 +992,13 @@
   color: var(--pt-muted);
 }
 
-/* Reusable Property Panel Card */
+/* Properties Section & Card */
+.properties-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .property-panel-card {
   background: var(--pt-subtle-bg);
   border: 1px solid var(--pt-soft-outline);

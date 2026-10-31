@@ -76,7 +76,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private exportService = inject(PdfExportService);
   private ocrService = inject(OcrService);
 
-  @ViewChild('pageCanvas') pageCanvasRef!: ElementRef<HTMLCanvasElement>;
+  private _pageCanvasRef?: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('pageCanvas') set pageCanvas(ref: ElementRef<HTMLCanvasElement> | undefined) {
+    this._pageCanvasRef = ref;
+    if (ref) {
+      setTimeout(() => this.renderCurrentPageToCanvas(), 0);
+    }
+  }
+
+  get pageCanvasRef(): ElementRef<HTMLCanvasElement> | undefined {
+    return this._pageCanvasRef;
+  }
+
   @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
   @ViewChild('fileInputAddMore') fileInputAddMore!: ElementRef<HTMLInputElement>;
 
@@ -93,6 +105,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // Cached PDF.js document proxy for high-performance canvas page rendering
   private cachedPdfDoc: any = null;
+  private currentRenderTask: any = null;
 
   // Tools & Selection
   readonly features = EDIT_PDF_FEATURES;
@@ -315,7 +328,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const scale = (display.width / page.widthPt) * dpr;
+        const unscaledViewport = pdfPage.getViewport({ scale: 1.0, rotation: page.rotation || 0 });
+        const scale = (display.width / unscaledViewport.width) * dpr;
         const viewport = pdfPage.getViewport({ scale, rotation: page.rotation || 0 });
 
         canvas.width = Math.floor(viewport.width);
@@ -323,12 +337,33 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         canvas.style.width = `${display.width}px`;
         canvas.style.height = `${display.height}px`;
 
+        if (this.currentRenderTask) {
+          try {
+            this.currentRenderTask.cancel();
+          } catch {}
+          this.currentRenderTask = null;
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        await pdfPage.render({ canvasContext: ctx, viewport }).promise;
-        return;
+        const renderTask = pdfPage.render({ canvasContext: ctx, viewport });
+        this.currentRenderTask = renderTask;
+
+        try {
+          await renderTask.promise;
+          return;
+        } catch (err: any) {
+          if (err?.name === 'RenderingCancelledException') {
+            return;
+          }
+          console.error('PDF.js render error:', err);
+        } finally {
+          if (this.currentRenderTask === renderTask) {
+            this.currentRenderTask = null;
+          }
+        }
       }
     } catch (err) {
-      console.error('PDF.js render error:', err);
+      console.error('PDF.js document loading error:', err);
     }
 
     // Fallback: draw clean white paper canvas
@@ -377,13 +412,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     setTimeout(() => this.renderCurrentPageToCanvas(), 20);
   }
 
-  rotateCurrentPage(): void {
-    const page = this.currentPage();
-    if (!page) return;
-    const newRotation = (page.rotation + 90) % 360;
-
-    const pageIndex = page.pageIndex;
+  rotatePage(pageIndex: number): void {
+    if (pageIndex < 0 || pageIndex >= this.pages().length) return;
+    const page = this.pages()[pageIndex];
     const oldRotation = page.rotation;
+    const newRotation = (oldRotation + 90) % 360;
 
     const cmd: Command = {
       description: `Rotate Page ${pageIndex + 1}`,
@@ -391,12 +424,58 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         this.pages.update(list =>
           list.map(p => (p.pageIndex === pageIndex ? { ...p, rotation: newRotation } : p))
         );
-        setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+        this.updateThumbnailForPage(pageIndex);
+        if (this.currentPageIndex() === pageIndex) {
+          setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+        }
       },
       undo: () => {
         this.pages.update(list =>
           list.map(p => (p.pageIndex === pageIndex ? { ...p, rotation: oldRotation } : p))
         );
+        this.updateThumbnailForPage(pageIndex);
+        if (this.currentPageIndex() === pageIndex) {
+          setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+        }
+      }
+    };
+
+    this.history.execute(cmd);
+  }
+
+  rotateCurrentPage(): void {
+    this.rotatePage(this.currentPageIndex());
+  }
+
+  deletePage(pageIndex: number): void {
+    if (this.pages().length <= 1) {
+      this.errorMessage.set('A document must have at least one page.');
+      return;
+    }
+    const removedPage = this.pages()[pageIndex];
+    const removedElements = this.elements().filter(e => e.pageIndex === pageIndex);
+
+    const cmd: Command = {
+      description: `Delete Page ${pageIndex + 1}`,
+      execute: () => {
+        this.pages.update(list => {
+          const updated = list.filter((_, i) => i !== pageIndex);
+          return updated.map((p, i) => ({ ...p, pageIndex: i }));
+        });
+        this.elements.update(list => list.filter(e => e.pageIndex !== pageIndex));
+        this.currentPageIndex.set(Math.min(pageIndex, this.pages().length - 1));
+        this.generateThumbnails();
+        setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+      },
+      undo: () => {
+        this.pages.update(list => {
+          const copy = [...list];
+          copy.splice(pageIndex, 0, removedPage);
+          return copy.map((p, i) => ({ ...p, pageIndex: i }));
+        });
+        this.elements.update(list => [...list, ...removedElements]);
+        this.currentPageIndex.set(pageIndex);
+        this.generateThumbnails();
         setTimeout(() => this.renderCurrentPageToCanvas(), 20);
       }
     };
@@ -405,38 +484,31 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   deleteCurrentPage(): void {
-    if (this.pages().length <= 1) {
-      this.errorMessage.set('A document must have at least one page.');
-      return;
-    }
-    const idx = this.currentPageIndex();
-    const removedPage = this.pages()[idx];
-    const removedElements = this.elements().filter(e => e.pageIndex === idx);
+    this.deletePage(this.currentPageIndex());
+  }
 
-    const cmd: Command = {
-      description: `Delete Page ${idx + 1}`,
-      execute: () => {
-        this.pages.update(list => {
-          const updated = list.filter((_, i) => i !== idx);
-          return updated.map((p, i) => ({ ...p, pageIndex: i }));
-        });
-        this.elements.update(list => list.filter(e => e.pageIndex !== idx));
-        this.currentPageIndex.set(Math.min(idx, this.pages().length - 1));
-        setTimeout(() => this.renderCurrentPageToCanvas(), 20);
-      },
-      undo: () => {
-        this.pages.update(list => {
-          const copy = [...list];
-          copy.splice(idx, 0, removedPage);
-          return copy.map((p, i) => ({ ...p, pageIndex: i }));
-        });
-        this.elements.update(list => [...list, ...removedElements]);
-        this.currentPageIndex.set(idx);
-        setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+  private async updateThumbnailForPage(pageIndex: number): Promise<void> {
+    if (!this.cachedPdfDoc || pageIndex < 0 || pageIndex >= this.pages().length) return;
+    try {
+      const pdfPage = await this.cachedPdfDoc.getPage(pageIndex + 1);
+      const pageDim = this.pages()[pageIndex];
+      const unscaled = pdfPage.getViewport({ scale: 1.0, rotation: pageDim.rotation || 0 });
+      const scale = 120 / Math.max(unscaled.width, unscaled.height);
+      const viewport = pdfPage.getViewport({ scale, rotation: pageDim.rotation || 0 });
+
+      const offscreen = document.createElement('canvas');
+      offscreen.width = Math.floor(viewport.width);
+      offscreen.height = Math.floor(viewport.height);
+      const ctx = offscreen.getContext('2d');
+      if (ctx) {
+        await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+        const currentThumbs = new Map(this.pageThumbnails());
+        currentThumbs.set(pageIndex, offscreen.toDataURL('image/png'));
+        this.pageThumbnails.set(currentThumbs);
       }
-    };
-
-    this.history.execute(cmd);
+    } catch {
+      // Best effort
+    }
   }
 
   toggleLeftSidebar(): void {
@@ -454,9 +526,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   onCanvasClick(event: MouseEvent): void {
     if (this.isDrawing) return;
     const page = this.currentPage();
-    if (!page) return;
+    const canvas = this.pageCanvasRef?.nativeElement;
+    if (!page || !canvas) return;
 
-    const rect = this.pageCanvasRef.nativeElement.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     const screenX = event.clientX - rect.left;
     const screenY = event.clientY - rect.top;
 
@@ -482,9 +555,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   onCanvasMouseDown(event: MouseEvent): void {
     if (this.activeTool() !== 'draw') return;
     const page = this.currentPage();
-    if (!page) return;
+    const canvas = this.pageCanvasRef?.nativeElement;
+    if (!page || !canvas) return;
 
-    const rect = this.pageCanvasRef.nativeElement.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     const screenX = event.clientX - rect.left;
     const screenY = event.clientY - rect.top;
     const pt = this.transform.screenPointToPdfPoint({ x: screenX, y: screenY }, page, this.zoom());
@@ -514,9 +588,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     if (!this.isDrawing || this.activeTool() !== 'draw') return;
     const page = this.currentPage();
-    if (!page) return;
+    const canvas = this.pageCanvasRef?.nativeElement;
+    if (!page || !canvas) return;
 
-    const rect = this.pageCanvasRef.nativeElement.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     const screenX = event.clientX - rect.left;
     const screenY = event.clientY - rect.top;
     const pt = this.transform.screenPointToPdfPoint({ x: screenX, y: screenY }, page, this.zoom());

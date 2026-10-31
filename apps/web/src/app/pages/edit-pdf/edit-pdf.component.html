@@ -240,7 +240,7 @@
                   <button
                     type="button"
                     class="card-action-btn"
-                    (click)="rotateCurrentPage(); $event.stopPropagation()"
+                    (click)="rotatePage(i); $event.stopPropagation()"
                     title="Rotate page"
                   >
                     <svg
@@ -261,7 +261,7 @@
                   <button
                     type="button"
                     class="card-action-btn danger"
-                    (click)="deleteCurrentPage(); $event.stopPropagation()"
+                    (click)="deletePage(i); $event.stopPropagation()"
                     title="Delete page"
                   >
                     <svg

@@ -247,4 +247,29 @@ describe('EditPdfComponent Integration Tests', () => {
 
     openSpy.mockRestore();
   });
+
+  it('supports rotating and deleting specific pages with undo history', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 1, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    // Rotate page 1 (second page)
+    component.rotatePage(1);
+    expect(component.pages()[1].rotation).toBe(90);
+
+    // Undo rotation
+    component.history.undo();
+    expect(component.pages()[1].rotation).toBe(0);
+
+    // Delete page 0
+    component.deletePage(0);
+    expect(component.pages().length).toBe(1);
+    expect(component.pages()[0].pageIndex).toBe(0);
+
+    // Cannot delete the only remaining page
+    component.deletePage(0);
+    expect(component.pages().length).toBe(1);
+    expect(component.errorMessage()).toContain('at least one page');
+  });
 });
