@@ -1385,36 +1385,279 @@
       margin: 0 auto;
     }
 
-    /* RESPONSIVENESS */
+    /* ===================================================================
+       RESPONSIVE LAYOUT & MOBILE DRAWER
+       =================================================================== */
     @media (max-width: 1024px) {
-      .organize-workspace-screen {
-        flex-direction: column;
-      }
-      .sidebar-action-panel {
-        width: 100%;
-        position: static;
-        min-height: auto;
-        border-left: none;
-        border-top: 1px solid #e2e8f0;
-        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
-      }
-      .canvas-main-area {
-        padding: 32px 24px;
-        min-height: 400px;
-      }
-      .floating-tools-dock {
-        top: auto;
-        bottom: 20px;
-        right: 20px;
-        flex-direction: row;
-        width: auto;
-        padding: 6px 12px;
-        border-radius: 9999px;
-      }
-      .steps-grid {
-        grid-template-columns: 1fr;
-      }
+      .steps-grid,
       .tool-faqs-list {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===================================================================
+       MOBILE GEAR ICON BUTTON
+       =================================================================== */
+    .mobile-gear-btn {
+      display: none; /* Hidden on desktop */
+    }
+
+    /* ===================================================================
+       MOBILE PANEL BACKDROP OVERLAY
+       =================================================================== */
+    .mobile-panel-backdrop {
+      display: none;
+    }
+
+    /* ===================================================================
+       SIDEBAR MOBILE CLOSE BUTTON
+       =================================================================== */
+    .sidebar-mobile-close {
+      display: none;
+    }
+
+    /* ===================================================================
+       MOBILE LAYOUT (≤ 768px)
+       Matches PDF to Word: PDF card + horizontal dock below it,
+       gear icon on top-right, sidebar slides in from right as overlay
+       =================================================================== */
+    @media (max-width: 768px) {
+      /* Make the workspace a column layout on mobile */
+      .organize-workspace-screen {
+        flex-direction: column;
+        position: relative;
+        height: calc(100vh - 60px);
+        min-height: calc(100vh - 60px);
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      /* Main canvas takes full width, centered */
+      .canvas-main-area {
+        flex: 1;
+        padding: 24px 16px 120px; /* bottom padding to clear action button */
+        min-height: unset;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        position: relative;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* PDF cards & split canvas take natural height, centered */
+      .pdf-cards-canvas,
+      .split-custom-canvas-row {
+        width: 100%;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .pdf-document-card {
+        width: 180px;
+      }
+
+      /* ---------------------------------------------------------------
+         FLOATING DOCK: horizontal pill below the card
+         --------------------------------------------------------------- */
+      .floating-tools-dock {
+        position: static;
+        margin-top: 20px;
+        flex-direction: row;
+        width: auto;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        gap: 12px;
+        align-self: center;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+      }
+
+      /* Tooltips on mobile: show above instead of to the left */
+      .dock-tooltip-label {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        bottom: calc(100% + 8px);
+        top: auto;
+      }
+      .dock-tooltip-label::after {
+        top: auto;
+        bottom: -4px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 4px 4px 0;
+        border-color: #0F172A transparent transparent;
+      }
+      .dock-btn-wrap:hover .dock-tooltip-label {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ---------------------------------------------------------------
+         GEAR ICON BUTTON — floats top-right over the canvas
+         --------------------------------------------------------------- */
+      .mobile-gear-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        color: var(--pt-teal-700, #0F766E);
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+        z-index: 35;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .mobile-gear-btn:hover,
+      .mobile-gear-btn:active {
+        background: #f8fafc;
+        border-color: var(--pt-teal-700, #0F766E);
+        transform: scale(1.06);
+        box-shadow: 0 6px 18px rgba(15, 118, 110, 0.22);
+      }
+      .mobile-gear-btn.active {
+        background: var(--pt-teal-700, #0F766E);
+        color: #ffffff;
+        border-color: var(--pt-teal-700, #0F766E);
+        box-shadow: 0 6px 18px rgba(15, 118, 110, 0.35);
+      }
+
+      /* ---------------------------------------------------------------
+         MOBILE BACKDROP OVERLAY
+         --------------------------------------------------------------- */
+      .mobile-panel-backdrop {
+        display: block;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        z-index: 40;
+        animation: fadeInBackdrop 0.22s ease;
+      }
+      @keyframes fadeInBackdrop {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+
+      /* ---------------------------------------------------------------
+         SIDEBAR: hidden off-screen by default on mobile,
+         slides in from right when .panel-open is added
+         --------------------------------------------------------------- */
+      .sidebar-action-panel {
+        width: 85vw;
+        max-width: 360px;
+        height: calc(100vh - 60px);
+        position: fixed;
+        top: 60px;
+        right: 0;
+        bottom: 0;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 50;
+        background: #ffffff;
+        border-left: 1px solid #e2e8f0;
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.18);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow-y: auto;
+      }
+      .sidebar-action-panel.panel-open {
+        transform: translateX(0);
+      }
+
+      /* Mobile close (×) button inside panel header */
+      .sidebar-mobile-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        border: none;
+        color: #475569;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.15s ease;
+      }
+      .sidebar-mobile-close:hover,
+      .sidebar-mobile-close:active {
+        background: #e2e8f0;
+        color: #0f172a;
+        transform: scale(1.05);
+      }
+
+      .sidebar-body,
+      .ilove-split-sidebar {
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .sidebar-heading,
+      .ilove-split-heading {
+        padding-right: 44px; /* Space so heading does not overlap close button */
+      }
+
+      /* Convert button stays at bottom of the panel on mobile */
+      .sidebar-footer {
+        position: sticky;
+        bottom: 0;
+        background: #ffffff;
+        padding: 16px 18px 24px;
+      }
+    }
+
+    /* ===================================================================
+       MOBILE FLOATING CONVERT BAR
+       =================================================================== */
+    .mobile-convert-bar {
+      display: none; /* Hidden on desktop */
+    }
+
+    @media (max-width: 768px) {
+      .mobile-convert-bar {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 16px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        background: #ffffff;
+        border-top: 1px solid #f1f5f9;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+        z-index: 30;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+      }
+      .mobile-convert-bar.hidden-when-panel-open {
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .mobile-convert-bar .giant-action-submit-btn {
+        width: 100%;
+        height: 52px;
+        font-size: 16px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }

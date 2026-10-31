@@ -55,6 +55,9 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
   readonly conversionResult = signal<ConvertedPowerPointResult | null>(null);
   readonly sourcePdfPreviewUrl = signal<string | null>(null);
 
+  /** Controls the mobile slide-in settings panel */
+  readonly isSidePanelOpen = signal<boolean>(false);
+
   // Check if OCR is available in the current environment
   readonly ocrAvailable = computed<boolean>(() => this.pptService.isOcrAvailable());
 
@@ -394,12 +397,21 @@ export class PdfToPowerPointComponent implements OnInit, OnDestroy {
     this.dismissedWarnings.set(true);
   }
 
+  toggleSidePanel(): void {
+    this.isSidePanelOpen.update(v => !v);
+  }
+
+  closeSidePanel(): void {
+    this.isSidePanelOpen.set(false);
+  }
+
   resetWorkspace(): void {
     this.currentRunId++;
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
     }
+    this.isSidePanelOpen.set(false);
     this.revokeCurrentUrl();
     this.selectedFiles.set([]);
     this.fileAnalysisMap.set(new Map());

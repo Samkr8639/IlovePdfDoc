@@ -36,6 +36,9 @@ export class MergePdfComponent implements OnInit, OnDestroy {
   mergeResult = signal<MergeResult | null>(null);
   draggedIdx: number | null = null;
 
+  /** Controls the mobile slide-in settings panel */
+  isSidePanelOpen = signal<boolean>(false);
+
   ngOnInit(): void {
     const tool = this.toolRegistry.getToolById('merge-pdf');
     if (tool) {
@@ -133,12 +136,21 @@ export class MergePdfComponent implements OnInit, OnDestroy {
     window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
   }
 
+  toggleSidePanel(): void {
+    this.isSidePanelOpen.update(v => !v);
+  }
+
+  closeSidePanel(): void {
+    this.isSidePanelOpen.set(false);
+  }
+
   resetWorkspace(): void {
     const currentResult = this.mergeResult();
     if (currentResult?.url) {
       URL.revokeObjectURL(currentResult.url);
     }
 
+    this.isSidePanelOpen.set(false);
     this.selectedFiles.set([]);
     this.mergeResult.set(null);
     this.errorMessage.set(null);

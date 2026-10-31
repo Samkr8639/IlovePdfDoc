@@ -30,7 +30,16 @@ app-back-to-top.workspace-hidden,
 .app-layout.workspace-active .app-main,
 :host:has(.tool-page.organize-mode) .app-main,
 .app-layout:has(.tool-page.organize-mode) .app-main {
-  padding-top: 0 !important;
+  padding-top: var(--header-height, 68px) !important;
   height: 100vh !important;
+  box-sizing: border-box !important;
   overflow: hidden !important;
+}
+
+@media (max-width: 1024px) {
+  .app-layout.workspace-active .app-main,
+  :host:has(.tool-page.organize-mode) .app-main,
+  .app-layout:has(.tool-page.organize-mode) .app-main {
+    padding-top: 60px !important;
+  }
 }

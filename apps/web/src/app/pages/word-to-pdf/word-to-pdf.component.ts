@@ -49,6 +49,9 @@ export class WordToPdfComponent implements OnInit, OnDestroy {
   readonly processingMessage = signal<string>('Preparing conversion...');
   readonly conversionResult = signal<ConvertedWordToPdfResult | null>(null);
 
+  /** Controls the mobile slide-in settings panel */
+  readonly isSidePanelOpen = signal<boolean>(false);
+
   // Computed result view-model for ResultViewComponent
   readonly resultViewModel = computed<MergeResult | null>(() => {
     const res = this.conversionResult();
@@ -215,11 +218,20 @@ export class WordToPdfComponent implements OnInit, OnDestroy {
     window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
   }
 
+  toggleSidePanel(): void {
+    this.isSidePanelOpen.update(v => !v);
+  }
+
+  closeSidePanel(): void {
+    this.isSidePanelOpen.set(false);
+  }
+
   resetWorkspace(): void {
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
     }
+    this.isSidePanelOpen.set(false);
     this.currentRunId++;
     this.revokeCurrentUrl();
     this.selectedFiles.set([]);

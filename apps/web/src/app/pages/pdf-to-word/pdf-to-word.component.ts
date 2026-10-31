@@ -42,6 +42,9 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
   conversionResult = signal<ConvertedWordResult | null>(null);
   sourcePdfPreviewUrl = signal<string | null>(null);
 
+  /** Controls the mobile slide-in settings panel */
+  isSidePanelOpen = signal<boolean>(false);
+
   readonly mergeResult = computed<MergeResult | null>(() => {
     const res = this.conversionResult();
     if (!res) return null;
@@ -219,6 +222,14 @@ export class PdfToWordComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
     window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
+  }
+
+  toggleSidePanel(): void {
+    this.isSidePanelOpen.update(v => !v);
+  }
+
+  closeSidePanel(): void {
+    this.isSidePanelOpen.set(false);
   }
 
   resetWorkspace(): void {

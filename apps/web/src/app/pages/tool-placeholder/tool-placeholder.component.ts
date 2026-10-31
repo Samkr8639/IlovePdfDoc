@@ -47,6 +47,9 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
   processingMessage = signal<string>('Initializing local processing engine...');
   toolResult = signal<MergeResult | null>(null);
 
+  /** Controls the mobile slide-in settings panel */
+  readonly isSidePanelOpen = signal<boolean>(false);
+
   // Compress PDF options
   compressionLevel = signal<'extreme' | 'recommended' | 'less'>('recommended');
 
@@ -631,7 +634,16 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleSidePanel(): void {
+    this.isSidePanelOpen.update(v => !v);
+  }
+
+  closeSidePanel(): void {
+    this.isSidePanelOpen.set(false);
+  }
+
   resetWorkspace(): void {
+    this.isSidePanelOpen.set(false);
     this.selectedFiles.set([]);
     this.toolResult.set(null);
     this.errorMessage.set(null);
