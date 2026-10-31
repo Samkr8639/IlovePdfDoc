@@ -139,8 +139,48 @@
   <!-- VIEW 2: FULL-FEATURED CANVAS WORKSPACE -->
   @if (viewMode() === 'editor') {
     <div class="editor-workspace">
-      <!-- TOP UNDO / REDO CAPSULE -->
+      <!-- TOP CONTROL & MODE BAR -->
       <div class="top-history-bar">
+        <!-- Mode Tabs: Annotate vs Edit Text (matching reference image) -->
+        <div class="workspace-mode-capsule" role="tablist" aria-label="Editor modes">
+          <button
+            type="button"
+            class="mode-pill-tab"
+            [class.active]="editorMode() === 'annotate'"
+            (click)="setEditorMode('annotate')"
+            role="tab"
+            [attr.aria-selected]="editorMode() === 'annotate'"
+          >
+            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+            <span>Annotate</span>
+          </button>
+          <button
+            type="button"
+            class="mode-pill-tab edit-mode-tab"
+            [class.active]="editorMode() === 'edit'"
+            (click)="setEditorMode('edit')"
+            role="tab"
+            [attr.aria-selected]="editorMode() === 'edit'"
+            title="Edit existing document text character-by-character"
+          >
+            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 7 4 4 20 4 20 7" />
+              <line x1="9" y1="20" x2="15" y2="20" />
+              <line x1="12" y1="4" x2="12" y2="20" />
+            </svg>
+            <span>Edit Text</span>
+            @if (isExtractingPageText()) {
+              <span class="mode-pill-loading">...</span>
+            } @else {
+              <span class="mode-pill-star">★</span>
+            }
+          </button>
+        </div>
+
+        <!-- History Capsule (Undo / Redo) -->
         <div class="history-capsule">
           <button
             type="button"
@@ -305,6 +345,8 @@
         <main class="canvas-viewport" (click)="selectedElementId.set(null)">
           <div
             class="paper-canvas-container"
+            [class.draw-mode]="activeTool() === 'draw'"
+            [class.edit-mode]="editorMode() === 'edit'"
             [style.width.px]="displaySize().width"
             [style.height.px]="displaySize().height"
             (click)="onCanvasClick($event)"
@@ -312,12 +354,33 @@
             (mousemove)="onCanvasMouseMove($event)"
             (mouseup)="onCanvasMouseUp()"
             (mouseleave)="onCanvasMouseUp()"
+            (touchstart)="onCanvasTouchStart($event)"
+            (touchmove)="onCanvasTouchMove($event)"
+            (touchend)="onCanvasTouchEnd()"
           >
             <!-- Native PDF Page Render Canvas -->
             <canvas
               #pageCanvas
               class="pdf-page-canvas"
             ></canvas>
+
+            <!-- Real-time Live Drawing Stroke Layer (Instant smooth feedback) -->
+            @if (isDrawingActive() && activeDrawingPath()) {
+              <svg
+                class="live-drawing-stroke-overlay"
+                [style.width.px]="displaySize().width"
+                [style.height.px]="displaySize().height"
+              >
+                <path
+                  [attr.d]="activeDrawingPath()"
+                  [attr.stroke]="drawColor()"
+                  [attr.stroke-width]="drawStrokeWidth() * zoom()"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            }
 
             <!-- Interactive Annotation / Edit Elements Overlay -->
             <div class="canvas-elements-overlay">
@@ -326,6 +389,8 @@
                   <div
                     class="canvas-element text-element"
                     [class.selected]="selectedElementId() === el.id"
+                    [class.page-text-line]="el.isPageTextLine"
+                    [class.in-edit-mode]="editorMode() === 'edit'"
                     [style.left]="getElementScreenRect(el).left"
                     [style.top]="getElementScreenRect(el).top"
                     [style.width]="getElementScreenRect(el).width"
@@ -337,12 +402,14 @@
                       type="text"
                       class="canvas-text-input"
                       [ngModel]="el.text"
-                      (ngModelChange)="el.text = $event"
+                      (ngModelChange)="onTextContentChange(el, $event)"
                       [style.font-family]="el.fontFamily || 'Inter'"
                       [style.font-size.px]="(el.fontSizePt || 14) * zoom()"
                       [style.color]="el.color || 'var(--pt-navy)'"
                       [style.font-weight]="el.bold ? '700' : '400'"
                       [style.font-style]="el.italic ? 'italic' : 'normal'"
+                      [style.text-decoration]="el.underline ? 'underline' : 'none'"
+                      [style.text-align]="el.align || 'left'"
                       (click)="$event.stopPropagation()"
                     />
                     @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) {
@@ -463,6 +530,7 @@
                     [style.top]="getElementScreenRect(el).top"
                     [style.width]="getElementScreenRect(el).width"
                     [style.height]="getElementScreenRect(el).height"
+                    [attr.viewBox]="'0 0 ' + el.widthPt + ' ' + el.heightPt"
                     (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
                   >
@@ -488,10 +556,17 @@
                     (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
                   >
-                    @if (el.dataUrl.startsWith('data:image')) {
+                    @if (el.dataUrl && el.dataUrl.startsWith('data:image')) {
                       <img [src]="el.dataUrl" alt="Signature" class="signature-img" />
                     } @else {
-                      <div class="signature-text">{{ el.dataUrl }}</div>
+                      <div
+                        class="signature-text"
+                        [style.font-family]="el.fontFamily || '\'Dancing Script\', cursive'"
+                        [style.color]="el.color || 'var(--pt-navy)'"
+                        [style.font-size.px]="(el.fontSizePt || 24) * zoom()"
+                      >
+                        {{ el.signatureText || el.dataUrl }}
+                      </div>
                     }
                   </div>
                 }
@@ -1163,38 +1238,48 @@
               </div>
             }
 
-            <!-- (B) Text Properties Panel -->
-            @else if (activeTool() === 'text' || (selectedElement() && selectedElement()?.type === 'text')) {
-              <div class="section-badge-title">TEXT PROPERTIES</div>
-              <div class="property-panel-card">
-                <div class="property-row">
+            <!-- (B) Text Properties Panel (Matching Reference Image) -->
+            @else if (editorMode() === 'edit' || activeTool() === 'text' || (selectedElement() && selectedElement()?.type === 'text')) {
+              <div class="section-badge-title">TEXT STYLES</div>
+              <div class="property-panel-card text-styles-card">
+                <!-- Row 1: Font Family and Size -->
+                <div class="property-row font-size-row">
                   <select
                     class="font-select"
                     [ngModel]="textFont()"
-                    (ngModelChange)="textFont.set($event); updateTextProperty('fontFamily', $event)"
+                    (ngModelChange)="setTextFont($event)"
                   >
                     <option value="Inter">Inter</option>
+                    <option value="Calibri">Calibri</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
                     <option value="Sora">Sora</option>
-                    <option value="Helvetica">Helvetica</option>
-                    <option value="Times">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Georgia">Georgia</option>
                   </select>
-                  <input
-                    type="number"
-                    class="font-size-input"
-                    [ngModel]="textSize()"
-                    (ngModelChange)="textSize.set($event); updateTextProperty('fontSizePt', $event)"
-                    min="8"
-                    max="72"
-                  />
+                  <div class="size-stepper-wrap">
+                    <input
+                      type="number"
+                      class="font-size-input"
+                      [ngModel]="textSize()"
+                      (ngModelChange)="setTextSize($event)"
+                      min="6"
+                      max="120"
+                    />
+                    <span class="size-unit">pt</span>
+                  </div>
                 </div>
 
-                <div class="style-and-color-row">
+                <!-- Row 2: Formatting B / I / U & Alignments -->
+                <div class="formatting-actions-row">
                   <div class="style-toggle-group">
                     <button
                       type="button"
                       class="style-toggle-btn"
                       [class.active]="isTextBold()"
-                      (click)="isTextBold.set(!isTextBold()); updateTextProperty('bold', isTextBold())"
+                      (click)="toggleTextBold()"
+                      title="Bold"
                     >
                       B
                     </button>
@@ -1202,46 +1287,118 @@
                       type="button"
                       class="style-toggle-btn"
                       [class.active]="isTextItalic()"
-                      (click)="isTextItalic.set(!isTextItalic()); updateTextProperty('italic', isTextItalic())"
+                      (click)="toggleTextItalic()"
+                      title="Italic"
                     >
                       I
                     </button>
+                    <button
+                      type="button"
+                      class="style-toggle-btn underline-btn"
+                      [class.active]="isTextUnderline()"
+                      (click)="toggleTextUnderline()"
+                      title="Underline"
+                    >
+                      U
+                    </button>
                   </div>
 
+                  <div class="style-toggle-group align-group">
+                    <button
+                      type="button"
+                      class="style-toggle-btn"
+                      [class.active]="textAlign() === 'left'"
+                      (click)="setTextAlign('left')"
+                      title="Align Left"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="17" y1="10" x2="3" y2="10" />
+                        <line x1="21" y1="6" x2="3" y2="6" />
+                        <line x1="21" y1="14" x2="3" y2="14" />
+                        <line x1="17" y1="18" x2="3" y2="18" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="style-toggle-btn"
+                      [class.active]="textAlign() === 'center'"
+                      (click)="setTextAlign('center')"
+                      title="Align Center"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="10" x2="6" y2="10" />
+                        <line x1="21" y1="6" x2="3" y2="6" />
+                        <line x1="21" y1="14" x2="3" y2="14" />
+                        <line x1="18" y1="18" x2="6" y2="18" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="style-toggle-btn"
+                      [class.active]="textAlign() === 'right'"
+                      (click)="setTextAlign('right')"
+                      title="Align Right"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="21" y1="10" x2="7" y2="10" />
+                        <line x1="21" y1="6" x2="3" y2="6" />
+                        <line x1="21" y1="14" x2="3" y2="14" />
+                        <line x1="21" y1="18" x2="7" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Row 3: Colors & Custom Color Picker -->
+                <label class="property-sublabel">Current Color</label>
+                <div class="color-palette-row">
                   <div class="color-swatches-group">
                     <button
                       type="button"
                       class="color-dot navy"
                       [class.active]="textColor() === 'var(--pt-navy)'"
-                      (click)="textColor.set('var(--pt-navy)'); updateTextProperty('color', 'var(--pt-navy)')"
-                      aria-label="Navy text color"
+                      (click)="setTextColor('var(--pt-navy)')"
+                      title="Navy"
                     ></button>
                     <button
                       type="button"
                       class="color-dot teal"
                       [class.active]="textColor() === 'var(--pt-teal-700)'"
-                      (click)="textColor.set('var(--pt-teal-700)'); updateTextProperty('color', 'var(--pt-teal-700)')"
-                      aria-label="Teal text color"
+                      (click)="setTextColor('var(--pt-teal-700)')"
+                      title="Teal"
                     ></button>
                     <button
                       type="button"
                       class="color-dot coral"
                       [class.active]="textColor() === 'var(--pt-coral)'"
-                      (click)="textColor.set('var(--pt-coral)'); updateTextProperty('color', 'var(--pt-coral)')"
-                      aria-label="Coral text color"
+                      (click)="setTextColor('var(--pt-coral)')"
+                      title="Coral"
                     ></button>
                     <button
                       type="button"
                       class="color-dot black"
                       [class.active]="textColor() === 'var(--pt-navy-deep)'"
-                      (click)="textColor.set('var(--pt-navy-deep)'); updateTextProperty('color', 'var(--pt-navy-deep)')"
-                      aria-label="Dark text color"
+                      (click)="setTextColor('var(--pt-navy-deep)')"
+                      title="Deep Navy"
                     ></button>
+                  </div>
+
+                  <div class="custom-color-wrap">
+                    <label class="custom-color-btn" title="Choose custom color">
+                      <input
+                        type="color"
+                        class="custom-color-input"
+                        [ngModel]="textCustomColor()"
+                        (ngModelChange)="setTextColor($event); textCustomColor.set($event)"
+                      />
+                      <span>+ Custom</span>
+                    </label>
                   </div>
                 </div>
 
+                <!-- Action Button -->
                 <button type="button" class="btn-action-primary" (click)="addTextElement(100, 100)">
-                  <span>+ Add Text Box</span>
+                  <span>+ Add New Text Box</span>
                 </button>
               </div>
             }
@@ -1321,29 +1478,225 @@
               </div>
             }
 
-            <!-- (G) Sign Panel -->
-            @else if (activeTool() === 'sign') {
-              <div class="section-badge-title">SIGNATURE</div>
-              <div class="property-panel-card">
-                <label class="property-sublabel">Signer Name / Text</label>
-                <input
-                  type="text"
-                  class="custom-range-input"
-                  placeholder="Type your name or signature..."
-                  [ngModel]="signatureText()"
-                  (ngModelChange)="signatureText.set($event)"
-                />
-
-                <label class="property-sublabel">Signature Color</label>
-                <div class="color-swatches-group">
-                  <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'" (click)="signatureColor.set('var(--pt-teal-700)')"></button>
-                  <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'" (click)="signatureColor.set('var(--pt-navy)')"></button>
-                  <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'" (click)="signatureColor.set('var(--pt-navy-deep)')"></button>
+            <!-- (G) Signature Studio Panel (Type / Draw / Upload + 4 Cursive Fonts) -->
+            @else if (activeTool() === 'sign' || (selectedElement() && selectedElement()?.type === 'sign')) {
+              <div class="section-badge-title">SIGNATURE STYLES</div>
+              <div class="property-panel-card signature-studio-card">
+                <!-- Signature Mode Tabs -->
+                <div class="sig-mode-tabs" role="tablist">
+                  <button
+                    type="button"
+                    class="sig-mode-tab"
+                    [class.active]="signatureTab() === 'type'"
+                    (click)="setSignatureTab('type')"
+                  >
+                    ✍️ Type
+                  </button>
+                  <button
+                    type="button"
+                    class="sig-mode-tab"
+                    [class.active]="signatureTab() === 'draw'"
+                    (click)="setSignatureTab('draw')"
+                  >
+                    🖌️ Draw
+                  </button>
+                  <button
+                    type="button"
+                    class="sig-mode-tab"
+                    [class.active]="signatureTab() === 'upload'"
+                    (click)="setSignatureTab('upload')"
+                  >
+                    📁 Upload
+                  </button>
                 </div>
 
-                <button type="button" class="btn-action-primary" (click)="addSignatureElement(100, 100)">
-                  <span>+ Place Signature on Page</span>
-                </button>
+                <!-- 1. TYPE SIGNATURE MODE -->
+                @if (signatureTab() === 'type') {
+                  <label class="property-sublabel">Signer Name / Text</label>
+                  <input
+                    type="text"
+                    class="custom-range-input"
+                    placeholder="Enter signature name..."
+                    [ngModel]="signatureText()"
+                    (ngModelChange)="setSignatureText($event)"
+                  />
+
+                  <label class="property-sublabel">Calligraphy Font Style</label>
+                  <div class="sig-fonts-grid">
+                    <button
+                      type="button"
+                      class="sig-font-card"
+                      [class.active]="signatureFont().includes('Dancing Script')"
+                      (click)="setSignatureFont('\'Dancing Script\', cursive')"
+                      title="Dancing Script"
+                    >
+                      <span class="font-preview" style="font-family: 'Dancing Script', cursive;">{{ signatureText() || 'Signature' }}</span>
+                      <small class="font-name-label">Dancing Script</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="sig-font-card"
+                      [class.active]="signatureFont().includes('Caveat')"
+                      (click)="setSignatureFont('\'Caveat\', cursive')"
+                      title="Caveat"
+                    >
+                      <span class="font-preview" style="font-family: 'Caveat', cursive;">{{ signatureText() || 'Signature' }}</span>
+                      <small class="font-name-label">Caveat</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="sig-font-card"
+                      [class.active]="signatureFont().includes('Great Vibes')"
+                      (click)="setSignatureFont('\'Great Vibes\', cursive')"
+                      title="Great Vibes"
+                    >
+                      <span class="font-preview" style="font-family: 'Great Vibes', cursive;">{{ signatureText() || 'Signature' }}</span>
+                      <small class="font-name-label">Great Vibes</small>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="sig-font-card"
+                      [class.active]="signatureFont().includes('Sacramento')"
+                      (click)="setSignatureFont('\'Sacramento\', cursive')"
+                      title="Sacramento"
+                    >
+                      <span class="font-preview" style="font-family: 'Sacramento', cursive;">{{ signatureText() || 'Signature' }}</span>
+                      <small class="font-name-label">Sacramento</small>
+                    </button>
+                  </div>
+
+                  <label class="property-sublabel">Ink Color</label>
+                  <div class="color-swatches-group">
+                    <button
+                      type="button"
+                      class="color-dot navy"
+                      [class.active]="signatureColor() === 'var(--pt-navy)'"
+                      (click)="setSignatureColor('var(--pt-navy)')"
+                      title="Navy Ink"
+                    ></button>
+                    <button
+                      type="button"
+                      class="color-dot black"
+                      [class.active]="signatureColor() === 'var(--pt-navy-deep)'"
+                      (click)="setSignatureColor('var(--pt-navy-deep)')"
+                      title="Black Ink"
+                    ></button>
+                    <button
+                      type="button"
+                      class="color-dot teal"
+                      [class.active]="signatureColor() === 'var(--pt-teal-700)'"
+                      (click)="setSignatureColor('var(--pt-teal-700)')"
+                      title="Teal Ink"
+                    ></button>
+                    <button
+                      type="button"
+                      class="color-dot coral"
+                      [class.active]="signatureColor() === 'var(--pt-coral)'"
+                      (click)="setSignatureColor('var(--pt-coral)')"
+                      title="Coral Ink"
+                    ></button>
+                  </div>
+
+                  <label class="property-sublabel">Signature Size</label>
+                  <div class="thickness-btn-group">
+                    <button type="button" class="thickness-btn" [class.active]="signatureSize() === 18" (click)="setSignatureSize(18)">Small</button>
+                    <button type="button" class="thickness-btn" [class.active]="signatureSize() === 26" (click)="setSignatureSize(26)">Medium</button>
+                    <button type="button" class="thickness-btn" [class.active]="signatureSize() === 34" (click)="setSignatureSize(34)">Large</button>
+                  </div>
+
+                  <button type="button" class="btn-action-primary" (click)="addSignatureElement(120, 120)">
+                    <span>+ Place Signature on Page</span>
+                  </button>
+                }
+
+                <!-- 2. DRAW SIGNATURE MODE -->
+                @if (signatureTab() === 'draw') {
+                  <label class="property-sublabel">Draw with your mouse or finger</label>
+                  <div class="sig-pad-wrapper">
+                    <canvas
+                      #sigPad
+                      class="sig-pad-canvas"
+                      width="280"
+                      height="120"
+                      (mousedown)="onSigPadMouseDown($event)"
+                      (mousemove)="onSigPadMouseMove($event)"
+                      (mouseup)="onSigPadMouseUp()"
+                      (mouseleave)="onSigPadMouseUp()"
+                      (touchstart)="onSigPadTouchStart($event)"
+                      (touchmove)="onSigPadTouchMove($event)"
+                      (touchend)="onSigPadTouchEnd()"
+                    ></canvas>
+                  </div>
+                  <div class="sig-pad-actions-row">
+                    <button type="button" class="btn-outline-sm" (click)="clearSigPad()">
+                      Clear Pad
+                    </button>
+                    <button type="button" class="btn-action-primary-sm" (click)="addSignatureElement(120, 120)">
+                      + Place Drawn Signature
+                    </button>
+                  </div>
+                }
+
+                <!-- 3. UPLOAD SIGNATURE MODE -->
+                @if (signatureTab() === 'upload') {
+                  <label class="property-sublabel">Upload transparent signature</label>
+                  <input
+                    #fileInputSigUpload
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    style="display: none"
+                    (change)="onSignatureFileSelected($event)"
+                  />
+                  @if (signatureDrawnDataUrl()) {
+                    <div class="sig-preview-box">
+                      <img [src]="signatureDrawnDataUrl()" alt="Signature Preview" class="sig-upload-preview" />
+                    </div>
+                  }
+                  <div class="sig-pad-actions-row">
+                    <button type="button" class="btn-outline-sm" (click)="fileInputSigUpload.click()">
+                      Select Image
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-action-primary-sm"
+                      [disabled]="!signatureDrawnDataUrl()"
+                      (click)="addSignatureElement(120, 120)"
+                    >
+                      + Place Signature
+                    </button>
+                  </div>
+                }
+
+                <!-- If signature on paper is currently selected, show action tools -->
+                @if (selectedElement() && selectedElement()?.type === 'sign') {
+                  <div class="selected-element-actions-divider">
+                    <div class="element-action-buttons">
+                      <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <span>Duplicate</span>
+                      </button>
+                      <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="18 15 12 9 6 15" />
+                        </svg>
+                        <span>Forward</span>
+                      </button>
+                      <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
             }
 

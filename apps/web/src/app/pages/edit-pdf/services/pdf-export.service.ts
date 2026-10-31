@@ -218,14 +218,43 @@ export class PdfExportService {
     el: SignEditElement
   ): Promise<void> {
     try {
-      const imageBytes = this.base64ToBytes(el.dataUrl);
-      const embedded = await pdfDoc.embedPng(imageBytes);
-      page.drawImage(embedded, {
-        x: el.xPt,
-        y: el.yPt,
-        width: el.widthPt,
-        height: el.heightPt
-      });
+      if (el.dataUrl && el.dataUrl.startsWith('data:image/')) {
+        const imageBytes = this.base64ToBytes(el.dataUrl);
+        const embedded = await pdfDoc.embedPng(imageBytes);
+        page.drawImage(embedded, {
+          x: el.xPt,
+          y: el.yPt,
+          width: el.widthPt,
+          height: el.heightPt
+        });
+      } else {
+        // High-DPI offscreen canvas render for cursive / styled text signatures
+        const textToRender = el.signatureText || el.dataUrl || 'Signature';
+        const offscreen = document.createElement('canvas');
+        const scale = 3;
+        offscreen.width = Math.round(Math.max(60, el.widthPt) * scale);
+        offscreen.height = Math.round(Math.max(25, el.heightPt) * scale);
+        const ctx = offscreen.getContext('2d');
+        if (ctx) {
+          ctx.scale(scale, scale);
+          const font = el.fontFamily || "'Dancing Script', 'Brush Script MT', cursive";
+          const fontSize = el.fontSizePt || Math.round(el.heightPt * 0.65);
+          ctx.font = `${fontSize}px ${font}`;
+          ctx.fillStyle = el.color || '#14213D';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(textToRender, 6, el.heightPt / 2);
+
+          const dataUrl = offscreen.toDataURL('image/png');
+          const imageBytes = this.base64ToBytes(dataUrl);
+          const embedded = await pdfDoc.embedPng(imageBytes);
+          page.drawImage(embedded, {
+            x: el.xPt,
+            y: el.yPt,
+            width: el.widthPt,
+            height: el.heightPt
+          });
+        }
+      }
     } catch {
       // Ignore corrupt signature data
     }
@@ -268,13 +297,29 @@ export class PdfExportService {
     const color = this.parseColor(el.color || '#14213D');
     const size = el.fontSizePt || 14;
 
+    const textY = el.baselineY !== undefined ? el.baselineY : el.yPt;
+
     page.drawText(el.text, {
       x: el.xPt,
-      y: el.baselineY !== undefined ? el.baselineY : el.yPt,
+      y: textY,
       font,
       size,
       color
     });
+
+    if (el.underline) {
+      try {
+        const textWidth = font.widthOfTextAtSize(el.text, size);
+        page.drawLine({
+          start: { x: el.xPt, y: textY - 2 },
+          end: { x: el.xPt + textWidth, y: textY - 2 },
+          color,
+          thickness: Math.max(0.75, size / 14)
+        });
+      } catch {
+        // Fallback if width computation fails on custom characters
+      }
+    }
   }
 
   /**

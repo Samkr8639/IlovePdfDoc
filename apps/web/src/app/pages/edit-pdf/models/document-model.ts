@@ -55,8 +55,11 @@ export interface TextEditElement extends BaseEditElement {
   color: string;
   bold?: boolean;
   italic?: boolean;
+  underline?: boolean;
+  align?: 'left' | 'center' | 'right';
   baselineY?: number;
   isOcrLine?: boolean;
+  isPageTextLine?: boolean;
   ocrConfidence?: number;
   lowConfidenceWords?: LowConfidenceWord[];
 }
@@ -102,6 +105,11 @@ export interface WhiteoutEditElement extends BaseEditElement {
 export interface SignEditElement extends BaseEditElement {
   type: 'sign';
   dataUrl: string;
+  signMode?: 'type' | 'draw' | 'upload';
+  signatureText?: string;
+  fontFamily?: string;
+  color?: string;
+  fontSizePt?: number;
 }
 
 export interface LinkEditElement extends BaseEditElement {

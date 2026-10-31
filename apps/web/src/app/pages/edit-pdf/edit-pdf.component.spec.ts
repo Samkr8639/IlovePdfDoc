@@ -272,4 +272,134 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.pages().length).toBe(1);
     expect(component.errorMessage()).toContain('at least one page');
   });
+
+  it('generates smooth midpoint quadratic bezier splines for drawing', () => {
+    // 0 or 1 point
+    expect(component.screenPointsToSmoothSvgPath([])).toBe('');
+    expect(component.screenPointsToSmoothSvgPath([{ x: 10, y: 20 }])).toContain('M 10 20 L 10.1 20.1');
+
+    // 2 points
+    expect(component.screenPointsToSmoothSvgPath([{ x: 0, y: 0 }, { x: 50, y: 50 }])).toBe('M 0 0 L 50 50');
+
+    // 3+ points generates quadratic bezier Q commands
+    const points = [
+      { x: 10, y: 10 },
+      { x: 20, y: 30 },
+      { x: 40, y: 50 }
+    ];
+    const path = component.screenPointsToSmoothSvgPath(points);
+    expect(path).toContain('M 10 10');
+    expect(path).toContain('Q 20 30');
+
+    // getDrawPath for DrawEditElement
+    const drawEl: any = {
+      id: 'draw-1',
+      type: 'draw',
+      xPt: 10,
+      yPt: 10,
+      widthPt: 50,
+      heightPt: 50,
+      points: [
+        { xPt: 10, yPt: 50 },
+        { xPt: 25, yPt: 35 },
+        { xPt: 60, yPt: 10 }
+      ]
+    };
+    const elPath = component.getDrawPath(drawEl);
+    expect(elPath).toContain('M');
+    expect(elPath).toContain('Q');
+  });
+
+  it('supports signature studio with cursive font styling and live property updates', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    component.signatureText.set('Sameer Kumar');
+    component.signatureFont.set("'Caveat', cursive");
+    component.signatureColor.set('var(--pt-teal-700)');
+    component.signatureSize.set(34);
+
+    component.addSignatureElement(100, 200);
+
+    expect(component.elements().length).toBe(1);
+    const signEl = component.elements()[0] as any;
+    expect(signEl.type).toBe('sign');
+    expect(signEl.signatureText).toBe('Sameer Kumar');
+    expect(signEl.fontFamily).toBe("'Caveat', cursive");
+    expect(signEl.color).toBe('var(--pt-teal-700)');
+    expect(signEl.fontSizePt).toBe(34);
+
+    // Live update signature font and color while selected
+    component.setSignatureFont("'Great Vibes', cursive");
+    const updatedSign = component.elements()[0] as any;
+    expect(updatedSign.fontFamily).toBe("'Great Vibes', cursive");
+
+    component.setSignatureText('S. Kumar');
+    expect((component.elements()[0] as any).signatureText).toBe('S. Kumar');
+
+    // Undo should revert
+    component.history.undo();
+    expect((component.elements()[0] as any).signatureText).toBe('Sameer Kumar');
+  });
+
+  it('supports in-place text styles: underline, alignment, and formatting', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    component.addTextElement(80, 120);
+    const textEl = component.elements()[0] as any;
+    expect(textEl.type).toBe('text');
+
+    component.toggleTextUnderline();
+    expect((component.elements()[0] as any).underline).toBe(true);
+
+    component.setTextAlign('center');
+    expect((component.elements()[0] as any).align).toBe('center');
+
+    component.setTextFont('Calibri');
+    expect((component.elements()[0] as any).fontFamily).toBe('Calibri');
+
+    component.setTextSize(22);
+    expect((component.elements()[0] as any).fontSizePt).toBe(22);
+
+    component.setTextColor('#e05d44');
+    expect((component.elements()[0] as any).color).toBe('#e05d44');
+  });
+
+  it('extracts digital PDF text and creates in-place editable lines with makePageTextEditable', async () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    // Mock cached PDF.js document
+    (component as any).cachedPdfDoc = {
+      getPage: vi.fn().mockResolvedValue({
+        getTextContent: vi.fn().mockResolvedValue({
+          items: [
+            { str: 'SAMEER KUMAR', transform: [16, 0, 0, 16, 50, 750], width: 140, height: 16 },
+            { str: 'Frontend Developer', transform: [12, 0, 0, 12, 50, 730], width: 120, height: 12 }
+          ]
+        })
+      })
+    };
+
+    await component.makePageTextEditable();
+
+    expect(component.editorMode()).toBe('edit');
+    // Each line gets a whiteout cover and a TextEditElement (2 lines * 2 = 4 elements)
+    expect(component.elements().length).toBe(4);
+
+    const textElements = component.elements().filter(e => e.type === 'text') as any[];
+    expect(textElements.length).toBe(2);
+    expect(textElements[0].text).toBe('SAMEER KUMAR');
+    expect(textElements[0].isPageTextLine).toBe(true);
+    expect(textElements[1].text).toBe('Frontend Developer');
+    expect(textElements[1].isPageTextLine).toBe(true);
+
+    // Can undo all extracted text lines in 1 step
+    component.history.undo();
+    expect(component.elements().length).toBe(0);
+  });
 });

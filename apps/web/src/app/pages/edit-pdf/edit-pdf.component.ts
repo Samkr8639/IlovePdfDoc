@@ -91,6 +91,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
   @ViewChild('fileInputAddMore') fileInputAddMore!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInputSigUpload') fileInputSigUpload!: ElementRef<HTMLInputElement>;
+
+  private _sigPadRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('sigPad') set sigPad(ref: ElementRef<HTMLCanvasElement> | undefined) {
+    this._sigPadRef = ref;
+  }
+  get sigPadRef(): ElementRef<HTMLCanvasElement> | undefined {
+    return this._sigPadRef;
+  }
 
   // Document state
   readonly viewMode = signal<EditorViewMode>('upload');
@@ -107,6 +116,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private cachedPdfDoc: any = null;
   private currentRenderTask: any = null;
 
+  // Workspace Mode (Annotate vs In-Place Edit)
+  readonly editorMode = signal<'annotate' | 'edit'>('annotate');
+  readonly isExtractingPageText = signal<boolean>(false);
+
   // Tools & Selection
   readonly features = EDIT_PDF_FEATURES;
   readonly browserTools = computed(() => this.features.filter(f => f.category === 'tools'));
@@ -119,6 +132,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly textColor = signal<string>('var(--pt-navy)');
   readonly isTextBold = signal<boolean>(false);
   readonly isTextItalic = signal<boolean>(false);
+  readonly isTextUnderline = signal<boolean>(false);
+  readonly textAlign = signal<'left' | 'center' | 'right'>('left');
+  readonly textCustomColor = signal<string>('#14213D');
 
   // Shape Properties
   readonly shapeType = signal<'rectangle' | 'circle' | 'line' | 'arrow' | 'star'>('rectangle');
@@ -129,14 +145,24 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   // Draw Properties
   readonly drawStrokeWidth = signal<number>(2);
   readonly drawColor = signal<string>('var(--pt-teal-700)');
+  readonly isDrawingActive = signal<boolean>(false);
+  readonly activeDrawingPath = signal<string>('');
+  private currentDrawingScreenPoints: Array<{ x: number; y: number }> = [];
 
   // Highlight Properties
   readonly highlightColor = signal<string>('var(--pt-amber)');
   readonly highlightOpacity = signal<number>(0.35);
 
-  // Signature Properties
+  // Signature Studio Properties
+  readonly signatureTab = signal<'type' | 'draw' | 'upload'>('type');
   readonly signatureText = signal<string>('John Doe');
-  readonly signatureColor = signal<string>('var(--pt-teal-700)');
+  readonly signatureFont = signal<string>("'Dancing Script', cursive");
+  readonly signatureColor = signal<string>('var(--pt-navy)');
+  readonly signatureSize = signal<number>(26);
+  readonly signatureCustomColor = signal<string>('#14213D');
+  readonly signatureDrawnDataUrl = signal<string | null>(null);
+  private isSigPadDrawing = false;
+  private sigPadPoints: Array<{ x: number; y: number }> = [];
 
   // Link Properties
   readonly linkUrl = signal<string>('https://');
@@ -551,20 +577,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- Freehand Draw Handlers ---
+  // --- Freehand Draw Handlers & Real-Time Smooth Spline ---
   onCanvasMouseDown(event: MouseEvent): void {
-    if (this.activeTool() !== 'draw') return;
-    const page = this.currentPage();
-    const canvas = this.pageCanvasRef?.nativeElement;
-    if (!page || !canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const screenX = event.clientX - rect.left;
-    const screenY = event.clientY - rect.top;
-    const pt = this.transform.screenPointToPdfPoint({ x: screenX, y: screenY }, page, this.zoom());
-
-    this.isDrawing = true;
-    this.currentDrawingPoints = [pt];
+    this.startDrawing(event.clientX, event.clientY);
   }
 
   onCanvasMouseMove(event: MouseEvent): void {
@@ -587,19 +602,72 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
 
     if (!this.isDrawing || this.activeTool() !== 'draw') return;
+    this.moveDrawing(event.clientX, event.clientY);
+  }
+
+  onCanvasMouseUp(): void {
+    this.endDrawing();
+  }
+
+  onCanvasTouchStart(event: TouchEvent): void {
+    if (this.activeTool() !== 'draw') return;
+    if (event.touches.length > 0) {
+      event.preventDefault();
+      const t = event.touches[0];
+      this.startDrawing(t.clientX, t.clientY);
+    }
+  }
+
+  onCanvasTouchMove(event: TouchEvent): void {
+    if (!this.isDrawing || this.activeTool() !== 'draw') return;
+    if (event.touches.length > 0) {
+      event.preventDefault();
+      const t = event.touches[0];
+      this.moveDrawing(t.clientX, t.clientY);
+    }
+  }
+
+  onCanvasTouchEnd(): void {
+    this.endDrawing();
+  }
+
+  private startDrawing(clientX: number, clientY: number): void {
+    if (this.activeTool() !== 'draw') return;
     const page = this.currentPage();
     const canvas = this.pageCanvasRef?.nativeElement;
     if (!page || !canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const screenX = event.clientX - rect.left;
-    const screenY = event.clientY - rect.top;
-    const pt = this.transform.screenPointToPdfPoint({ x: screenX, y: screenY }, page, this.zoom());
+    const screenX = clientX - rect.left;
+    const screenY = clientY - rect.top;
 
-    this.currentDrawingPoints.push(pt);
+    this.isDrawing = true;
+    this.isDrawingActive.set(true);
+    this.currentDrawingScreenPoints = [{ x: screenX, y: screenY }];
+    this.activeDrawingPath.set(`M ${screenX} ${screenY} L ${screenX + 0.1} ${screenY + 0.1}`);
   }
 
-  onCanvasMouseUp(): void {
+  private moveDrawing(clientX: number, clientY: number): void {
+    const canvas = this.pageCanvasRef?.nativeElement;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const screenX = clientX - rect.left;
+    const screenY = clientY - rect.top;
+
+    const pts = this.currentDrawingScreenPoints;
+    if (pts.length > 0) {
+      const last = pts[pts.length - 1];
+      const dist = Math.hypot(screenX - last.x, screenY - last.y);
+      if (dist < 1.5) return;
+    }
+
+    pts.push({ x: screenX, y: screenY });
+    const smooth = this.screenPointsToSmoothSvgPath(pts);
+    this.activeDrawingPath.set(smooth);
+  }
+
+  private endDrawing(): void {
     if (this.isDraggingElement) {
       this.isDraggingElement = false;
       this.draggedElementId = null;
@@ -608,14 +676,27 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     if (!this.isDrawing || this.activeTool() !== 'draw') {
       this.isDrawing = false;
+      this.isDrawingActive.set(false);
       return;
     }
-    this.isDrawing = false;
-    const page = this.currentPage();
-    if (!page || this.currentDrawingPoints.length < 2) return;
 
-    const xs = this.currentDrawingPoints.map(p => p.xPt);
-    const ys = this.currentDrawingPoints.map(p => p.yPt);
+    this.isDrawing = false;
+    this.isDrawingActive.set(false);
+    const page = this.currentPage();
+    const screenPts = this.currentDrawingScreenPoints;
+    if (!page || screenPts.length < 2) {
+      this.activeDrawingPath.set('');
+      this.currentDrawingScreenPoints = [];
+      return;
+    }
+
+    // Convert screen points to PDF points
+    const pdfPts = screenPts.map(p =>
+      this.transform.screenPointToPdfPoint({ x: p.x, y: p.y }, page, this.zoom())
+    );
+
+    const xs = pdfPts.map(p => p.xPt);
+    const ys = pdfPts.map(p => p.yPt);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
@@ -627,9 +708,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       type: 'draw',
       xPt: minX,
       yPt: minY,
-      widthPt: Math.max(10, maxX - minX),
-      heightPt: Math.max(10, maxY - minY),
-      points: [...this.currentDrawingPoints],
+      widthPt: Math.max(8, maxX - minX),
+      heightPt: Math.max(8, maxY - minY),
+      points: pdfPts,
       strokeColor: this.drawColor(),
       strokeWidth: this.drawStrokeWidth()
     };
@@ -645,8 +726,32 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         this.selectedElementId.set(null);
       }
     };
+
     this.history.execute(cmd);
-    this.currentDrawingPoints = [];
+    this.activeDrawingPath.set('');
+    this.currentDrawingScreenPoints = [];
+  }
+
+  screenPointsToSmoothSvgPath(points: Array<{ x: number; y: number }>): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) {
+      return `M ${points[0].x} ${points[0].y} L ${points[0].x + 0.1} ${points[0].y + 0.1}`;
+    }
+    if (points.length === 2) {
+      return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+    }
+
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const midX = (p0.x + p1.x) / 2;
+      const midY = (p0.y + p1.y) / 2;
+      d += ` Q ${p0.x} ${p0.y}, ${midX} ${midY}`;
+    }
+    const last = points[points.length - 1];
+    d += ` L ${last.x} ${last.y}`;
+    return d;
   }
 
   onElementMouseDown(el: EditElement, event: MouseEvent): void {
@@ -836,19 +941,252 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  addSignatureElement(xPt = 100, yPt = 100): void {
+  // --- Signature Studio Handlers ---
+  setSignatureTab(tab: 'type' | 'draw' | 'upload'): void {
+    this.signatureTab.set(tab);
+    if (tab === 'draw') {
+      setTimeout(() => this.clearSigPad(), 50);
+    }
+  }
+
+  setSignatureFont(font: string): void {
+    this.signatureFont.set(font);
+    this.updateSelectedSignatureProperty('fontFamily', font);
+  }
+
+  setSignatureColor(color: string): void {
+    this.signatureColor.set(color);
+    this.updateSelectedSignatureProperty('color', color);
+  }
+
+  setSignatureText(text: string): void {
+    this.signatureText.set(text);
+    const el = this.selectedElement();
+    if (!el || el.type !== 'sign') return;
+
+    const signEl = el as SignEditElement;
+    const oldText = signEl.signatureText;
+    const oldUrl = signEl.dataUrl;
+
+    const cmd: Command = {
+      description: 'Change signature text',
+      execute: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === signEl.id ? ({ ...e, signatureText: text, dataUrl: text } as EditElement) : e))
+        );
+      },
+      undo: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === signEl.id ? ({ ...e, signatureText: oldText, dataUrl: oldUrl } as EditElement) : e))
+        );
+      }
+    };
+    this.history.execute(cmd);
+  }
+
+  setSignatureSize(size: number): void {
+    this.signatureSize.set(size);
+    const el = this.selectedElement();
+    if (!el || el.type !== 'sign') return;
+
+    const signEl = el as SignEditElement;
+    const oldSize = signEl.fontSizePt;
+    const oldHeight = signEl.heightPt;
+    const newHeight = Math.round(size * 1.6);
+
+    const cmd: Command = {
+      description: 'Change signature size',
+      execute: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === signEl.id ? ({ ...e, fontSizePt: size, heightPt: newHeight } as EditElement) : e))
+        );
+      },
+      undo: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === signEl.id ? ({ ...e, fontSizePt: oldSize, heightPt: oldHeight } as EditElement) : e))
+        );
+      }
+    };
+    this.history.execute(cmd);
+  }
+
+  updateSelectedSignatureProperty(field: keyof SignEditElement, value: any): void {
+    const el = this.selectedElement();
+    if (!el || el.type !== 'sign') return;
+
+    const signEl = el as SignEditElement;
+    const oldVal = signEl[field];
+
+    const cmd: Command = {
+      description: `Change signature ${field}`,
+      execute: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === signEl.id ? { ...e, [field]: value } : e))
+        );
+      },
+      undo: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === signEl.id ? { ...e, [field]: oldVal } : e))
+        );
+      }
+    };
+    this.history.execute(cmd);
+  }
+
+  // Signature Pad Drawing
+  onSigPadMouseDown(event: MouseEvent): void {
+    this.startSigPadDrawing(event.offsetX, event.offsetY);
+  }
+
+  onSigPadMouseMove(event: MouseEvent): void {
+    if (!this.isSigPadDrawing) return;
+    this.moveSigPadDrawing(event.offsetX, event.offsetY);
+  }
+
+  onSigPadMouseUp(): void {
+    this.endSigPadDrawing();
+  }
+
+  onSigPadTouchStart(event: TouchEvent): void {
+    const canvas = this.sigPadRef?.nativeElement;
+    if (!canvas || event.touches.length === 0) return;
+    event.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const x = event.touches[0].clientX - rect.left;
+    const y = event.touches[0].clientY - rect.top;
+    this.startSigPadDrawing(x, y);
+  }
+
+  onSigPadTouchMove(event: TouchEvent): void {
+    if (!this.isSigPadDrawing) return;
+    const canvas = this.sigPadRef?.nativeElement;
+    if (!canvas || event.touches.length === 0) return;
+    event.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const x = event.touches[0].clientX - rect.left;
+    const y = event.touches[0].clientY - rect.top;
+    this.moveSigPadDrawing(x, y);
+  }
+
+  onSigPadTouchEnd(): void {
+    this.endSigPadDrawing();
+  }
+
+  private startSigPadDrawing(x: number, y: number): void {
+    const canvas = this.sigPadRef?.nativeElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    this.isSigPadDrawing = true;
+    this.sigPadPoints = [{ x, y }];
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = this.signatureColor() === 'var(--pt-navy)' ? '#14213D' : this.signatureColor();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 0.1, y + 0.1);
+    ctx.stroke();
+  }
+
+  private moveSigPadDrawing(x: number, y: number): void {
+    const canvas = this.sigPadRef?.nativeElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    this.sigPadPoints.push({ x, y });
+    const pts = this.sigPadPoints;
+    if (pts.length < 3) {
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      return;
+    }
+
+    const p0 = pts[pts.length - 2];
+    const p1 = pts[pts.length - 1];
+    const midX = (p0.x + p1.x) / 2;
+    const midY = (p0.y + p1.y) / 2;
+    ctx.quadraticCurveTo(p0.x, p0.y, midX, midY);
+    ctx.stroke();
+  }
+
+  private endSigPadDrawing(): void {
+    if (!this.isSigPadDrawing) return;
+    this.isSigPadDrawing = false;
+    const canvas = this.sigPadRef?.nativeElement;
+    if (canvas) {
+      this.signatureDrawnDataUrl.set(canvas.toDataURL('image/png'));
+    }
+  }
+
+  clearSigPad(): void {
+    const canvas = this.sigPadRef?.nativeElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    this.signatureDrawnDataUrl.set(null);
+    this.sigPadPoints = [];
+  }
+
+  onSignatureFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.signatureDrawnDataUrl.set(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      input.value = '';
+    }
+  }
+
+  addSignatureElement(xPt = 120, yPt = 120): void {
     const page = this.currentPage();
     if (!page) return;
+
+    const mode = this.signatureTab();
+    let dataUrl = '';
+    let widthPt = 180;
+    let heightPt = 48;
+
+    if (mode === 'draw' || mode === 'upload') {
+      dataUrl = this.signatureDrawnDataUrl() || '';
+      if (!dataUrl) {
+        if (mode === 'draw') {
+          this.errorMessage.set('Please draw your signature on the pad first.');
+        } else {
+          this.errorMessage.set('Please upload a signature image first.');
+        }
+        return;
+      }
+      widthPt = 160;
+      heightPt = 60;
+    } else {
+      // Type mode
+      dataUrl = this.signatureText() || 'John Doe';
+      widthPt = Math.max(120, (this.signatureText().length || 8) * 14);
+      heightPt = Math.round(this.signatureSize() * 1.6);
+    }
 
     const newElement: SignEditElement = {
       id: `sign-${Date.now()}`,
       pageIndex: page.pageIndex,
       type: 'sign',
+      signMode: mode,
       xPt,
       yPt,
-      widthPt: 180,
-      heightPt: 45,
-      dataUrl: this.signatureText()
+      widthPt,
+      heightPt,
+      dataUrl,
+      signatureText: mode === 'type' ? (this.signatureText() || 'John Doe') : undefined,
+      fontFamily: mode === 'type' ? this.signatureFont() : undefined,
+      color: mode === 'type' ? this.signatureColor() : undefined,
+      fontSizePt: mode === 'type' ? this.signatureSize() : undefined
     };
 
     const cmd: Command = {
@@ -856,7 +1194,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       execute: () => {
         this.elements.update(list => [...list, newElement]);
         this.selectedElementId.set(newElement.id);
-        this.activeTool.set('select');
+        this.selectTool('select');
       },
       undo: () => {
         this.elements.update(list => list.filter(e => e.id !== newElement.id));
@@ -978,6 +1316,37 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   selectElement(el: EditElement, event?: MouseEvent): void {
     event?.stopPropagation();
     this.selectedElementId.set(el.id);
+
+    if (el.type === 'text') {
+      const textEl = el as TextEditElement;
+      this.textFont.set(textEl.fontFamily || 'Inter');
+      this.textSize.set(textEl.fontSizePt || 14);
+      this.textColor.set(textEl.color || 'var(--pt-navy)');
+      this.isTextBold.set(!!textEl.bold);
+      this.isTextItalic.set(!!textEl.italic);
+      this.isTextUnderline.set(!!textEl.underline);
+      this.textAlign.set(textEl.align || 'left');
+    } else if (el.type === 'sign') {
+      const signEl = el as SignEditElement;
+      if (signEl.signatureText) {
+        this.signatureText.set(signEl.signatureText);
+      }
+      if (signEl.fontFamily) {
+        this.signatureFont.set(signEl.fontFamily);
+      }
+      if (signEl.color) {
+        this.signatureColor.set(signEl.color);
+      }
+      if (signEl.fontSizePt) {
+        this.signatureSize.set(signEl.fontSizePt);
+      }
+    } else if (el.type === 'shape') {
+      const shapeEl = el as ShapeEditElement;
+      this.shapeType.set(shapeEl.shapeType);
+      this.strokeColor.set(shapeEl.strokeColor || 'var(--pt-navy)');
+      this.fillColor.set(shapeEl.fillColor || 'transparent');
+      this.strokeWidth.set(shapeEl.strokeWidth || 2);
+    }
   }
 
   duplicateSelectedElement(): void {
@@ -1079,6 +1448,200 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     };
 
     this.history.execute(cmd);
+  }
+
+  setTextFont(font: string): void {
+    this.textFont.set(font);
+    this.updateTextProperty('fontFamily', font);
+  }
+
+  setTextSize(size: number): void {
+    this.textSize.set(size);
+    this.updateTextProperty('fontSizePt', size);
+  }
+
+  toggleTextBold(): void {
+    const next = !this.isTextBold();
+    this.isTextBold.set(next);
+    this.updateTextProperty('bold', next);
+  }
+
+  toggleTextItalic(): void {
+    const next = !this.isTextItalic();
+    this.isTextItalic.set(next);
+    this.updateTextProperty('italic', next);
+  }
+
+  toggleTextUnderline(): void {
+    const next = !this.isTextUnderline();
+    this.isTextUnderline.set(next);
+    this.updateTextProperty('underline', next);
+  }
+
+  setTextAlign(align: 'left' | 'center' | 'right'): void {
+    this.textAlign.set(align);
+    this.updateTextProperty('align', align);
+  }
+
+  setTextColor(color: string): void {
+    this.textColor.set(color);
+    this.updateTextProperty('color', color);
+  }
+
+  onTextContentChange(el: TextEditElement, newText: string): void {
+    el.text = newText;
+  }
+
+  // --- In-Place Page Text Extraction (Character/Line editing) ---
+  setEditorMode(mode: 'annotate' | 'edit'): void {
+    this.editorMode.set(mode);
+    if (mode === 'edit') {
+      this.makePageTextEditable();
+    }
+  }
+
+  async makePageTextEditable(): Promise<void> {
+    const page = this.currentPage();
+    if (!page || !this.cachedPdfDoc) return;
+
+    // Check if we already have page text lines extracted for this page
+    const existingPageText = this.elements().filter(
+      e => e.pageIndex === page.pageIndex && (e as TextEditElement).isPageTextLine
+    );
+    if (existingPageText.length > 0) {
+      this.editorMode.set('edit');
+      this.activeTool.set('select');
+      this.selectedElementId.set(existingPageText[0].id);
+      return;
+    }
+
+    this.isExtractingPageText.set(true);
+    try {
+      const pdfPage = await this.cachedPdfDoc.getPage(page.pageIndex + 1);
+      const textContent = await pdfPage.getTextContent();
+      const rawItems = (textContent.items || []).filter(
+        (it: any) => it.str && it.str.trim().length > 0
+      );
+
+      if (rawItems.length === 0) {
+        this.errorMessage.set(
+          'No digital text found on this page (it appears to be a scanned image). Click "Make text editable" in Cloud Tools to recognize text with OCR.'
+        );
+        this.selectTool('ocr');
+        return;
+      }
+
+      // Group items into lines by baseline Y
+      const lines: Array<{
+        baselineY: number;
+        items: Array<{ text: string; x: number; width: number; fontSize: number; height: number }>;
+      }> = [];
+
+      for (const item of rawItems) {
+        const tx = item.transform[4];
+        const ty = item.transform[5];
+        const fontSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
+        const width = item.width || (fontSize * item.str.length * 0.55);
+        const height = item.height || fontSize;
+
+        let foundLine = lines.find(l => Math.abs(l.baselineY - ty) <= 3.5);
+        if (foundLine) {
+          foundLine.items.push({ text: item.str, x: tx, width, fontSize, height });
+        } else {
+          lines.push({
+            baselineY: ty,
+            items: [{ text: item.str, x: tx, width, fontSize, height }]
+          });
+        }
+      }
+
+      // Sort lines from top of document to bottom (in PDF, higher baselineY is higher)
+      lines.sort((a, b) => b.baselineY - a.baselineY);
+
+      const generatedElements: EditElement[] = [];
+
+      for (let idx = 0; idx < lines.length; idx++) {
+        const line = lines[idx];
+        line.items.sort((a, b) => a.x - b.x);
+
+        let fullText = '';
+        for (let j = 0; j < line.items.length; j++) {
+          const it = line.items[j];
+          if (j > 0) {
+            const prev = line.items[j - 1];
+            const gap = it.x - (prev.x + prev.width);
+            if (gap > 2) {
+              fullText += ' ';
+            }
+          }
+          fullText += it.text;
+        }
+
+        if (!fullText.trim()) continue;
+
+        const minX = Math.min(...line.items.map(it => it.x));
+        const maxX = Math.max(...line.items.map(it => it.x + it.width));
+        const maxFont = Math.max(...line.items.map(it => it.fontSize));
+        const fontSizePt = Math.round(maxFont * 10) / 10;
+        const baselineY = line.baselineY;
+        const yPt = baselineY - fontSizePt * 0.25;
+        const heightPt = Math.max(14, fontSizePt * 1.25);
+        const widthPt = Math.max(24, maxX - minX + 6);
+
+        const coverEl: WhiteoutEditElement = {
+          id: `page-wo-${page.pageIndex}-${idx}-${Date.now()}`,
+          pageIndex: page.pageIndex,
+          type: 'whiteout',
+          xPt: Math.max(0, minX - 2),
+          yPt: Math.max(0, yPt - 1),
+          widthPt: widthPt + 4,
+          heightPt: heightPt + 2,
+          fillColor: 'var(--pt-surface-white)'
+        };
+
+        const textEl: TextEditElement = {
+          id: `page-text-${page.pageIndex}-${idx}-${Date.now()}`,
+          pageIndex: page.pageIndex,
+          type: 'text',
+          isPageTextLine: true,
+          xPt: minX,
+          yPt: yPt,
+          baselineY: baselineY,
+          widthPt: widthPt,
+          heightPt: heightPt,
+          text: fullText,
+          fontFamily: 'Inter',
+          fontSizePt: fontSizePt,
+          color: 'var(--pt-navy)'
+        };
+
+        generatedElements.push(coverEl, textEl);
+      }
+
+      const cmd: Command = {
+        description: `Make Page ${page.pageIndex + 1} Text Editable`,
+        execute: () => {
+          this.elements.update(list => [...list, ...generatedElements]);
+          this.editorMode.set('edit');
+          this.selectTool('select');
+          if (generatedElements.length > 1) {
+            this.selectedElementId.set(generatedElements[1].id);
+          }
+        },
+        undo: () => {
+          const idsToRemove = new Set(generatedElements.map(e => e.id));
+          this.elements.update(list => list.filter(e => !idsToRemove.has(e.id)));
+          this.editorMode.set('annotate');
+        }
+      };
+
+      this.history.execute(cmd);
+    } catch (err) {
+      console.error('Failed to extract text from page:', err);
+      this.errorMessage.set('Could not extract text from this page.');
+    } finally {
+      this.isExtractingPageText.set(false);
+    }
   }
 
   // --- OCR Cloud Tool Flow ---
@@ -1407,12 +1970,29 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   getDrawPath(el: DrawEditElement): string {
     if (!el.points || el.points.length === 0) return '';
-    const first = el.points[0];
-    let d = `M ${first.xPt - el.xPt} ${first.yPt - el.yPt}`;
-    for (let i = 1; i < el.points.length; i++) {
-      const p = el.points[i];
-      d += ` L ${p.xPt - el.xPt} ${p.yPt - el.yPt}`;
+    // Map PDF points to local SVG coordinate space (top-left 0,0, bottom-right widthPt, heightPt)
+    const localPts = el.points.map(p => ({
+      x: p.xPt - el.xPt,
+      y: (el.yPt + el.heightPt) - p.yPt
+    }));
+
+    if (localPts.length === 1) {
+      return `M ${localPts[0].x} ${localPts[0].y} L ${localPts[0].x + 0.1} ${localPts[0].y + 0.1}`;
     }
+    if (localPts.length === 2) {
+      return `M ${localPts[0].x} ${localPts[0].y} L ${localPts[1].x} ${localPts[1].y}`;
+    }
+
+    let d = `M ${localPts[0].x} ${localPts[0].y}`;
+    for (let i = 1; i < localPts.length - 1; i++) {
+      const p0 = localPts[i];
+      const p1 = localPts[i + 1];
+      const midX = (p0.x + p1.x) / 2;
+      const midY = (p0.y + p1.y) / 2;
+      d += ` Q ${p0.x} ${p0.y}, ${midX} ${midY}`;
+    }
+    const last = localPts[localPts.length - 1];
+    d += ` L ${last.x} ${last.y}`;
     return d;
   }
 
