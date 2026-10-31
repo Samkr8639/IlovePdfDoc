@@ -1501,8 +1501,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     // No-op if already in the requested mode
     if (this.editorMode() === mode) return;
 
-    this.editorMode.set(mode);
-    if (mode === 'edit') {
+    if (mode === 'annotate') {
+      // Remove ALL isPageTextLine elements (text blocks + their whiteout covers)
+      // from every page when leaving Edit Text mode.
+      // This makes the canvas look exactly as it did before "Edit Text" was clicked,
+      // and ensures re-entering Edit Text re-extracts fresh text blocks.
+      const pageTextIds = new Set(
+        this.elements()
+          .filter(e => (e as TextEditElement).isPageTextLine)
+          .map(e => e.id)
+      );
+      if (pageTextIds.size > 0) {
+        this.elements.update(list => list.filter(e => !pageTextIds.has(e.id)));
+      }
+      // Clear selection so no stale element stays highlighted
+      this.selectedElementId.set(null);
+      this.editorMode.set('annotate');
+    } else {
+      // Switching to Edit Text
+      this.editorMode.set('edit');
       // Small delay so the slider thumb animation (220ms) completes before
       // the spinner appears — prevents a jarring visual overlap
       setTimeout(() => this.makePageTextEditable(), 80);
