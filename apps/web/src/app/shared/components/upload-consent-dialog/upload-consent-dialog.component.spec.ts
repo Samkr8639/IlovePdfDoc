@@ -53,3 +53,4 @@ describe('UploadConsentDialogComponent', () => {
     expect(cancelSpy).toHaveBeenCalled();
   });
 });
+

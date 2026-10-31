@@ -130,6 +130,50 @@ export class PdfExportService {
         color: strokeColor || rgb(0, 0, 0),
         thickness: borderWidth
       });
+    } else if (el.shapeType === 'arrow') {
+      const startX = el.xPt;
+      const startY = el.yPt;
+      const endX = el.xPt + el.widthPt;
+      const endY = el.yPt + el.heightPt;
+      const arrowColor = strokeColor || rgb(0, 0, 0);
+
+      page.drawLine({
+        start: { x: startX, y: startY },
+        end: { x: endX, y: endY },
+        color: arrowColor,
+        thickness: borderWidth
+      });
+
+      const angle = Math.atan2(endY - startY, endX - startX);
+      const headLen = Math.max(8, borderWidth * 3);
+      page.drawLine({
+        start: { x: endX, y: endY },
+        end: {
+          x: endX - headLen * Math.cos(angle - Math.PI / 6),
+          y: endY - headLen * Math.sin(angle - Math.PI / 6)
+        },
+        color: arrowColor,
+        thickness: borderWidth
+      });
+      page.drawLine({
+        start: { x: endX, y: endY },
+        end: {
+          x: endX - headLen * Math.cos(angle + Math.PI / 6),
+          y: endY - headLen * Math.sin(angle + Math.PI / 6)
+        },
+        color: arrowColor,
+        thickness: borderWidth
+      });
+    } else if (el.shapeType === 'star') {
+      page.drawRectangle({
+        x: el.xPt,
+        y: el.yPt,
+        width: el.widthPt,
+        height: el.heightPt,
+        borderColor: strokeColor,
+        borderWidth,
+        color: fillColor
+      });
     }
   }
 

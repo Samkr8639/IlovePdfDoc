@@ -96,3 +96,4 @@ The Edit PDF tool provides an in-browser canvas document editor (`pdf.js` + `pdf
 - Zero hardcoded hex color codes outside tokens.
 - Self-hosted variable typography (`Sora` headings, `Inter` UI body).
 - Lucide SVG icons used across all controls.
+

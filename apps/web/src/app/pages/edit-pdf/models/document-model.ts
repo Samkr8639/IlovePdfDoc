@@ -82,7 +82,7 @@ export interface DrawEditElement extends BaseEditElement {
 
 export interface ShapeEditElement extends BaseEditElement {
   type: 'shape';
-  shapeType: 'rectangle' | 'circle' | 'line';
+  shapeType: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star';
   strokeColor: string;
   fillColor: string;
   strokeWidth: number;
@@ -141,3 +141,4 @@ export type EditElement =
   | SignEditElement
   | LinkEditElement
   | OcrTextLayerElement;
+

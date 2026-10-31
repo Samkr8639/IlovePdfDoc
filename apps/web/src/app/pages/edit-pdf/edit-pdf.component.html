@@ -198,7 +198,7 @@
         <aside
           class="left-thumbnails-panel"
           [class.collapsed]="isLeftSidebarCollapsed()"
-          aria-label="Pages navigation"
+          aria-label="Pages thumbnail list"
         >
           <div class="thumbnails-header">
             <span class="thumbnails-count-title">{{ pages().length }} Pages</span>
@@ -206,12 +206,12 @@
               type="button"
               class="collapse-toggle-btn"
               (click)="toggleLeftSidebar()"
-              [title]="isLeftSidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+              [title]="isLeftSidebarCollapsed() ? 'Expand Thumbnails' : 'Collapse Thumbnails'"
             >
               <svg
                 class="lucide-icon"
-                width="16"
-                height="16"
+                width="14"
+                height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -283,12 +283,16 @@
 
                 <!-- Page Preview Mini Sheet -->
                 <div class="page-mini-sheet">
-                  <div class="mini-doc-lines">
-                    <span class="mini-line header"></span>
-                    <span class="mini-line accent"></span>
-                    <span class="mini-line body"></span>
-                    <span class="mini-line body short"></span>
-                  </div>
+                  @if (pageThumbnails().has(i)) {
+                    <img [src]="pageThumbnails().get(i)" alt="Page {{ i + 1 }}" class="page-thumb-img" />
+                  } @else {
+                    <div class="mini-doc-lines">
+                      <span class="mini-line header"></span>
+                      <span class="mini-line accent"></span>
+                      <span class="mini-line body"></span>
+                      <span class="mini-line body short"></span>
+                    </div>
+                  }
                 </div>
 
                 <div class="page-number-label">{{ i + 1 }}</div>
@@ -303,47 +307,47 @@
             class="paper-canvas-container"
             [style.width.px]="displaySize().width"
             [style.height.px]="displaySize().height"
-            (click)="onCanvasClick($event); $event.stopPropagation()"
+            (click)="onCanvasClick($event)"
+            (mousedown)="onCanvasMouseDown($event)"
+            (mousemove)="onCanvasMouseMove($event)"
+            (mouseup)="onCanvasMouseUp()"
+            (mouseleave)="onCanvasMouseUp()"
           >
-            <!-- Rendered PDF Page Canvas -->
+            <!-- Native PDF Page Render Canvas -->
             <canvas
               #pageCanvas
               class="pdf-page-canvas"
-              [style.width.px]="displaySize().width"
-              [style.height.px]="displaySize().height"
             ></canvas>
 
-            <!-- Interactive Annotation Elements Overlay -->
-            <div class="elements-overlay">
+            <!-- Interactive Annotation / Edit Elements Overlay -->
+            <div class="canvas-elements-overlay">
               @for (el of currentPageElements(); track el.id) {
                 @if (el.type === 'text') {
                   <div
                     class="canvas-element text-element"
                     [class.selected]="selectedElementId() === el.id"
-                    [class.ocr-line]="el.isOcrLine"
                     [style.left]="getElementScreenRect(el).left"
                     [style.top]="getElementScreenRect(el).top"
                     [style.width]="getElementScreenRect(el).width"
-                    [style.min-height]="getElementScreenRect(el).height"
+                    [style.height]="getElementScreenRect(el).height"
+                    (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
                   >
                     <input
                       type="text"
-                      class="inline-text-input"
-                      [(ngModel)]="el.text"
+                      class="canvas-text-input"
+                      [ngModel]="el.text"
+                      (ngModelChange)="el.text = $event"
                       [style.font-family]="el.fontFamily || 'Inter'"
-                      [style.font-size.pt]="el.fontSizePt"
+                      [style.font-size.px]="(el.fontSizePt || 14) * zoom()"
                       [style.color]="el.color || 'var(--pt-navy)'"
                       [style.font-weight]="el.bold ? '700' : '400'"
                       [style.font-style]="el.italic ? 'italic' : 'normal'"
                       (click)="$event.stopPropagation()"
                     />
-                    @if (selectedElementId() === el.id) {
-                      <div class="selection-handles">
-                        <span class="handle nw"></span>
-                        <span class="handle ne"></span>
-                        <span class="handle sw"></span>
-                        <span class="handle se"></span>
+                    @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) {
+                      <div class="ocr-low-conf-badge" title="Confidence: {{ el.ocrConfidence }}%">
+                        !
                       </div>
                     }
                   </div>
@@ -358,6 +362,7 @@
                     [style.width]="getElementScreenRect(el).width"
                     [style.height]="getElementScreenRect(el).height"
                     [style.background-color]="el.fillColor || 'var(--pt-surface-white)'"
+                    (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
                   ></div>
                 }
@@ -370,13 +375,69 @@
                     [style.top]="getElementScreenRect(el).top"
                     [style.width]="getElementScreenRect(el).width"
                     [style.height]="getElementScreenRect(el).height"
-                    [style.border-color]="el.strokeColor || 'var(--pt-navy)'"
-                    [style.border-width.px]="el.strokeWidth || 2"
-                    [style.border-style]="'solid'"
-                    [style.background-color]="el.fillColor || 'transparent'"
-                    [class.circle]="el.shapeType === 'circle'"
+                    (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
-                  ></div>
+                  >
+                    @if (el.shapeType === 'rectangle') {
+                      <div
+                        class="shape-inner rect"
+                        [style.border-color]="el.strokeColor || 'var(--pt-navy)'"
+                        [style.border-width.px]="el.strokeWidth || 2"
+                        [style.background-color]="el.fillColor || 'transparent'"
+                      ></div>
+                    } @else if (el.shapeType === 'circle') {
+                      <div
+                        class="shape-inner circle"
+                        [style.border-color]="el.strokeColor || 'var(--pt-navy)'"
+                        [style.border-width.px]="el.strokeWidth || 2"
+                        [style.background-color]="el.fillColor || 'transparent'"
+                      ></div>
+                    } @else if (el.shapeType === 'line') {
+                      <svg width="100%" height="100%" style="overflow: visible;">
+                        <line
+                          x1="0"
+                          y1="100%"
+                          x2="100%"
+                          y2="0"
+                          [attr.stroke]="el.strokeColor || 'var(--pt-navy)'"
+                          [attr.stroke-width]="el.strokeWidth || 2"
+                        />
+                      </svg>
+                    } @else if (el.shapeType === 'arrow') {
+                      <svg width="100%" height="100%" style="overflow: visible;">
+                        <defs>
+                          <marker
+                            [id]="'arrhead-' + el.id"
+                            markerWidth="10"
+                            markerHeight="7"
+                            refX="9"
+                            refY="3.5"
+                            orient="auto"
+                          >
+                            <polygon points="0 0, 10 3.5, 0 7" [attr.fill]="el.strokeColor || 'var(--pt-navy)'" />
+                          </marker>
+                        </defs>
+                        <line
+                          x1="0"
+                          y1="100%"
+                          x2="100%"
+                          y2="0"
+                          [attr.stroke]="el.strokeColor || 'var(--pt-navy)'"
+                          [attr.stroke-width]="el.strokeWidth || 2"
+                          [attr.marker-end]="'url(#arrhead-' + el.id + ')'"
+                        />
+                      </svg>
+                    } @else if (el.shapeType === 'star') {
+                      <svg width="100%" height="100%" viewBox="0 0 24 24">
+                        <polygon
+                          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                          [attr.stroke]="el.strokeColor || 'var(--pt-navy)'"
+                          [attr.stroke-width]="el.strokeWidth || 2"
+                          [attr.fill]="el.fillColor || 'transparent'"
+                        />
+                      </svg>
+                    }
+                  </div>
                 }
 
                 @if (el.type === 'highlight') {
@@ -389,109 +450,173 @@
                     [style.height]="getElementScreenRect(el).height"
                     [style.background-color]="el.color || 'var(--pt-amber)'"
                     [style.opacity]="el.opacity || 0.35"
+                    (mousedown)="onElementMouseDown(el, $event)"
                     (click)="selectElement(el, $event)"
                   ></div>
+                }
+
+                @if (el.type === 'draw') {
+                  <svg
+                    class="canvas-element draw-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    (mousedown)="onElementMouseDown(el, $event)"
+                    (click)="selectElement(el, $event)"
+                  >
+                    <path
+                      [attr.d]="getDrawPath(el)"
+                      [attr.stroke]="el.strokeColor || 'var(--pt-teal-700)'"
+                      [attr.stroke-width]="el.strokeWidth || 2"
+                      fill="none"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                }
+
+                @if (el.type === 'sign') {
+                  <div
+                    class="canvas-element sign-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    (mousedown)="onElementMouseDown(el, $event)"
+                    (click)="selectElement(el, $event)"
+                  >
+                    @if (el.dataUrl.startsWith('data:image')) {
+                      <img [src]="el.dataUrl" alt="Signature" class="signature-img" />
+                    } @else {
+                      <div class="signature-text">{{ el.dataUrl }}</div>
+                    }
+                  </div>
+                }
+
+                @if (el.type === 'image') {
+                  <div
+                    class="canvas-element image-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    (mousedown)="onElementMouseDown(el, $event)"
+                    (click)="selectElement(el, $event)"
+                  >
+                    <img [src]="el.dataUrl" alt="Inserted image" class="inserted-image-tag" />
+                  </div>
+                }
+
+                @if (el.type === 'link') {
+                  <div
+                    class="canvas-element link-element"
+                    [class.selected]="selectedElementId() === el.id"
+                    [style.left]="getElementScreenRect(el).left"
+                    [style.top]="getElementScreenRect(el).top"
+                    [style.width]="getElementScreenRect(el).width"
+                    [style.height]="getElementScreenRect(el).height"
+                    (mousedown)="onElementMouseDown(el, $event)"
+                    (click)="selectElement(el, $event)"
+                  >
+                    <a [href]="el.url" target="_blank" rel="noopener noreferrer" class="link-anchor" (click)="$event.stopPropagation()">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      <span>{{ el.url }}</span>
+                    </a>
+                  </div>
                 }
               }
             </div>
           </div>
 
-          <!-- FLOATING MULTI-DOC DOCK -->
-          <div class="floating-dock-vertical" aria-label="Add sources">
-            <button
-              type="button"
-              class="dock-action-btn primary"
-              title="Add pages from another PDF"
-              (click)="fileInputAppend.click()"
-            >
-              <svg
-                class="lucide-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+          <!-- FLOATING MULTI-DOCUMENT UPLOAD PILL (Exact match to other tool pages) -->
+          <div class="floating-tools-dock" role="toolbar" aria-label="Add more documents">
+            <!-- 1. Add More Files (+ in teal circle with count badge) -->
+            <div class="dock-btn-wrap">
+              <button
+                type="button"
+                class="dock-square-btn add-more-action"
+                (click)="fileInputAddMore.click()"
+                title="Add more files"
+                aria-label="Add more files"
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span class="dock-badge">1</span>
-            </button>
+                <span class="dock-count-badge">{{ pages().length }}</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Add more files</span>
+            </div>
+
+            <!-- 2. Computer / Laptop Upload -->
+            <div class="dock-btn-wrap">
+              <button
+                type="button"
+                class="dock-icon-btn pc-action"
+                (click)="fileInputAddMore.click()"
+                title="Upload from computer"
+                aria-label="Upload from computer"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="3"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Upload from PC</span>
+            </div>
+
+            <!-- 3. Google Drive (Authentic Full-Color Logo) -->
+            <div class="dock-btn-wrap">
+              <button
+                type="button"
+                class="dock-icon-btn drive-action"
+                (click)="openGoogleDrive($event)"
+                title="Google Drive"
+                aria-label="Add from Google Drive"
+              >
+                <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none">
+                  <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                  <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
+                  <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
+                  <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                  <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                  <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Google Drive</span>
+            </div>
+
+            <!-- 4. Dropbox (Authentic Blue Logo) -->
+            <div class="dock-btn-wrap">
+              <button
+                type="button"
+                class="dock-icon-btn dropbox-action"
+                (click)="openDropbox($event)"
+                title="Dropbox"
+                aria-label="Add from Dropbox"
+              >
+                <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF">
+                  <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Dropbox</span>
+            </div>
+
             <input
-              #fileInputAppend
+              #fileInputAddMore
               type="file"
+              hidden
               accept=".pdf,application/pdf"
-              style="display: none"
-              (change)="onFilesSelected($any($event.target).files)"
+              (change)="onAddMoreFiles($event)"
             />
-
-            <button
-              type="button"
-              class="dock-action-btn"
-              title="Device upload"
-              (click)="fileInputAppend.click()"
-            >
-              <svg
-                class="lucide-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                <line x1="8" y1="21" x2="16" y2="21" />
-                <line x1="12" y1="17" x2="12" y2="21" />
-              </svg>
-            </button>
-
-            <button
-              type="button"
-              class="dock-action-btn"
-              title="Google Drive (Coming Soon)"
-            >
-              <svg
-                class="lucide-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-            </button>
-
-            <button
-              type="button"
-              class="dock-action-btn"
-              title="Dropbox (Coming Soon)"
-            >
-              <svg
-                class="lucide-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polygon points="12 2 2 8.5 7 12 12 8.5 17 12 22 8.5 12 2" />
-                <polygon points="2 15.5 7 12 12 15.5 17 12 22 15.5 12 22 2 15.5" />
-              </svg>
-            </button>
           </div>
 
           <!-- BOTTOM FLOATING CAPSULE BAR -->
@@ -704,7 +829,7 @@
                 type="button"
                 class="tool-tile"
                 [class.active]="activeTool() === 'image'"
-                (click)="selectTool('image'); fileInputImage.click()"
+                (click)="selectTool('image')"
               >
                 <svg
                   class="lucide-icon"
@@ -723,12 +848,6 @@
                 </svg>
                 <span class="tool-tile-name">Image</span>
               </button>
-              <input
-                #fileInputImage
-                type="file"
-                accept="image/*"
-                style="display: none"
-              />
 
               <!-- 4. Draw -->
               <button
@@ -833,7 +952,7 @@
                 type="button"
                 class="tool-tile"
                 [class.active]="activeTool() === 'sign'"
-                (click)="selectTool('sign'); addTextElement(100, 100)"
+                (click)="selectTool('sign')"
               >
                 <svg
                   class="lucide-icon"
@@ -858,7 +977,7 @@
                 type="button"
                 class="tool-tile"
                 [class.active]="activeTool() === 'link'"
-                (click)="selectTool('link'); addTextElement(100, 100)"
+                (click)="selectTool('link')"
               >
                 <svg
                   class="lucide-icon"
@@ -878,6 +997,14 @@
               </button>
             </div>
           </div>
+
+          <input
+            #fileInputImage
+            type="file"
+            accept="image/*"
+            style="display: none"
+            (change)="onImageFileSelected($event)"
+          />
 
           <!-- Section: CLOUD TOOLS Group -->
           <div class="sidebar-section cloud-tools-section">
@@ -929,12 +1056,117 @@
             </button>
           </div>
 
-          <!-- Section: PROPERTIES (Contextual) -->
+          <!-- Section: PROPERTIES (Contextual for every tool) -->
           <div class="sidebar-section properties-section">
-            <!-- (A) Text Properties Panel -->
-            @if (activeTool() === 'text' || (selectedElement() && selectedElement()?.type === 'text')) {
-              <div class="section-badge-title">TEXT</div>
-              <div class="text-properties-panel">
+            <!-- (A) Shapes Properties Panel -->
+            @if (activeTool() === 'shapes' || (selectedElement() && selectedElement()?.type === 'shape')) {
+              <div class="section-badge-title">SHAPE OPTIONS</div>
+              <div class="property-panel-card">
+                <label class="property-sublabel">Select Shape</label>
+                <div class="shape-type-grid">
+                  <button
+                    type="button"
+                    class="shape-choice-btn"
+                    [class.active]="shapeType() === 'rectangle'"
+                    (click)="setShapeType('rectangle')"
+                    title="Rectangle"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                    </svg>
+                    <span>Rectangle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="shape-choice-btn"
+                    [class.active]="shapeType() === 'circle'"
+                    (click)="setShapeType('circle')"
+                    title="Circle"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="9" />
+                    </svg>
+                    <span>Circle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="shape-choice-btn"
+                    [class.active]="shapeType() === 'line'"
+                    (click)="setShapeType('line')"
+                    title="Line"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="5" y1="19" x2="19" y2="5" />
+                    </svg>
+                    <span>Line</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="shape-choice-btn"
+                    [class.active]="shapeType() === 'arrow'"
+                    (click)="setShapeType('arrow')"
+                    title="Arrow"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="5" y1="19" x2="19" y2="5" />
+                      <polyline points="10 5 19 5 19 14" />
+                    </svg>
+                    <span>Arrow</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="shape-choice-btn"
+                    [class.active]="shapeType() === 'star'"
+                    (click)="setShapeType('star')"
+                    title="Star"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    <span>Star</span>
+                  </button>
+                </div>
+
+                <label class="property-sublabel">Border Thickness</label>
+                <div class="thickness-btn-group">
+                  <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 1" (click)="setStrokeWidth(1)">1px</button>
+                  <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 2" (click)="setStrokeWidth(2)">2px</button>
+                  <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 4" (click)="setStrokeWidth(4)">4px</button>
+                  <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 6" (click)="setStrokeWidth(6)">6px</button>
+                </div>
+
+                <label class="property-sublabel">Border Color</label>
+                <div class="color-swatches-group">
+                  <button type="button" class="color-dot navy" [class.active]="strokeColor() === 'var(--pt-navy)'" (click)="setStrokeColor('var(--pt-navy)')" title="Navy"></button>
+                  <button type="button" class="color-dot teal" [class.active]="strokeColor() === 'var(--pt-teal-700)'" (click)="setStrokeColor('var(--pt-teal-700)')" title="Teal"></button>
+                  <button type="button" class="color-dot coral" [class.active]="strokeColor() === 'var(--pt-coral)'" (click)="setStrokeColor('var(--pt-coral)')" title="Coral"></button>
+                  <button type="button" class="color-dot amber" [class.active]="strokeColor() === 'var(--pt-amber)'" (click)="setStrokeColor('var(--pt-amber)')" title="Amber"></button>
+                  <button type="button" class="color-dot black" [class.active]="strokeColor() === 'var(--pt-navy-deep)'" (click)="setStrokeColor('var(--pt-navy-deep)')" title="Dark"></button>
+                </div>
+
+                <label class="property-sublabel">Fill Color</label>
+                <div class="color-swatches-group">
+                  <button type="button" class="color-dot transparent" [class.active]="fillColor() === 'transparent'" (click)="setFillColor('transparent')" title="Transparent"></button>
+                  <button type="button" class="color-dot white" [class.active]="fillColor() === 'var(--pt-surface-white)'" (click)="setFillColor('var(--pt-surface-white)')" title="White"></button>
+                  <button type="button" class="color-dot teal-tint" [class.active]="fillColor() === 'var(--pt-teal-50)'" (click)="setFillColor('var(--pt-teal-50)')" title="Teal Tint"></button>
+                  <button type="button" class="color-dot amber-tint" [class.active]="fillColor() === 'rgba(245, 158, 11, 0.15)'" (click)="setFillColor('rgba(245, 158, 11, 0.15)')" title="Amber Tint"></button>
+                  <button type="button" class="color-dot coral-tint" [class.active]="fillColor() === 'rgba(244, 63, 94, 0.15)'" (click)="setFillColor('rgba(244, 63, 94, 0.15)')" title="Coral Tint"></button>
+                </div>
+
+                <button type="button" class="btn-action-primary" (click)="addShapeElement(120, 120)">
+                  <span>+ Place Shape on Page</span>
+                </button>
+              </div>
+            }
+
+            <!-- (B) Text Properties Panel -->
+            @else if (activeTool() === 'text' || (selectedElement() && selectedElement()?.type === 'text')) {
+              <div class="section-badge-title">TEXT PROPERTIES</div>
+              <div class="property-panel-card">
                 <div class="property-row">
                   <select
                     class="font-select"
@@ -998,13 +1230,144 @@
                       (click)="textColor.set('var(--pt-coral)'); updateTextProperty('color', 'var(--pt-coral)')"
                       aria-label="Coral text color"
                     ></button>
+                    <button
+                      type="button"
+                      class="color-dot black"
+                      [class.active]="textColor() === 'var(--pt-navy-deep)'"
+                      (click)="textColor.set('var(--pt-navy-deep)'); updateTextProperty('color', 'var(--pt-navy-deep)')"
+                      aria-label="Dark text color"
+                    ></button>
                   </div>
                 </div>
+
+                <button type="button" class="btn-action-primary" (click)="addTextElement(100, 100)">
+                  <span>+ Add Text Box</span>
+                </button>
               </div>
             }
 
-            <!-- (B) OCR Properties Panel -->
-            @if (activeTool() === 'ocr') {
+            <!-- (C) Freehand Draw Panel -->
+            @else if (activeTool() === 'draw') {
+              <div class="section-badge-title">FREEHAND DRAW</div>
+              <div class="property-panel-card">
+                <label class="property-sublabel">Brush Size</label>
+                <div class="thickness-btn-group">
+                  <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 2" (click)="drawStrokeWidth.set(2)">2px</button>
+                  <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 4" (click)="drawStrokeWidth.set(4)">4px</button>
+                  <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 6" (click)="drawStrokeWidth.set(6)">6px</button>
+                  <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 8" (click)="drawStrokeWidth.set(8)">8px</button>
+                </div>
+
+                <label class="property-sublabel">Brush Color</label>
+                <div class="color-swatches-group">
+                  <button type="button" class="color-dot teal" [class.active]="drawColor() === 'var(--pt-teal-700)'" (click)="drawColor.set('var(--pt-teal-700)')"></button>
+                  <button type="button" class="color-dot navy" [class.active]="drawColor() === 'var(--pt-navy)'" (click)="drawColor.set('var(--pt-navy)')"></button>
+                  <button type="button" class="color-dot coral" [class.active]="drawColor() === 'var(--pt-coral)'" (click)="drawColor.set('var(--pt-coral)')"></button>
+                  <button type="button" class="color-dot black" [class.active]="drawColor() === 'var(--pt-navy-deep)'" (click)="drawColor.set('var(--pt-navy-deep)')"></button>
+                </div>
+
+                <p class="property-tip">Click and drag directly on the canvas to draw freely.</p>
+              </div>
+            }
+
+            <!-- (D) Highlight Panel -->
+            @else if (activeTool() === 'highlight') {
+              <div class="section-badge-title">HIGHLIGHT</div>
+              <div class="property-panel-card">
+                <label class="property-sublabel">Color</label>
+                <div class="color-swatches-group">
+                  <button type="button" class="color-dot amber" [class.active]="highlightColor() === 'var(--pt-amber)'" (click)="highlightColor.set('var(--pt-amber)')" title="Yellow"></button>
+                  <button type="button" class="color-dot teal" [class.active]="highlightColor() === 'var(--pt-teal-700)'" (click)="highlightColor.set('var(--pt-teal-700)')" title="Teal"></button>
+                  <button type="button" class="color-dot coral" [class.active]="highlightColor() === 'var(--pt-coral)'" (click)="highlightColor.set('var(--pt-coral)')" title="Pink"></button>
+                </div>
+
+                <label class="property-sublabel">Opacity</label>
+                <div class="thickness-btn-group">
+                  <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.25" (click)="highlightOpacity.set(0.25)">25%</button>
+                  <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.35" (click)="highlightOpacity.set(0.35)">35%</button>
+                  <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.5" (click)="highlightOpacity.set(0.5)">50%</button>
+                </div>
+
+                <button type="button" class="btn-action-primary" (click)="addHighlightElement(100, 100)">
+                  <span>+ Place Highlight Box</span>
+                </button>
+              </div>
+            }
+
+            <!-- (E) Whiteout Panel -->
+            @else if (activeTool() === 'whiteout') {
+              <div class="section-badge-title">WHITEOUT</div>
+              <div class="property-panel-card">
+                <p class="property-tip">Erase or hide sensitive text with an opaque cover rectangle.</p>
+                <button type="button" class="btn-action-primary" (click)="addWhiteoutElement(100, 100)">
+                  <span>+ Place Whiteout Block</span>
+                </button>
+              </div>
+            }
+
+            <!-- (F) Image Panel -->
+            @else if (activeTool() === 'image') {
+              <div class="section-badge-title">IMAGE</div>
+              <div class="property-panel-card">
+                <p class="property-tip">Insert photos, logos, or stamps directly onto the page.</p>
+                <button type="button" class="btn-action-primary" (click)="fileInputImage.click()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <span>Choose Image File</span>
+                </button>
+              </div>
+            }
+
+            <!-- (G) Sign Panel -->
+            @else if (activeTool() === 'sign') {
+              <div class="section-badge-title">SIGNATURE</div>
+              <div class="property-panel-card">
+                <label class="property-sublabel">Signer Name / Text</label>
+                <input
+                  type="text"
+                  class="custom-range-input"
+                  placeholder="Type your name or signature..."
+                  [ngModel]="signatureText()"
+                  (ngModelChange)="signatureText.set($event)"
+                />
+
+                <label class="property-sublabel">Signature Color</label>
+                <div class="color-swatches-group">
+                  <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'" (click)="signatureColor.set('var(--pt-teal-700)')"></button>
+                  <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'" (click)="signatureColor.set('var(--pt-navy)')"></button>
+                  <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'" (click)="signatureColor.set('var(--pt-navy-deep)')"></button>
+                </div>
+
+                <button type="button" class="btn-action-primary" (click)="addSignatureElement(100, 100)">
+                  <span>+ Place Signature on Page</span>
+                </button>
+              </div>
+            }
+
+            <!-- (H) Link Panel -->
+            @else if (activeTool() === 'link') {
+              <div class="section-badge-title">LINK</div>
+              <div class="property-panel-card">
+                <label class="property-sublabel">Destination URL</label>
+                <input
+                  type="url"
+                  class="custom-range-input"
+                  placeholder="https://example.com"
+                  [ngModel]="linkUrl()"
+                  (ngModelChange)="linkUrl.set($event)"
+                />
+
+                <button type="button" class="btn-action-primary" (click)="addLinkElement(100, 100)">
+                  <span>+ Insert Link Box</span>
+                </button>
+              </div>
+            }
+
+            <!-- (I) OCR Properties Panel -->
+            @else if (activeTool() === 'ocr') {
               <div class="section-badge-title">OCR RECOGNITION</div>
               <div class="ocr-properties-panel">
                 <!-- Page Range -->
@@ -1174,6 +1537,68 @@
                   </div>
                 }
               </div>
+            }
+
+            <!-- (J) Selection Tool Properties Panel (Element info or Document summary) -->
+            @else {
+              @if (selectedElement(); as el) {
+                <div class="section-badge-title">ELEMENT PROPERTIES</div>
+                <div class="property-panel-card">
+                  <div class="selected-meta-row">
+                    <span class="selected-type-tag">{{ el.type | uppercase }}</span>
+                    <span class="selected-id-tag">Page {{ (el.pageIndex || 0) + 1 }}</span>
+                  </div>
+
+                  <div class="element-action-buttons">
+                    <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      <span>Duplicate</span>
+                    </button>
+
+                    <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15" />
+                      </svg>
+                      <span>Forward</span>
+                    </button>
+
+                    <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete Element">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="section-badge-title">DOCUMENT INFO</div>
+                <div class="property-panel-card">
+                  <div class="doc-stats-grid">
+                    <div class="stat-item">
+                      <span class="stat-label">Current Page</span>
+                      <span class="stat-value">{{ currentPageIndex() + 1 }} of {{ pages().length }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">Elements on Page</span>
+                      <span class="stat-value">{{ currentPageElements().length }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">Zoom Level</span>
+                      <span class="stat-value">{{ (zoom() * 100) | number:'1.0-0' }}%</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">Page Dimensions</span>
+                      <span class="stat-value">{{ currentPage()?.widthPt }} × {{ currentPage()?.heightPt }} pt</span>
+                    </div>
+                  </div>
+
+                  <p class="property-tip">Select a tool above to annotate, draw, place shapes, or run OCR.</p>
+                </div>
+              }
             }
           </div>
 

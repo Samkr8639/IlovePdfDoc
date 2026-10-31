@@ -180,4 +180,71 @@ describe('EditPdfComponent Integration Tests', () => {
     component.history.undo();
     expect(component.elements().length).toBe(0);
   });
+
+  it('supports selecting different shape types, stroke widths, and colors', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    component.selectTool('shapes');
+    expect(component.activeTool()).toBe('shapes');
+
+    component.setShapeType('circle');
+    expect(component.shapeType()).toBe('circle');
+
+    component.setStrokeWidth(4);
+    expect(component.strokeWidth()).toBe(4);
+
+    component.setStrokeColor('var(--pt-coral)');
+    expect(component.strokeColor()).toBe('var(--pt-coral)');
+
+    component.setFillColor('var(--pt-teal-50)');
+    expect(component.fillColor()).toBe('var(--pt-teal-50)');
+
+    // Add shape to page
+    component.addShapeElement(150, 150);
+    expect(component.elements().length).toBe(1);
+    const addedShape = component.elements()[0] as any;
+    expect(addedShape.type).toBe('shape');
+    expect(addedShape.shapeType).toBe('circle');
+    expect(addedShape.strokeWidth).toBe(4);
+    expect(addedShape.strokeColor).toBe('var(--pt-coral)');
+    expect(addedShape.fillColor).toBe('var(--pt-teal-50)');
+
+    // Switch shape to arrow
+    component.setShapeType('arrow');
+    const updatedShape = component.elements()[0] as any;
+    expect(updatedShape.shapeType).toBe('arrow');
+  });
+
+  it('supports duplicating and deleting selected elements', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    component.addTextElement(100, 100);
+    expect(component.elements().length).toBe(1);
+
+    component.duplicateSelectedElement();
+    expect(component.elements().length).toBe(2);
+
+    component.deleteSelectedElement();
+    expect(component.elements().length).toBe(1);
+
+    component.selectedElementId.set(component.elements()[0].id);
+    component.deleteSelectedElement();
+    expect(component.elements().length).toBe(0);
+  });
+
+  it('handles Google Drive and Dropbox external openers safely', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    component.openGoogleDrive();
+    expect(openSpy).toHaveBeenCalledWith('https://drive.google.com/', '_blank', 'noopener,noreferrer');
+
+    component.openDropbox();
+    expect(openSpy).toHaveBeenCalledWith('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
+
+    openSpy.mockRestore();
+  });
 });

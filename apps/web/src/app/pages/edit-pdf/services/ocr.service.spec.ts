@@ -59,3 +59,4 @@ describe('OcrService', () => {
     await expect(service.cancel()).resolves.toBeUndefined();
   });
 });
+
