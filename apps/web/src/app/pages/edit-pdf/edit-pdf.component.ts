@@ -1313,7 +1313,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectElement(el: EditElement, event?: MouseEvent): void {
+  selectElement(el: EditElement, event?: Event): void {
     event?.stopPropagation();
     this.selectedElementId.set(el.id);
 
@@ -1525,9 +1525,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
       if (rawItems.length === 0) {
         this.errorMessage.set(
-          'No digital text found on this page (it appears to be a scanned image). Click "Make text editable" in Cloud Tools to recognize text with OCR.'
+          'No digital text found on this page (it appears to be a scanned image). You can recognize text using OCR.'
         );
-        this.selectTool('ocr');
+        this.startOcrRecognition();
         return;
       }
 
@@ -1862,6 +1862,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
             color: 'var(--pt-navy)',
             baselineY: line.baselineY,
             isOcrLine: true,
+            isPageTextLine: true,
             ocrConfidence: line.confidence
           };
 
@@ -1887,6 +1888,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       description: `Recognize Text (${mode === 'searchable' ? 'Searchable' : 'Editable'})`,
       execute: () => {
         this.elements.update(list => [...list, ...generatedElements]);
+        if (mode === 'editable') {
+          this.editorMode.set('edit');
+        }
       },
       undo: () => {
         const idsToRemove = new Set(generatedElements.map(e => e.id));

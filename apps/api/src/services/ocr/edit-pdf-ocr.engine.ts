@@ -41,6 +41,7 @@ export async function detectSkewAngle(
     // Search angles between -15 and +15 degrees
     let bestAngle = 0;
     let maxVariance = 0;
+    let varianceAt0 = 0;
 
     for (let angle = -15; angle <= 15; angle += 1.0) {
       const rad = (angle * Math.PI) / 180;
@@ -75,14 +76,24 @@ export async function detectSkewAngle(
       }
       const variance = sumSq / height - (sum / height) ** 2;
 
+      if (angle === 0) {
+        varianceAt0 = variance;
+      }
+
       if (variance > maxVariance) {
         maxVariance = variance;
         bestAngle = angle;
       }
     }
 
-    // Only deskew if significant variance and angle is at least 0.5 degrees
-    if (maxVariance > 10 && Math.abs(bestAngle) >= 0.5 && Math.abs(bestAngle) <= 15) {
+    // Only deskew if the variance is at least 35% higher than at angle 0 and angle >= 1.0 deg
+    // This prevents straight digital documents from being rotated due to tiny projection noise.
+    const isSignificantSkew =
+      varianceAt0 > 0
+        ? maxVariance > 1.35 * varianceAt0 && Math.abs(bestAngle) >= 1.0 && Math.abs(bestAngle) <= 15
+        : maxVariance > 100 && Math.abs(bestAngle) >= 1.0 && Math.abs(bestAngle) <= 15;
+
+    if (isSignificantSkew) {
       const deskewedBuffer = await sharp(imageBuffer)
         .rotate(-bestAngle, { background: '#ffffff' })
         .toBuffer();

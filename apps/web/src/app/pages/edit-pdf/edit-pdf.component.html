@@ -390,6 +390,7 @@
                     class="canvas-element text-element"
                     [class.selected]="selectedElementId() === el.id"
                     [class.page-text-line]="el.isPageTextLine"
+                    [class.is-ocr-line]="el.isOcrLine"
                     [class.in-edit-mode]="editorMode() === 'edit'"
                     [style.left]="getElementScreenRect(el).left"
                     [style.top]="getElementScreenRect(el).top"
@@ -410,6 +411,7 @@
                       [style.font-style]="el.italic ? 'italic' : 'normal'"
                       [style.text-decoration]="el.underline ? 'underline' : 'none'"
                       [style.text-align]="el.align || 'left'"
+                      (focus)="selectElement(el, $event)"
                       (click)="$event.stopPropagation()"
                     />
                     @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) {
@@ -1081,55 +1083,7 @@
             (change)="onImageFileSelected($event)"
           />
 
-          <!-- Section: CLOUD TOOLS Group -->
-          <div class="sidebar-section cloud-tools-section">
-            <div class="section-badge-title cloud-badge-title">
-              <svg
-                class="lucide-icon-sm"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-              </svg>
-              <span>CLOUD TOOLS</span>
-            </div>
 
-            <!-- OCR Tile: Make text editable -->
-            <button
-              type="button"
-              class="cloud-tool-tile"
-              [class.active]="activeTool() === 'ocr'"
-              (click)="selectTool('ocr')"
-              title="Sends this PDF to our server"
-            >
-              <div class="cloud-tile-icon-wrap">
-                <svg
-                  class="lucide-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-                </svg>
-                <span class="cloud-sub-badge">CLOUD</span>
-              </div>
-              <div class="cloud-tile-info">
-                <span class="cloud-tile-title">Make text editable</span>
-                <span class="cloud-tile-hint">OCR recognition</span>
-              </div>
-            </button>
-          </div>
 
           <!-- Section: PROPERTIES (Contextual for every tool) -->
           <div class="sidebar-section properties-section">
