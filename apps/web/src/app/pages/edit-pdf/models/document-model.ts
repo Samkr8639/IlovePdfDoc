@@ -60,6 +60,8 @@ export interface TextEditElement extends BaseEditElement {
   baselineY?: number;
   isOcrLine?: boolean;
   isPageTextLine?: boolean;
+  isEdited?: boolean;
+  originalText?: string;
   ocrConfidence?: number;
   lowConfidenceWords?: LowConfidenceWord[];
 }

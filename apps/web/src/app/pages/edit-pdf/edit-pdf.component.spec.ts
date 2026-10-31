@@ -388,15 +388,17 @@ describe('EditPdfComponent Integration Tests', () => {
     await component.makePageTextEditable();
 
     expect(component.editorMode()).toBe('edit');
-    // Each line gets a whiteout cover and a TextEditElement (2 lines * 2 = 4 elements)
-    expect(component.elements().length).toBe(4);
+    // Generates clean in-place text elements (2 lines) without obscuring original PDF
+    expect(component.elements().length).toBe(2);
 
     const textElements = component.elements().filter(e => e.type === 'text') as any[];
     expect(textElements.length).toBe(2);
     expect(textElements[0].text).toBe('SAMEER KUMAR');
     expect(textElements[0].isPageTextLine).toBe(true);
+    expect(textElements[0].isEdited).toBe(false);
     expect(textElements[1].text).toBe('Frontend Developer');
     expect(textElements[1].isPageTextLine).toBe(true);
+    expect(textElements[1].isEdited).toBe(false);
 
     // Can undo all extracted text lines in 1 step
     component.history.undo();

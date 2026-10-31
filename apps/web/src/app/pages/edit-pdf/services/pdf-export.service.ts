@@ -67,16 +67,32 @@ export class PdfExportService {
           case 'draw':
             this.renderDraw(page, el as DrawEditElement);
             break;
-          case 'text':
+          case 'text': {
+            const textEl = el as TextEditElement;
+            // Skip unedited page text elements (they are already in the original PDF)
+            if (textEl.isPageTextLine && !textEl.isEdited) {
+              break;
+            }
+            // If user edited this page text block, whiteout the old text first
+            if (textEl.isPageTextLine && textEl.isEdited) {
+              page.drawRectangle({
+                x: Math.max(0, textEl.xPt - 2),
+                y: Math.max(0, textEl.yPt - 1),
+                width: textEl.widthPt + 4,
+                height: textEl.heightPt + 2,
+                color: rgb(1, 1, 1)
+              });
+            }
             this.renderText(
               page,
-              el as TextEditElement,
+              textEl,
               fontRegular,
               fontBold,
               fontItalic,
               fontBoldItalic
             );
             break;
+          }
           case 'ocr-layer':
             this.renderOcrTextLayer(page, el as OcrTextLayerElement, fontRegular);
             break;

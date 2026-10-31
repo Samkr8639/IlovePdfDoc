@@ -1445,7 +1445,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       description: `Change text ${field}`,
       execute: () => {
         this.elements.update(list =>
-          list.map(e => (e.id === textEl.id ? { ...e, [field]: value } : e))
+          list.map(e => (e.id === textEl.id ? { ...e, [field]: value, ...(textEl.isPageTextLine ? { isEdited: true } : {}) } : e))
         );
       },
       undo: () => {
@@ -1498,6 +1498,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   onTextContentChange(el: TextEditElement, newText: string): void {
     el.text = newText;
+    if (el.isPageTextLine) {
+      if (el.originalText === undefined || newText !== el.originalText) {
+        el.isEdited = true;
+      }
+    }
     this.elements.update(list => [...list]);
   }
 
@@ -1778,28 +1783,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         if (!fullBlockText.trim()) continue;
 
         const xPt = block.x0;
-        const widthPt = Math.max(30, block.x1 - block.x0 + 6);
+        const widthPt = Math.max(30, block.x1 - block.x0 + 12);
         const heightPt = Math.max(16, block.y1 - block.y0 + 4);
         const yPt = block.y0 - 2;
         const baselineY = block.lines[0].baselineY;
         const fontSizePt = Math.round(block.fontSize * 10) / 10;
-
-        const coverEl: WhiteoutEditElement = {
-          id: `page-wo-${page.pageIndex}-${idx}-${Date.now()}`,
-          pageIndex: page.pageIndex,
-          type: 'whiteout',
-          xPt: Math.max(0, xPt - 2),
-          yPt: Math.max(0, yPt - 1),
-          widthPt: widthPt + 4,
-          heightPt: heightPt + 2,
-          fillColor: 'var(--pt-surface-white)'
-        };
 
         const textEl: TextEditElement = {
           id: `page-text-${page.pageIndex}-${idx}-${Date.now()}`,
           pageIndex: page.pageIndex,
           type: 'text',
           isPageTextLine: true,
+          isEdited: false,
+          originalText: fullBlockText,
           xPt,
           yPt,
           baselineY,
@@ -1811,7 +1807,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           color: 'var(--pt-navy)'
         };
 
-        generatedElements.push(coverEl, textEl);
+        generatedElements.push(textEl);
       }
 
       const cmd: Command = {

@@ -420,40 +420,43 @@
             <div class="canvas-elements-overlay">
               @for (el of currentPageElements(); track el.id) {
                 @if (el.type === 'text') {
-                  <div
-                    class="canvas-element text-element"
-                    [class.selected]="selectedElementId() === el.id"
-                    [class.page-text-line]="el.isPageTextLine"
-                    [class.is-ocr-line]="el.isOcrLine"
-                    [class.in-edit-mode]="editorMode() === 'edit'"
-                    [style.left]="getElementScreenRect(el).left"
-                    [style.top]="getElementScreenRect(el).top"
-                    [style.width]="getElementScreenRect(el).width"
-                    [style.height]="getElementScreenRect(el).height"
-                    (mousedown)="onElementMouseDown(el, $event)"
-                    (click)="selectElement(el, $event)"
-                  >
-                    <textarea
-                      class="canvas-text-area"
-                      [ngModel]="el.text"
-                      (ngModelChange)="onTextContentChange(el, $event)"
-                      [style.font-family]="el.fontFamily || 'Inter'"
-                      [style.font-size.px]="(el.fontSizePt || 14) * zoom()"
-                      [style.color]="el.color || 'var(--pt-navy)'"
-                      [style.font-weight]="el.bold ? '700' : '400'"
-                      [style.font-style]="el.italic ? 'italic' : 'normal'"
-                      [style.text-decoration]="el.underline ? 'underline' : 'none'"
-                      [style.text-align]="el.align || 'left'"
-                      [style.line-height]="1.35"
-                      (focus)="selectElement(el, $event)"
-                      (click)="$event.stopPropagation()"
-                    ></textarea>
-                    @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) {
-                      <div class="ocr-low-conf-badge" title="Confidence: {{ el.ocrConfidence }}%">
-                        !
-                      </div>
-                    }
-                  </div>
+                  @if (editorMode() === 'edit' || !el.isPageTextLine || el.isEdited) {
+                    <div
+                      class="canvas-element text-element"
+                      [class.selected]="selectedElementId() === el.id"
+                      [class.page-text-line]="el.isPageTextLine"
+                      [class.is-ocr-line]="el.isOcrLine"
+                      [class.in-edit-mode]="editorMode() === 'edit'"
+                      [class.is-user-edited]="el.isEdited"
+                      [style.left]="getElementScreenRect(el).left"
+                      [style.top]="getElementScreenRect(el).top"
+                      [style.width]="getElementScreenRect(el).width"
+                      [style.height]="getElementScreenRect(el).height"
+                      (mousedown)="onElementMouseDown(el, $event)"
+                      (click)="selectElement(el, $event)"
+                    >
+                      <textarea
+                        class="canvas-text-area"
+                        [ngModel]="el.text"
+                        (ngModelChange)="onTextContentChange(el, $event)"
+                        [style.font-family]="el.fontFamily || 'Inter'"
+                        [style.font-size.px]="(el.fontSizePt || 14) * zoom()"
+                        [style.color]="el.color || 'var(--pt-navy)'"
+                        [style.font-weight]="el.bold ? '700' : '400'"
+                        [style.font-style]="el.italic ? 'italic' : 'normal'"
+                        [style.text-decoration]="el.underline ? 'underline' : 'none'"
+                        [style.text-align]="el.align || 'left'"
+                        [style.line-height]="1.35"
+                        (focus)="selectElement(el, $event)"
+                        (click)="$event.stopPropagation()"
+                      ></textarea>
+                      @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) {
+                        <div class="ocr-low-conf-badge" title="Confidence: {{ el.ocrConfidence }}%">
+                          !
+                        </div>
+                      }
+                    </div>
+                  }
                 }
 
                 @if (el.type === 'whiteout') {
