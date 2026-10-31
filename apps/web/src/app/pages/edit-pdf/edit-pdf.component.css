@@ -196,80 +196,155 @@
   position: relative;
 }
 
-/* Top Undo/Redo Bar */
-.top-history-bar {
-  position: absolute;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
+/* ─── Top Toolbar Strip ──────────────────────────────────────────────────────
+   Sits in the normal flow above the workspace row. Never overlaps the PDF
+   canvas or side panels. Centered pill controls sit naturally at the top.     */
+.top-toolbar-strip {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--pt-soft-outline);
+  background: var(--pt-surface-white);
+  z-index: 20;
+  min-height: 52px;
 }
 
-/* Mode Caps (Annotate vs Edit Text) */
-.workspace-mode-capsule {
+.top-toolbar-inner {
   display: flex;
   align-items: center;
-  background: var(--pt-surface-white);
+  gap: 0.625rem;
+}
+
+/* Thin vertical divider between mode toggle and undo/redo */
+.toolbar-section-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--pt-soft-outline);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* ─── Mode Toggle Capsule (Annotate / Edit Text) ─────────────────────────────
+   Uses a sliding thumb indicator via CSS transforms so no JS measurement is
+   required. The thumb absolutely-positions itself within the capsule and slides
+   left ↔ right via transition.                                                  */
+.workspace-mode-capsule {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--pt-subtle-bg);
   border: 1px solid var(--pt-soft-outline);
   border-radius: var(--pt-radius-pill);
   padding: 3px;
   box-shadow: var(--pt-shadow-sm);
-  gap: 2px;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* Sliding highlight — a pill that translates behind the active button */
+.mode-slider-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  /* width / height match one tab button — sized via JS-free approach using
+     the same padding + font as .mode-pill-tab */
+  width: calc(50% - 3px);
+  bottom: 3px;
+  border-radius: var(--pt-radius-pill);
+  background: var(--pt-navy);
+  box-shadow: 0 1px 3px rgba(20, 33, 61, 0.18);
+  transition:
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.22s ease;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Thumb slides to the right half when Edit Text is active */
+.mode-slider-thumb.at-edit {
+  transform: translateX(100%);
+  background: var(--pt-teal-700);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.35);
+}
+
+/* Pulse animation while extracting/loading */
+.mode-slider-thumb.is-loading {
+  animation: thumbPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes thumbPulse {
+  from { opacity: 1; }
+  to   { opacity: 0.65; }
 }
 
 .mode-pill-tab {
+  position: relative; /* sits above the sliding thumb via z-index */
+  z-index: 1;
   background: transparent;
   border: none;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.375rem;
-  padding: 0.35rem 0.75rem;
+  padding: 0.375rem 0.875rem;
   border-radius: var(--pt-radius-pill);
   font-size: 0.8125rem;
   font-weight: 600;
+  font-family: var(--pt-font-body);
   color: var(--pt-muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  white-space: nowrap;
+  /* Color and opacity transition — background is handled by the thumb */
+  transition: color 0.2s ease, opacity 0.2s ease;
+  min-width: 100px; /* ensures both tabs are equal width for the 50% thumb */
+  user-select: none;
 }
 
-.mode-pill-tab:hover {
-  color: var(--pt-navy);
-  background: var(--pt-subtle-bg);
+.mode-pill-tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
+/* Active state: text flips to white to contrast against the sliding thumb */
 .mode-pill-tab.active {
-  background: var(--pt-navy);
   color: var(--pt-surface-white);
 }
 
-.mode-pill-tab.edit-mode-tab.active {
-  background: var(--pt-teal-700);
-  color: var(--pt-surface-white);
-  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.35);
+/* Hover: a faint tint when not active and not loading */
+.mode-pill-tab:not(.active):not(:disabled):hover {
+  color: var(--pt-navy);
+}
+
+/* Spinner icon for Edit Text loading state */
+.mode-spinner-icon {
+  animation: spinIcon 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spinIcon {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 .mode-pill-star {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--pt-amber);
+  line-height: 1;
 }
 
-.mode-pill-loading {
-  font-size: 0.75rem;
-  color: var(--pt-teal-600);
-}
-
+/* ─── History Capsule (Undo / Redo) ─────────────────────────────────────────*/
 .history-capsule {
   display: flex;
   align-items: center;
   background: var(--pt-surface-white);
   border: 1px solid var(--pt-soft-outline);
   border-radius: var(--pt-radius-pill);
-  padding: 0.25rem 0.625rem;
+  padding: 0.25rem 0.5rem;
   box-shadow: var(--pt-shadow-sm);
-  gap: 0.375rem;
+  gap: 0.25rem;
 }
 
 .history-btn {
@@ -278,13 +353,15 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.5rem;
+  padding: 0.3125rem 0.5625rem;
   border-radius: var(--pt-radius-pill);
   font-size: 0.75rem;
   font-weight: 600;
+  font-family: var(--pt-font-body);
   color: var(--pt-navy);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
 }
 
 .history-btn:hover:not(:disabled) {
@@ -301,13 +378,26 @@
   width: 1px;
   height: 16px;
   background: var(--pt-soft-outline);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* Responsive: on narrow screens collapse Undo/Redo labels */
+@media (max-width: 480px) {
+  .history-btn span {
+    display: none;
+  }
+  .mode-pill-tab {
+    padding: 0.375rem 0.625rem;
+    min-width: 80px;
+  }
 }
 
 /* Workspace Main Split Row */
 .workspace-main {
   display: flex;
   flex: 1;
-  height: 100%;
+  min-height: 0; /* critical — allows flex child to scroll inside bounded height */
   overflow: hidden;
   position: relative;
 }

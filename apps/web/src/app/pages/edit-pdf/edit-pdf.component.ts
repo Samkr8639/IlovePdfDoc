@@ -1496,9 +1496,16 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- In-Place Page Text Extraction (Character/Line editing) ---
   setEditorMode(mode: 'annotate' | 'edit'): void {
+    // Ignore rapid repeated clicks during text extraction
+    if (this.isExtractingPageText()) return;
+    // No-op if already in the requested mode
+    if (this.editorMode() === mode) return;
+
     this.editorMode.set(mode);
     if (mode === 'edit') {
-      this.makePageTextEditable();
+      // Small delay so the slider thumb animation (220ms) completes before
+      // the spinner appears — prevents a jarring visual overlap
+      setTimeout(() => this.makePageTextEditable(), 80);
     }
   }
 
