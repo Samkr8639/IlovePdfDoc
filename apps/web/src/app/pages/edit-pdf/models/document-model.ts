@@ -62,6 +62,10 @@ export interface TextEditElement extends BaseEditElement {
   isPageTextLine?: boolean;
   isEdited?: boolean;
   originalText?: string;
+  originalXPt?: number;
+  originalYPt?: number;
+  originalWidthPt?: number;
+  originalHeightPt?: number;
   ocrConfidence?: number;
   lowConfidenceWords?: LowConfidenceWord[];
   html?: string;

@@ -74,13 +74,18 @@ export class PdfExportService {
               if (textEl.isPageTextLine && !textEl.isEdited) {
                 break;
               }
-              // If user edited this page text block, whiteout the old text first
+              // If user edited this page text block, whiteout the old text first at its original position
               if (textEl.isPageTextLine && textEl.isEdited) {
+                const origX = textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt;
+                const origY = textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt;
+                const origW = textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt;
+                const origH = textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt;
+
                 page.drawRectangle({
-                  x: Math.max(0, textEl.xPt - 3),
-                  y: Math.max(0, textEl.yPt - 2),
-                  width: textEl.widthPt + 6,
-                  height: textEl.heightPt + 4,
+                  x: Math.max(0, origX - 3),
+                  y: Math.max(0, origY - 2),
+                  width: origW + 6,
+                  height: origH + 4,
                   color: rgb(1, 1, 1)
                 });
               }

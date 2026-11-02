@@ -476,6 +476,16 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         const ctx = canvas.getContext('2d');
         if (ctx) {
           await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+
+          // Erase original text on canvas for all page text blocks that are edited or currently selected
+          for (const el of this.elements()) {
+            if (el.pageIndex === i && el.type === 'text') {
+              const textEl = el as TextEditElement;
+              if (textEl.isPageTextLine && (textEl.isEdited || this.selectedElementId() === textEl.id)) {
+                this.whiteoutOriginalTextOnCanvas(textEl, ctx, pageInfo, dpr);
+              }
+            }
+          }
         }
       } catch (err: any) {
         if (err?.name !== 'RenderingCancelledException') {
@@ -487,6 +497,57 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   async renderCurrentPageToCanvas(): Promise<void> {
     await this.renderAllPages();
+  }
+
+  /**
+   * Directly paints a solid white rectangle onto the PDF canvas over the original text bounding box.
+   * This permanently erases the PDF.js bitmap pixels so that edited or moved text never shows
+   * a ghost/duplicate underneath.
+   */
+  whiteoutOriginalTextOnCanvas(
+    textEl: TextEditElement,
+    existingCtx?: CanvasRenderingContext2D,
+    pageInfoParam?: PageDimensions,
+    dprParam?: number
+  ): void {
+    const pageIndex = textEl.pageIndex;
+    const pageInfo = pageInfoParam || this.pages()[pageIndex];
+    if (!pageInfo) return;
+
+    const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
+      || this.pageCanvasRef?.nativeElement;
+    if (!canvas) return;
+
+    const ctx = existingCtx || canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = dprParam !== undefined
+      ? dprParam
+      : (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1);
+
+    const origX = textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt;
+    const origY = textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt;
+    const origW = textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt;
+    const origH = textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt;
+
+    const screenRect = this.transform.pdfRectToScreenRect(
+      {
+        xPt: Math.max(0, origX - 3),
+        yPt: Math.max(0, origY - 2),
+        widthPt: origW + 6,
+        heightPt: origH + 4
+      },
+      pageInfo,
+      this.zoom()
+    );
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(
+      Math.floor(screenRect.x * dpr),
+      Math.floor(screenRect.y * dpr),
+      Math.ceil(screenRect.width * dpr),
+      Math.ceil(screenRect.height * dpr)
+    );
   }
 
   // --- Page Navigation & Zoom ---
@@ -760,6 +821,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         : this.currentPage();
       if (!page) return;
 
+      if (draggedEl && draggedEl.type === 'text' && (draggedEl as TextEditElement).isPageTextLine) {
+        const textEl = draggedEl as TextEditElement;
+        if (!textEl.isEdited) {
+          textEl.isEdited = true;
+          this.whiteoutOriginalTextOnCanvas(textEl);
+        }
+      }
+
       const dxScreen = event.clientX - this.dragStartMouse.x;
       const dyScreen = event.clientY - this.dragStartMouse.y;
       const dxPt = dxScreen / this.zoom();
@@ -968,7 +1037,17 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           description,
           execute: () => {
             this.elements.update(list =>
-              list.map(e => (e.id === draggedId ? { ...e, pageIndex: targetPageIndex, xPt: finalX, yPt: finalY } : e))
+              list.map(e =>
+                e.id === draggedId
+                  ? {
+                      ...e,
+                      pageIndex: targetPageIndex,
+                      xPt: finalX,
+                      yPt: finalY,
+                      ...(e.type === 'text' && (e as TextEditElement).isPageTextLine ? { isEdited: true } : {})
+                    }
+                  : e
+              )
             );
             if (targetPageIndex !== this.currentPageIndex()) {
               this.currentPageIndex.set(targetPageIndex);
@@ -1230,10 +1309,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (this.activeTool() !== 'select') return;
     if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event.stopPropagation();
-    if (el.pageIndex !== undefined && el.pageIndex !== this.currentPageIndex()) {
-      this.currentPageIndex.set(el.pageIndex);
-    }
-    this.selectedElementId.set(el.id);
+    this.selectElement(el, event);
     this.isDraggingElement = true;
     this.draggedElementId = el.id;
     this.dragStartMouse = { x: event.clientX, y: event.clientY };
@@ -1851,6 +1927,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     if (el.type === 'text') {
       const textEl = el as TextEditElement;
+      if (textEl.isPageTextLine) {
+        textEl.isEdited = true;
+        this.whiteoutOriginalTextOnCanvas(textEl);
+      }
       this.textFont.set(textEl.fontFamily || 'Inter');
       this.textSize.set(textEl.fontSizePt || 14);
       this.textColor.set(textEl.color || 'var(--pt-navy)');
@@ -1941,6 +2021,39 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   deleteSelectedElement(): void {
     const el = this.selectedElement();
     if (!el) return;
+
+    if (el.type === 'text' && (el as TextEditElement).isPageTextLine) {
+      const textEl = el as TextEditElement;
+      const origX = textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt;
+      const origY = textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt;
+      const origW = textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt;
+      const origH = textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt;
+      const coverEl: WhiteoutEditElement = {
+        id: `deleted-page-text-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        pageIndex: el.pageIndex,
+        type: 'whiteout',
+        xPt: Math.max(0, origX - 3),
+        yPt: Math.max(0, origY - 2),
+        widthPt: origW + 6,
+        heightPt: origH + 4,
+        fillColor: 'var(--pt-surface-white)'
+      };
+
+      const cmd: Command = {
+        description: 'Delete text',
+        execute: () => {
+          this.whiteoutOriginalTextOnCanvas(textEl);
+          this.elements.update(list => [...list.filter(e => e.id !== el.id), coverEl]);
+          this.selectedElementId.set(null);
+        },
+        undo: () => {
+          this.elements.update(list => [...list.filter(e => e.id !== coverEl.id), el]);
+          this.selectedElementId.set(el.id);
+        }
+      };
+      this.history.execute(cmd);
+      return;
+    }
 
     const cmd: Command = {
       description: `Delete ${el.type}`,
@@ -2377,6 +2490,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         isPageTextLine: true,
         isEdited: false,
         originalText: fullBlockText,
+        originalXPt: xPt,
+        originalYPt: yPt,
+        originalWidthPt: widthPt,
+        originalHeightPt: heightPt,
         xPt,
         yPt,
         baselineY,
