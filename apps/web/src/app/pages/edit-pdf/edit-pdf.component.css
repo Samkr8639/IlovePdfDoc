@@ -1113,6 +1113,34 @@
 .resize-handle.handle-sw { bottom: -4.5px; left: -4.5px; cursor: nesw-resize; }
 .resize-handle.handle-w  { top: calc(50% - 4.5px); left: -4.5px; cursor: ew-resize; }
 
+/* Quick Floating Delete Button on Selected Element */
+.element-quick-delete-btn {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+  transition: all 0.15s ease-in-out;
+  padding: 0;
+}
+
+.element-quick-delete-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(239, 68, 68, 0.35);
+}
+
 .sign-element {
   display: flex;
   align-items: center;

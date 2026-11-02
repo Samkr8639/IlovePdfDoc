@@ -236,6 +236,29 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.elements().length).toBe(0);
   });
 
+  it('supports deleting selected shape with undo and redo history', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    component.addShapeElement(150, 150);
+    expect(component.elements().length).toBe(1);
+    expect(component.selectedElement()?.type).toBe('shape');
+
+    component.deleteSelectedElement();
+    expect(component.elements().length).toBe(0);
+    expect(component.selectedElementId()).toBeNull();
+
+    // Undo restores the shape
+    component.history.undo();
+    expect(component.elements().length).toBe(1);
+    expect(component.elements()[0].type).toBe('shape');
+
+    // Redo re-deletes the shape
+    component.history.redo();
+    expect(component.elements().length).toBe(0);
+  });
+
   it('handles Google Drive and Dropbox external openers safely', () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
