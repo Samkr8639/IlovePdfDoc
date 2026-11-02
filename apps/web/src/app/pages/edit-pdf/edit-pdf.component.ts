@@ -92,6 +92,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
   @ViewChild('fileInputAddMore') fileInputAddMore!: ElementRef<HTMLInputElement>;
+  @ViewChild('canvasViewport') canvasViewportRef?: ElementRef<HTMLElement>;
+
+  private isPageSwitching = false;
+  private wheelAccumulator = 0;
+  private wheelResetTimer: any = null;
   @ViewChild('fileInputSigUpload') fileInputSigUpload!: ElementRef<HTMLInputElement>;
 
   private _sigPadRef?: ElementRef<HTMLCanvasElement>;
@@ -406,16 +411,102 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   // --- Page Navigation & Zoom ---
-  setPageIndex(index: number): void {
+  setPageIndex(index: number, resetViewportScroll = true): void {
     if (index >= 0 && index < this.pages().length) {
       this.currentPageIndex.set(index);
       this.selectedElementId.set(null);
+      this.scrollActiveThumbnailIntoView(index);
+
+      if (resetViewportScroll && this.canvasViewportRef?.nativeElement) {
+        this.canvasViewportRef.nativeElement.scrollTop = 0;
+      }
+
       setTimeout(() => {
         this.renderCurrentPageToCanvas();
         if (this.editorMode() === 'edit') {
           this.makePageTextEditable();
         }
       }, 20);
+    }
+  }
+
+  private scrollActiveThumbnailIntoView(index: number): void {
+    if (typeof document === 'undefined') return;
+    setTimeout(() => {
+      const thumbEl = document.getElementById(`thumb-page-${index}`);
+      if (thumbEl) {
+        thumbEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 40);
+  }
+
+  onViewportWheel(event: WheelEvent): void {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      if (event.deltaY < 0) {
+        this.zoomIn();
+      } else {
+        this.zoomOut();
+      }
+      return;
+    }
+
+    const totalPages = this.pages().length;
+    if (totalPages <= 1) {
+      return;
+    }
+
+    const vp = this.canvasViewportRef?.nativeElement;
+    if (!vp) {
+      return;
+    }
+
+    const maxScroll = vp.scrollHeight - vp.clientHeight;
+    const isAtBottom = maxScroll <= 12 || vp.scrollTop >= maxScroll - 16;
+    const isAtTop = maxScroll <= 12 || vp.scrollTop <= 16;
+
+    if (this.isPageSwitching) {
+      return;
+    }
+
+    clearTimeout(this.wheelResetTimer);
+    this.wheelResetTimer = setTimeout(() => {
+      this.wheelAccumulator = 0;
+    }, 200);
+
+    // Scrolling down (towards next page)
+    if (event.deltaY > 0) {
+      if (isAtBottom && this.currentPageIndex() < totalPages - 1) {
+        this.wheelAccumulator += event.deltaY;
+        if (this.wheelAccumulator >= 35) {
+          this.isPageSwitching = true;
+          this.wheelAccumulator = 0;
+          this.setPageIndex(this.currentPageIndex() + 1, true);
+          setTimeout(() => {
+            this.isPageSwitching = false;
+            this.wheelAccumulator = 0;
+          }, 320);
+        }
+      }
+    } else if (event.deltaY < 0) {
+      // Scrolling up (towards previous page)
+      if (isAtTop && this.currentPageIndex() > 0) {
+        this.wheelAccumulator += event.deltaY;
+        if (this.wheelAccumulator <= -35) {
+          this.isPageSwitching = true;
+          this.wheelAccumulator = 0;
+          this.setPageIndex(this.currentPageIndex() - 1, false);
+          requestAnimationFrame(() => {
+            if (vp) {
+              vp.scrollTop = Math.max(0, vp.scrollHeight - vp.clientHeight);
+            }
+          });
+          setTimeout(() => {
+            this.isPageSwitching = false;
+            this.wheelAccumulator = 0;
+          }, 320);
+        }
+      }
     }
   }
 
@@ -2299,6 +2390,18 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           event.preventDefault();
           this.history.undo();
         }
+      }
+    } else if (event.key === 'PageDown' || (event.altKey && event.key === 'ArrowDown')) {
+      const target = event.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+        event.preventDefault();
+        this.nextPage();
+      }
+    } else if (event.key === 'PageUp' || (event.altKey && event.key === 'ArrowUp')) {
+      const target = event.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+        event.preventDefault();
+        this.prevPage();
       }
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
       const target = event.target as HTMLElement;

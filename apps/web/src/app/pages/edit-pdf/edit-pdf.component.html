@@ -430,6 +430,7 @@
             @for (page of pages(); track page.pageIndex; let i = $index) {
               <div
                 class="thumbnail-card"
+                [id]="'thumb-page-' + i"
                 [class.active]="currentPageIndex() === i"
                 (click)="setPageIndex(i)"
               >
@@ -500,7 +501,12 @@
         </aside>
 
         <!-- 2. CENTER CANVAS VIEWPORT -->
-        <main class="canvas-viewport" (click)="selectedElementId.set(null)">
+        <main
+          class="canvas-viewport"
+          #canvasViewport
+          (click)="selectedElementId.set(null)"
+          (wheel)="onViewportWheel($event)"
+        >
           <div
             class="paper-canvas-container"
             [class.draw-mode]="activeTool() === 'draw'"
@@ -773,89 +779,13 @@
             </div>
           </div>
 
-          <!-- FLOATING MULTI-DOCUMENT UPLOAD PILL (Exact match to other tool pages) -->
-          <div class="floating-tools-dock" role="toolbar" aria-label="Add more documents">
-            <!-- 1. Add More Files (+ in teal circle with count badge) -->
-            <div class="dock-btn-wrap">
-              <button
-                type="button"
-                class="dock-square-btn add-more-action"
-                (click)="fileInputAddMore.click()"
-                title="Add more files"
-                aria-label="Add more files"
-              >
-                <span class="dock-count-badge">{{ pages().length }}</span>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Add more files</span>
-            </div>
-
-            <!-- 2. Computer / Laptop Upload -->
-            <div class="dock-btn-wrap">
-              <button
-                type="button"
-                class="dock-icon-btn pc-action"
-                (click)="fileInputAddMore.click()"
-                title="Upload from computer"
-                aria-label="Upload from computer"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="3"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Upload from PC</span>
-            </div>
-
-            <!-- 3. Google Drive (Authentic Full-Color Logo) -->
-            <div class="dock-btn-wrap">
-              <button
-                type="button"
-                class="dock-icon-btn drive-action"
-                (click)="openGoogleDrive($event)"
-                title="Google Drive"
-                aria-label="Add from Google Drive"
-              >
-                <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none">
-                  <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
-                  <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
-                  <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
-                  <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
-                  <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
-                  <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Google Drive</span>
-            </div>
-
-            <!-- 4. Dropbox (Authentic Blue Logo) -->
-            <div class="dock-btn-wrap">
-              <button
-                type="button"
-                class="dock-icon-btn dropbox-action"
-                (click)="openDropbox($event)"
-                title="Dropbox"
-                aria-label="Add from Dropbox"
-              >
-                <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF">
-                  <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Dropbox</span>
-            </div>
-
-            <input
-              #fileInputAddMore
-              type="file"
-              hidden
-              accept=".pdf,application/pdf"
-              (change)="onAddMoreFiles($event)"
-            />
-          </div>
+          <input
+            #fileInputAddMore
+            type="file"
+            hidden
+            accept=".pdf,application/pdf"
+            (change)="onAddMoreFiles($event)"
+          />
 
           <!-- BOTTOM FLOATING CAPSULE BAR -->
           <div class="bottom-floating-bar" aria-label="Page navigation and zoom controls">

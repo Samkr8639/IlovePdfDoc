@@ -404,4 +404,76 @@ describe('EditPdfComponent Integration Tests', () => {
     component.history.undo();
     expect(component.elements().length).toBe(0);
   });
+
+  it('navigates pages smoothly on mouse wheel scroll and updates current page', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 1, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 2, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+    component.currentPageIndex.set(0);
+
+    // Mock canvasViewport element
+    const mockViewport = {
+      scrollTop: 100,
+      scrollHeight: 100,
+      clientHeight: 100
+    };
+    component.canvasViewportRef = { nativeElement: mockViewport as unknown as HTMLElement };
+
+    // Scrolling down when at bottom triggers next page
+    const wheelDown = {
+      deltaY: 100,
+      ctrlKey: false,
+      metaKey: false,
+      preventDefault: vi.fn()
+    };
+
+    component.onViewportWheel(wheelDown as unknown as WheelEvent);
+    expect(component.currentPageIndex()).toBe(1);
+
+    // Scrolling up when at top triggers previous page
+    (component as any).isPageSwitching = false;
+    (component as any).wheelAccumulator = 0;
+    mockViewport.scrollTop = 0;
+    const wheelUp = {
+      deltaY: -100,
+      ctrlKey: false,
+      metaKey: false,
+      preventDefault: vi.fn()
+    };
+
+    component.onViewportWheel(wheelUp as unknown as WheelEvent);
+    expect(component.currentPageIndex()).toBe(0);
+  });
+
+  it('supports zoom on ctrl+wheel', () => {
+    const zoomInSpy = vi.spyOn(component, 'zoomIn');
+    const zoomOutSpy = vi.spyOn(component, 'zoomOut');
+
+    const ctrlWheelUp = { deltaY: -50, ctrlKey: true, metaKey: false, preventDefault: vi.fn() };
+    component.onViewportWheel(ctrlWheelUp as unknown as WheelEvent);
+    expect(zoomInSpy).toHaveBeenCalled();
+
+    const ctrlWheelDown = { deltaY: 50, ctrlKey: true, metaKey: false, preventDefault: vi.fn() };
+    component.onViewportWheel(ctrlWheelDown as unknown as WheelEvent);
+    expect(zoomOutSpy).toHaveBeenCalled();
+  });
+
+  it('supports PageDown and PageUp keys for page navigation', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 1, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+    component.currentPageIndex.set(0);
+
+    const target = document.createElement('div');
+    const pageDownEvent = { key: 'PageDown', target, preventDefault: vi.fn() };
+    component.onKeydown(pageDownEvent as unknown as KeyboardEvent);
+    expect(component.currentPageIndex()).toBe(1);
+
+    const pageUpEvent = { key: 'PageUp', target, preventDefault: vi.fn() };
+    component.onKeydown(pageUpEvent as unknown as KeyboardEvent);
+    expect(component.currentPageIndex()).toBe(0);
+  });
 });
