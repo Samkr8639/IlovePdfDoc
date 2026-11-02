@@ -737,4 +737,41 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.signatureCustomColor()).toBe('#059669');
     expect(component.isSignatureCustomActive()).toBe(true);
   });
+
+  it('supports embedding and removing links on selected text with undo/redo history', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }]);
+    component.selectTool('text');
+    component.addTextElement(100, 100, 0);
+
+    const el = component.elements()[0] as any;
+    expect(el.type).toBe('text');
+
+    // Toggle link input popover
+    expect(component.showTextLinkInput()).toBe(false);
+    component.toggleTextLinkInput();
+    expect(component.showTextLinkInput()).toBe(true);
+
+    // Apply link with missing protocol - auto prefixes https://
+    component.applyTextLink('github.com');
+    expect(component.showTextLinkInput()).toBe(false);
+    expect(component.isTextLinked()).toBe(true);
+
+    const updatedEl = component.elements()[0] as any;
+    expect(updatedEl.linkUrl).toBe('https://github.com');
+    expect(updatedEl.html).toContain('href="https://github.com"');
+
+    // Remove link
+    component.removeTextLink();
+    expect(component.isTextLinked()).toBe(false);
+    const unlinkedEl = component.elements()[0] as any;
+    expect(unlinkedEl.linkUrl).toBeUndefined();
+    expect(unlinkedEl.html).not.toContain('href=');
+
+    // Undo restores the embedded link
+    expect(component.history.canUndo()).toBe(true);
+    component.history.undo();
+    const restoredEl = component.elements()[0] as any;
+    expect(restoredEl.linkUrl).toBe('https://github.com');
+    expect(restoredEl.html).toContain('href="https://github.com"');
+  });
 });

@@ -947,6 +947,13 @@
                 (mousedown)="$event.preventDefault()" (click)="toggleTextUnderline()" title="Underline">
                 U
               </button>
+              <button type="button" class="style-toggle-btn link-btn" [class.active]="showTextLinkInput() || isTextLinked()"
+                (mousedown)="$event.preventDefault()" (click)="toggleTextLinkInput()" title="Embed Link">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              </button>
             </div>
 
             <div class="style-toggle-group align-group">
@@ -979,6 +986,35 @@
               </button>
             </div>
           </div>
+
+          <!-- Embed Link Input Popover Bar -->
+          @if (showTextLinkInput()) {
+          <div class="text-link-embed-bar">
+            <div class="text-link-input-wrap">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="link-icon">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              <input type="url" class="text-link-url-input" placeholder="https://example.com"
+                [ngModel]="textLinkUrl()" (ngModelChange)="textLinkUrl.set($event)"
+                (keydown.enter)="applyTextLink(textLinkUrl())"
+                (keydown.escape)="showTextLinkInput.set(false)" />
+            </div>
+            <div class="text-link-actions">
+              <button type="button" class="btn-link-action apply" (click)="applyTextLink(textLinkUrl())" title="Apply Link">
+                Link
+              </button>
+              @if (isTextLinked()) {
+              <button type="button" class="btn-link-action remove" (click)="removeTextLink()" title="Remove Link">
+                Unlink
+              </button>
+              }
+              <button type="button" class="btn-link-action cancel" (click)="showTextLinkInput.set(false)" title="Close">
+                ✕
+              </button>
+            </div>
+          </div>
+          }
 
           <!-- Row 3: Colors & Custom Color Picker -->
           <label class="property-sublabel">Current Color</label>

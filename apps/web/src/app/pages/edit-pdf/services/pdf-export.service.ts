@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PDFDocument, rgb, StandardFonts, PDFPage, Color } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFPage, Color, PDFString } from 'pdf-lib';
 import {
   EditElement,
   PageDimensions,
@@ -10,6 +10,7 @@ import {
   HighlightEditElement,
   WhiteoutEditElement,
   SignEditElement,
+  LinkEditElement,
   OcrTextLayerElement
 } from '../models/document-model';
 
@@ -109,6 +110,13 @@ export class PdfExportService {
             case 'ocr-layer':
               this.renderOcrTextLayer(page, el as OcrTextLayerElement, fontRegular);
               break;
+            case 'link': {
+              const linkEl = el as LinkEditElement;
+              if (linkEl.url) {
+                this.addLinkAnnotation(page, linkEl.url, linkEl.xPt, linkEl.yPt, linkEl.widthPt, linkEl.heightPt);
+              }
+              break;
+            }
           }
         } catch (elErr) {
           console.warn(`Error rendering element ${el.id} (${el.type}) on export:`, elErr);
@@ -401,7 +409,7 @@ export class PdfExportService {
   private parseRichTextToLines(
     el: TextEditElement,
     defaultColor: Color
-  ): Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color }> }> {
+  ): Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color; linkUrl?: string }> }> {
     const rawHtml = el.html;
     if (!rawHtml || !rawHtml.includes('<') || typeof DOMParser === 'undefined') {
       const lines = (el.text || '').split('\n');
@@ -410,8 +418,9 @@ export class PdfExportService {
           text: line,
           bold: !!el.bold,
           italic: !!el.italic,
-          underline: !!el.underline,
-          color: defaultColor
+          underline: !!el.underline || !!el.linkUrl,
+          color: el.linkUrl ? (this.parseColor('#2563EB') || defaultColor) : defaultColor,
+          linkUrl: el.linkUrl
         }]
       }));
     }
@@ -424,15 +433,16 @@ export class PdfExportService {
         .replace(/<\/p>/gi, '\n</p>');
 
       const doc = parser.parseFromString(`<body>${normalizedHtml}</body>`, 'text/html');
-      const lines: Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color }> }> = [];
-      let currentLineSpans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color }> = [];
+      const lines: Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color; linkUrl?: string }> }> = [];
+      let currentLineSpans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color; linkUrl?: string }> = [];
 
       const traverse = (
         node: Node,
         boldState: boolean,
         italicState: boolean,
         underlineState: boolean,
-        colorState: Color
+        colorState: Color,
+        linkUrlState?: string
       ) => {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.textContent || '';
@@ -444,12 +454,14 @@ export class PdfExportService {
               currentLineSpans = [];
             }
             if (parts[i]) {
+              const spanLink = linkUrlState || el.linkUrl;
               currentLineSpans.push({
                 text: parts[i],
                 bold: boldState,
                 italic: italicState,
-                underline: underlineState,
-                color: colorState
+                underline: underlineState || !!spanLink,
+                color: spanLink && colorState === defaultColor ? (this.parseColor('#2563EB') || colorState) : colorState,
+                linkUrl: spanLink
               });
             }
           }
@@ -486,13 +498,18 @@ export class PdfExportService {
             if (parsed) col = parsed;
           }
 
+          let link = linkUrlState;
+          if (tag === 'a') {
+            link = elem.getAttribute('href') || linkUrlState;
+          }
+
           for (let child = elem.firstChild; child; child = child.nextSibling) {
-            traverse(child, isB, isI, isU, col);
+            traverse(child, isB, isI, isU, col, link);
           }
         }
       };
 
-      traverse(doc.body, !!el.bold, !!el.italic, !!el.underline, defaultColor);
+      traverse(doc.body, !!el.bold, !!el.italic, !!el.underline, defaultColor, el.linkUrl);
       if (currentLineSpans.length > 0 || lines.length === 0) {
         lines.push({ spans: currentLineSpans });
       }
@@ -505,8 +522,9 @@ export class PdfExportService {
           text: line,
           bold: !!el.bold,
           italic: !!el.italic,
-          underline: !!el.underline,
-          color: defaultColor
+          underline: !!el.underline || !!el.linkUrl,
+          color: el.linkUrl ? (this.parseColor('#2563EB') || defaultColor) : defaultColor,
+          linkUrl: el.linkUrl
         }]
       }));
     }
@@ -576,11 +594,46 @@ export class PdfExportService {
               thickness: Math.max(0.75, size / 14)
             });
           }
+          if (span.linkUrl) {
+            this.addLinkAnnotation(page, span.linkUrl, currentX, currentY - 2, spanWidth, size + 4);
+          }
           currentX += spanWidth;
         } catch {
-          currentX += size * span.text.length * 0.55;
+          const approxWidth = size * span.text.length * 0.55;
+          if (span.linkUrl) {
+            this.addLinkAnnotation(page, span.linkUrl, currentX, currentY - 2, approxWidth, size + 4);
+          }
+          currentX += approxWidth;
         }
       }
+    }
+  }
+
+  private addLinkAnnotation(
+    page: PDFPage,
+    url: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): void {
+    try {
+      const doc = page.doc;
+      const linkAnnot = doc.context.obj({
+        Type: 'Annot',
+        Subtype: 'Link',
+        Rect: [x, y, x + width, y + height],
+        Border: [0, 0, 0],
+        A: {
+          Type: 'Action',
+          S: 'URI',
+          URI: PDFString.of(url)
+        }
+      });
+      const annotRef = doc.context.register(linkAnnot);
+      page.node.addAnnot(annotRef);
+    } catch (e) {
+      console.warn('Failed to add PDF link annotation:', e);
     }
   }
 

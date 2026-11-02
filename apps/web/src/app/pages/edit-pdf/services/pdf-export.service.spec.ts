@@ -131,5 +131,48 @@ describe('PdfExportService', () => {
     expect(resultBlob.type).toBe('application/pdf');
     expect(resultBlob.size).toBeGreaterThan(0);
   });
+
+  it('should export PDF with embedded text link and standalone link element annotations', async () => {
+    const testDoc = await PDFDocument.create();
+    testDoc.addPage([600, 800]);
+    const pdfBytes = await testDoc.save();
+
+    const elements = [
+      {
+        id: 'txt-link-1',
+        pageIndex: 0,
+        type: 'text',
+        xPt: 50,
+        yPt: 500,
+        widthPt: 300,
+        heightPt: 50,
+        text: 'Visit our documentation online',
+        html: 'Visit our <a href="https://example.com" target="_blank">documentation</a> online',
+        fontFamily: 'Inter',
+        fontSizePt: 12,
+        color: 'var(--pt-navy)'
+      } as any,
+      {
+        id: 'standalone-link-1',
+        pageIndex: 0,
+        type: 'link',
+        xPt: 50,
+        yPt: 400,
+        widthPt: 150,
+        heightPt: 30,
+        url: 'https://github.com'
+      } as any
+    ];
+
+    const resultBlob = await service.exportPdf(
+      pdfBytes,
+      [{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }],
+      elements
+    );
+
+    expect(resultBlob).toBeTruthy();
+    expect(resultBlob.type).toBe('application/pdf');
+    expect(resultBlob.size).toBeGreaterThan(0);
+  });
 });
 

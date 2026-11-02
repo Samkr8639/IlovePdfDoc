@@ -146,6 +146,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly isTextUnderline = signal<boolean>(false);
   readonly textAlign = signal<'left' | 'center' | 'right'>('left');
   readonly textCustomColor = signal<string>('#14213D');
+  readonly showTextLinkInput = signal<boolean>(false);
+  readonly textLinkUrl = signal<string>('https://');
+  readonly isTextLinked = signal<boolean>(false);
 
   // Shape Properties
   readonly shapeType = signal<'rectangle' | 'circle' | 'line' | 'arrow' | 'star'>('rectangle');
@@ -1503,6 +1506,18 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
       this.savedTextRange = sel.getRangeAt(0).cloneRange();
       this.savedTextElementId = el.id;
+
+      const range = sel.getRangeAt(0);
+      let parent: Node | null = range.commonAncestorContainer;
+      if (parent && parent.nodeType === Node.TEXT_NODE) parent = parent.parentElement;
+      const anchor = (parent as HTMLElement)?.closest?.('a');
+      if (anchor) {
+        this.isTextLinked.set(true);
+        const href = anchor.getAttribute('href');
+        if (href) this.textLinkUrl.set(href);
+      } else {
+        this.isTextLinked.set(false);
+      }
     }
   }
 
@@ -2164,6 +2179,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.isTextItalic.set(!!textEl.italic);
       this.isTextUnderline.set(!!textEl.underline);
       this.textAlign.set(textEl.align || 'left');
+      const hasLink = !!(textEl.linkUrl || (textEl.html && textEl.html.includes('<a ')));
+      this.isTextLinked.set(hasLink);
+      if (textEl.linkUrl) {
+        this.textLinkUrl.set(textEl.linkUrl);
+      } else if (textEl.html && textEl.html.includes('href="')) {
+        const match = textEl.html.match(/href="([^"]*)"/i);
+        if (match) this.textLinkUrl.set(match[1]);
+      }
+      this.showTextLinkInput.set(false);
     } else if (el.type === 'sign') {
       const signEl = el as SignEditElement;
       if (signEl.signatureText) {
@@ -2460,6 +2484,213 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const next = !this.isTextUnderline();
     this.isTextUnderline.set(next);
     this.updateTextProperty('underline', next);
+  }
+
+  toggleTextLinkInput(): void {
+    const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
+
+    // Check if selection or whole element has a link
+    let existingUrl = '';
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        let parent: Node | null = sel.getRangeAt(0).commonAncestorContainer;
+        if (parent && parent.nodeType === Node.TEXT_NODE) parent = parent.parentElement;
+        const anchor = (parent as HTMLElement)?.closest?.('a');
+        if (anchor) {
+          existingUrl = anchor.getAttribute('href') || '';
+        }
+      }
+    } else if (el.html && el.html.includes('href="')) {
+      const match = el.html.match(/href="([^"]*)"/i);
+      if (match) existingUrl = match[1];
+    } else if (el.linkUrl) {
+      existingUrl = el.linkUrl;
+    }
+
+    if (existingUrl) {
+      this.textLinkUrl.set(existingUrl);
+      this.isTextLinked.set(true);
+    } else {
+      if (!this.textLinkUrl() || !this.textLinkUrl().startsWith('http')) {
+        this.textLinkUrl.set('https://');
+      }
+      this.isTextLinked.set(false);
+    }
+
+    this.showTextLinkInput.update(v => !v);
+  }
+
+  applyTextLink(inputUrl?: string): void {
+    const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
+
+    let targetUrl = (inputUrl !== undefined ? inputUrl : this.textLinkUrl()).trim();
+    if (!targetUrl || targetUrl === 'https://' || targetUrl === 'http://') {
+      this.removeTextLink();
+      return;
+    }
+
+    // Auto-prefix https:// if no protocol given
+    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(targetUrl)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+    this.textLinkUrl.set(targetUrl);
+
+    const oldHtml = el.html || el.text;
+    const oldText = el.text;
+    const oldLinkUrl = el.linkUrl;
+
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
+      document.execCommand('createLink', false, targetUrl);
+
+      // Enhance anchors in active element
+      const anchors = activeEl.querySelectorAll('a');
+      anchors.forEach(a => {
+        if (a.getAttribute('href') === targetUrl || !a.getAttribute('href')) {
+          a.setAttribute('href', targetUrl);
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener noreferrer');
+          a.style.color = '#2563EB';
+          a.style.textDecoration = 'underline';
+        }
+      });
+
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
+      }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      }
+    } else {
+      // Entire text element link
+      el.linkUrl = targetUrl;
+      const textToWrap = el.text || 'Link';
+      el.html = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: underline;">${el.html || textToWrap}</a>`;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
+      }
+    }
+
+    this.isTextLinked.set(true);
+    this.showTextLinkInput.set(false);
+
+    const newHtml = el.html;
+    const newText = el.text;
+    const newLinkUrl = el.linkUrl;
+
+    const cmd: Command = {
+      description: 'Embed Link in Text',
+      execute: () => {
+        this.elements.update(list =>
+          list.map(e =>
+            e.id === el.id
+              ? ({
+                  ...e,
+                  html: newHtml,
+                  text: newText,
+                  linkUrl: newLinkUrl,
+                  isEdited: el.isPageTextLine ? true : (e as TextEditElement).isEdited
+                } as TextEditElement)
+              : e
+          )
+        );
+      },
+      undo: () => {
+        this.elements.update(list =>
+          list.map(e =>
+            e.id === el.id
+              ? ({
+                  ...e,
+                  html: oldHtml,
+                  text: oldText,
+                  linkUrl: oldLinkUrl
+                } as TextEditElement)
+              : e
+          )
+        );
+      }
+    };
+    this.history.execute(cmd);
+    this.elements.update(list => [...list]);
+  }
+
+  removeTextLink(): void {
+    const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
+
+    const oldHtml = el.html || el.text;
+    const oldText = el.text;
+    const oldLinkUrl = el.linkUrl;
+
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
+      document.execCommand('unlink', false);
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
+      }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      }
+    } else {
+      delete el.linkUrl;
+      if (el.html) {
+        el.html = el.html.replace(/<\/?a[^>]*>/gi, '');
+      }
+      if (el.isPageTextLine) {
+        el.isEdited = true;
+      }
+    }
+
+    this.isTextLinked.set(false);
+    this.showTextLinkInput.set(false);
+
+    const newHtml = el.html;
+    const newText = el.text;
+
+    const cmd: Command = {
+      description: 'Remove Link from Text',
+      execute: () => {
+        this.elements.update(list =>
+          list.map(e => {
+            if (e.id === el.id) {
+              const updated = { ...e, html: newHtml, text: newText };
+              delete (updated as TextEditElement).linkUrl;
+              return updated as TextEditElement;
+            }
+            return e;
+          })
+        );
+      },
+      undo: () => {
+        this.elements.update(list =>
+          list.map(e =>
+            e.id === el.id
+              ? ({
+                  ...e,
+                  html: oldHtml,
+                  text: oldText,
+                  linkUrl: oldLinkUrl
+                } as TextEditElement)
+              : e
+          )
+        );
+      }
+    };
+    this.history.execute(cmd);
+    this.elements.update(list => [...list]);
   }
 
   setTextAlign(align: 'left' | 'center' | 'right'): void {
