@@ -775,9 +775,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     if (this.isResizingElement && this.resizingElementId && this.resizeHandle) {
       const resizingEl = this.elements().find(e => e.id === this.resizingElementId);
-      const page = resizingEl
-        ? (this.pages().find(p => p.pageIndex === resizingEl.pageIndex) || this.currentPage())
-        : this.currentPage();
+      if (!resizingEl) return;
+      const page = this.pages().find(p => p.pageIndex === resizingEl.pageIndex) || this.currentPage();
       if (!page) return;
 
       const startScreen = this.transform.pdfRectToScreenRect(
@@ -801,30 +800,70 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
       const handle = this.resizeHandle;
 
-      if (handle.includes('e')) {
-        newWidth = Math.max(20, startScreen.width + dx);
-      }
-      if (handle.includes('s')) {
-        newHeight = Math.max(16, startScreen.height + dy);
-      }
-      if (handle.includes('w')) {
-        const potentialW = startScreen.width - dx;
-        if (potentialW >= 20) {
-          newLeft = startScreen.x + dx;
-          newWidth = potentialW;
-        } else {
-          newLeft = startScreen.x + startScreen.width - 20;
-          newWidth = 20;
+      if (resizingEl.type === 'image' || resizingEl.type === 'sign') {
+        const aspect = (startScreen.width > 0 && startScreen.height > 0)
+          ? (startScreen.width / startScreen.height)
+          : 1;
+
+        if (handle === 'se') {
+          newWidth = Math.max(20, startScreen.width + dx);
+          newHeight = Math.max(16, newWidth / aspect);
+        } else if (handle === 'sw') {
+          newWidth = Math.max(20, startScreen.width - dx);
+          newLeft = startScreen.x + startScreen.width - newWidth;
+          newHeight = Math.max(16, newWidth / aspect);
+        } else if (handle === 'ne') {
+          newWidth = Math.max(20, startScreen.width + dx);
+          newHeight = Math.max(16, newWidth / aspect);
+          newTop = startScreen.y + startScreen.height - newHeight;
+        } else if (handle === 'nw') {
+          newWidth = Math.max(20, startScreen.width - dx);
+          newLeft = startScreen.x + startScreen.width - newWidth;
+          newHeight = Math.max(16, newWidth / aspect);
+          newTop = startScreen.y + startScreen.height - newHeight;
+        } else if (handle === 'e' || handle === 'w') {
+          if (handle === 'e') {
+            newWidth = Math.max(20, startScreen.width + dx);
+          } else {
+            newWidth = Math.max(20, startScreen.width - dx);
+            newLeft = startScreen.x + startScreen.width - newWidth;
+          }
+          newHeight = Math.max(16, newWidth / aspect);
+        } else if (handle === 's' || handle === 'n') {
+          if (handle === 's') {
+            newHeight = Math.max(16, startScreen.height + dy);
+          } else {
+            newHeight = Math.max(16, startScreen.height - dy);
+            newTop = startScreen.y + startScreen.height - newHeight;
+          }
+          newWidth = Math.max(20, newHeight * aspect);
         }
-      }
-      if (handle.includes('n')) {
-        const potentialH = startScreen.height - dy;
-        if (potentialH >= 16) {
-          newTop = startScreen.y + dy;
-          newHeight = potentialH;
-        } else {
-          newTop = startScreen.y + startScreen.height - 16;
-          newHeight = 16;
+      } else {
+        if (handle.includes('e')) {
+          newWidth = Math.max(20, startScreen.width + dx);
+        }
+        if (handle.includes('s')) {
+          newHeight = Math.max(16, startScreen.height + dy);
+        }
+        if (handle.includes('w')) {
+          const potentialW = startScreen.width - dx;
+          if (potentialW >= 20) {
+            newLeft = startScreen.x + dx;
+            newWidth = potentialW;
+          } else {
+            newLeft = startScreen.x + startScreen.width - 20;
+            newWidth = 20;
+          }
+        }
+        if (handle.includes('n')) {
+          const potentialH = startScreen.height - dy;
+          if (potentialH >= 16) {
+            newTop = startScreen.y + dy;
+            newHeight = potentialH;
+          } else {
+            newTop = startScreen.y + startScreen.height - 16;
+            newHeight = 16;
+          }
         }
       }
 

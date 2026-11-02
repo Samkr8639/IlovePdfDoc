@@ -217,11 +217,29 @@ export class PdfExportService {
         ? await pdfDoc.embedPng(imageBytes)
         : await pdfDoc.embedJpg(imageBytes);
 
+      // Compute proportional display rectangle matching CSS object-fit: contain
+      const imgAspect = (embedded.width && embedded.height) ? (embedded.width / embedded.height) : 1;
+      const boxAspect = (el.widthPt > 0 && el.heightPt > 0) ? (el.widthPt / el.heightPt) : 1;
+      let drawW = el.widthPt;
+      let drawH = el.heightPt;
+      let drawX = el.xPt;
+      let drawY = el.yPt;
+
+      if (boxAspect > imgAspect) {
+        // Bounding box is wider than image: letterbox sides, center horizontally
+        drawW = el.heightPt * imgAspect;
+        drawX = el.xPt + (el.widthPt - drawW) / 2;
+      } else {
+        // Bounding box is taller than image: letterbox top/bottom, center vertically
+        drawH = el.widthPt / imgAspect;
+        drawY = el.yPt + (el.heightPt - drawH) / 2;
+      }
+
       page.drawImage(embedded, {
-        x: el.xPt,
-        y: el.yPt,
-        width: el.widthPt,
-        height: el.heightPt
+        x: drawX,
+        y: drawY,
+        width: drawW,
+        height: drawH
       });
     } catch {
       // Ignore corrupt images on export
@@ -237,11 +255,28 @@ export class PdfExportService {
       if (el.dataUrl && el.dataUrl.startsWith('data:image/')) {
         const imageBytes = this.base64ToBytes(el.dataUrl);
         const embedded = await pdfDoc.embedPng(imageBytes);
+
+        // Compute proportional display rectangle matching CSS object-fit: contain
+        const imgAspect = (embedded.width && embedded.height) ? (embedded.width / embedded.height) : 1;
+        const boxAspect = (el.widthPt > 0 && el.heightPt > 0) ? (el.widthPt / el.heightPt) : 1;
+        let drawW = el.widthPt;
+        let drawH = el.heightPt;
+        let drawX = el.xPt;
+        let drawY = el.yPt;
+
+        if (boxAspect > imgAspect) {
+          drawW = el.heightPt * imgAspect;
+          drawX = el.xPt + (el.widthPt - drawW) / 2;
+        } else {
+          drawH = el.widthPt / imgAspect;
+          drawY = el.yPt + (el.heightPt - drawH) / 2;
+        }
+
         page.drawImage(embedded, {
-          x: el.xPt,
-          y: el.yPt,
-          width: el.widthPt,
-          height: el.heightPt
+          x: drawX,
+          y: drawY,
+          width: drawW,
+          height: drawH
         });
       } else {
         // High-DPI offscreen canvas render for cursive / styled text signatures
