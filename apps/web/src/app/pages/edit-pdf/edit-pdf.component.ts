@@ -211,6 +211,13 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private dragStartElementPos = { xPt: 0, yPt: 0 };
   private draggedElementId: string | null = null;
 
+  // Element resizing state
+  private isResizingElement = false;
+  private resizeHandle: 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | null = null;
+  private resizeStartMouse = { x: 0, y: 0 };
+  private resizeStartRect = { xPt: 0, yPt: 0, widthPt: 0, heightPt: 0 };
+  private resizingElementId: string | null = null;
+
   // Active page computed metrics
   readonly currentPage = computed<PageDimensions | null>(() => {
     const list = this.pages();
@@ -742,13 +749,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.startDrawing(event.clientX, event.clientY);
   }
 
-  onCanvasMouseMove(event: MouseEvent): void {
+  handleDragOrResizeMove(event: MouseEvent): void {
     if (this.isDraggingElement && this.draggedElementId) {
       const draggedEl = this.elements().find(e => e.id === this.draggedElementId);
       const page = draggedEl
         ? (this.pages().find(p => p.pageIndex === draggedEl.pageIndex) || this.currentPage())
         : this.currentPage();
       if (!page) return;
+
       const dxScreen = event.clientX - this.dragStartMouse.x;
       const dyScreen = event.clientY - this.dragStartMouse.y;
       const dxPt = dxScreen / this.zoom();
@@ -764,11 +772,195 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.isResizingElement && this.resizingElementId && this.resizeHandle) {
+      const resizingEl = this.elements().find(e => e.id === this.resizingElementId);
+      const page = resizingEl
+        ? (this.pages().find(p => p.pageIndex === resizingEl.pageIndex) || this.currentPage())
+        : this.currentPage();
+      if (!page) return;
+
+      const startScreen = this.transform.pdfRectToScreenRect(
+        {
+          xPt: this.resizeStartRect.xPt,
+          yPt: this.resizeStartRect.yPt,
+          widthPt: this.resizeStartRect.widthPt,
+          heightPt: this.resizeStartRect.heightPt
+        },
+        page,
+        this.zoom()
+      );
+
+      const dx = event.clientX - this.resizeStartMouse.x;
+      const dy = event.clientY - this.resizeStartMouse.y;
+
+      let newLeft = startScreen.x;
+      let newTop = startScreen.y;
+      let newWidth = startScreen.width;
+      let newHeight = startScreen.height;
+
+      const handle = this.resizeHandle;
+
+      if (handle.includes('e')) {
+        newWidth = Math.max(20, startScreen.width + dx);
+      }
+      if (handle.includes('s')) {
+        newHeight = Math.max(16, startScreen.height + dy);
+      }
+      if (handle.includes('w')) {
+        const potentialW = startScreen.width - dx;
+        if (potentialW >= 20) {
+          newLeft = startScreen.x + dx;
+          newWidth = potentialW;
+        } else {
+          newLeft = startScreen.x + startScreen.width - 20;
+          newWidth = 20;
+        }
+      }
+      if (handle.includes('n')) {
+        const potentialH = startScreen.height - dy;
+        if (potentialH >= 16) {
+          newTop = startScreen.y + dy;
+          newHeight = potentialH;
+        } else {
+          newTop = startScreen.y + startScreen.height - 16;
+          newHeight = 16;
+        }
+      }
+
+      const newPdfRect = this.transform.screenRectToPdfRect(
+        { x: newLeft, y: newTop, width: newWidth, height: newHeight },
+        page,
+        this.zoom()
+      );
+
+      this.elements.update(list =>
+        list.map(e =>
+          e.id === this.resizingElementId
+            ? {
+                ...e,
+                xPt: Math.round(newPdfRect.xPt),
+                yPt: Math.round(newPdfRect.yPt),
+                widthPt: Math.max(10, Math.round(newPdfRect.widthPt)),
+                heightPt: Math.max(8, Math.round(newPdfRect.heightPt))
+              }
+            : e
+        )
+      );
+    }
+  }
+
+  finishDragOrResize(): void {
+    if (this.isDraggingElement && this.draggedElementId) {
+      const draggedId = this.draggedElementId;
+      const el = this.elements().find(e => e.id === draggedId);
+      const startPos = { ...this.dragStartElementPos };
+
+      this.isDraggingElement = false;
+      this.draggedElementId = null;
+
+      if (el && (el.xPt !== startPos.xPt || el.yPt !== startPos.yPt)) {
+        const finalX = el.xPt;
+        const finalY = el.yPt;
+        const cmd: Command = {
+          description: 'Move Element',
+          execute: () => {
+            this.elements.update(list =>
+              list.map(e => (e.id === draggedId ? { ...e, xPt: finalX, yPt: finalY } : e))
+            );
+          },
+          undo: () => {
+            this.elements.update(list =>
+              list.map(e => (e.id === draggedId ? { ...e, xPt: startPos.xPt, yPt: startPos.yPt } : e))
+            );
+          }
+        };
+        this.history.execute(cmd);
+      }
+      return;
+    }
+
+    if (this.isResizingElement && this.resizingElementId) {
+      const resizeId = this.resizingElementId;
+      const el = this.elements().find(e => e.id === resizeId);
+      const startRect = { ...this.resizeStartRect };
+
+      this.isResizingElement = false;
+      this.resizeHandle = null;
+      this.resizingElementId = null;
+
+      if (
+        el &&
+        (el.xPt !== startRect.xPt ||
+          el.yPt !== startRect.yPt ||
+          el.widthPt !== startRect.widthPt ||
+          el.heightPt !== startRect.heightPt)
+      ) {
+        const finalRect = {
+          xPt: el.xPt,
+          yPt: el.yPt,
+          widthPt: el.widthPt,
+          heightPt: el.heightPt
+        };
+        const cmd: Command = {
+          description: 'Resize Element',
+          execute: () => {
+            this.elements.update(list =>
+              list.map(e => (e.id === resizeId ? { ...e, ...finalRect } : e))
+            );
+          },
+          undo: () => {
+            this.elements.update(list =>
+              list.map(e => (e.id === resizeId ? { ...e, ...startRect } : e))
+            );
+          }
+        };
+        this.history.execute(cmd);
+      }
+    }
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onWindowMouseMove(event: MouseEvent): void {
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.handleDragOrResizeMove(event);
+    }
+  }
+
+  @HostListener('window:mouseup')
+  onWindowMouseUp(): void {
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.finishDragOrResize();
+    }
+    if (this.isDrawing) {
+      this.endDrawing();
+    }
+  }
+
+  @HostListener('window:touchend')
+  onWindowTouchEnd(): void {
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.finishDragOrResize();
+    }
+    if (this.isDrawing) {
+      this.endDrawing();
+    }
+  }
+
+  onCanvasMouseMove(event: MouseEvent): void {
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.handleDragOrResizeMove(event);
+      return;
+    }
+
     if (!this.isDrawing || this.activeTool() !== 'draw') return;
     this.moveDrawing(event.clientX, event.clientY);
   }
 
   onCanvasMouseUp(): void {
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.finishDragOrResize();
+      return;
+    }
     this.endDrawing();
   }
 
@@ -791,6 +983,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasTouchEnd(): void {
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.finishDragOrResize();
+      return;
+    }
     this.endDrawing();
   }
 
@@ -835,9 +1031,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   private endDrawing(): void {
-    if (this.isDraggingElement) {
-      this.isDraggingElement = false;
-      this.draggedElementId = null;
+    if (this.isDraggingElement || this.isResizingElement) {
+      this.finishDragOrResize();
       return;
     }
 
@@ -934,6 +1129,33 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.draggedElementId = el.id;
     this.dragStartMouse = { x: event.clientX, y: event.clientY };
     this.dragStartElementPos = { xPt: el.xPt, yPt: el.yPt };
+  }
+
+  onResizeHandleMouseDown(
+    el: EditElement,
+    handle: 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w',
+    event: MouseEvent
+  ): void {
+    if (this.activeTool() !== 'select') return;
+    event.stopPropagation();
+    event.preventDefault();
+
+    this.isResizingElement = true;
+    this.resizeHandle = handle;
+    this.resizingElementId = el.id;
+    this.resizeStartMouse = { x: event.clientX, y: event.clientY };
+    this.resizeStartRect = {
+      xPt: el.xPt,
+      yPt: el.yPt,
+      widthPt: el.widthPt,
+      heightPt: el.heightPt
+    };
+  }
+
+  onTextareaMouseDown(event: MouseEvent, el: EditElement): void {
+    if (this.selectedElementId() === el.id) {
+      event.stopPropagation();
+    }
   }
 
   // --- Element Creators & Setters ---

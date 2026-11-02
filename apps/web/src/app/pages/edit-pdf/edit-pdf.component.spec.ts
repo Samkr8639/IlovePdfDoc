@@ -546,4 +546,62 @@ describe('EditPdfComponent Integration Tests', () => {
     component.selectElement(p2Texts[0]);
     expect(component.currentPageIndex()).toBe(2);
   });
+
+  it('records move element as an undoable command in history and restores position on undo', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }]);
+    component.selectTool('select');
+    component.addShapeElement(100, 100, 0);
+
+    const el = component.elements()[0];
+    expect(el.xPt).toBe(100);
+    expect(el.yPt).toBe(100);
+
+    // Simulate mouse down on element
+    component.onElementMouseDown(el, { clientX: 200, clientY: 200, stopPropagation: vi.fn() } as unknown as MouseEvent);
+
+    // Simulate drag movement
+    component.onWindowMouseMove({ clientX: 250, clientY: 230 } as unknown as MouseEvent);
+    expect(component.elements()[0].xPt).toBe(150);
+
+    // Simulate mouse release
+    component.onWindowMouseUp();
+
+    // Verify final moved position
+    expect(component.elements()[0].xPt).toBe(150);
+
+    // Undoing should move element back to (100, 100)
+    expect(component.history.canUndo()).toBe(true);
+    component.history.undo();
+    expect(component.elements()[0].xPt).toBe(100);
+    expect(component.elements()[0].yPt).toBe(100);
+  });
+
+  it('allows resizing element with handles and records resize in history', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }]);
+    component.selectTool('select');
+    component.addShapeElement(100, 100, 0);
+
+    const el = component.elements()[0];
+    const initialWidth = el.widthPt;
+    const initialHeight = el.heightPt;
+
+    // Simulate mousedown on 'se' (southeast) handle
+    component.onResizeHandleMouseDown(
+      el,
+      'se',
+      { clientX: 300, clientY: 300, stopPropagation: vi.fn(), preventDefault: vi.fn() } as unknown as MouseEvent
+    );
+
+    // Simulate dragging 40px right and 30px down
+    component.onWindowMouseMove({ clientX: 340, clientY: 330 } as unknown as MouseEvent);
+    expect(component.elements()[0].widthPt).toBeGreaterThan(initialWidth);
+
+    // Release mouse
+    component.onWindowMouseUp();
+
+    // Verify undo restores original dimensions
+    component.history.undo();
+    expect(component.elements()[0].widthPt).toBe(initialWidth);
+    expect(component.elements()[0].heightPt).toBe(initialHeight);
+  });
 });

@@ -1078,12 +1078,40 @@
 }
 
 .draw-element {
-  pointer-events: auto;
+  pointer-events: none;
+}
+
+.draw-element path {
+  pointer-events: stroke;
+  cursor: move;
 }
 
 .draw-element.selected {
   outline: 1.5px dashed var(--pt-teal-700);
+  pointer-events: auto;
 }
+
+/* 8-Point Precision Resize Handles */
+.resize-handle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background-color: #ffffff;
+  border: 1.5px solid var(--pt-teal-700, #0f766e);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  z-index: 60;
+  box-sizing: border-box;
+}
+
+.resize-handle.handle-nw { top: -4.5px; left: -4.5px; cursor: nwse-resize; }
+.resize-handle.handle-n  { top: -4.5px; left: calc(50% - 4.5px); cursor: ns-resize; }
+.resize-handle.handle-ne { top: -4.5px; right: -4.5px; cursor: nesw-resize; }
+.resize-handle.handle-e  { top: calc(50% - 4.5px); right: -4.5px; cursor: ew-resize; }
+.resize-handle.handle-se { bottom: -4.5px; right: -4.5px; cursor: nwse-resize; }
+.resize-handle.handle-s  { bottom: -4.5px; left: calc(50% - 4.5px); cursor: ns-resize; }
+.resize-handle.handle-sw { bottom: -4.5px; left: -4.5px; cursor: nesw-resize; }
+.resize-handle.handle-w  { top: calc(50% - 4.5px); left: -4.5px; cursor: ew-resize; }
 
 .sign-element {
   display: flex;
