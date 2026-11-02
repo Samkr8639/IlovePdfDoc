@@ -926,12 +926,12 @@
   user-select: none !important;
 }
 
-/* In-Place Editable Page Text Block (Matching iLovePDF reference Image 2) - Only active in Edit Mode */
+/* In-Place Editable Page Text Block - Clean view until hover or selection */
 .paper-canvas-container.edit-mode .text-element.page-text-line,
 .paper-canvas-container.edit-mode .text-element.is-ocr-line,
 .text-element.page-text-line.in-edit-mode,
 .text-element.is-ocr-line.in-edit-mode {
-  border: 1px dashed var(--pt-blue-focus);
+  border: 1px dashed transparent;
   background: transparent;
   border-radius: 2px;
   cursor: text;
@@ -944,23 +944,23 @@
 }
 
 /* Unedited & unfocused page text blocks: transparent text so original crisp PDF canvas renders through */
-.paper-canvas-container.edit-mode .text-element.page-text-line:not(.is-user-edited):not(:focus-within) .canvas-text-area,
-.text-element.page-text-line.in-edit-mode:not(.is-user-edited):not(:focus-within) .canvas-text-area {
+.paper-canvas-container.edit-mode .text-element.page-text-line:not(.is-user-edited):not(.selected):not(:focus-within) .canvas-text-area,
+.text-element.page-text-line.in-edit-mode:not(.is-user-edited):not(.selected):not(:focus-within) .canvas-text-area {
   color: transparent !important;
   background: transparent !important;
   caret-color: var(--pt-navy);
 }
 
-/* Hover: highlight with brighter blue dashed boundary */
+/* Hover: subtle guide outline on hover so user knows it is clickable, without cluttering the page */
 .paper-canvas-container.edit-mode .text-element.page-text-line:hover,
 .paper-canvas-container.edit-mode .text-element.is-ocr-line:hover,
 .text-element.page-text-line.in-edit-mode:hover,
 .text-element.is-ocr-line.in-edit-mode:hover {
-  border: 1.5px dashed var(--pt-blue-hover);
+  border: 1px dashed rgba(37, 99, 235, 0.45);
   z-index: 10;
 }
 
-/* Selected, Focused, or User-Edited: white background to cover underlying PDF text and show typed text */
+/* Selected, Focused, or User-Edited: solid white background to completely mask underlying PDF text and show typed text */
 .paper-canvas-container.edit-mode .text-element.page-text-line.selected,
 .paper-canvas-container.edit-mode .text-element.is-ocr-line.selected,
 .paper-canvas-container.edit-mode .text-element.page-text-line:focus-within,
@@ -971,17 +971,19 @@
 .text-element.page-text-line.in-edit-mode:focus-within,
 .text-element.is-ocr-line.in-edit-mode:focus-within,
 .text-element.page-text-line.is-user-edited {
-  border: 1.5px solid var(--pt-blue-focus);
-  background: var(--pt-surface-white);
+  border: 1.5px solid var(--pt-blue-focus) !important;
+  background: #ffffff !important;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
   z-index: 25;
 }
 
+.paper-canvas-container.edit-mode .text-element.page-text-line.selected .canvas-text-area,
 .paper-canvas-container.edit-mode .text-element.page-text-line:focus-within .canvas-text-area,
 .paper-canvas-container.edit-mode .text-element.page-text-line.is-user-edited .canvas-text-area,
-.text-element.page-text-line.is-user-edited .canvas-text-area {
+.text-element.page-text-line.is-user-edited .canvas-text-area,
+.text-element.page-text-line.selected .canvas-text-area {
   color: var(--pt-navy) !important;
-  background: var(--pt-surface-white) !important;
+  background: #ffffff !important;
 }
 
 .canvas-text-area {

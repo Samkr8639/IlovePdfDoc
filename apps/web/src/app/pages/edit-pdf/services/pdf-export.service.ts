@@ -77,10 +77,10 @@ export class PdfExportService {
               // If user edited this page text block, whiteout the old text first
               if (textEl.isPageTextLine && textEl.isEdited) {
                 page.drawRectangle({
-                  x: Math.max(0, textEl.xPt - 2),
-                  y: Math.max(0, textEl.yPt - 1),
-                  width: textEl.widthPt + 4,
-                  height: textEl.heightPt + 2,
+                  x: Math.max(0, textEl.xPt - 3),
+                  y: Math.max(0, textEl.yPt - 2),
+                  width: textEl.widthPt + 6,
+                  height: textEl.heightPt + 4,
                   color: rgb(1, 1, 1)
                 });
               }
@@ -386,6 +386,120 @@ export class PdfExportService {
     }
   }
 
+  private parseRichTextToLines(
+    el: TextEditElement,
+    defaultColor: Color
+  ): Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color }> }> {
+    const rawHtml = el.html;
+    if (!rawHtml || !rawHtml.includes('<') || typeof DOMParser === 'undefined') {
+      const lines = (el.text || '').split('\n');
+      return lines.map(line => ({
+        spans: [{
+          text: line,
+          bold: !!el.bold,
+          italic: !!el.italic,
+          underline: !!el.underline,
+          color: defaultColor
+        }]
+      }));
+    }
+
+    try {
+      const parser = new DOMParser();
+      const normalizedHtml = rawHtml
+        .replace(/<br\s*[\/]?>/gi, '\n')
+        .replace(/<\/div>/gi, '\n</div>')
+        .replace(/<\/p>/gi, '\n</p>');
+
+      const doc = parser.parseFromString(`<body>${normalizedHtml}</body>`, 'text/html');
+      const lines: Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color }> }> = [];
+      let currentLineSpans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color }> = [];
+
+      const traverse = (
+        node: Node,
+        boldState: boolean,
+        italicState: boolean,
+        underlineState: boolean,
+        colorState: Color
+      ) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent || '';
+          if (!text) return;
+          const parts = text.split('\n');
+          for (let i = 0; i < parts.length; i++) {
+            if (i > 0) {
+              lines.push({ spans: currentLineSpans });
+              currentLineSpans = [];
+            }
+            if (parts[i]) {
+              currentLineSpans.push({
+                text: parts[i],
+                bold: boldState,
+                italic: italicState,
+                underline: underlineState,
+                color: colorState
+              });
+            }
+          }
+          return;
+        }
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const elem = node as HTMLElement;
+          const tag = elem.tagName.toLowerCase();
+          const isB: boolean = !!(
+            boldState ||
+            tag === 'b' ||
+            tag === 'strong' ||
+            elem.style.fontWeight === 'bold' ||
+            parseInt(elem.style.fontWeight || '400', 10) >= 600
+          );
+          const isI: boolean = !!(
+            italicState ||
+            tag === 'i' ||
+            tag === 'em' ||
+            elem.style.fontStyle === 'italic'
+          );
+          const isU: boolean = !!(
+            underlineState ||
+            tag === 'u' ||
+            (elem.style.textDecoration && elem.style.textDecoration.includes('underline'))
+          );
+          let col = colorState;
+          if (elem.style.color) {
+            const parsed = this.parseColor(elem.style.color);
+            if (parsed) col = parsed;
+          } else if (elem.getAttribute('color')) {
+            const parsed = this.parseColor(elem.getAttribute('color') || '');
+            if (parsed) col = parsed;
+          }
+
+          for (let child = elem.firstChild; child; child = child.nextSibling) {
+            traverse(child, isB, isI, isU, col);
+          }
+        }
+      };
+
+      traverse(doc.body, !!el.bold, !!el.italic, !!el.underline, defaultColor);
+      if (currentLineSpans.length > 0 || lines.length === 0) {
+        lines.push({ spans: currentLineSpans });
+      }
+
+      return lines;
+    } catch {
+      const lines = (el.text || '').split('\n');
+      return lines.map(line => ({
+        spans: [{
+          text: line,
+          bold: !!el.bold,
+          italic: !!el.italic,
+          underline: !!el.underline,
+          color: defaultColor
+        }]
+      }));
+    }
+  }
+
   private renderText(
     page: PDFPage,
     el: TextEditElement,
@@ -394,61 +508,65 @@ export class PdfExportService {
     italicFont: any,
     boldItalicFont: any
   ): void {
-    let font = regularFont;
-    if (el.bold && el.italic) {
-      font = boldItalicFont;
-    } else if (el.bold) {
-      font = boldFont;
-    } else if (el.italic) {
-      font = italicFont;
-    }
-
-    const color = this.parseColor(el.color || '#14213D') || rgb(0.08, 0.13, 0.24);
+    const baseColor = this.parseColor(el.color || '#14213D') || rgb(0.08, 0.13, 0.24);
     const size = el.fontSizePt || 14;
     const lineHeight = size * 1.35;
-    const lines = (el.text || '').split('\n');
     const startY = el.baselineY !== undefined ? el.baselineY : (el.yPt + el.heightPt - size);
+    const lineSpansList = this.parseRichTextToLines(el, baseColor);
 
-    for (let i = 0; i < lines.length; i++) {
-      const lineText = lines[i];
-      if (!lineText) continue;
+    for (let i = 0; i < lineSpansList.length; i++) {
+      const lineObj = lineSpansList[i];
       const currentY = startY - (i * lineHeight);
+      let currentX = el.xPt;
 
-      try {
-        page.drawText(lineText, {
-          x: el.xPt,
-          y: currentY,
-          font,
-          size,
-          color
-        });
-      } catch {
-        // Fallback for characters outside standard WinAnsi font charset (e.g. custom bullets or unicode symbols)
-        const sanitized = lineText.replace(/[•●○▪▸]/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ');
+      for (const span of lineObj.spans) {
+        if (!span.text) continue;
+
+        let font = regularFont;
+        if (span.bold && span.italic) {
+          font = boldItalicFont;
+        } else if (span.bold) {
+          font = boldFont;
+        } else if (span.italic) {
+          font = italicFont;
+        }
+
+        const spanColor = span.color || baseColor;
+
         try {
-          page.drawText(sanitized, {
-            x: el.xPt,
+          page.drawText(span.text, {
+            x: currentX,
             y: currentY,
             font,
             size,
-            color
+            color: spanColor
           });
         } catch {
-          // Fallback ignore if still unencodable
+          const sanitized = span.text.replace(/[•●○▪▸]/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ');
+          try {
+            page.drawText(sanitized, {
+              x: currentX,
+              y: currentY,
+              font,
+              size,
+              color: spanColor
+            });
+          } catch {}
         }
-      }
 
-      if (el.underline) {
         try {
-          const textWidth = font.widthOfTextAtSize(lineText, size);
-          page.drawLine({
-            start: { x: el.xPt, y: currentY - 2 },
-            end: { x: el.xPt + textWidth, y: currentY - 2 },
-            color,
-            thickness: Math.max(0.75, size / 14)
-          });
+          const spanWidth = font.widthOfTextAtSize(span.text, size);
+          if (span.underline) {
+            page.drawLine({
+              start: { x: currentX, y: currentY - 2 },
+              end: { x: currentX + spanWidth, y: currentY - 2 },
+              color: spanColor,
+              thickness: Math.max(0.75, size / 14)
+            });
+          }
+          currentX += spanWidth;
         } catch {
-          // Fallback if width computation fails on custom characters
+          currentX += size * span.text.length * 0.55;
         }
       }
     }

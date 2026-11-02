@@ -98,4 +98,38 @@ describe('PdfExportService', () => {
     expect(resultBlob.type).toBe('application/pdf');
     expect(resultBlob.size).toBeGreaterThan(0);
   });
+
+  it('should export PDF with rich text containing mixed bold, italic, and colored words', async () => {
+    const testDoc = await PDFDocument.create();
+    testDoc.addPage([600, 800]);
+    const pdfBytes = await testDoc.save();
+
+    const elements = [
+      {
+        id: 'txt-rich-1',
+        pageIndex: 0,
+        type: 'text',
+        xPt: 50,
+        yPt: 500,
+        widthPt: 300,
+        heightPt: 50,
+        text: 'Nextum AI sandbox Australia',
+        html: 'Nextum <b>AI</b> <i>sandbox</i> Australia',
+        fontFamily: 'Inter',
+        fontSizePt: 12,
+        color: 'var(--pt-navy)'
+      } as any
+    ];
+
+    const resultBlob = await service.exportPdf(
+      pdfBytes,
+      [{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }],
+      elements
+    );
+
+    expect(resultBlob).toBeTruthy();
+    expect(resultBlob.type).toBe('application/pdf');
+    expect(resultBlob.size).toBeGreaterThan(0);
+  });
 });
+

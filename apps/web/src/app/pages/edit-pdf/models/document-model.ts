@@ -64,6 +64,7 @@ export interface TextEditElement extends BaseEditElement {
   originalText?: string;
   ocrConfidence?: number;
   lowConfidenceWords?: LowConfidenceWord[];
+  html?: string;
 }
 
 export interface ImageEditElement extends BaseEditElement {

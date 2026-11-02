@@ -437,14 +437,17 @@
                   [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                   [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
                   (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
-                  <textarea class="canvas-text-area" [ngModel]="el.text"
-                    (ngModelChange)="onTextContentChange(el, $event)" [style.font-family]="el.fontFamily || 'Inter'"
+                  <div class="canvas-text-area canvas-text-content"
+                    contenteditable="true"
+                    [appContentEditableModel]="{ html: el.html, text: el.text }"
+                    (contentChange)="onTextContentChange(el, $event)"
+                    [style.font-family]="el.fontFamily || 'Inter'"
                     [style.font-size.px]="(el.fontSizePt || 14) * zoom()" [style.color]="el.color || 'var(--pt-navy)'"
                     [style.font-weight]="el.bold ? '700' : '400'" [style.font-style]="el.italic ? 'italic' : 'normal'"
                     [style.text-decoration]="el.underline ? 'underline' : 'none'"
                     [style.text-align]="el.align || 'left'" [style.line-height]="1.35"
                     (focus)="selectElement(el, $event)" (mousedown)="onTextareaMouseDown($event, el)"
-                    (click)="$event.stopPropagation()"></textarea>
+                    (click)="$event.stopPropagation()"></div>
                   <ng-container *ngTemplateOutlet="resizeHandles; context: { el: el }"></ng-container>
                   @if (el.isOcrLine && el.ocrConfidence && el.ocrConfidence < 60) { <div class="ocr-low-conf-badge"
                     title="Confidence: {{ el.ocrConfidence }}%">
@@ -916,23 +919,23 @@
           <!-- Row 2: Formatting B / I / U & Alignments -->
           <div class="formatting-actions-row">
             <div class="style-toggle-group">
-              <button type="button" class="style-toggle-btn" [class.active]="isTextBold()" (click)="toggleTextBold()"
-                title="Bold">
+              <button type="button" class="style-toggle-btn" [class.active]="isTextBold()"
+                (mousedown)="$event.preventDefault()" (click)="toggleTextBold()" title="Bold">
                 B
               </button>
               <button type="button" class="style-toggle-btn" [class.active]="isTextItalic()"
-                (click)="toggleTextItalic()" title="Italic">
+                (mousedown)="$event.preventDefault()" (click)="toggleTextItalic()" title="Italic">
                 I
               </button>
               <button type="button" class="style-toggle-btn underline-btn" [class.active]="isTextUnderline()"
-                (click)="toggleTextUnderline()" title="Underline">
+                (mousedown)="$event.preventDefault()" (click)="toggleTextUnderline()" title="Underline">
                 U
               </button>
             </div>
 
             <div class="style-toggle-group align-group">
               <button type="button" class="style-toggle-btn" [class.active]="textAlign() === 'left'"
-                (click)="setTextAlign('left')" title="Align Left">
+                (mousedown)="$event.preventDefault()" (click)="setTextAlign('left')" title="Align Left">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="17" y1="10" x2="3" y2="10" />
                   <line x1="21" y1="6" x2="3" y2="6" />
@@ -941,7 +944,7 @@
                 </svg>
               </button>
               <button type="button" class="style-toggle-btn" [class.active]="textAlign() === 'center'"
-                (click)="setTextAlign('center')" title="Align Center">
+                (mousedown)="$event.preventDefault()" (click)="setTextAlign('center')" title="Align Center">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="18" y1="10" x2="6" y2="10" />
                   <line x1="21" y1="6" x2="3" y2="6" />
@@ -950,7 +953,7 @@
                 </svg>
               </button>
               <button type="button" class="style-toggle-btn" [class.active]="textAlign() === 'right'"
-                (click)="setTextAlign('right')" title="Align Right">
+                (mousedown)="$event.preventDefault()" (click)="setTextAlign('right')" title="Align Right">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="21" y1="10" x2="7" y2="10" />
                   <line x1="21" y1="6" x2="3" y2="6" />
@@ -966,13 +969,13 @@
           <div class="color-palette-row">
             <div class="color-swatches-group">
               <button type="button" class="color-dot navy" [class.active]="textColor() === 'var(--pt-navy)'"
-                (click)="setTextColor('var(--pt-navy)')" title="Navy"></button>
+                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-navy)')" title="Navy"></button>
               <button type="button" class="color-dot teal" [class.active]="textColor() === 'var(--pt-teal-700)'"
-                (click)="setTextColor('var(--pt-teal-700)')" title="Teal"></button>
+                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-teal-700)')" title="Teal"></button>
               <button type="button" class="color-dot coral" [class.active]="textColor() === 'var(--pt-coral)'"
-                (click)="setTextColor('var(--pt-coral)')" title="Coral"></button>
+                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-coral)')" title="Coral"></button>
               <button type="button" class="color-dot black" [class.active]="textColor() === 'var(--pt-navy-deep)'"
-                (click)="setTextColor('var(--pt-navy-deep)')" title="Deep Navy"></button>
+                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-navy-deep)')" title="Deep Navy"></button>
             </div>
 
             <div class="custom-color-wrap">

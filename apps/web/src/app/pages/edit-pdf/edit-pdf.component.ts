@@ -48,6 +48,7 @@ import { CoordinateTransformService } from './services/coordinate-transform';
 import { CommandHistoryService, Command } from './services/command-history';
 import { PdfExportService } from './services/pdf-export.service';
 import { OcrService } from './services/ocr.service';
+import { ContentEditableModelDirective } from './directives/content-editable-model.directive';
 
 type EditorViewMode = 'upload' | 'editor';
 
@@ -62,7 +63,8 @@ if (typeof window !== 'undefined' && pdfjsLib && (pdfjsLib as any).GlobalWorkerO
     CommonModule,
     FormsModule,
     RouterModule,
-    DropzoneComponent
+    DropzoneComponent,
+    ContentEditableModelDirective
   ],
   templateUrl: './edit-pdf.component.html',
   styleUrl: './edit-pdf.component.css'
@@ -1990,19 +1992,86 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.updateTextProperty('fontSizePt', size);
   }
 
+  private resolveColorToCss(colorStr?: string): string {
+    if (!colorStr) return '#14213D';
+    const colorMap: Record<string, string> = {
+      'var(--pt-navy)': '#14213D',
+      'var(--pt-navy-deep)': '#0D1629',
+      'var(--pt-teal-700)': '#0F766E',
+      'var(--pt-teal-800)': '#0B5D57',
+      'var(--pt-teal-600)': '#14B8A6',
+      'var(--pt-coral)': '#E05D44',
+      'var(--pt-amber)': '#D97706',
+      'var(--pt-surface-white)': '#FFFFFF'
+    };
+    if (colorMap[colorStr]) return colorMap[colorStr];
+    return colorStr;
+  }
+
   toggleTextBold(): void {
+    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+    const el = this.selectedElement() as TextEditElement;
+
+    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+      document.execCommand('bold', false);
+      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
+      if (activeEl && el && el.type === 'text') {
+        el.html = activeEl.innerHTML;
+        el.text = activeEl.innerText;
+        if (el.isPageTextLine) {
+          el.isEdited = true;
+        }
+        this.elements.update(list => [...list]);
+        return;
+      }
+    }
+
     const next = !this.isTextBold();
     this.isTextBold.set(next);
     this.updateTextProperty('bold', next);
   }
 
   toggleTextItalic(): void {
+    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+    const el = this.selectedElement() as TextEditElement;
+
+    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+      document.execCommand('italic', false);
+      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
+      if (activeEl && el && el.type === 'text') {
+        el.html = activeEl.innerHTML;
+        el.text = activeEl.innerText;
+        if (el.isPageTextLine) {
+          el.isEdited = true;
+        }
+        this.elements.update(list => [...list]);
+        return;
+      }
+    }
+
     const next = !this.isTextItalic();
     this.isTextItalic.set(next);
     this.updateTextProperty('italic', next);
   }
 
   toggleTextUnderline(): void {
+    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+    const el = this.selectedElement() as TextEditElement;
+
+    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+      document.execCommand('underline', false);
+      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
+      if (activeEl && el && el.type === 'text') {
+        el.html = activeEl.innerHTML;
+        el.text = activeEl.innerText;
+        if (el.isPageTextLine) {
+          el.isEdited = true;
+        }
+        this.elements.update(list => [...list]);
+        return;
+      }
+    }
+
     const next = !this.isTextUnderline();
     this.isTextUnderline.set(next);
     this.updateTextProperty('underline', next);
@@ -2015,13 +2084,36 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   setTextColor(color: string): void {
     this.textColor.set(color);
+    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+    const el = this.selectedElement() as TextEditElement;
+
+    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+      const cssColor = this.resolveColorToCss(color);
+      document.execCommand('foreColor', false, cssColor);
+      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
+      if (activeEl && el && el.type === 'text') {
+        el.html = activeEl.innerHTML;
+        el.text = activeEl.innerText;
+        if (el.isPageTextLine) {
+          el.isEdited = true;
+        }
+        this.elements.update(list => [...list]);
+        return;
+      }
+    }
+
     this.updateTextProperty('color', color);
   }
 
-  onTextContentChange(el: TextEditElement, newText: string): void {
-    el.text = newText;
+  onTextContentChange(el: TextEditElement, val: string | { html: string; text: string }): void {
+    if (typeof val === 'string') {
+      el.text = val;
+    } else if (val) {
+      el.html = val.html;
+      el.text = val.text;
+    }
     if (el.isPageTextLine) {
-      if (el.originalText === undefined || newText !== el.originalText) {
+      if (el.originalText === undefined || el.text !== el.originalText) {
         el.isEdited = true;
       }
     }
@@ -2047,12 +2139,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       );
       if (unextractedPages.length === 0) {
         this.activeTool.set('select');
-        const existing = this.elements().find(
-          e => e.pageIndex === this.currentPageIndex() && (e as TextEditElement).isPageTextLine
-        ) || this.elements().find(e => (e as TextEditElement).isPageTextLine);
-        if (existing && !this.selectedElementId()) {
-          this.selectedElementId.set(existing.id);
-        }
+        this.selectedElementId.set(null);
         return;
       }
       // Small delay so the slider thumb animation (220ms) completes before
@@ -2366,11 +2453,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           this.elements.update(list => [...list, ...allGeneratedElements]);
           this.editorMode.set('edit');
           this.selectTool('select');
-          const targetPage = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
-          const firstOnPage = allGeneratedElements.find(e => e.pageIndex === targetPage) || allGeneratedElements[0];
-          if (firstOnPage) {
-            this.selectedElementId.set(firstOnPage.id);
-          }
+          this.selectedElementId.set(null);
         },
         undo: () => {
           const idsToRemove = new Set(allGeneratedElements.map(e => e.id));
