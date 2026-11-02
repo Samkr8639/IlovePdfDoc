@@ -1166,43 +1166,53 @@
           <div class="sig-fonts-grid">
             <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Dancing Script')"
               (click)="setSignatureFont('\'Dancing Script\', cursive')" title="Dancing Script">
-              <span class="font-preview" style="font-family: 'Dancing Script', cursive;">{{ signatureText() ||
+              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Dancing Script', cursive;">{{ signatureText() ||
                 'Signature' }}</span>
               <small class="font-name-label">Dancing Script</small>
             </button>
 
             <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Caveat')"
               (click)="setSignatureFont('\'Caveat\', cursive')" title="Caveat">
-              <span class="font-preview" style="font-family: 'Caveat', cursive;">{{ signatureText() || 'Signature'
+              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Caveat', cursive;">{{ signatureText() || 'Signature'
                 }}</span>
               <small class="font-name-label">Caveat</small>
             </button>
 
             <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Great Vibes')"
               (click)="setSignatureFont('\'Great Vibes\', cursive')" title="Great Vibes">
-              <span class="font-preview" style="font-family: 'Great Vibes', cursive;">{{ signatureText() || 'Signature'
+              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Great Vibes', cursive;">{{ signatureText() || 'Signature'
                 }}</span>
               <small class="font-name-label">Great Vibes</small>
             </button>
 
             <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Sacramento')"
               (click)="setSignatureFont('\'Sacramento\', cursive')" title="Sacramento">
-              <span class="font-preview" style="font-family: 'Sacramento', cursive;">{{ signatureText() || 'Signature'
+              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Sacramento', cursive;">{{ signatureText() || 'Signature'
                 }}</span>
               <small class="font-name-label">Sacramento</small>
             </button>
           </div>
 
           <label class="property-sublabel">Ink Color</label>
-          <div class="color-swatches-group">
-            <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'"
-              (click)="setSignatureColor('var(--pt-navy)')" title="Navy Ink"></button>
-            <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'"
-              (click)="setSignatureColor('var(--pt-navy-deep)')" title="Black Ink"></button>
-            <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'"
-              (click)="setSignatureColor('var(--pt-teal-700)')" title="Teal Ink"></button>
-            <button type="button" class="color-dot coral" [class.active]="signatureColor() === 'var(--pt-coral)'"
-              (click)="setSignatureColor('var(--pt-coral)')" title="Coral Ink"></button>
+          <div class="color-palette-row">
+            <div class="color-swatches-group">
+              <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'"
+                (click)="setSignatureColor('var(--pt-navy)')" title="Navy Ink"></button>
+              <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'"
+                (click)="setSignatureColor('var(--pt-navy-deep)')" title="Black Ink"></button>
+              <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'"
+                (click)="setSignatureColor('var(--pt-teal-700)')" title="Teal Ink"></button>
+              <button type="button" class="color-dot coral" [class.active]="signatureColor() === 'var(--pt-coral)'"
+                (click)="setSignatureColor('var(--pt-coral)')" title="Coral Ink"></button>
+            </div>
+
+            <div class="custom-color-wrap">
+              <label class="custom-color-btn" [class.active]="isSignatureCustomActive()" title="Choose custom ink color">
+                <input type="color" class="custom-color-input" [ngModel]="signatureCustomColor()"
+                  (ngModelChange)="setSignatureColor($event)" />
+                <span>+ Custom</span>
+              </label>
+            </div>
           </div>
 
           <label class="property-sublabel">Signature Size</label>
@@ -1222,6 +1232,28 @@
 
           <!-- 2. DRAW SIGNATURE MODE -->
           @if (signatureTab() === 'draw') {
+          <label class="property-sublabel">Ink Color</label>
+          <div class="color-palette-row">
+            <div class="color-swatches-group">
+              <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'"
+                (click)="setSignatureColor('var(--pt-navy)')" title="Navy Ink"></button>
+              <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'"
+                (click)="setSignatureColor('var(--pt-navy-deep)')" title="Black Ink"></button>
+              <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'"
+                (click)="setSignatureColor('var(--pt-teal-700)')" title="Teal Ink"></button>
+              <button type="button" class="color-dot coral" [class.active]="signatureColor() === 'var(--pt-coral)'"
+                (click)="setSignatureColor('var(--pt-coral)')" title="Coral Ink"></button>
+            </div>
+
+            <div class="custom-color-wrap">
+              <label class="custom-color-btn" [class.active]="isSignatureCustomActive()" title="Choose custom ink color">
+                <input type="color" class="custom-color-input" [ngModel]="signatureCustomColor()"
+                  (ngModelChange)="setSignatureColor($event)" />
+                <span>+ Custom</span>
+              </label>
+            </div>
+          </div>
+
           <label class="property-sublabel">Draw with your mouse or finger</label>
           <div class="sig-pad-wrapper">
             <canvas #sigPad class="sig-pad-canvas" width="280" height="120" (mousedown)="onSigPadMouseDown($event)"

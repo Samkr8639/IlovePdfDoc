@@ -1763,7 +1763,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   setSignatureColor(color: string): void {
     this.signatureColor.set(color);
+    if (color && !color.startsWith('var(')) {
+      this.signatureCustomColor.set(color);
+    }
     this.updateSelectedSignatureProperty('color', color);
+  }
+
+  isSignatureCustomActive(): boolean {
+    const c = this.signatureColor();
+    return !!c && !c.startsWith('var(');
   }
 
   setSignatureText(text: string): void {
@@ -1890,7 +1898,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = this.signatureColor() === 'var(--pt-navy)' ? '#14213D' : this.signatureColor();
+    ctx.strokeStyle = this.resolveColorToCss(this.signatureColor());
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + 0.1, y + 0.1);
@@ -2166,6 +2174,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       }
       if (signEl.color) {
         this.signatureColor.set(signEl.color);
+        if (!signEl.color.startsWith('var(')) {
+          this.signatureCustomColor.set(signEl.color);
+        }
       }
       if (signEl.fontSizePt) {
         this.signatureSize.set(signEl.fontSizePt);

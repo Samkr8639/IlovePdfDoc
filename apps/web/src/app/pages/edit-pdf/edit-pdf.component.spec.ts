@@ -691,4 +691,50 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.highlightOpacity()).toBe(0.25);
     expect(component.isHighlightCustomActive()).toBe(true);
   });
+
+  it('supports custom ink color selection for signature tool and updates selected signature elements', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }]);
+    component.selectTool('sign');
+
+    // Default ink color is navy
+    expect(component.signatureColor()).toBe('var(--pt-navy)');
+    expect(component.isSignatureCustomActive()).toBe(false);
+
+    // Set custom hex color
+    component.setSignatureColor('#2563EB');
+    expect(component.signatureColor()).toBe('#2563EB');
+    expect(component.signatureCustomColor()).toBe('#2563EB');
+    expect(component.isSignatureCustomActive()).toBe(true);
+
+    // Adding signature element uses custom ink color
+    component.addSignatureElement();
+    const signEl = component.elements()[0] as any;
+    expect(signEl.type).toBe('sign');
+    expect(signEl.color).toBe('#2563EB');
+
+    // Updating signature color while selected changes element and records undo
+    component.setSignatureColor('#7C3AED');
+    expect((component.elements()[0] as any).color).toBe('#7C3AED');
+
+    component.history.undo();
+    expect((component.elements()[0] as any).color).toBe('#2563EB');
+
+    // Selecting an existing signature element with custom color syncs the signals
+    component.selectElement({
+      id: 'sign-test',
+      type: 'sign',
+      pageIndex: 0,
+      xPt: 10,
+      yPt: 10,
+      widthPt: 140,
+      heightPt: 40,
+      color: '#059669',
+      fontSizePt: 26,
+      signatureText: 'Jane Smith'
+    } as any);
+
+    expect(component.signatureColor()).toBe('#059669');
+    expect(component.signatureCustomColor()).toBe('#059669');
+    expect(component.isSignatureCustomActive()).toBe(true);
+  });
 });
