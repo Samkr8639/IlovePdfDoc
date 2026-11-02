@@ -34,6 +34,7 @@ import {
   PageDimensions,
   EditElement,
   TextEditElement,
+  TextLineBounds,
   ShapeEditElement,
   HighlightEditElement,
   WhiteoutEditElement,
@@ -505,8 +506,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   /**
    * Directly paints a solid white rectangle onto the PDF canvas over the original text bounding box.
-   * This permanently erases the PDF.js bitmap pixels so that edited or moved text never shows
-   * a ghost/duplicate underneath.
+   * Uses precise per-line bounds so that nearby table lines, horizontal rules, and borders remain intact.
    */
   whiteoutOriginalTextOnCanvas(
     textEl: TextEditElement,
@@ -529,29 +529,37 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       ? dprParam
       : (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1);
 
-    const origX = textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt;
-    const origY = textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt;
-    const origW = textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt;
-    const origH = textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt;
-
-    const screenRect = this.transform.pdfRectToScreenRect(
-      {
-        xPt: Math.max(0, origX - 3),
-        yPt: Math.max(0, origY - 2),
-        widthPt: origW + 6,
-        heightPt: origH + 4
-      },
-      pageInfo,
-      this.zoom()
-    );
+    const linesToWhiteout = textEl.originalLines && textEl.originalLines.length > 0
+      ? textEl.originalLines
+      : [{
+          text: textEl.text,
+          xPt: (textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt) - 0.5,
+          yPt: textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt,
+          widthPt: (textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt) + 1.0,
+          heightPt: textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt
+        }];
 
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(
-      Math.floor(screenRect.x * dpr),
-      Math.floor(screenRect.y * dpr),
-      Math.ceil(screenRect.width * dpr),
-      Math.ceil(screenRect.height * dpr)
-    );
+
+    for (const line of linesToWhiteout) {
+      const screenRect = this.transform.pdfRectToScreenRect(
+        {
+          xPt: Math.max(0, line.xPt),
+          yPt: line.yPt,
+          widthPt: line.widthPt,
+          heightPt: line.heightPt
+        },
+        pageInfo,
+        this.zoom()
+      );
+
+      ctx.fillRect(
+        Math.floor(screenRect.x * dpr),
+        Math.floor(screenRect.y * dpr),
+        Math.ceil(screenRect.width * dpr),
+        Math.ceil(screenRect.height * dpr)
+      );
+    }
   }
 
   // --- Page Navigation & Zoom ---
@@ -2329,8 +2337,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const maxX = Math.max(...items.map(it => it.x + it.width));
     const maxFont = Math.max(...items.map(it => it.fontSize));
     const fontSize = Math.round(maxFont * 10) / 10;
-    const y0 = baselineY - fontSize * 0.25;
-    const y1 = baselineY + fontSize * 0.85;
+    const y0 = baselineY - fontSize * 0.22;
+    const y1 = baselineY + fontSize * 0.78;
 
     return {
       text: fullText,
@@ -2481,16 +2489,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
             continue;
           }
 
+          // Do NOT merge table cells, invoice summary rows, or short standalone labels (e.g. Subtotal, Total, Amount due, numbers)
+          const isShortOrTableCell = (text: string, w: number) => {
+            const words = text.trim().split(/\s+/);
+            return words.length <= 4 && w < 160;
+          };
+          if (isShortOrTableCell(lastLine.text, lastLine.width) || isShortOrTableCell(seg.text, seg.width)) {
+            continue;
+          }
+
           const deltaY = lastLine.baselineY - seg.baselineY;
           const avgFont = (lastLine.fontSize + seg.fontSize) / 2;
 
-          const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 2.4);
+          const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 1.8);
 
           const overlap = Math.min(block.x1, seg.x1) - Math.max(block.x0, seg.x0);
           const minW = Math.min(block.x1 - block.x0, seg.width);
-          const hasColumnOverlap = overlap > 0 && (overlap / minW >= 0.45 || Math.abs(block.x0 - seg.x0) <= 18);
+          const hasColumnOverlap = overlap > 0 && (overlap / minW >= 0.65 || Math.abs(block.x0 - seg.x0) <= 8);
 
-          const isSameFontSize = Math.abs(lastLine.fontSize - seg.fontSize) <= 2.2;
+          const isSameFontSize = Math.abs(lastLine.fontSize - seg.fontSize) <= 1.5;
 
           if (isVerticallyAdjacent && hasColumnOverlap && isSameFontSize) {
             block.lines.push(seg);
@@ -2524,11 +2541,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       if (!fullBlockText.trim()) continue;
 
       const xPt = block.x0;
-      const widthPt = Math.max(30, block.x1 - block.x0 + 12);
-      const heightPt = Math.max(16, block.y1 - block.y0 + 4);
-      const yPt = block.y0 - 2;
+      const widthPt = Math.max(20, block.x1 - block.x0 + 4);
+      const heightPt = Math.max(block.fontSize, block.y1 - block.y0);
+      const yPt = block.y0;
       const baselineY = block.lines[0].baselineY;
       const fontSizePt = Math.round(block.fontSize * 10) / 10;
+
+      const originalLines: TextLineBounds[] = block.lines.map(l => ({
+        text: l.text,
+        xPt: l.x0 - 0.5,
+        yPt: l.y0,
+        widthPt: l.width + 1.0,
+        heightPt: Math.max(l.fontSize * 0.95, l.y1 - l.y0)
+      }));
 
       const textEl: TextEditElement = {
         id: `page-text-${page.pageIndex}-${idx}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -2541,6 +2566,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         originalYPt: yPt,
         originalWidthPt: widthPt,
         originalHeightPt: heightPt,
+        originalLines,
         xPt,
         yPt,
         baselineY,

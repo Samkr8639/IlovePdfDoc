@@ -76,18 +76,25 @@ export class PdfExportService {
               }
               // If user edited this page text block, whiteout the old text first at its original position
               if (textEl.isPageTextLine && textEl.isEdited) {
-                const origX = textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt;
-                const origY = textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt;
-                const origW = textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt;
-                const origH = textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt;
+                const linesToWhiteout = textEl.originalLines && textEl.originalLines.length > 0
+                  ? textEl.originalLines
+                  : [{
+                      text: textEl.text,
+                      xPt: (textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt) - 0.5,
+                      yPt: textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt,
+                      widthPt: (textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt) + 1.0,
+                      heightPt: textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt
+                    }];
 
-                page.drawRectangle({
-                  x: Math.max(0, origX - 3),
-                  y: Math.max(0, origY - 2),
-                  width: origW + 6,
-                  height: origH + 4,
-                  color: rgb(1, 1, 1)
-                });
+                for (const line of linesToWhiteout) {
+                  page.drawRectangle({
+                    x: Math.max(0, line.xPt),
+                    y: line.yPt,
+                    width: line.widthPt,
+                    height: line.heightPt,
+                    color: rgb(1, 1, 1)
+                  });
+                }
               }
               this.renderText(
                 page,

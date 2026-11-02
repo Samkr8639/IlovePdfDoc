@@ -47,6 +47,14 @@ export interface LowConfidenceWord {
   confidence: number;
 }
 
+export interface TextLineBounds {
+  text: string;
+  xPt: number;
+  yPt: number;
+  widthPt: number;
+  heightPt: number;
+}
+
 export interface TextEditElement extends BaseEditElement {
   type: 'text';
   text: string;
@@ -66,6 +74,7 @@ export interface TextEditElement extends BaseEditElement {
   originalYPt?: number;
   originalWidthPt?: number;
   originalHeightPt?: number;
+  originalLines?: TextLineBounds[];
   ocrConfidence?: number;
   lowConfidenceWords?: LowConfidenceWord[];
   html?: string;
