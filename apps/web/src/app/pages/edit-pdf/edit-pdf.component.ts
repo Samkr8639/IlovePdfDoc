@@ -221,6 +221,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private resizeStartRect = { xPt: 0, yPt: 0, widthPt: 0, heightPt: 0 };
   private resizingElementId: string | null = null;
 
+  // Active inline text selection state
+  private savedTextRange: Range | null = null;
+  private savedTextElementId: string | null = null;
+
   // Active page computed metrics
   readonly currentPage = computed<PageDimensions | null>(() => {
     const list = this.pages();
@@ -1339,8 +1343,16 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onTextareaMouseDown(event: MouseEvent, el: EditElement): void {
-    if (this.selectedElementId() === el.id) {
-      event.stopPropagation();
+    event.stopPropagation();
+    this.selectElement(el, event);
+  }
+
+  onTextareaSelectionChange(el: EditElement): void {
+    if (typeof window === 'undefined') return;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      this.savedTextElementId = el.id;
     }
   }
 
@@ -2121,22 +2133,48 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     return colorStr;
   }
 
-  toggleTextBold(): void {
-    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
-    const el = this.selectedElement() as TextEditElement;
+  private restoreTextSelection(el: TextEditElement): { hasSelection: boolean; activeEl: HTMLElement | null } {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return { hasSelection: false, activeEl: null };
+    }
+    const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
+    if (!activeEl) return { hasSelection: false, activeEl: null };
 
-    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
-      document.execCommand('bold', false);
-      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
-      if (activeEl && el && el.type === 'text') {
-        el.html = activeEl.innerHTML;
-        el.text = activeEl.innerText;
-        if (el.isPageTextLine) {
-          el.isEdited = true;
-        }
-        this.elements.update(list => [...list]);
-        return;
+    activeEl.focus();
+
+    const sel = window.getSelection();
+    if (sel && this.savedTextRange && this.savedTextElementId === el.id) {
+      try {
+        sel.removeAllRanges();
+        sel.addRange(this.savedTextRange);
+      } catch {
+        // Stale range
       }
+    }
+
+    const hasSelection = !!(sel && !sel.isCollapsed && sel.rangeCount > 0);
+    return { hasSelection, activeEl };
+  }
+
+  toggleTextBold(): void {
+    const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
+
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
+      document.execCommand('bold', false);
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
+      }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      }
+      this.elements.update(list => [...list]);
+      return;
     }
 
     const next = !this.isTextBold();
@@ -2145,21 +2183,24 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   toggleTextItalic(): void {
-    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
     const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
 
-    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
       document.execCommand('italic', false);
-      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
-      if (activeEl && el && el.type === 'text') {
-        el.html = activeEl.innerHTML;
-        el.text = activeEl.innerText;
-        if (el.isPageTextLine) {
-          el.isEdited = true;
-        }
-        this.elements.update(list => [...list]);
-        return;
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
       }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      }
+      this.elements.update(list => [...list]);
+      return;
     }
 
     const next = !this.isTextItalic();
@@ -2168,21 +2209,24 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   toggleTextUnderline(): void {
-    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
     const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
 
-    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
       document.execCommand('underline', false);
-      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
-      if (activeEl && el && el.type === 'text') {
-        el.html = activeEl.innerHTML;
-        el.text = activeEl.innerText;
-        if (el.isPageTextLine) {
-          el.isEdited = true;
-        }
-        this.elements.update(list => [...list]);
-        return;
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
       }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      }
+      this.elements.update(list => [...list]);
+      return;
     }
 
     const next = !this.isTextUnderline();
@@ -2197,22 +2241,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   setTextColor(color: string): void {
     this.textColor.set(color);
-    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
     const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
 
-    if (sel && !sel.isCollapsed && sel.rangeCount > 0 && typeof document !== 'undefined') {
+    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+
+    if (hasSelection && activeEl) {
       const cssColor = this.resolveColorToCss(color);
       document.execCommand('foreColor', false, cssColor);
-      const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
-      if (activeEl && el && el.type === 'text') {
-        el.html = activeEl.innerHTML;
-        el.text = activeEl.innerText;
-        if (el.isPageTextLine) {
-          el.isEdited = true;
-        }
-        this.elements.update(list => [...list]);
-        return;
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
       }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        this.savedTextRange = sel.getRangeAt(0).cloneRange();
+      }
+      this.elements.update(list => [...list]);
+      return;
     }
 
     this.updateTextProperty('color', color);

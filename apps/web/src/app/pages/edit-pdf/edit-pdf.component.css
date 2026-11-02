@@ -926,12 +926,12 @@
   user-select: none !important;
 }
 
-/* In-Place Editable Page Text Block - Clean view until hover or selection */
+/* In-Place Editable Page Text Block - Continuous visible dashed guide boxes matching Sejda */
 .paper-canvas-container.edit-mode .text-element.page-text-line,
 .paper-canvas-container.edit-mode .text-element.is-ocr-line,
 .text-element.page-text-line.in-edit-mode,
 .text-element.is-ocr-line.in-edit-mode {
-  border: 1px dashed transparent;
+  border: 1px dashed rgba(59, 130, 246, 0.65) !important;
   background: transparent;
   border-radius: 2px;
   cursor: text;
@@ -939,7 +939,7 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   z-index: 5;
 }
 
@@ -951,12 +951,13 @@
   caret-color: var(--pt-navy);
 }
 
-/* Hover: subtle guide outline on hover so user knows it is clickable, without cluttering the page */
+/* Hover: stronger guide outline and subtle tint */
 .paper-canvas-container.edit-mode .text-element.page-text-line:hover,
 .paper-canvas-container.edit-mode .text-element.is-ocr-line:hover,
 .text-element.page-text-line.in-edit-mode:hover,
 .text-element.is-ocr-line.in-edit-mode:hover {
-  border: 1px dashed rgba(37, 99, 235, 0.45);
+  border: 1px dashed #2563eb !important;
+  background: rgba(239, 246, 255, 0.35) !important;
   z-index: 10;
 }
 
@@ -975,12 +976,17 @@
   z-index: 25;
 }
 
-/* User-edited blocks when unselected: blend seamlessly with zero distracting borders */
+/* User-edited blocks when unselected: subtle dashed guide box remains visible */
 .paper-canvas-container.edit-mode .text-element.page-text-line.is-user-edited:not(.selected):not(:focus-within),
 .text-element.page-text-line.is-user-edited:not(.selected):not(:focus-within) {
-  border: 1px solid transparent !important;
+  border: 1px dashed rgba(59, 130, 246, 0.65) !important;
   box-shadow: none !important;
   background: transparent !important;
+}
+
+.canvas-text-content::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: inherit;
 }
 
 .paper-canvas-container.edit-mode .text-element.page-text-line.selected .canvas-text-area,
