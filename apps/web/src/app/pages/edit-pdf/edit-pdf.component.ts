@@ -209,6 +209,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private isDraggingElement = false;
   private dragStartMouse = { x: 0, y: 0 };
   private dragStartElementPos = { xPt: 0, yPt: 0 };
+  private dragStartPageIndex = 0;
   private draggedElementId: string | null = null;
 
   // Element resizing state
@@ -854,24 +855,91 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       const draggedId = this.draggedElementId;
       const el = this.elements().find(e => e.id === draggedId);
       const startPos = { ...this.dragStartElementPos };
+      const startPageIndex = this.dragStartPageIndex;
 
       this.isDraggingElement = false;
       this.draggedElementId = null;
 
-      if (el && (el.xPt !== startPos.xPt || el.yPt !== startPos.yPt)) {
-        const finalX = el.xPt;
-        const finalY = el.yPt;
+      if (!el) return;
+
+      const originPage = this.pages().find(p => p.pageIndex === startPageIndex) || this.currentPage();
+      if (!originPage) return;
+
+      let targetPageIndex = startPageIndex;
+      let finalX = el.xPt;
+      let finalY = el.yPt;
+
+      if (typeof document !== 'undefined') {
+        const originPageEl = document.getElementById(`pdf-page-${startPageIndex}`);
+        if (originPageEl) {
+          const originRect = originPageEl.getBoundingClientRect();
+          const elScreen = this.transform.pdfRectToScreenRect(
+            { xPt: el.xPt, yPt: el.yPt, widthPt: el.widthPt, heightPt: el.heightPt },
+            originPage,
+            this.zoom()
+          );
+
+          // Center of the element in global screen coordinates
+          const centerClientY = originRect.top + elScreen.y + elScreen.height / 2;
+
+          for (let i = 0; i < this.pages().length; i++) {
+            const pageEl = document.getElementById(`pdf-page-${i}`);
+            if (!pageEl) continue;
+            const pRect = pageEl.getBoundingClientRect();
+            if (centerClientY >= pRect.top && centerClientY <= pRect.bottom) {
+              targetPageIndex = i;
+              break;
+            }
+          }
+
+          if (targetPageIndex !== startPageIndex) {
+            const targetPage = this.pages().find(p => p.pageIndex === targetPageIndex);
+            const targetPageEl = document.getElementById(`pdf-page-${targetPageIndex}`);
+            if (targetPage && targetPageEl) {
+              const targetRect = targetPageEl.getBoundingClientRect();
+              const screenLeftInTarget = (originRect.left + elScreen.x) - targetRect.left;
+              const screenTopInTarget = (originRect.top + elScreen.y) - targetRect.top;
+
+              const newPdfRect = this.transform.screenRectToPdfRect(
+                {
+                  x: screenLeftInTarget,
+                  y: screenTopInTarget,
+                  width: elScreen.width,
+                  height: elScreen.height
+                },
+                targetPage,
+                this.zoom()
+              );
+
+              finalX = Math.round(newPdfRect.xPt);
+              finalY = Math.round(newPdfRect.yPt);
+            }
+          }
+        }
+      }
+
+      if (targetPageIndex !== startPageIndex || el.xPt !== startPos.xPt || el.yPt !== startPos.yPt) {
+        const description = targetPageIndex !== startPageIndex
+          ? `Move Element to Page ${targetPageIndex + 1}`
+          : 'Move Element';
+
         const cmd: Command = {
-          description: 'Move Element',
+          description,
           execute: () => {
             this.elements.update(list =>
-              list.map(e => (e.id === draggedId ? { ...e, xPt: finalX, yPt: finalY } : e))
+              list.map(e => (e.id === draggedId ? { ...e, pageIndex: targetPageIndex, xPt: finalX, yPt: finalY } : e))
             );
+            if (targetPageIndex !== this.currentPageIndex()) {
+              this.currentPageIndex.set(targetPageIndex);
+            }
           },
           undo: () => {
             this.elements.update(list =>
-              list.map(e => (e.id === draggedId ? { ...e, xPt: startPos.xPt, yPt: startPos.yPt } : e))
+              list.map(e => (e.id === draggedId ? { ...e, pageIndex: startPageIndex, xPt: startPos.xPt, yPt: startPos.yPt } : e))
             );
+            if (startPageIndex !== this.currentPageIndex()) {
+              this.currentPageIndex.set(startPageIndex);
+            }
           }
         };
         this.history.execute(cmd);
@@ -1129,6 +1197,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.draggedElementId = el.id;
     this.dragStartMouse = { x: event.clientX, y: event.clientY };
     this.dragStartElementPos = { xPt: el.xPt, yPt: el.yPt };
+    this.dragStartPageIndex = el.pageIndex ?? this.currentPageIndex();
   }
 
   onResizeHandleMouseDown(
@@ -1239,20 +1308,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  addShapeElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
+  addShapeElement(xPt?: number, yPt?: number, targetPageIndex?: number): void {
     const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
+
+    const widthPt = this.shapeType() === 'line' || this.shapeType() === 'arrow' ? 140 : 160;
+    const heightPt = this.shapeType() === 'line' || this.shapeType() === 'arrow' ? 70 : 100;
+    const finalX = xPt !== undefined ? xPt : Math.round((page.widthPt - widthPt) / 2);
+    const finalY = yPt !== undefined ? yPt : Math.round((page.heightPt - heightPt) / 2);
 
     const newElement: ShapeEditElement = {
       id: `shape-${Date.now()}`,
       pageIndex: page.pageIndex,
       type: 'shape',
       shapeType: this.shapeType(),
-      xPt,
-      yPt,
-      widthPt: this.shapeType() === 'line' || this.shapeType() === 'arrow' ? 140 : 160,
-      heightPt: this.shapeType() === 'line' || this.shapeType() === 'arrow' ? 70 : 100,
+      xPt: finalX,
+      yPt: finalY,
+      widthPt,
+      heightPt,
       strokeColor: this.strokeColor(),
       fillColor: this.fillColor(),
       strokeWidth: this.strokeWidth()
@@ -1543,7 +1617,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  addSignatureElement(xPt = 120, yPt = 120, targetPageIndex?: number): void {
+  addSignatureElement(xPt?: number, yPt?: number, targetPageIndex?: number): void {
     const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
@@ -1572,13 +1646,16 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       heightPt = Math.round(this.signatureSize() * 1.6);
     }
 
+    const finalX = xPt !== undefined ? xPt : Math.round((page.widthPt - widthPt) / 2);
+    const finalY = yPt !== undefined ? yPt : Math.round((page.heightPt - heightPt) / 2);
+
     const newElement: SignEditElement = {
       id: `sign-${Date.now()}`,
       pageIndex: page.pageIndex,
       type: 'sign',
       signMode: mode,
-      xPt,
-      yPt,
+      xPt: finalX,
+      yPt: finalY,
       widthPt,
       heightPt,
       dataUrl,
@@ -1648,21 +1725,31 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
         const img = new Image();
         img.onload = () => {
-          const maxW = 200;
-          const ratio = img.height / (img.width || 1);
-          const w = Math.min(maxW, page.widthPt * 0.5);
-          const h = w * ratio;
+          const maxW = Math.min(250, page.widthPt * 0.6);
+          const maxH = Math.min(320, page.heightPt * 0.5);
+          const naturalW = img.naturalWidth || img.width || 200;
+          const naturalH = img.naturalHeight || img.height || 200;
+          const ratio = naturalH / (naturalW || 1);
+          let w = maxW;
+          let h = w * ratio;
+          if (h > maxH) {
+            h = maxH;
+            w = h / ratio;
+          }
+
+          const xPt = Math.max(20, Math.round((page.widthPt - w) / 2));
+          const yPt = Math.max(20, Math.round((page.heightPt - h) / 2));
 
           const newElement: ImageEditElement = {
             id: `img-${Date.now()}`,
             pageIndex: page.pageIndex,
             type: 'image',
-            xPt: 100,
-            yPt: 100,
+            xPt,
+            yPt,
             widthPt: Math.round(w),
             heightPt: Math.round(h),
-            naturalWidth: img.naturalWidth || img.width || 200,
-            naturalHeight: img.naturalHeight || img.height || 200,
+            naturalWidth: naturalW,
+            naturalHeight: naturalH,
             dataUrl
           };
 

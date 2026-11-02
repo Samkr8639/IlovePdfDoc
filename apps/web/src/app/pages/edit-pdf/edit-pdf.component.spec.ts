@@ -259,6 +259,17 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.elements().length).toBe(0);
   });
 
+  it('centers shapes and signatures when placed without coordinates', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }
+    ]);
+
+    component.addShapeElement();
+    const shape = component.elements()[0];
+    expect(shape.xPt).toBe((600 - shape.widthPt) / 2);
+    expect(shape.yPt).toBe((800 - shape.heightPt) / 2);
+  });
+
   it('handles Google Drive and Dropbox external openers safely', () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 

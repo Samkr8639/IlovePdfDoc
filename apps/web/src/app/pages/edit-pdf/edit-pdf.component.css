@@ -2394,6 +2394,10 @@
   box-shadow: 0 14px 34px -4px rgba(15, 118, 110, 0.18), 0 4px 12px -2px rgba(11, 18, 32, 0.06);
 }
 
+.paper-canvas-container.has-selected-element {
+  z-index: 40 !important;
+}
+
 .page-corner-indicator {
   position: absolute;
   top: 10px;

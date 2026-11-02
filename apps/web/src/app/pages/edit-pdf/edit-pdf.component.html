@@ -380,6 +380,7 @@
           <div class="pages-vertical-stack">
             @for (page of pages(); track page.pageIndex; let i = $index) {
             <div class="paper-canvas-container" [id]="'pdf-page-' + i" [class.active-page]="currentPageIndex() === i"
+              [class.has-selected-element]="selectedElement()?.pageIndex === i"
               [class.draw-mode]="activeTool() === 'draw'" [class.edit-mode]="editorMode() === 'edit'"
               [style.width.px]="getPageDisplaySize(page).width" [style.height.px]="getPageDisplaySize(page).height"
               (click)="onPageClick(i, $event)" (mousedown)="onPageMouseDown(i, $event)"
@@ -855,7 +856,7 @@
               (click)="setFillColor('rgba(244, 63, 94, 0.15)')" title="Coral Tint"></button>
           </div>
 
-          <button type="button" class="btn-action-primary" (click)="addShapeElement(120, 120)">
+          <button type="button" class="btn-action-primary" (click)="addShapeElement()">
             <span>+ Place Shape on Page</span>
           </button>
 
@@ -1158,7 +1159,7 @@
               (click)="setSignatureSize(34)">Large</button>
           </div>
 
-          <button type="button" class="btn-action-primary" (click)="addSignatureElement(120, 120)">
+          <button type="button" class="btn-action-primary" (click)="addSignatureElement()">
             <span>+ Place Signature on Page</span>
           </button>
           }
@@ -1176,7 +1177,7 @@
             <button type="button" class="btn-outline-sm" (click)="clearSigPad()">
               Clear Pad
             </button>
-            <button type="button" class="btn-action-primary-sm" (click)="addSignatureElement(120, 120)">
+            <button type="button" class="btn-action-primary-sm" (click)="addSignatureElement()">
               + Place Drawn Signature
             </button>
           </div>
@@ -1197,7 +1198,7 @@
               Select Image
             </button>
             <button type="button" class="btn-action-primary-sm" [disabled]="!signatureDrawnDataUrl()"
-              (click)="addSignatureElement(120, 120)">
+              (click)="addSignatureElement()">
               + Place Signature
             </button>
           </div>
