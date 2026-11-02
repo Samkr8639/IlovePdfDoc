@@ -476,4 +476,74 @@ describe('EditPdfComponent Integration Tests', () => {
     component.onKeydown(pageUpEvent as unknown as KeyboardEvent);
     expect(component.currentPageIndex()).toBe(0);
   });
+
+  it('extracts digital PDF text across ALL pages in multi-page document with makePageTextEditable', async () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 1, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    (component as any).cachedPdfDoc = {
+      getPage: vi.fn((pageNum: number) => {
+        if (pageNum === 1) {
+          return Promise.resolve({
+            getTextContent: vi.fn().mockResolvedValue({
+              items: [
+                { str: 'Page 1 Header', transform: [14, 0, 0, 14, 50, 750], width: 120, height: 14 }
+              ]
+            })
+          });
+        } else {
+          return Promise.resolve({
+            getTextContent: vi.fn().mockResolvedValue({
+              items: [
+                { str: 'Page 2 Content', transform: [12, 0, 0, 12, 50, 700], width: 110, height: 12 }
+              ]
+            })
+          });
+        }
+      })
+    };
+
+    await component.makePageTextEditable();
+
+    expect(component.editorMode()).toBe('edit');
+    expect(component.elements().length).toBe(2);
+
+    const page0Els = component.getElementsByPage(0);
+    const page1Els = component.getElementsByPage(1);
+
+    expect(page0Els.length).toBe(1);
+    expect((page0Els[0] as any).text).toBe('Page 1 Header');
+    expect(page0Els[0].pageIndex).toBe(0);
+
+    expect(page1Els.length).toBe(1);
+    expect((page1Els[0] as any).text).toBe('Page 2 Content');
+    expect(page1Els[0].pageIndex).toBe(1);
+  });
+
+  it('allows adding annotations directly to any page across multi-page document', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 1, widthPt: 595, heightPt: 842, rotation: 0 },
+      { pageIndex: 2, widthPt: 595, heightPt: 842, rotation: 0 }
+    ]);
+
+    component.addShapeElement(100, 100, 1);
+    component.addTextElement(120, 120, 2);
+
+    const p1Shapes = component.getElementsByPage(1);
+    expect(p1Shapes.length).toBe(1);
+    expect(p1Shapes[0].type).toBe('shape');
+    expect(p1Shapes[0].pageIndex).toBe(1);
+
+    const p2Texts = component.getElementsByPage(2);
+    expect(p2Texts.length).toBe(1);
+    expect(p2Texts[0].type).toBe('text');
+    expect(p2Texts[0].pageIndex).toBe(2);
+
+    // Selecting element on page 2 updates current page index
+    component.selectElement(p2Texts[0]);
+    expect(component.currentPageIndex()).toBe(2);
+  });
 });

@@ -347,8 +347,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onPageClick(pageIndex: number, event: MouseEvent): void {
+    event.stopPropagation();
     this.currentPageIndex.set(pageIndex);
-    this.onCanvasClick(event);
+    this.onCanvasClick(event, pageIndex);
   }
 
   onPageMouseDown(pageIndex: number, event: MouseEvent): void {
@@ -358,7 +359,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onPageMouseMove(pageIndex: number, event: MouseEvent): void {
-    if (this.currentPageIndex() === pageIndex) {
+    if (this.isDrawing) {
+      if (this.activeDrawingPageIndex() === pageIndex) {
+        this.onCanvasMouseMove(event);
+      }
+    } else {
       this.onCanvasMouseMove(event);
     }
   }
@@ -370,7 +375,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onPageTouchMove(pageIndex: number, event: TouchEvent): void {
-    if (this.currentPageIndex() === pageIndex) {
+    if (this.isDrawing) {
+      if (this.activeDrawingPageIndex() === pageIndex) {
+        this.onCanvasTouchMove(event);
+      }
+    } else {
       this.onCanvasTouchMove(event);
     }
   }
@@ -698,10 +707,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCanvasClick(event: MouseEvent): void {
+  onCanvasClick(event: MouseEvent, targetPageIndex?: number): void {
     if (this.isDrawing) return;
-    const page = this.currentPage();
-    const canvas = this.pageCanvasRef?.nativeElement;
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
+    const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
+      || this.pageCanvasRef?.nativeElement;
     if (!page || !canvas) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -712,16 +723,16 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     switch (this.activeTool()) {
       case 'text':
-        this.addTextElement(pdfPt.xPt, pdfPt.yPt);
+        this.addTextElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
         break;
       case 'shapes':
-        this.addShapeElement(pdfPt.xPt, pdfPt.yPt);
+        this.addShapeElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
         break;
       case 'highlight':
-        this.addHighlightElement(pdfPt.xPt, pdfPt.yPt);
+        this.addHighlightElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
         break;
       case 'whiteout':
-        this.addWhiteoutElement(pdfPt.xPt, pdfPt.yPt);
+        this.addWhiteoutElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
         break;
     }
   }
@@ -733,7 +744,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   onCanvasMouseMove(event: MouseEvent): void {
     if (this.isDraggingElement && this.draggedElementId) {
-      const page = this.currentPage();
+      const draggedEl = this.elements().find(e => e.id === this.draggedElementId);
+      const page = draggedEl
+        ? (this.pages().find(p => p.pageIndex === draggedEl.pageIndex) || this.currentPage())
+        : this.currentPage();
       if (!page) return;
       const dxScreen = event.clientX - this.dragStartMouse.x;
       const dyScreen = event.clientY - this.dragStartMouse.y;
@@ -782,8 +796,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   private startDrawing(clientX: number, clientY: number): void {
     if (this.activeTool() !== 'draw') return;
-    const page = this.currentPage();
-    const canvas = this.pageCanvasRef?.nativeElement;
+    const pageIndex = this.activeDrawingPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
+    const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
+      || this.pageCanvasRef?.nativeElement;
     if (!page || !canvas) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -797,7 +813,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   private moveDrawing(clientX: number, clientY: number): void {
-    const canvas = this.pageCanvasRef?.nativeElement;
+    const pageIndex = this.activeDrawingPageIndex();
+    const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
+      || this.pageCanvasRef?.nativeElement;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -831,7 +849,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     this.isDrawing = false;
     this.isDrawingActive.set(false);
-    const page = this.currentPage();
+    const pageIndex = this.activeDrawingPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     const screenPts = this.currentDrawingScreenPoints;
     if (!page || screenPts.length < 2) {
       this.activeDrawingPath.set('');
@@ -907,6 +926,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (this.activeTool() !== 'select') return;
     if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event.stopPropagation();
+    if (el.pageIndex !== undefined && el.pageIndex !== this.currentPageIndex()) {
+      this.currentPageIndex.set(el.pageIndex);
+    }
     this.selectedElementId.set(el.id);
     this.isDraggingElement = true;
     this.draggedElementId = el.id;
@@ -915,8 +937,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   // --- Element Creators & Setters ---
-  addTextElement(xPt = 100, yPt = 100): void {
-    const page = this.currentPage();
+  addTextElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
     const newElement: TextEditElement = {
@@ -994,8 +1017,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  addShapeElement(xPt = 100, yPt = 100): void {
-    const page = this.currentPage();
+  addShapeElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
     const newElement: ShapeEditElement = {
@@ -1028,8 +1052,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  addHighlightElement(xPt = 100, yPt = 100): void {
-    const page = this.currentPage();
+  addHighlightElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
     const newElement: HighlightEditElement = {
@@ -1060,8 +1085,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  addWhiteoutElement(xPt = 100, yPt = 100): void {
-    const page = this.currentPage();
+  addWhiteoutElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
     const newElement: WhiteoutEditElement = {
@@ -1295,8 +1321,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  addSignatureElement(xPt = 120, yPt = 120): void {
-    const page = this.currentPage();
+  addSignatureElement(xPt = 120, yPt = 120, targetPageIndex?: number): void {
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
     const mode = this.signatureTab();
@@ -1355,8 +1382,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  addLinkElement(xPt = 100, yPt = 100): void {
-    const page = this.currentPage();
+  addLinkElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
+    const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+    const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
     const newElement: LinkEditElement = {
@@ -1466,6 +1494,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   selectElement(el: EditElement, event?: Event): void {
     if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event?.stopPropagation();
+    if (el.pageIndex !== undefined && el.pageIndex !== this.currentPageIndex()) {
+      this.currentPageIndex.set(el.pageIndex);
+    }
     this.selectedElementId.set(el.id);
 
     if (el.type === 'text') {
@@ -1661,21 +1692,20 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.selectedElementId.set(null);
       this.editorMode.set('annotate');
     } else {
-      // Switching to Edit Text
+      // Switching to Edit Text across entire document
       this.editorMode.set('edit');
-      // If we already have extracted text for this page, activate selection immediately
-      const page = this.currentPage();
-      if (page) {
-        const existingPageText = this.elements().filter(
-          e => e.pageIndex === page.pageIndex && (e as TextEditElement).isPageTextLine
-        );
-        if (existingPageText.length > 0) {
-          this.activeTool.set('select');
-          if (!this.selectedElementId()) {
-            this.selectedElementId.set(existingPageText[0].id);
-          }
-          return;
+      const unextractedPages = this.pages().filter(page =>
+        !this.elements().some(e => e.pageIndex === page.pageIndex && (e as TextEditElement).isPageTextLine)
+      );
+      if (unextractedPages.length === 0) {
+        this.activeTool.set('select');
+        const existing = this.elements().find(
+          e => e.pageIndex === this.currentPageIndex() && (e as TextEditElement).isPageTextLine
+        ) || this.elements().find(e => (e as TextEditElement).isPageTextLine);
+        if (existing && !this.selectedElementId()) {
+          this.selectedElementId.set(existing.id);
         }
+        return;
       }
       // Small delay so the slider thumb animation (220ms) completes before
       // the spinner appears — prevents a jarring visual overlap
@@ -1719,252 +1749,283 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     };
   }
 
-  async makePageTextEditable(): Promise<void> {
-    const page = this.currentPage();
-    if (!page || !this.cachedPdfDoc) return;
+  private async extractTextForSinglePage(page: PageDimensions): Promise<EditElement[]> {
+    if (!this.cachedPdfDoc) return [];
 
-    // Check if we already have page text lines extracted for this page
-    const existingPageText = this.elements().filter(
-      e => e.pageIndex === page.pageIndex && (e as TextEditElement).isPageTextLine
+    const pdfPage = await this.cachedPdfDoc.getPage(page.pageIndex + 1);
+    const textContent = await pdfPage.getTextContent();
+    const rawItems = (textContent.items || []).filter(
+      (it: any) => it.str && it.str.trim().length > 0
     );
-    if (existingPageText.length > 0) {
+
+    if (rawItems.length === 0) {
+      return [];
+    }
+
+    // 1. Convert raw PDF items to structured glyph objects
+    interface GlyphItem {
+      text: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      fontSize: number;
+    }
+
+    const glyphs: GlyphItem[] = rawItems.map((item: any) => {
+      const tx = item.transform[4];
+      const ty = item.transform[5];
+      const fontSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
+      const width = item.width || (fontSize * item.str.length * 0.55);
+      const height = item.height || fontSize;
+      return { text: item.str, x: tx, y: ty, width, height, fontSize };
+    });
+
+    const baselineRows: Array<{ baselineY: number; items: GlyphItem[] }> = [];
+    for (const g of glyphs) {
+      let row = baselineRows.find(r => Math.abs(r.baselineY - g.y) <= 3.0);
+      if (row) {
+        row.items.push(g);
+      } else {
+        baselineRows.push({ baselineY: g.y, items: [g] });
+      }
+    }
+
+    // 2. Within each baseline row, sort left-to-right and split into LineSegments by large horizontal gaps
+    interface LineSegment {
+      text: string;
+      x0: number;
+      x1: number;
+      width: number;
+      baselineY: number;
+      fontSize: number;
+      y0: number;
+      y1: number;
+    }
+
+    const lineSegments: LineSegment[] = [];
+
+    for (const row of baselineRows) {
+      row.items.sort((a, b) => a.x - b.x);
+
+      let currentSegmentItems: GlyphItem[] = [];
+
+      for (let i = 0; i < row.items.length; i++) {
+        const item = row.items[i];
+        if (currentSegmentItems.length === 0) {
+          currentSegmentItems.push(item);
+          continue;
+        }
+
+        const prev = currentSegmentItems[currentSegmentItems.length - 1];
+        const gap = item.x - (prev.x + prev.width);
+
+        // If gap exceeds 2.0x font size or 16pt, it is a separate column or table cell
+        const maxGap = Math.max(16, prev.fontSize * 2.0);
+        if (gap > maxGap) {
+          lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
+          currentSegmentItems = [item];
+        } else {
+          currentSegmentItems.push(item);
+        }
+      }
+
+      if (currentSegmentItems.length > 0) {
+        lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
+      }
+    }
+
+    // Sort line segments from top to bottom (in PDF coordinates, higher baselineY is higher)
+    lineSegments.sort((a, b) => b.baselineY - a.baselineY);
+
+    // 3. Semantic Block Clustering: Group vertically adjacent line segments that share column alignment
+    //    and typographic scale into unified multi-line Paragraph Blocks
+    interface TextBlock {
+      lines: LineSegment[];
+      x0: number;
+      x1: number;
+      y0: number;
+      y1: number;
+      fontSize: number;
+    }
+
+    const isBulletLine = (text: string) => {
+      const t = text.trim();
+      return /^[•\-\*\u2022\u25cf\u25cb\u25aa\u25b8\u2013\u2014]/.test(t);
+    };
+
+    const isSectionHeading = (text: string) => {
+      const t = text.trim();
+      if (t.length >= 3 && t.length <= 50 && t === t.toUpperCase() && /[A-Z]/.test(t)) {
+        return true;
+      }
+      return false;
+    };
+
+    const textBlocks: TextBlock[] = [];
+
+    for (const seg of lineSegments) {
+      if (!seg.text.trim()) continue;
+
+      const isSegHeading = isSectionHeading(seg.text);
+      const isSegBullet = isBulletLine(seg.text);
+
+      let merged = false;
+
+      if (!isSegHeading) {
+        for (const block of textBlocks) {
+          const firstLine = block.lines[0];
+          const lastLine = block.lines[block.lines.length - 1];
+
+          if (isSectionHeading(firstLine.text)) {
+            continue;
+          }
+
+          const blockHasBullets = block.lines.some(l => isBulletLine(l.text));
+          if (!blockHasBullets && isSegBullet) {
+            continue;
+          }
+
+          const deltaY = lastLine.baselineY - seg.baselineY;
+          const avgFont = (lastLine.fontSize + seg.fontSize) / 2;
+
+          const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 2.4);
+
+          const overlap = Math.min(block.x1, seg.x1) - Math.max(block.x0, seg.x0);
+          const minW = Math.min(block.x1 - block.x0, seg.width);
+          const hasColumnOverlap = overlap > 0 && (overlap / minW >= 0.45 || Math.abs(block.x0 - seg.x0) <= 18);
+
+          const isSameFontSize = Math.abs(lastLine.fontSize - seg.fontSize) <= 2.2;
+
+          if (isVerticallyAdjacent && hasColumnOverlap && isSameFontSize) {
+            block.lines.push(seg);
+            block.x0 = Math.min(block.x0, seg.x0);
+            block.x1 = Math.max(block.x1, seg.x1);
+            block.y0 = Math.min(block.y0, seg.y0);
+            block.y1 = Math.max(block.y1, seg.y1);
+            merged = true;
+            break;
+          }
+        }
+      }
+
+      if (!merged) {
+        textBlocks.push({
+          lines: [seg],
+          x0: seg.x0,
+          x1: seg.x1,
+          y0: seg.y0,
+          y1: seg.y1,
+          fontSize: seg.fontSize
+        });
+      }
+    }
+
+    const generatedElements: EditElement[] = [];
+
+    for (let idx = 0; idx < textBlocks.length; idx++) {
+      const block = textBlocks[idx];
+      const fullBlockText = block.lines.map(l => l.text).join('\n');
+      if (!fullBlockText.trim()) continue;
+
+      const xPt = block.x0;
+      const widthPt = Math.max(30, block.x1 - block.x0 + 12);
+      const heightPt = Math.max(16, block.y1 - block.y0 + 4);
+      const yPt = block.y0 - 2;
+      const baselineY = block.lines[0].baselineY;
+      const fontSizePt = Math.round(block.fontSize * 10) / 10;
+
+      const textEl: TextEditElement = {
+        id: `page-text-${page.pageIndex}-${idx}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        pageIndex: page.pageIndex,
+        type: 'text',
+        isPageTextLine: true,
+        isEdited: false,
+        originalText: fullBlockText,
+        xPt,
+        yPt,
+        baselineY,
+        widthPt,
+        heightPt,
+        text: fullBlockText,
+        fontFamily: 'Inter',
+        fontSizePt,
+        color: 'var(--pt-navy)'
+      };
+
+      generatedElements.push(textEl);
+    }
+
+    return generatedElements;
+  }
+
+  async makePageTextEditable(targetPageIndex?: number): Promise<void> {
+    if (!this.cachedPdfDoc) return;
+
+    const pagesToProcess = targetPageIndex !== undefined
+      ? this.pages().filter(p => p.pageIndex === targetPageIndex)
+      : this.pages();
+
+    if (pagesToProcess.length === 0) return;
+
+    // Filter to pages that do not yet have extracted text lines
+    const unextractedPages = pagesToProcess.filter(page =>
+      !this.elements().some(e => e.pageIndex === page.pageIndex && (e as TextEditElement).isPageTextLine)
+    );
+
+    if (unextractedPages.length === 0) {
       this.editorMode.set('edit');
       this.activeTool.set('select');
-      this.selectedElementId.set(existingPageText[0].id);
+      const targetPage = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+      const existing = this.elements().find(
+        e => (e as TextEditElement).isPageTextLine && e.pageIndex === targetPage
+      ) || this.elements().find(e => (e as TextEditElement).isPageTextLine);
+      if (existing) {
+        this.selectedElementId.set(existing.id);
+      }
       return;
     }
 
     this.isExtractingPageText.set(true);
     try {
-      const pdfPage = await this.cachedPdfDoc.getPage(page.pageIndex + 1);
-      const textContent = await pdfPage.getTextContent();
-      const rawItems = (textContent.items || []).filter(
-        (it: any) => it.str && it.str.trim().length > 0
-      );
+      const allGeneratedElements: EditElement[] = [];
 
-      if (rawItems.length === 0) {
-        this.errorMessage.set(
-          'No digital text found on this page (it appears to be a scanned image). You can recognize text using OCR.'
-        );
-        this.startOcrRecognition();
+      for (const page of unextractedPages) {
+        try {
+          const pageElements = await this.extractTextForSinglePage(page);
+          allGeneratedElements.push(...pageElements);
+        } catch (pageErr) {
+          console.warn(`Could not extract text for page ${page.pageIndex + 1}:`, pageErr);
+        }
+      }
+
+      if (allGeneratedElements.length === 0) {
+        const anyExisting = this.elements().some(e => (e as TextEditElement).isPageTextLine);
+        if (!anyExisting) {
+          this.errorMessage.set(
+            'No digital text found on this page (it appears to be a scanned image). You can recognize text using OCR.'
+          );
+          this.startOcrRecognition();
+        }
         return;
       }
 
-      // 1. Convert raw PDF items to structured glyph objects
-      interface GlyphItem {
-        text: string;
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-        fontSize: number;
-      }
-
-      const glyphs: GlyphItem[] = rawItems.map((item: any) => {
-        const tx = item.transform[4];
-        const ty = item.transform[5];
-        const fontSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
-        const width = item.width || (fontSize * item.str.length * 0.55);
-        const height = item.height || fontSize;
-        return { text: item.str, x: tx, y: ty, width, height, fontSize };
-      });
-
-      const baselineRows: Array<{ baselineY: number; items: GlyphItem[] }> = [];
-      for (const g of glyphs) {
-        let row = baselineRows.find(r => Math.abs(r.baselineY - g.y) <= 3.0);
-        if (row) {
-          row.items.push(g);
-        } else {
-          baselineRows.push({ baselineY: g.y, items: [g] });
-        }
-      }
-
-      // 2. Within each baseline row, sort left-to-right and split into LineSegments by large horizontal gaps
-      //    (Preserves columns, tables, side-by-side dates/roles)
-      interface LineSegment {
-        text: string;
-        x0: number;
-        x1: number;
-        width: number;
-        baselineY: number;
-        fontSize: number;
-        y0: number;
-        y1: number;
-      }
-
-      const lineSegments: LineSegment[] = [];
-
-      for (const row of baselineRows) {
-        row.items.sort((a, b) => a.x - b.x);
-
-        let currentSegmentItems: GlyphItem[] = [];
-
-        for (let i = 0; i < row.items.length; i++) {
-          const item = row.items[i];
-          if (currentSegmentItems.length === 0) {
-            currentSegmentItems.push(item);
-            continue;
-          }
-
-          const prev = currentSegmentItems[currentSegmentItems.length - 1];
-          const gap = item.x - (prev.x + prev.width);
-
-          // If gap exceeds 2.0x font size or 16pt, it is a separate column or table cell
-          const maxGap = Math.max(16, prev.fontSize * 2.0);
-          if (gap > maxGap) {
-            lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
-            currentSegmentItems = [item];
-          } else {
-            currentSegmentItems.push(item);
-          }
-        }
-
-        if (currentSegmentItems.length > 0) {
-          lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
-        }
-      }
-
-      // Sort line segments from top to bottom (in PDF coordinates, higher baselineY is higher)
-      lineSegments.sort((a, b) => b.baselineY - a.baselineY);
-
-      // 3. Semantic Block Clustering: Group vertically adjacent line segments that share column alignment
-      //    and typographic scale into unified multi-line Paragraph Blocks (matching iLovePDF reference Image 2)
-      interface TextBlock {
-        lines: LineSegment[];
-        x0: number;
-        x1: number;
-        y0: number;
-        y1: number;
-        fontSize: number;
-      }
-
-      const isBulletLine = (text: string) => {
-        const t = text.trim();
-        return /^[•\-\*\u2022\u25cf\u25cb\u25aa\u25b8\u2013\u2014]/.test(t);
-      };
-
-      const isSectionHeading = (text: string) => {
-        const t = text.trim();
-        // All-caps short section titles (e.g. "PROFESSIONAL SUMMARY", "CORE COMPETENCIES", "WORK EXPERIENCE", "INDEPENDENT PROJECTS", "EDUCATION")
-        if (t.length >= 3 && t.length <= 50 && t === t.toUpperCase() && /[A-Z]/.test(t)) {
-          return true;
-        }
-        return false;
-      };
-
-      const textBlocks: TextBlock[] = [];
-
-      for (const seg of lineSegments) {
-        if (!seg.text.trim()) continue;
-
-        const isSegHeading = isSectionHeading(seg.text);
-        const isSegBullet = isBulletLine(seg.text);
-
-        let merged = false;
-
-        // If the current line is a section heading, it should always start its own block (never merge)
-        if (!isSegHeading) {
-          for (const block of textBlocks) {
-            const firstLine = block.lines[0];
-            const lastLine = block.lines[block.lines.length - 1];
-
-            // If the block is a section heading, do not append normal body text to it
-            if (isSectionHeading(firstLine.text)) {
-              continue;
-            }
-
-            // If the block is NOT a bullet list, but the incoming line IS a bullet item (e.g. under a job title),
-            // do not merge them together: let the bullet item start its own list block!
-            const blockHasBullets = block.lines.some(l => isBulletLine(l.text));
-            if (!blockHasBullets && isSegBullet) {
-              continue;
-            }
-
-            const deltaY = lastLine.baselineY - seg.baselineY;
-            const avgFont = (lastLine.fontSize + seg.fontSize) / 2;
-
-            // Normal paragraph / bullet line spacing is between 0.8x and 2.4x font size
-            const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 2.4);
-
-            // Horizontal column overlap / margin alignment
-            const overlap = Math.min(block.x1, seg.x1) - Math.max(block.x0, seg.x0);
-            const minW = Math.min(block.x1 - block.x0, seg.width);
-            const hasColumnOverlap = overlap > 0 && (overlap / minW >= 0.45 || Math.abs(block.x0 - seg.x0) <= 18);
-
-            // Typography consistency (headings must NOT merge with body text)
-            const isSameFontSize = Math.abs(lastLine.fontSize - seg.fontSize) <= 2.2;
-
-            if (isVerticallyAdjacent && hasColumnOverlap && isSameFontSize) {
-              block.lines.push(seg);
-              block.x0 = Math.min(block.x0, seg.x0);
-              block.x1 = Math.max(block.x1, seg.x1);
-              block.y0 = Math.min(block.y0, seg.y0);
-              block.y1 = Math.max(block.y1, seg.y1);
-              merged = true;
-              break;
-            }
-          }
-        }
-
-        if (!merged) {
-          textBlocks.push({
-            lines: [seg],
-            x0: seg.x0,
-            x1: seg.x1,
-            y0: seg.y0,
-            y1: seg.y1,
-            fontSize: seg.fontSize
-          });
-        }
-      }
-
-      const generatedElements: EditElement[] = [];
-
-      for (let idx = 0; idx < textBlocks.length; idx++) {
-        const block = textBlocks[idx];
-        const fullBlockText = block.lines.map(l => l.text).join('\n');
-        if (!fullBlockText.trim()) continue;
-
-        const xPt = block.x0;
-        const widthPt = Math.max(30, block.x1 - block.x0 + 12);
-        const heightPt = Math.max(16, block.y1 - block.y0 + 4);
-        const yPt = block.y0 - 2;
-        const baselineY = block.lines[0].baselineY;
-        const fontSizePt = Math.round(block.fontSize * 10) / 10;
-
-        const textEl: TextEditElement = {
-          id: `page-text-${page.pageIndex}-${idx}-${Date.now()}`,
-          pageIndex: page.pageIndex,
-          type: 'text',
-          isPageTextLine: true,
-          isEdited: false,
-          originalText: fullBlockText,
-          xPt,
-          yPt,
-          baselineY,
-          widthPt,
-          heightPt,
-          text: fullBlockText,
-          fontFamily: 'Inter',
-          fontSizePt,
-          color: 'var(--pt-navy)'
-        };
-
-        generatedElements.push(textEl);
-      }
-
       const cmd: Command = {
-        description: `Make Page ${page.pageIndex + 1} Text Editable`,
+        description: targetPageIndex !== undefined
+          ? `Make Page ${targetPageIndex + 1} Text Editable`
+          : 'Make All Pages Text Editable',
         execute: () => {
-          this.elements.update(list => [...list, ...generatedElements]);
+          this.elements.update(list => [...list, ...allGeneratedElements]);
           this.editorMode.set('edit');
           this.selectTool('select');
-          if (generatedElements.length > 1) {
-            this.selectedElementId.set(generatedElements[1].id);
+          const targetPage = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
+          const firstOnPage = allGeneratedElements.find(e => e.pageIndex === targetPage) || allGeneratedElements[0];
+          if (firstOnPage) {
+            this.selectedElementId.set(firstOnPage.id);
           }
         },
         undo: () => {
-          const idsToRemove = new Set(generatedElements.map(e => e.id));
+          const idsToRemove = new Set(allGeneratedElements.map(e => e.id));
           this.elements.update(list => list.filter(e => !idsToRemove.has(e.id)));
           this.editorMode.set('annotate');
         }
@@ -1972,8 +2033,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
       this.history.execute(cmd);
     } catch (err) {
-      console.error('Failed to extract text from page:', err);
-      this.errorMessage.set('Could not extract text from this page.');
+      console.error('Failed to extract text from pages:', err);
+      this.errorMessage.set('Could not extract text from document.');
     } finally {
       this.isExtractingPageText.set(false);
     }
