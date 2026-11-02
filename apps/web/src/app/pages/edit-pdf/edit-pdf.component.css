@@ -1690,7 +1690,8 @@
   transition: all 0.15s ease;
 }
 
-.custom-color-btn:hover {
+.custom-color-btn:hover,
+.custom-color-btn.active {
   border-color: var(--pt-teal-700);
   background: var(--pt-teal-50);
 }

@@ -163,6 +163,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   // Highlight Properties
   readonly highlightColor = signal<string>('var(--pt-amber)');
   readonly highlightOpacity = signal<number>(0.35);
+  readonly highlightCustomColor = signal<string>('#F59E0B');
   readonly liveHighlightRect = signal<{ x: number; y: number; width: number; height: number; pageIndex: number } | null>(null);
   private isHighlighting = false;
   private highlightStartPos = { x: 0, y: 0 };
@@ -1659,6 +1660,62 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
+  setHighlightColor(color: string): void {
+    this.highlightColor.set(color);
+    if (color && !color.startsWith('var(')) {
+      this.highlightCustomColor.set(color);
+    }
+    const el = this.selectedElement();
+    if (el && el.type === 'highlight') {
+      const hlEl = el as HighlightEditElement;
+      const oldColor = hlEl.color;
+      if (oldColor === color) return;
+      const cmd: Command = {
+        description: 'Change Highlight Color',
+        execute: () => {
+          this.elements.update(list =>
+            list.map(e => (e.id === hlEl.id ? { ...e, color } : e))
+          );
+        },
+        undo: () => {
+          this.elements.update(list =>
+            list.map(e => (e.id === hlEl.id ? { ...e, color: oldColor } : e))
+          );
+        }
+      };
+      this.history.execute(cmd);
+    }
+  }
+
+  setHighlightOpacity(opacity: number): void {
+    this.highlightOpacity.set(opacity);
+    const el = this.selectedElement();
+    if (el && el.type === 'highlight') {
+      const hlEl = el as HighlightEditElement;
+      const oldOpacity = hlEl.opacity;
+      if (oldOpacity === opacity) return;
+      const cmd: Command = {
+        description: 'Change Highlight Opacity',
+        execute: () => {
+          this.elements.update(list =>
+            list.map(e => (e.id === hlEl.id ? { ...e, opacity } : e))
+          );
+        },
+        undo: () => {
+          this.elements.update(list =>
+            list.map(e => (e.id === hlEl.id ? { ...e, opacity: oldOpacity } : e))
+          );
+        }
+      };
+      this.history.execute(cmd);
+    }
+  }
+
+  isHighlightCustomActive(): boolean {
+    const c = this.highlightColor();
+    return !!c && !c.startsWith('var(');
+  }
+
   addWhiteoutElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
     const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
     const page = this.pages()[pageIndex] || this.currentPage();
@@ -2119,6 +2176,17 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.strokeColor.set(shapeEl.strokeColor || 'var(--pt-navy)');
       this.fillColor.set(shapeEl.fillColor || 'transparent');
       this.strokeWidth.set(shapeEl.strokeWidth || 2);
+    } else if (el.type === 'highlight') {
+      const hlEl = el as HighlightEditElement;
+      if (hlEl.color) {
+        this.highlightColor.set(hlEl.color);
+        if (!hlEl.color.startsWith('var(')) {
+          this.highlightCustomColor.set(hlEl.color);
+        }
+      }
+      if (hlEl.opacity !== undefined) {
+        this.highlightOpacity.set(hlEl.opacity);
+      }
     }
   }
 
@@ -2266,7 +2334,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.updateTextProperty('fontSizePt', size);
   }
 
-  private resolveColorToCss(colorStr?: string): string {
+  resolveColorToCss(colorStr?: string): string {
     if (!colorStr) return '#14213D';
     const colorMap: Record<string, string> = {
       'var(--pt-navy)': '#14213D',

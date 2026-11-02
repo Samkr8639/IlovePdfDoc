@@ -1043,32 +1043,69 @@
         }
 
         <!-- (D) Highlight Panel -->
-        @else if (activeTool() === 'highlight') {
+        @else if (activeTool() === 'highlight' || (selectedElement() && selectedElement()?.type === 'highlight')) {
         <div class="section-badge-title">HIGHLIGHT</div>
         <div class="property-panel-card">
           <label class="property-sublabel">Color</label>
-          <div class="color-swatches-group">
-            <button type="button" class="color-dot amber" [class.active]="highlightColor() === 'var(--pt-amber)'"
-              (click)="highlightColor.set('var(--pt-amber)')" title="Yellow"></button>
-            <button type="button" class="color-dot teal" [class.active]="highlightColor() === 'var(--pt-teal-700)'"
-              (click)="highlightColor.set('var(--pt-teal-700)')" title="Teal"></button>
-            <button type="button" class="color-dot coral" [class.active]="highlightColor() === 'var(--pt-coral)'"
-              (click)="highlightColor.set('var(--pt-coral)')" title="Pink"></button>
+          <div class="color-palette-row">
+            <div class="color-swatches-group">
+              <button type="button" class="color-dot amber" [class.active]="highlightColor() === 'var(--pt-amber)'"
+                (click)="setHighlightColor('var(--pt-amber)')" title="Yellow"></button>
+              <button type="button" class="color-dot teal" [class.active]="highlightColor() === 'var(--pt-teal-700)'"
+                (click)="setHighlightColor('var(--pt-teal-700)')" title="Teal"></button>
+              <button type="button" class="color-dot coral" [class.active]="highlightColor() === 'var(--pt-coral)'"
+                (click)="setHighlightColor('var(--pt-coral)')" title="Pink"></button>
+            </div>
+
+            <div class="custom-color-wrap">
+              <label class="custom-color-btn" [class.active]="isHighlightCustomActive()" title="Choose custom highlight color">
+                <input type="color" class="custom-color-input" [ngModel]="highlightCustomColor()"
+                  (ngModelChange)="setHighlightColor($event)" />
+                <span>+ Custom</span>
+              </label>
+            </div>
           </div>
 
           <label class="property-sublabel">Opacity</label>
           <div class="thickness-btn-group">
             <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.25"
-              (click)="highlightOpacity.set(0.25)">25%</button>
+              (click)="setHighlightOpacity(0.25)">25%</button>
             <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.35"
-              (click)="highlightOpacity.set(0.35)">35%</button>
+              (click)="setHighlightOpacity(0.35)">35%</button>
             <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.5"
-              (click)="highlightOpacity.set(0.5)">50%</button>
+              (click)="setHighlightOpacity(0.5)">50%</button>
           </div>
 
+          @if (selectedElement() && selectedElement()?.type === 'highlight') {
+          <div class="selected-element-actions-divider">
+            <div class="element-action-buttons">
+              <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate Highlight">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span>Duplicate</span>
+              </button>
+              <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15" />
+                </svg>
+                <span>Forward</span>
+              </button>
+              <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete Highlight">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+          } @else {
           <button type="button" class="btn-action-primary" (click)="addHighlightElement(100, 100)">
             <span>+ Place Highlight Box</span>
           </button>
+          }
         </div>
         }
 

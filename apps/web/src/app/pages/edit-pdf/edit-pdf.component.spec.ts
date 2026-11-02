@@ -638,4 +638,57 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.elements()[0].widthPt).toBe(initialWidth);
     expect(component.elements()[0].heightPt).toBe(initialHeight);
   });
+
+  it('supports custom color selection for highlight tool and updates selected highlight elements', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }]);
+    component.selectTool('highlight');
+
+    // Default preset is amber
+    expect(component.highlightColor()).toBe('var(--pt-amber)');
+    expect(component.isHighlightCustomActive()).toBe(false);
+
+    // Set custom hex color
+    component.setHighlightColor('#10B981');
+    expect(component.highlightColor()).toBe('#10B981');
+    expect(component.highlightCustomColor()).toBe('#10B981');
+    expect(component.isHighlightCustomActive()).toBe(true);
+
+    // Adding highlight element uses custom color
+    component.addHighlightElement(50, 50, 0);
+    const hl = component.elements()[0] as any;
+    expect(hl.type).toBe('highlight');
+    expect(hl.color).toBe('#10B981');
+    expect(hl.opacity).toBe(0.35);
+
+    // Updating highlight color while selected changes element and records undo
+    component.setHighlightColor('#8B5CF6');
+    expect((component.elements()[0] as any).color).toBe('#8B5CF6');
+
+    component.setHighlightOpacity(0.5);
+    expect((component.elements()[0] as any).opacity).toBe(0.5);
+
+    component.history.undo();
+    expect((component.elements()[0] as any).opacity).toBe(0.35);
+
+    component.history.undo();
+    expect((component.elements()[0] as any).color).toBe('#10B981');
+
+    // Selecting an existing highlight element syncs its color and opacity
+    component.selectElement({
+      id: 'hl-test',
+      type: 'highlight',
+      pageIndex: 0,
+      xPt: 10,
+      yPt: 10,
+      widthPt: 50,
+      heightPt: 20,
+      color: '#EC4899',
+      opacity: 0.25
+    } as any);
+
+    expect(component.highlightColor()).toBe('#EC4899');
+    expect(component.highlightCustomColor()).toBe('#EC4899');
+    expect(component.highlightOpacity()).toBe(0.25);
+    expect(component.isHighlightCustomActive()).toBe(true);
+  });
 });
