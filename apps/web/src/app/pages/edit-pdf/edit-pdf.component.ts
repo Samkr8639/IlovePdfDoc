@@ -94,6 +94,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   @ViewChild('fileInputAddMore') fileInputAddMore!: ElementRef<HTMLInputElement>;
   @ViewChild('canvasViewport') canvasViewportRef?: ElementRef<HTMLElement>;
 
+  readonly activeDrawingPageIndex = signal<number>(0);
+  private isUserScrollingToPage = false;
   private isPageSwitching = false;
   private wheelAccumulator = 0;
   private wheelResetTimer: any = null;
@@ -335,94 +337,144 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.pageThumbnails.set(thumbs);
   }
 
-  async renderCurrentPageToCanvas(): Promise<void> {
-    const page = this.currentPage();
-    const canvas = this.pageCanvasRef?.nativeElement;
-    if (!page || !canvas) return;
+  
+  getPageDisplaySize(page: PageDimensions): { width: number; height: number } {
+    return this.transform.getPageDisplaySize(page, this.zoom());
+  }
 
-    const display = this.displaySize();
+  getElementsByPage(pageIndex: number): EditElement[] {
+    return this.elements().filter(e => e.pageIndex === pageIndex);
+  }
+
+  onPageClick(pageIndex: number, event: MouseEvent): void {
+    this.currentPageIndex.set(pageIndex);
+    this.onCanvasClick(event);
+  }
+
+  onPageMouseDown(pageIndex: number, event: MouseEvent): void {
+    this.currentPageIndex.set(pageIndex);
+    this.activeDrawingPageIndex.set(pageIndex);
+    this.onCanvasMouseDown(event);
+  }
+
+  onPageMouseMove(pageIndex: number, event: MouseEvent): void {
+    if (this.currentPageIndex() === pageIndex) {
+      this.onCanvasMouseMove(event);
+    }
+  }
+
+  onPageTouchStart(pageIndex: number, event: TouchEvent): void {
+    this.currentPageIndex.set(pageIndex);
+    this.activeDrawingPageIndex.set(pageIndex);
+    this.onCanvasTouchStart(event);
+  }
+
+  onPageTouchMove(pageIndex: number, event: TouchEvent): void {
+    if (this.currentPageIndex() === pageIndex) {
+      this.onCanvasTouchMove(event);
+    }
+  }
+
+  onViewportScroll(): void {
+    if (this.isUserScrollingToPage) return;
+
+    const vp = this.canvasViewportRef?.nativeElement;
+    if (!vp) return;
+
+    const vpRect = vp.getBoundingClientRect();
+    const vpCenterY = vpRect.top + vpRect.height / 2;
+
+    let closestPageIndex = 0;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < this.pages().length; i++) {
+      const pageEl = document.getElementById(`pdf-page-${i}`);
+      if (!pageEl) continue;
+
+      const pageRect = pageEl.getBoundingClientRect();
+      const pageCenterY = pageRect.top + pageRect.height / 2;
+      const dist = Math.abs(pageCenterY - vpCenterY);
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestPageIndex = i;
+      }
+    }
+
+    if (closestPageIndex !== this.currentPageIndex()) {
+      this.currentPageIndex.set(closestPageIndex);
+      this.scrollActiveThumbnailIntoView(closestPageIndex);
+    }
+  }
+
+  scrollToPage(index: number): void {
+    if (index < 0 || index >= this.pages().length) return;
+    this.currentPageIndex.set(index);
+    this.scrollActiveThumbnailIntoView(index);
+
+    const pageEl = document.getElementById(`pdf-page-${index}`);
+    if (pageEl) {
+      this.isUserScrollingToPage = true;
+      pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        this.isUserScrollingToPage = false;
+      }, 500);
+    }
+  }
+
+    async renderAllPages(): Promise<void> {
+    if (!this.cachedPdfDoc) {
+      const bytes = this.currentPdfBytes();
+      if (bytes) {
+        this.cachedPdfDoc = await (pdfjsLib as any).getDocument({
+          data: bytes.slice(0),
+          verbosity: 0,
+          isEvalSupported: false
+        }).promise;
+      }
+    }
+    if (!this.cachedPdfDoc) return;
+
     const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
 
-    try {
-      if (!this.cachedPdfDoc) {
-        const bytes = this.currentPdfBytes();
-        if (bytes) {
-          this.cachedPdfDoc = await (pdfjsLib as any).getDocument({
-            data: bytes.slice(0),
-            verbosity: 0,
-            isEvalSupported: false
-          }).promise;
-        }
-      }
+    for (let i = 0; i < this.pages().length; i++) {
+      const pageInfo = this.pages()[i];
+      const canvas = document.getElementById(`pdf-canvas-${i}`) as HTMLCanvasElement | null;
+      if (!canvas) continue;
 
-      if (this.cachedPdfDoc) {
-        const pdfPage = await this.cachedPdfDoc.getPage(page.pageIndex + 1);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        const unscaledViewport = pdfPage.getViewport({ scale: 1.0, rotation: page.rotation || 0 });
+      try {
+        const pdfPage = await this.cachedPdfDoc.getPage(pageInfo.pageIndex + 1);
+        const display = this.getPageDisplaySize(pageInfo);
+        const unscaledViewport = pdfPage.getViewport({ scale: 1.0, rotation: pageInfo.rotation || 0 });
         const scale = (display.width / unscaledViewport.width) * dpr;
-        const viewport = pdfPage.getViewport({ scale, rotation: page.rotation || 0 });
+        const viewport = pdfPage.getViewport({ scale, rotation: pageInfo.rotation || 0 });
 
         canvas.width = Math.floor(viewport.width);
         canvas.height = Math.floor(viewport.height);
         canvas.style.width = `${display.width}px`;
         canvas.style.height = `${display.height}px`;
 
-        if (this.currentRenderTask) {
-          try {
-            this.currentRenderTask.cancel();
-          } catch {}
-          this.currentRenderTask = null;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          await pdfPage.render({ canvasContext: ctx, viewport }).promise;
         }
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const renderTask = pdfPage.render({ canvasContext: ctx, viewport });
-        this.currentRenderTask = renderTask;
-
-        try {
-          await renderTask.promise;
-          return;
-        } catch (err: any) {
-          if (err?.name === 'RenderingCancelledException') {
-            return;
-          }
-          console.error('PDF.js render error:', err);
-        } finally {
-          if (this.currentRenderTask === renderTask) {
-            this.currentRenderTask = null;
-          }
+      } catch (err: any) {
+        if (err?.name !== 'RenderingCancelledException') {
+          console.warn(`PDF render page ${i + 1} warning:`, err);
         }
       }
-    } catch (err) {
-      console.error('PDF.js document loading error:', err);
     }
+  }
 
-    // Fallback: draw clean white paper canvas
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      canvas.width = Math.floor(display.width * dpr);
-      canvas.height = Math.floor(display.height * dpr);
-      canvas.style.width = `${display.width}px`;
-      canvas.style.height = `${display.height}px`;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+  async renderCurrentPageToCanvas(): Promise<void> {
+    await this.renderAllPages();
   }
 
   // --- Page Navigation & Zoom ---
   setPageIndex(index: number, resetViewportScroll = true): void {
     if (index >= 0 && index < this.pages().length) {
-      this.currentPageIndex.set(index);
-      this.selectedElementId.set(null);
-      this.scrollActiveThumbnailIntoView(index);
-
-      if (resetViewportScroll && this.canvasViewportRef?.nativeElement) {
-        this.canvasViewportRef.nativeElement.scrollTop = 0;
-      }
-
+      this.scrollToPage(index);
       setTimeout(() => {
-        this.renderCurrentPageToCanvas();
         if (this.editorMode() === 'edit') {
           this.makePageTextEditable();
         }
@@ -511,11 +563,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   prevPage(): void {
-    this.setPageIndex(this.currentPageIndex() - 1);
+    this.scrollToPage(this.currentPageIndex() - 1);
   }
 
   nextPage(): void {
-    this.setPageIndex(this.currentPageIndex() + 1);
+    this.scrollToPage(this.currentPageIndex() + 1);
   }
 
   zoomIn(): void {
@@ -2318,7 +2370,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // UI coordinate calculation helper for element bounding boxes on canvas
   getElementScreenRect(el: EditElement) {
-    const page = this.currentPage();
+    const page = this.pages().find(p => p.pageIndex === el.pageIndex) || this.currentPage();
     if (!page) return { left: '0px', top: '0px', width: '0px', height: '0px' };
 
     const screenRect = this.transform.pdfRectToScreenRect(

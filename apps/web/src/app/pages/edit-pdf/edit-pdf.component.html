@@ -500,55 +500,60 @@
           </div>
         </aside>
 
-        <!-- 2. CENTER CANVAS VIEWPORT -->
-        <main
-          class="canvas-viewport"
-          #canvasViewport
-          (click)="selectedElementId.set(null)"
-          (wheel)="onViewportWheel($event)"
-        >
-          <div
-            class="paper-canvas-container"
-            [class.draw-mode]="activeTool() === 'draw'"
-            [class.edit-mode]="editorMode() === 'edit'"
-            [style.width.px]="displaySize().width"
-            [style.height.px]="displaySize().height"
-            (click)="onCanvasClick($event)"
-            (mousedown)="onCanvasMouseDown($event)"
-            (mousemove)="onCanvasMouseMove($event)"
-            (mouseup)="onCanvasMouseUp()"
-            (mouseleave)="onCanvasMouseUp()"
-            (touchstart)="onCanvasTouchStart($event)"
-            (touchmove)="onCanvasTouchMove($event)"
-            (touchend)="onCanvasTouchEnd()"
+        <!-- 2. CENTER CANVAS VIEWPORT (Continuous Smooth Multi-Page Document) -->
+        <div class="canvas-viewport-wrapper">
+          <main
+            class="canvas-viewport"
+            #canvasViewport
+            (scroll)="onViewportScroll()"
+            (click)="selectedElementId.set(null)"
           >
-            <!-- Native PDF Page Render Canvas -->
-            <canvas
-              #pageCanvas
-              class="pdf-page-canvas"
-            ></canvas>
+            <div class="pages-vertical-stack">
+              @for (page of pages(); track page.pageIndex; let i = $index) {
+                <div
+                  class="paper-canvas-container"
+                  [id]="'pdf-page-' + i"
+                  [class.active-page]="currentPageIndex() === i"
+                  [class.draw-mode]="activeTool() === 'draw' && currentPageIndex() === i"
+                  [class.edit-mode]="editorMode() === 'edit' && currentPageIndex() === i"
+                  [style.width.px]="getPageDisplaySize(page).width"
+                  [style.height.px]="getPageDisplaySize(page).height"
+                  (click)="onPageClick(i, $event)"
+                  (mousedown)="onPageMouseDown(i, $event)"
+                  (mousemove)="onPageMouseMove(i, $event)"
+                  (mouseup)="onCanvasMouseUp()"
+                  (mouseleave)="onCanvasMouseUp()"
+                  (touchstart)="onPageTouchStart(i, $event)"
+                  (touchmove)="onPageTouchMove(i, $event)"
+                  (touchend)="onCanvasTouchEnd()"
+                >
+                  <!-- Native PDF Page Render Canvas -->
+                  <canvas
+                    [id]="'pdf-canvas-' + i"
+                    class="pdf-page-canvas"
+                  ></canvas>
 
-            <!-- Real-time Live Drawing Stroke Layer (Instant smooth feedback) -->
-            @if (isDrawingActive() && activeDrawingPath()) {
-              <svg
-                class="live-drawing-stroke-overlay"
-                [style.width.px]="displaySize().width"
-                [style.height.px]="displaySize().height"
-              >
-                <path
-                  [attr.d]="activeDrawingPath()"
-                  [attr.stroke]="drawColor()"
-                  [attr.stroke-width]="drawStrokeWidth() * zoom()"
-                  fill="none"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            }
+                  <!-- Real-time Live Drawing Stroke Layer -->
+                  @if (isDrawingActive() && activeDrawingPageIndex() === i && activeDrawingPath()) {
+                    <svg
+                      class="live-drawing-stroke-overlay"
+                      [style.width.px]="getPageDisplaySize(page).width"
+                      [style.height.px]="getPageDisplaySize(page).height"
+                    >
+                      <path
+                        [attr.d]="activeDrawingPath()"
+                        [attr.stroke]="drawColor()"
+                        [attr.stroke-width]="drawStrokeWidth() * zoom()"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  }
 
-            <!-- Interactive Annotation / Edit Elements Overlay -->
-            <div class="canvas-elements-overlay">
-              @for (el of currentPageElements(); track el.id) {
+                  <!-- Interactive Annotation / Edit Elements Overlay for Page i -->
+                  <div class="canvas-elements-overlay">
+                    @for (el of getElementsByPage(i); track el.id) {
                 @if (el.type === 'text') {
                   @if (editorMode() === 'edit' || !el.isPageTextLine || el.isEdited) {
                     <div
@@ -776,17 +781,26 @@
                   </div>
                 }
               }
+                  </div>
+
+                  <!-- Page Number Watermark Indicator -->
+                  <div class="page-corner-indicator">
+                    Page {{ i + 1 }}
+                  </div>
+                </div>
+              }
             </div>
-          </div>
 
-          <input
-            #fileInputAddMore
-            type="file"
-            hidden
-            accept=".pdf,application/pdf"
-            (change)="onAddMoreFiles($event)"
-          />
+            <input
+              #fileInputAddMore
+              type="file"
+              hidden
+              accept=".pdf,application/pdf"
+              (change)="onAddMoreFiles($event)"
+            />
+          </main>
 
+          <!-- BOTTOM FLOATING CAPSULE BAR (FLOATING PERMANENTLY AT THE BOTTOM CENTER) -->
           <!-- BOTTOM FLOATING CAPSULE BAR -->
           <div class="bottom-floating-bar" aria-label="Page navigation and zoom controls">
             <button
@@ -923,7 +937,7 @@
               </svg>
             </button>
           </div>
-        </main>
+        </div>
 
         <!-- 3. RIGHT SIDEBAR -->
         <aside class="right-properties-sidebar" [class.mobile-open]="isSidePanelOpenMobile()">
