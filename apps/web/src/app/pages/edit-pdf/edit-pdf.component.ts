@@ -163,6 +163,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   // Highlight Properties
   readonly highlightColor = signal<string>('var(--pt-amber)');
   readonly highlightOpacity = signal<number>(0.35);
+  readonly liveHighlightRect = signal<{ x: number; y: number; width: number; height: number; pageIndex: number } | null>(null);
+  private isHighlighting = false;
+  private highlightStartPos = { x: 0, y: 0 };
+  private highlightPageIndex = 0;
+  private justFinishedHighlightDrag = false;
 
   // Signature Studio Properties
   readonly signatureTab = signal<'type' | 'draw' | 'upload'>('type');
@@ -369,11 +374,20 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   onPageMouseDown(pageIndex: number, event: MouseEvent): void {
     this.currentPageIndex.set(pageIndex);
+    if (this.activeTool() === 'highlight' && event.button === 0) {
+      event.preventDefault();
+      this.startHighlightDrag(pageIndex, event.clientX, event.clientY);
+      return;
+    }
     this.activeDrawingPageIndex.set(pageIndex);
     this.onCanvasMouseDown(event);
   }
 
   onPageMouseMove(pageIndex: number, event: MouseEvent): void {
+    if (this.isHighlighting) {
+      this.moveHighlightDrag(event.clientX, event.clientY);
+      return;
+    }
     if (this.isDrawing) {
       if (this.activeDrawingPageIndex() === pageIndex) {
         this.onCanvasMouseMove(event);
@@ -385,11 +399,23 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   onPageTouchStart(pageIndex: number, event: TouchEvent): void {
     this.currentPageIndex.set(pageIndex);
+    if (this.activeTool() === 'highlight' && event.touches.length > 0) {
+      event.preventDefault();
+      const t = event.touches[0];
+      this.startHighlightDrag(pageIndex, t.clientX, t.clientY);
+      return;
+    }
     this.activeDrawingPageIndex.set(pageIndex);
     this.onCanvasTouchStart(event);
   }
 
   onPageTouchMove(pageIndex: number, event: TouchEvent): void {
+    if (this.isHighlighting && event.touches.length > 0) {
+      event.preventDefault();
+      const t = event.touches[0];
+      this.moveHighlightDrag(t.clientX, t.clientY);
+      return;
+    }
     if (this.isDrawing) {
       if (this.activeDrawingPageIndex() === pageIndex) {
         this.onCanvasTouchMove(event);
@@ -791,7 +817,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasClick(event: MouseEvent, targetPageIndex?: number): void {
-    if (this.isDrawing) return;
+    if (this.isDrawing || this.justFinishedHighlightDrag) return;
     const pageIndex = targetPageIndex !== undefined ? targetPageIndex : this.currentPageIndex();
     const page = this.pages()[pageIndex] || this.currentPage();
     const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
@@ -1121,6 +1147,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:mousemove', ['$event'])
   onWindowMouseMove(event: MouseEvent): void {
+    if (this.isHighlighting) {
+      this.moveHighlightDrag(event.clientX, event.clientY);
+      return;
+    }
     if (this.isDraggingElement || this.isResizingElement) {
       this.handleDragOrResizeMove(event);
     }
@@ -1128,6 +1158,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:mouseup')
   onWindowMouseUp(): void {
+    if (this.isHighlighting) {
+      this.finishHighlightDrag();
+      return;
+    }
     if (this.isDraggingElement || this.isResizingElement) {
       this.finishDragOrResize();
     }
@@ -1138,6 +1172,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:touchend')
   onWindowTouchEnd(): void {
+    if (this.isHighlighting) {
+      this.finishHighlightDrag();
+      return;
+    }
     if (this.isDraggingElement || this.isResizingElement) {
       this.finishDragOrResize();
     }
@@ -1147,6 +1185,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasMouseMove(event: MouseEvent): void {
+    if (this.isHighlighting) {
+      this.moveHighlightDrag(event.clientX, event.clientY);
+      return;
+    }
     if (this.isDraggingElement || this.isResizingElement) {
       this.handleDragOrResizeMove(event);
       return;
@@ -1157,6 +1199,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasMouseUp(): void {
+    if (this.isHighlighting) {
+      this.finishHighlightDrag();
+      return;
+    }
     if (this.isDraggingElement || this.isResizingElement) {
       this.finishDragOrResize();
       return;
@@ -1174,6 +1220,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasTouchMove(event: TouchEvent): void {
+    if (this.isHighlighting && event.touches.length > 0) {
+      event.preventDefault();
+      const t = event.touches[0];
+      this.moveHighlightDrag(t.clientX, t.clientY);
+      return;
+    }
     if (!this.isDrawing || this.activeTool() !== 'draw') return;
     if (event.touches.length > 0) {
       event.preventDefault();
@@ -1183,11 +1235,100 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasTouchEnd(): void {
+    if (this.isHighlighting) {
+      this.finishHighlightDrag();
+      return;
+    }
     if (this.isDraggingElement || this.isResizingElement) {
       this.finishDragOrResize();
       return;
     }
     this.endDrawing();
+  }
+
+  private startHighlightDrag(pageIndex: number, clientX: number, clientY: number): void {
+    const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
+    if (!pageEl) return;
+    const rect = pageEl.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    this.isHighlighting = true;
+    this.highlightPageIndex = pageIndex;
+    this.highlightStartPos = { x, y };
+    this.liveHighlightRect.set({ x, y, width: 0, height: 0, pageIndex });
+  }
+
+  private moveHighlightDrag(clientX: number, clientY: number): void {
+    if (!this.isHighlighting) return;
+    const pageEl = document.getElementById(`pdf-page-${this.highlightPageIndex}`);
+    if (!pageEl) return;
+    const rect = pageEl.getBoundingClientRect();
+    const curX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+    const curY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+    const left = Math.min(this.highlightStartPos.x, curX);
+    const top = Math.min(this.highlightStartPos.y, curY);
+    const width = Math.abs(curX - this.highlightStartPos.x);
+    const height = Math.abs(curY - this.highlightStartPos.y);
+
+    this.liveHighlightRect.set({
+      x: left,
+      y: top,
+      width,
+      height,
+      pageIndex: this.highlightPageIndex
+    });
+  }
+
+  private finishHighlightDrag(): void {
+    if (!this.isHighlighting) return;
+    this.isHighlighting = false;
+    const liveRect = this.liveHighlightRect();
+    this.liveHighlightRect.set(null);
+
+    const pageIndex = this.highlightPageIndex;
+    const page = this.pages()[pageIndex] || this.currentPage();
+    if (!page) return;
+
+    if (liveRect && (liveRect.width > 6 || liveRect.height > 6)) {
+      this.justFinishedHighlightDrag = true;
+      setTimeout(() => {
+        this.justFinishedHighlightDrag = false;
+      }, 150);
+
+      const pdfRect = this.transform.screenRectToPdfRect(
+        { x: liveRect.x, y: liveRect.y, width: liveRect.width, height: liveRect.height },
+        page,
+        this.zoom()
+      );
+
+      const newElement: HighlightEditElement = {
+        id: `hl-${Date.now()}`,
+        pageIndex,
+        type: 'highlight',
+        xPt: Math.round(pdfRect.xPt),
+        yPt: Math.round(pdfRect.yPt),
+        widthPt: Math.max(12, Math.round(pdfRect.widthPt)),
+        heightPt: Math.max(8, Math.round(pdfRect.heightPt)),
+        color: this.highlightColor(),
+        opacity: this.highlightOpacity()
+      };
+
+      const cmd: Command = {
+        description: 'Add Highlight',
+        execute: () => {
+          this.elements.update(list => [...list, newElement]);
+          this.selectedElementId.set(newElement.id);
+          this.activeTool.set('select');
+        },
+        undo: () => {
+          this.elements.update(list => list.filter(e => e.id !== newElement.id));
+          this.selectedElementId.set(null);
+        }
+      };
+      this.history.execute(cmd);
+    }
   }
 
   private startDrawing(clientX: number, clientY: number): void {

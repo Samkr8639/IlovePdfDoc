@@ -865,7 +865,8 @@
   flex-shrink: 0;
 }
 
-.paper-canvas-container.draw-mode {
+.paper-canvas-container.draw-mode,
+.paper-canvas-container.highlight-mode {
   cursor: crosshair;
 }
 
@@ -874,6 +875,16 @@
   inset: 0;
   pointer-events: none;
   z-index: 12;
+}
+
+.live-highlight-preview {
+  position: absolute;
+  pointer-events: none;
+  border: 1.5px dashed var(--pt-teal-700, #0F766E);
+  border-radius: 2px;
+  box-sizing: border-box;
+  z-index: 45;
+  transition: none !important;
 }
 
 .pdf-page-canvas {

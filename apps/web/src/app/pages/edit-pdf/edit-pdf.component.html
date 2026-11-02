@@ -381,7 +381,8 @@
             @for (page of pages(); track page.pageIndex; let i = $index) {
             <div class="paper-canvas-container" [id]="'pdf-page-' + i" [class.active-page]="currentPageIndex() === i"
               [class.has-selected-element]="selectedElement()?.pageIndex === i"
-              [class.draw-mode]="activeTool() === 'draw'" [class.edit-mode]="editorMode() === 'edit'"
+              [class.draw-mode]="activeTool() === 'draw'" [class.highlight-mode]="activeTool() === 'highlight'"
+              [class.edit-mode]="editorMode() === 'edit'"
               [style.width.px]="getPageDisplaySize(page).width" [style.height.px]="getPageDisplaySize(page).height"
               (click)="onPageClick(i, $event)" (mousedown)="onPageMouseDown(i, $event)"
               (mousemove)="onPageMouseMove(i, $event)" (mouseup)="onCanvasMouseUp()"
@@ -398,6 +399,18 @@
                   [attr.stroke-width]="drawStrokeWidth() * zoom()" fill="none" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
+              }
+
+              <!-- Real-time Live Highlight Drag Selection Preview -->
+              @if (liveHighlightRect() && liveHighlightRect()?.pageIndex === i) {
+              <div class="live-highlight-preview"
+                [style.left.px]="liveHighlightRect()!.x"
+                [style.top.px]="liveHighlightRect()!.y"
+                [style.width.px]="liveHighlightRect()!.width"
+                [style.height.px]="liveHighlightRect()!.height"
+                [style.background-color]="resolveColorToCss(highlightColor())"
+                [style.opacity]="highlightOpacity()">
+              </div>
               }
 
               <!-- Interactive Annotation / Edit Elements Overlay for Page i -->
