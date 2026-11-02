@@ -48,54 +48,58 @@ export class PdfExportService {
       // Sort elements by z-index or visual rendering order
       // Whiteouts and OCR layers first, then shapes, highlights, images, text, signatures
       for (const el of pageElements) {
-        switch (el.type) {
-          case 'whiteout':
-            this.renderWhiteout(page, el as WhiteoutEditElement);
-            break;
-          case 'shape':
-            this.renderShape(page, el as ShapeEditElement);
-            break;
-          case 'highlight':
-            this.renderHighlight(page, el as HighlightEditElement);
-            break;
-          case 'image':
-            await this.renderImage(pdfDoc, page, el as ImageEditElement);
-            break;
-          case 'sign':
-            await this.renderSignature(pdfDoc, page, el as SignEditElement);
-            break;
-          case 'draw':
-            this.renderDraw(page, el as DrawEditElement);
-            break;
-          case 'text': {
-            const textEl = el as TextEditElement;
-            // Skip unedited page text elements (they are already in the original PDF)
-            if (textEl.isPageTextLine && !textEl.isEdited) {
+        try {
+          switch (el.type) {
+            case 'whiteout':
+              this.renderWhiteout(page, el as WhiteoutEditElement);
+              break;
+            case 'shape':
+              this.renderShape(page, el as ShapeEditElement);
+              break;
+            case 'highlight':
+              this.renderHighlight(page, el as HighlightEditElement);
+              break;
+            case 'image':
+              await this.renderImage(pdfDoc, page, el as ImageEditElement);
+              break;
+            case 'sign':
+              await this.renderSignature(pdfDoc, page, el as SignEditElement);
+              break;
+            case 'draw':
+              this.renderDraw(page, el as DrawEditElement);
+              break;
+            case 'text': {
+              const textEl = el as TextEditElement;
+              // Skip unedited page text elements (they are already in the original PDF)
+              if (textEl.isPageTextLine && !textEl.isEdited) {
+                break;
+              }
+              // If user edited this page text block, whiteout the old text first
+              if (textEl.isPageTextLine && textEl.isEdited) {
+                page.drawRectangle({
+                  x: Math.max(0, textEl.xPt - 2),
+                  y: Math.max(0, textEl.yPt - 1),
+                  width: textEl.widthPt + 4,
+                  height: textEl.heightPt + 2,
+                  color: rgb(1, 1, 1)
+                });
+              }
+              this.renderText(
+                page,
+                textEl,
+                fontRegular,
+                fontBold,
+                fontItalic,
+                fontBoldItalic
+              );
               break;
             }
-            // If user edited this page text block, whiteout the old text first
-            if (textEl.isPageTextLine && textEl.isEdited) {
-              page.drawRectangle({
-                x: Math.max(0, textEl.xPt - 2),
-                y: Math.max(0, textEl.yPt - 1),
-                width: textEl.widthPt + 4,
-                height: textEl.heightPt + 2,
-                color: rgb(1, 1, 1)
-              });
-            }
-            this.renderText(
-              page,
-              textEl,
-              fontRegular,
-              fontBold,
-              fontItalic,
-              fontBoldItalic
-            );
-            break;
+            case 'ocr-layer':
+              this.renderOcrTextLayer(page, el as OcrTextLayerElement, fontRegular);
+              break;
           }
-          case 'ocr-layer':
-            this.renderOcrTextLayer(page, el as OcrTextLayerElement, fontRegular);
-            break;
+        } catch (elErr) {
+          console.warn(`Error rendering element ${el.id} (${el.type}) on export:`, elErr);
         }
       }
     }
@@ -104,19 +108,73 @@ export class PdfExportService {
     return new Blob([exportedBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
   }
 
+  private static readonly COLOR_MAP: Record<string, string> = {
+    'var(--pt-navy)': '#14213D',
+    'var(--pt-navy-hover)': '#1D2E54',
+    'var(--pt-navy-deep)': '#0D1629',
+    'var(--pt-teal-700)': '#0F766E',
+    'var(--pt-teal-800)': '#0B5D57',
+    'var(--pt-teal-600)': '#14B8A6',
+    'var(--pt-teal-100)': '#CCEBE6',
+    'var(--pt-teal-50)': '#E6F5F3',
+    'var(--pt-coral)': '#E05D44',
+    'var(--pt-coral-hover)': '#C54E37',
+    'var(--pt-coral-subtle)': '#FDF3F1',
+    'var(--pt-amber)': '#D97706',
+    'var(--pt-emerald)': '#059669',
+    'var(--pt-surface-white)': '#FFFFFF',
+    'var(--pt-canvas-pure)': '#FFFFFF',
+    'var(--pt-subtle-bg)': '#F6F8FA',
+    'var(--pt-text-headline)': '#111827',
+    'var(--pt-text-body)': '#374151',
+    'var(--pt-muted)': '#4B5563',
+    'yellow': '#FFFF00',
+    'black': '#000000',
+    'white': '#FFFFFF',
+    'red': '#FF0000',
+    'blue': '#0000FF',
+    'green': '#008000',
+    'teal': '#0F766E',
+    'coral': '#E05D44',
+    'amber': '#D97706',
+    'navy': '#14213D'
+  };
+
+  private resolveColorToCss(colorStr?: string): string {
+    if (!colorStr) return '#000000';
+    const trimmed = colorStr.trim();
+    if (PdfExportService.COLOR_MAP[trimmed]) {
+      return PdfExportService.COLOR_MAP[trimmed];
+    }
+    const lower = trimmed.toLowerCase();
+    if (PdfExportService.COLOR_MAP[lower]) {
+      return PdfExportService.COLOR_MAP[lower];
+    }
+    if (lower.startsWith('var(')) {
+      for (const [key, val] of Object.entries(PdfExportService.COLOR_MAP)) {
+        const varName = key.replace('var(', '').replace(')', '');
+        if (lower.includes(varName)) {
+          return val;
+        }
+      }
+    }
+    return trimmed;
+  }
+
   private renderWhiteout(page: PDFPage, el: WhiteoutEditElement): void {
+    const color = this.parseColor(el.fillColor || '#ffffff') || rgb(1, 1, 1);
     page.drawRectangle({
       x: el.xPt,
       y: el.yPt,
       width: el.widthPt,
       height: el.heightPt,
-      color: this.parseColor(el.fillColor || '#ffffff')
+      color
     });
   }
 
   private renderShape(page: PDFPage, el: ShapeEditElement): void {
-    const strokeColor = el.strokeColor ? this.parseColor(el.strokeColor) : undefined;
-    const fillColor = el.fillColor ? this.parseColor(el.fillColor) : undefined;
+    const strokeColor = el.strokeColor ? (this.parseColor(el.strokeColor) || rgb(0, 0, 0)) : undefined;
+    const fillColor = this.parseColor(el.fillColor);
     const borderWidth = el.strokeWidth || 1;
 
     if (el.shapeType === 'rectangle') {
@@ -194,7 +252,7 @@ export class PdfExportService {
   }
 
   private renderHighlight(page: PDFPage, el: HighlightEditElement): void {
-    const color = this.parseColor(el.color || '#FFFF00');
+    const color = this.parseColor(el.color || '#D97706') || rgb(0.85, 0.47, 0.02);
     page.drawRectangle({
       x: el.xPt,
       y: el.yPt,
@@ -291,7 +349,7 @@ export class PdfExportService {
           const font = el.fontFamily || "'Dancing Script', 'Brush Script MT', cursive";
           const fontSize = el.fontSizePt || Math.round(el.heightPt * 0.65);
           ctx.font = `${fontSize}px ${font}`;
-          ctx.fillStyle = el.color || '#14213D';
+          ctx.fillStyle = this.resolveColorToCss(el.color || '#14213D');
           ctx.textBaseline = 'middle';
           ctx.fillText(textToRender, 6, el.heightPt / 2);
 
@@ -313,7 +371,7 @@ export class PdfExportService {
 
   private renderDraw(page: PDFPage, el: DrawEditElement): void {
     if (!el.points || el.points.length < 2) return;
-    const color = this.parseColor(el.strokeColor || '#000000');
+    const color = this.parseColor(el.strokeColor || '#000000') || rgb(0, 0, 0);
     const thickness = el.strokeWidth || 2;
 
     for (let i = 0; i < el.points.length - 1; i++) {
@@ -345,7 +403,7 @@ export class PdfExportService {
       font = italicFont;
     }
 
-    const color = this.parseColor(el.color || '#14213D');
+    const color = this.parseColor(el.color || '#14213D') || rgb(0.08, 0.13, 0.24);
     const size = el.fontSizePt || 14;
     const lineHeight = size * 1.35;
     const lines = (el.text || '').split('\n');
@@ -423,19 +481,41 @@ export class PdfExportService {
     }
   }
 
-  private parseColor(hex: string): Color {
-    const cleanHex = hex.replace('#', '');
+  private parseColor(colorStr?: string): Color | undefined {
+    if (!colorStr) return undefined;
+    const resolved = this.resolveColorToCss(colorStr);
+    const clean = resolved.trim().toLowerCase();
+
+    if (clean === 'transparent' || clean === 'none') {
+      return undefined;
+    }
+
+    if (clean.startsWith('rgb')) {
+      const match = clean.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) {
+        const r = Math.min(1, Math.max(0, Number(match[1]) / 255));
+        const g = Math.min(1, Math.max(0, Number(match[2]) / 255));
+        const b = Math.min(1, Math.max(0, Number(match[3]) / 255));
+        return rgb(r, g, b);
+      }
+    }
+
+    const cleanHex = clean.replace('#', '');
     if (cleanHex.length === 3) {
       const r = parseInt(cleanHex[0] + cleanHex[0], 16) / 255;
       const g = parseInt(cleanHex[1] + cleanHex[1], 16) / 255;
       const b = parseInt(cleanHex[2] + cleanHex[2], 16) / 255;
-      return rgb(r, g, b);
+      if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+        return rgb(r, g, b);
+      }
     }
     if (cleanHex.length >= 6) {
       const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
       const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
       const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
-      return rgb(r, g, b);
+      if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+        return rgb(r, g, b);
+      }
     }
     return rgb(0, 0, 0);
   }

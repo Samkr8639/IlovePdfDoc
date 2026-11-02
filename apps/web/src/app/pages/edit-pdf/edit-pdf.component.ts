@@ -2770,7 +2770,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(downloadUrl);
-    } catch {
+    } catch (err) {
+      console.error('Failed to export edited PDF document:', err);
       this.errorMessage.set('Failed to export edited PDF document.');
     } finally {
       this.isExporting.set(false);
