@@ -232,82 +232,14 @@
   @if (viewMode() === 'editor') {
   <div class="editor-workspace">
     <!-- TOP CONTROL & MODE BAR — sticky bar anchored in the normal document flow, never overlaps PDF canvas -->
-    <div class="top-toolbar-strip">
-      <div class="top-toolbar-inner">
-
-        <!-- Mode Toggle (Annotate / Edit Text) — sliding-pill style -->
-        <div class="workspace-mode-capsule" role="tablist" aria-label="Editor modes"
-          [class.is-transitioning]="isExtractingPageText()">
-          <!-- Sliding background indicator: moves left (annotate) or right (edit) -->
-          <div class="mode-slider-thumb" [class.at-edit]="editorMode() === 'edit'"
-            [class.is-loading]="isExtractingPageText()" aria-hidden="true"></div>
-
-          <button type="button" class="mode-pill-tab" [class.active]="editorMode() === 'annotate'"
-            [disabled]="isExtractingPageText()" (click)="setEditorMode('annotate')" role="tab"
-            [attr.aria-selected]="editorMode() === 'annotate'">
-            <!-- Pen / annotate icon -->
-            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-            </svg>
-            <span>Annotate</span>
-          </button>
-
-          <button type="button" class="mode-pill-tab edit-mode-tab" [class.active]="editorMode() === 'edit'"
-            [disabled]="isExtractingPageText()" (click)="setEditorMode('edit')" role="tab"
-            [attr.aria-selected]="editorMode() === 'edit'" title="Edit existing document text in-place">
-            @if (isExtractingPageText()) {
-            <!-- Inline SVG spinner shown while extracting text -->
-            <svg class="mode-spinner-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-              <path
-                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-            } @else {
-            <!-- T / type icon -->
-            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="4 7 4 4 20 4 20 7" />
-              <line x1="9" y1="20" x2="15" y2="20" />
-              <line x1="12" y1="4" x2="12" y2="20" />
-            </svg>
-            }
-            <span>Edit Text</span>
-            @if (!isExtractingPageText()) {
-            <span class="mode-pill-star" aria-hidden="true">★</span>
-            }
-          </button>
-        </div>
-
-        <!-- Divider between mode toggle and undo/redo -->
-        <div class="toolbar-section-divider" aria-hidden="true"></div>
-
-        <!-- History: Undo / Redo -->
-        <div class="history-capsule">
-          <button type="button" class="history-btn" [disabled]="!history.canUndo()" (click)="history.undo()"
-            title="Undo (Ctrl+Z / Cmd+Z)" aria-label="Undo">
-            <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="1 4 1 10 7 10" />
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-            </svg>
-            <span>Undo</span>
-          </button>
-          <div class="history-divider" aria-hidden="true"></div>
-          <button type="button" class="history-btn" [disabled]="!history.canRedo()" (click)="history.redo()"
-            title="Redo (Ctrl+Shift+Z / Cmd+Shift+Z)" aria-label="Redo">
-            <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            <span>Redo</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
+    <app-edit-pdf-top-nav
+      [editorMode]="editorMode()"
+      [isExtractingPageText]="isExtractingPageText()"
+      [canUndo]="history.canUndo()"
+      [canRedo]="history.canRedo()"
+      (modeChange)="setEditorMode($event)"
+      (undo)="history.undo()"
+      (redo)="history.redo()" />
 
     <!-- MAIN WORKSPACE ROW -->
     <div class="workspace-main">
@@ -784,769 +716,124 @@
 
       <!-- Section: PROPERTIES (Contextual for every tool) -->
       <div class="sidebar-section properties-section">
-        <!-- (A) Shapes Properties Panel -->
         @if (activeTool() === 'shapes' || (selectedElement() && selectedElement()?.type === 'shape')) {
-        <div class="section-badge-title">SHAPE OPTIONS</div>
-        <div class="property-panel-card">
-          <label class="property-sublabel">Select Shape</label>
-          <div class="shape-type-grid">
-            <button type="button" class="shape-choice-btn" [class.active]="shapeType() === 'rectangle'"
-              (click)="setShapeType('rectangle')" title="Rectangle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-              </svg>
-              <span>Rectangle</span>
-            </button>
-
-            <button type="button" class="shape-choice-btn" [class.active]="shapeType() === 'circle'"
-              (click)="setShapeType('circle')" title="Circle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="9" />
-              </svg>
-              <span>Circle</span>
-            </button>
-
-            <button type="button" class="shape-choice-btn" [class.active]="shapeType() === 'line'"
-              (click)="setShapeType('line')" title="Line">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="5" y1="19" x2="19" y2="5" />
-              </svg>
-              <span>Line</span>
-            </button>
-
-            <button type="button" class="shape-choice-btn" [class.active]="shapeType() === 'arrow'"
-              (click)="setShapeType('arrow')" title="Arrow">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="5" y1="19" x2="19" y2="5" />
-                <polyline points="10 5 19 5 19 14" />
-              </svg>
-              <span>Arrow</span>
-            </button>
-
-            <button type="button" class="shape-choice-btn" [class.active]="shapeType() === 'star'"
-              (click)="setShapeType('star')" title="Star">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              <span>Star</span>
-            </button>
-          </div>
-
-          <label class="property-sublabel">Border Thickness</label>
-          <div class="thickness-btn-group">
-            <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 1"
-              (click)="setStrokeWidth(1)">1px</button>
-            <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 2"
-              (click)="setStrokeWidth(2)">2px</button>
-            <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 4"
-              (click)="setStrokeWidth(4)">4px</button>
-            <button type="button" class="thickness-btn" [class.active]="strokeWidth() === 6"
-              (click)="setStrokeWidth(6)">6px</button>
-          </div>
-
-          <label class="property-sublabel">Border Color</label>
-          <div class="color-swatches-group">
-            <button type="button" class="color-dot navy" [class.active]="strokeColor() === 'var(--pt-navy)'"
-              (click)="setStrokeColor('var(--pt-navy)')" title="Navy"></button>
-            <button type="button" class="color-dot teal" [class.active]="strokeColor() === 'var(--pt-teal-700)'"
-              (click)="setStrokeColor('var(--pt-teal-700)')" title="Teal"></button>
-            <button type="button" class="color-dot coral" [class.active]="strokeColor() === 'var(--pt-coral)'"
-              (click)="setStrokeColor('var(--pt-coral)')" title="Coral"></button>
-            <button type="button" class="color-dot amber" [class.active]="strokeColor() === 'var(--pt-amber)'"
-              (click)="setStrokeColor('var(--pt-amber)')" title="Amber"></button>
-            <button type="button" class="color-dot black" [class.active]="strokeColor() === 'var(--pt-navy-deep)'"
-              (click)="setStrokeColor('var(--pt-navy-deep)')" title="Dark"></button>
-          </div>
-
-          <label class="property-sublabel">Fill Color</label>
-          <div class="color-swatches-group">
-            <button type="button" class="color-dot transparent" [class.active]="fillColor() === 'transparent'"
-              (click)="setFillColor('transparent')" title="Transparent"></button>
-            <button type="button" class="color-dot white" [class.active]="fillColor() === 'var(--pt-surface-white)'"
-              (click)="setFillColor('var(--pt-surface-white)')" title="White"></button>
-            <button type="button" class="color-dot teal-tint" [class.active]="fillColor() === 'var(--pt-teal-50)'"
-              (click)="setFillColor('var(--pt-teal-50)')" title="Teal Tint"></button>
-            <button type="button" class="color-dot amber-tint"
-              [class.active]="fillColor() === 'rgba(245, 158, 11, 0.15)'"
-              (click)="setFillColor('rgba(245, 158, 11, 0.15)')" title="Amber Tint"></button>
-            <button type="button" class="color-dot coral-tint"
-              [class.active]="fillColor() === 'rgba(244, 63, 94, 0.15)'"
-              (click)="setFillColor('rgba(244, 63, 94, 0.15)')" title="Coral Tint"></button>
-          </div>
-
-          <button type="button" class="btn-action-primary" (click)="addShapeElement()">
-            <span>+ Place Shape on Page</span>
-          </button>
-
-          @if (selectedElement() && selectedElement()?.type === 'shape') {
-          <div class="selected-element-actions-divider">
-            <div class="element-action-buttons">
-              <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate Shape">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-                <span>Duplicate</span>
-              </button>
-              <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="18 15 12 9 6 15" />
-                </svg>
-                <span>Forward</span>
-              </button>
-              <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete Shape">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-                <span>Delete</span>
-              </button>
-            </div>
-          </div>
-          }
-        </div>
-        }
-
-        <!-- (B) Text Properties Panel (Matching Reference Image) -->
-        @else if (editorMode() === 'edit' || activeTool() === 'text' || (selectedElement() && selectedElement()?.type
-        === 'text')) {
-        <div class="section-badge-title">TEXT STYLES</div>
-        <div class="property-panel-card text-styles-card">
-          <!-- Row 1: Font Family and Size -->
-          <div class="property-row font-size-row">
-            <select class="font-select" [ngModel]="textFont()" (ngModelChange)="setTextFont($event)">
-              <option value="Inter">Inter</option>
-              <option value="Calibri">Calibri</option>
-              <option value="Roboto">Roboto</option>
-              <option value="Arial">Arial</option>
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Sora">Sora</option>
-              <option value="Courier New">Courier New</option>
-              <option value="Georgia">Georgia</option>
-            </select>
-            <div class="size-stepper-wrap">
-              <input type="number" class="font-size-input" [ngModel]="textSize()" (ngModelChange)="setTextSize($event)"
-                min="6" max="120" />
-              <span class="size-unit">pt</span>
-            </div>
-          </div>
-
-          <!-- Row 2: Formatting B / I / U & Alignments -->
-          <div class="formatting-actions-row">
-            <div class="style-toggle-group">
-              <button type="button" class="style-toggle-btn" [class.active]="isTextBold()"
-                (mousedown)="$event.preventDefault()" (click)="toggleTextBold()" title="Bold">
-                B
-              </button>
-              <button type="button" class="style-toggle-btn" [class.active]="isTextItalic()"
-                (mousedown)="$event.preventDefault()" (click)="toggleTextItalic()" title="Italic">
-                I
-              </button>
-              <button type="button" class="style-toggle-btn underline-btn" [class.active]="isTextUnderline()"
-                (mousedown)="$event.preventDefault()" (click)="toggleTextUnderline()" title="Underline">
-                U
-              </button>
-              <button type="button" class="style-toggle-btn link-btn" [class.active]="showTextLinkInput() || isTextLinked()"
-                (mousedown)="$event.preventDefault()" (click)="toggleTextLinkInput()" title="Embed Link">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              </button>
-            </div>
-
-            <div class="style-toggle-group align-group">
-              <button type="button" class="style-toggle-btn" [class.active]="textAlign() === 'left'"
-                (mousedown)="$event.preventDefault()" (click)="setTextAlign('left')" title="Align Left">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="17" y1="10" x2="3" y2="10" />
-                  <line x1="21" y1="6" x2="3" y2="6" />
-                  <line x1="21" y1="14" x2="3" y2="14" />
-                  <line x1="17" y1="18" x2="3" y2="18" />
-                </svg>
-              </button>
-              <button type="button" class="style-toggle-btn" [class.active]="textAlign() === 'center'"
-                (mousedown)="$event.preventDefault()" (click)="setTextAlign('center')" title="Align Center">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="10" x2="6" y2="10" />
-                  <line x1="21" y1="6" x2="3" y2="6" />
-                  <line x1="21" y1="14" x2="3" y2="14" />
-                  <line x1="18" y1="18" x2="6" y2="18" />
-                </svg>
-              </button>
-              <button type="button" class="style-toggle-btn" [class.active]="textAlign() === 'right'"
-                (mousedown)="$event.preventDefault()" (click)="setTextAlign('right')" title="Align Right">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="21" y1="10" x2="7" y2="10" />
-                  <line x1="21" y1="6" x2="3" y2="6" />
-                  <line x1="21" y1="14" x2="3" y2="14" />
-                  <line x1="21" y1="18" x2="7" y2="18" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Embed Link Input Popover Bar -->
-          @if (showTextLinkInput()) {
-          <div class="text-link-embed-bar">
-            <div class="text-link-input-wrap">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="link-icon">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-              <input type="url" class="text-link-url-input" placeholder="https://example.com"
-                [ngModel]="textLinkUrl()" (ngModelChange)="textLinkUrl.set($event)"
-                (keydown.enter)="applyTextLink(textLinkUrl())"
-                (keydown.escape)="showTextLinkInput.set(false)" />
-            </div>
-            <div class="text-link-actions">
-              <button type="button" class="btn-link-action apply" (click)="applyTextLink(textLinkUrl())" title="Apply Link">
-                Link
-              </button>
-              @if (isTextLinked()) {
-              <button type="button" class="btn-link-action remove" (click)="removeTextLink()" title="Remove Link">
-                Unlink
-              </button>
-              }
-              <button type="button" class="btn-link-action cancel" (click)="showTextLinkInput.set(false)" title="Close">
-                ✕
-              </button>
-            </div>
-          </div>
-          }
-
-          <!-- Row 3: Colors & Custom Color Picker -->
-          <label class="property-sublabel">Current Color</label>
-          <div class="color-palette-row">
-            <div class="color-swatches-group">
-              <button type="button" class="color-dot navy" [class.active]="textColor() === 'var(--pt-navy)'"
-                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-navy)')" title="Navy"></button>
-              <button type="button" class="color-dot teal" [class.active]="textColor() === 'var(--pt-teal-700)'"
-                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-teal-700)')" title="Teal"></button>
-              <button type="button" class="color-dot coral" [class.active]="textColor() === 'var(--pt-coral)'"
-                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-coral)')" title="Coral"></button>
-              <button type="button" class="color-dot black" [class.active]="textColor() === 'var(--pt-navy-deep)'"
-                (mousedown)="$event.preventDefault()" (click)="setTextColor('var(--pt-navy-deep)')" title="Deep Navy"></button>
-            </div>
-
-            <div class="custom-color-wrap">
-              <label class="custom-color-btn" title="Choose custom color">
-                <input type="color" class="custom-color-input" [ngModel]="textCustomColor()"
-                  (ngModelChange)="setTextColor($event); textCustomColor.set($event)" />
-                <span>+ Custom</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Action Button -->
-          <button type="button" class="btn-action-primary" (click)="addTextElement(100, 100)">
-            <span>+ Add New Text Box</span>
-          </button>
-        </div>
-        }
-
-        <!-- (C) Freehand Draw Panel -->
-        @else if (activeTool() === 'draw') {
-        <div class="section-badge-title">FREEHAND DRAW</div>
-        <div class="property-panel-card">
-          <label class="property-sublabel">Brush Size</label>
-          <div class="thickness-btn-group">
-            <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 2"
-              (click)="drawStrokeWidth.set(2)">2px</button>
-            <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 4"
-              (click)="drawStrokeWidth.set(4)">4px</button>
-            <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 6"
-              (click)="drawStrokeWidth.set(6)">6px</button>
-            <button type="button" class="thickness-btn" [class.active]="drawStrokeWidth() === 8"
-              (click)="drawStrokeWidth.set(8)">8px</button>
-          </div>
-
-          <label class="property-sublabel">Brush Color</label>
-          <div class="color-swatches-group">
-            <button type="button" class="color-dot teal" [class.active]="drawColor() === 'var(--pt-teal-700)'"
-              (click)="drawColor.set('var(--pt-teal-700)')"></button>
-            <button type="button" class="color-dot navy" [class.active]="drawColor() === 'var(--pt-navy)'"
-              (click)="drawColor.set('var(--pt-navy)')"></button>
-            <button type="button" class="color-dot coral" [class.active]="drawColor() === 'var(--pt-coral)'"
-              (click)="drawColor.set('var(--pt-coral)')"></button>
-            <button type="button" class="color-dot black" [class.active]="drawColor() === 'var(--pt-navy-deep)'"
-              (click)="drawColor.set('var(--pt-navy-deep)')"></button>
-          </div>
-
-          <p class="property-tip">Click and drag directly on the canvas to draw freely.</p>
-        </div>
-        }
-
-        <!-- (D) Highlight Panel -->
-        @else if (activeTool() === 'highlight' || (selectedElement() && selectedElement()?.type === 'highlight')) {
-        <div class="section-badge-title">HIGHLIGHT</div>
-        <div class="property-panel-card">
-          <label class="property-sublabel">Color</label>
-          <div class="color-palette-row">
-            <div class="color-swatches-group">
-              <button type="button" class="color-dot amber" [class.active]="highlightColor() === 'var(--pt-amber)'"
-                (click)="setHighlightColor('var(--pt-amber)')" title="Yellow"></button>
-              <button type="button" class="color-dot teal" [class.active]="highlightColor() === 'var(--pt-teal-700)'"
-                (click)="setHighlightColor('var(--pt-teal-700)')" title="Teal"></button>
-              <button type="button" class="color-dot coral" [class.active]="highlightColor() === 'var(--pt-coral)'"
-                (click)="setHighlightColor('var(--pt-coral)')" title="Pink"></button>
-            </div>
-
-            <div class="custom-color-wrap">
-              <label class="custom-color-btn" [class.active]="isHighlightCustomActive()" title="Choose custom highlight color">
-                <input type="color" class="custom-color-input" [ngModel]="highlightCustomColor()"
-                  (ngModelChange)="setHighlightColor($event)" />
-                <span>+ Custom</span>
-              </label>
-            </div>
-          </div>
-
-          <label class="property-sublabel">Opacity</label>
-          <div class="thickness-btn-group">
-            <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.25"
-              (click)="setHighlightOpacity(0.25)">25%</button>
-            <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.35"
-              (click)="setHighlightOpacity(0.35)">35%</button>
-            <button type="button" class="thickness-btn" [class.active]="highlightOpacity() === 0.5"
-              (click)="setHighlightOpacity(0.5)">50%</button>
-          </div>
-
-          @if (selectedElement() && selectedElement()?.type === 'highlight') {
-          <div class="selected-element-actions-divider">
-            <div class="element-action-buttons">
-              <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate Highlight">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-                <span>Duplicate</span>
-              </button>
-              <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="18 15 12 9 6 15" />
-                </svg>
-                <span>Forward</span>
-              </button>
-              <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete Highlight">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-                <span>Delete</span>
-              </button>
-            </div>
-          </div>
-          } @else {
-          <button type="button" class="btn-action-primary" (click)="addHighlightElement(100, 100)">
-            <span>+ Place Highlight Box</span>
-          </button>
-          }
-        </div>
-        }
-
-        <!-- (E) Whiteout Panel -->
-        @else if (activeTool() === 'whiteout') {
-        <div class="section-badge-title">WHITEOUT</div>
-        <div class="property-panel-card">
-          <p class="property-tip">Erase or hide sensitive text with an opaque cover rectangle.</p>
-          <button type="button" class="btn-action-primary" (click)="addWhiteoutElement(100, 100)">
-            <span>+ Place Whiteout Block</span>
-          </button>
-        </div>
-        }
-
-        <!-- (F) Image Panel -->
-        @else if (activeTool() === 'image') {
-        <div class="section-badge-title">IMAGE</div>
-        <div class="property-panel-card">
-          <p class="property-tip">Insert photos, logos, or stamps directly onto the page.</p>
-          <button type="button" class="btn-action-primary" (click)="fileInputImage.click()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
-            <span>Choose Image File</span>
-          </button>
-        </div>
-        }
-
-        <!-- (G) Signature Studio Panel (Type / Draw / Upload + 4 Cursive Fonts) -->
-        @else if (activeTool() === 'sign' || (selectedElement() && selectedElement()?.type === 'sign')) {
-        <div class="section-badge-title">SIGNATURE STYLES</div>
-        <div class="property-panel-card signature-studio-card">
-          <!-- Signature Mode Tabs -->
-          <div class="sig-mode-tabs" role="tablist">
-            <button type="button" class="sig-mode-tab" [class.active]="signatureTab() === 'type'"
-              (click)="setSignatureTab('type')">
-              ✍️ Type
-            </button>
-            <button type="button" class="sig-mode-tab" [class.active]="signatureTab() === 'draw'"
-              (click)="setSignatureTab('draw')">
-              🖌️ Draw
-            </button>
-            <button type="button" class="sig-mode-tab" [class.active]="signatureTab() === 'upload'"
-              (click)="setSignatureTab('upload')">
-              📁 Upload
-            </button>
-          </div>
-
-          <!-- 1. TYPE SIGNATURE MODE -->
-          @if (signatureTab() === 'type') {
-          <label class="property-sublabel">Signer Name / Text</label>
-          <input type="text" class="custom-range-input" placeholder="Enter signature name..."
-            [ngModel]="signatureText()" (ngModelChange)="setSignatureText($event)" />
-
-          <label class="property-sublabel">Calligraphy Font Style</label>
-          <div class="sig-fonts-grid">
-            <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Dancing Script')"
-              (click)="setSignatureFont('\'Dancing Script\', cursive')" title="Dancing Script">
-              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Dancing Script', cursive;">{{ signatureText() ||
-                'Signature' }}</span>
-              <small class="font-name-label">Dancing Script</small>
-            </button>
-
-            <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Caveat')"
-              (click)="setSignatureFont('\'Caveat\', cursive')" title="Caveat">
-              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Caveat', cursive;">{{ signatureText() || 'Signature'
-                }}</span>
-              <small class="font-name-label">Caveat</small>
-            </button>
-
-            <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Great Vibes')"
-              (click)="setSignatureFont('\'Great Vibes\', cursive')" title="Great Vibes">
-              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Great Vibes', cursive;">{{ signatureText() || 'Signature'
-                }}</span>
-              <small class="font-name-label">Great Vibes</small>
-            </button>
-
-            <button type="button" class="sig-font-card" [class.active]="signatureFont().includes('Sacramento')"
-              (click)="setSignatureFont('\'Sacramento\', cursive')" title="Sacramento">
-              <span class="font-preview" [style.color]="resolveColorToCss(signatureColor())" style="font-family: 'Sacramento', cursive;">{{ signatureText() || 'Signature'
-                }}</span>
-              <small class="font-name-label">Sacramento</small>
-            </button>
-          </div>
-
-          <label class="property-sublabel">Ink Color</label>
-          <div class="color-palette-row">
-            <div class="color-swatches-group">
-              <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'"
-                (click)="setSignatureColor('var(--pt-navy)')" title="Navy Ink"></button>
-              <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'"
-                (click)="setSignatureColor('var(--pt-navy-deep)')" title="Black Ink"></button>
-              <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'"
-                (click)="setSignatureColor('var(--pt-teal-700)')" title="Teal Ink"></button>
-              <button type="button" class="color-dot coral" [class.active]="signatureColor() === 'var(--pt-coral)'"
-                (click)="setSignatureColor('var(--pt-coral)')" title="Coral Ink"></button>
-            </div>
-
-            <div class="custom-color-wrap">
-              <label class="custom-color-btn" [class.active]="isSignatureCustomActive()" title="Choose custom ink color">
-                <input type="color" class="custom-color-input" [ngModel]="signatureCustomColor()"
-                  (ngModelChange)="setSignatureColor($event)" />
-                <span>+ Custom</span>
-              </label>
-            </div>
-          </div>
-
-          <label class="property-sublabel">Signature Size</label>
-          <div class="thickness-btn-group">
-            <button type="button" class="thickness-btn" [class.active]="signatureSize() === 18"
-              (click)="setSignatureSize(18)">Small</button>
-            <button type="button" class="thickness-btn" [class.active]="signatureSize() === 26"
-              (click)="setSignatureSize(26)">Medium</button>
-            <button type="button" class="thickness-btn" [class.active]="signatureSize() === 34"
-              (click)="setSignatureSize(34)">Large</button>
-          </div>
-
-          <button type="button" class="btn-action-primary" (click)="addSignatureElement()">
-            <span>+ Place Signature on Page</span>
-          </button>
-          }
-
-          <!-- 2. DRAW SIGNATURE MODE -->
-          @if (signatureTab() === 'draw') {
-          <label class="property-sublabel">Ink Color</label>
-          <div class="color-palette-row">
-            <div class="color-swatches-group">
-              <button type="button" class="color-dot navy" [class.active]="signatureColor() === 'var(--pt-navy)'"
-                (click)="setSignatureColor('var(--pt-navy)')" title="Navy Ink"></button>
-              <button type="button" class="color-dot black" [class.active]="signatureColor() === 'var(--pt-navy-deep)'"
-                (click)="setSignatureColor('var(--pt-navy-deep)')" title="Black Ink"></button>
-              <button type="button" class="color-dot teal" [class.active]="signatureColor() === 'var(--pt-teal-700)'"
-                (click)="setSignatureColor('var(--pt-teal-700)')" title="Teal Ink"></button>
-              <button type="button" class="color-dot coral" [class.active]="signatureColor() === 'var(--pt-coral)'"
-                (click)="setSignatureColor('var(--pt-coral)')" title="Coral Ink"></button>
-            </div>
-
-            <div class="custom-color-wrap">
-              <label class="custom-color-btn" [class.active]="isSignatureCustomActive()" title="Choose custom ink color">
-                <input type="color" class="custom-color-input" [ngModel]="signatureCustomColor()"
-                  (ngModelChange)="setSignatureColor($event)" />
-                <span>+ Custom</span>
-              </label>
-            </div>
-          </div>
-
-          <label class="property-sublabel">Draw with your mouse or finger</label>
-          <div class="sig-pad-wrapper">
-            <canvas #sigPad class="sig-pad-canvas" width="280" height="120" (mousedown)="onSigPadMouseDown($event)"
-              (mousemove)="onSigPadMouseMove($event)" (mouseup)="onSigPadMouseUp()" (mouseleave)="onSigPadMouseUp()"
-              (touchstart)="onSigPadTouchStart($event)" (touchmove)="onSigPadTouchMove($event)"
-              (touchend)="onSigPadTouchEnd()"></canvas>
-          </div>
-          <div class="sig-pad-actions-row">
-            <button type="button" class="btn-outline-sm" (click)="clearSigPad()">
-              Clear Pad
-            </button>
-            <button type="button" class="btn-action-primary-sm" (click)="addSignatureElement()">
-              + Place Drawn Signature
-            </button>
-          </div>
-          }
-
-          <!-- 3. UPLOAD SIGNATURE MODE -->
-          @if (signatureTab() === 'upload') {
-          <label class="property-sublabel">Upload transparent signature</label>
-          <input #fileInputSigUpload type="file" accept="image/png,image/jpeg,image/webp" style="display: none"
-            (change)="onSignatureFileSelected($event)" />
-          @if (signatureDrawnDataUrl()) {
-          <div class="sig-preview-box">
-            <img [src]="signatureDrawnDataUrl()" alt="Signature Preview" class="sig-upload-preview" />
-          </div>
-          }
-          <div class="sig-pad-actions-row">
-            <button type="button" class="btn-outline-sm" (click)="fileInputSigUpload.click()">
-              Select Image
-            </button>
-            <button type="button" class="btn-action-primary-sm" [disabled]="!signatureDrawnDataUrl()"
-              (click)="addSignatureElement()">
-              + Place Signature
-            </button>
-          </div>
-          }
-
-          <!-- If signature on paper is currently selected, show action tools -->
-          @if (selectedElement() && selectedElement()?.type === 'sign') {
-          <div class="selected-element-actions-divider">
-            <div class="element-action-buttons">
-              <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-                <span>Duplicate</span>
-              </button>
-              <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="18 15 12 9 6 15" />
-                </svg>
-                <span>Forward</span>
-              </button>
-              <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-                <span>Delete</span>
-              </button>
-            </div>
-          </div>
-          }
-        </div>
-        }
-
-        <!-- (H) Link Panel -->
-        @else if (activeTool() === 'link') {
-        <div class="section-badge-title">LINK</div>
-        <div class="property-panel-card">
-          <label class="property-sublabel">Destination URL</label>
-          <input type="url" class="custom-range-input" placeholder="https://example.com" [ngModel]="linkUrl()"
-            (ngModelChange)="linkUrl.set($event)" />
-
-          <button type="button" class="btn-action-primary" (click)="addLinkElement(100, 100)">
-            <span>+ Insert Link Box</span>
-          </button>
-        </div>
-        }
-
-        <!-- (I) OCR Properties Panel -->
-        @else if (activeTool() === 'ocr') {
-        <div class="section-badge-title">OCR RECOGNITION</div>
-        <div class="ocr-properties-panel">
-          <!-- Page Range -->
-          <div class="property-group">
-            <label class="property-label">Pages to process</label>
-            <div class="page-range-selector">
-              <label class="radio-option">
-                <input type="radio" name="ocrPageRange" value="current" [checked]="ocrPageRange() === 'current'"
-                  (change)="ocrPageRange.set('current'); validateOcrPageRange()" />
-                <span>Current page ({{ currentPageIndex() + 1 }})</span>
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="ocrPageRange" value="all" [checked]="ocrPageRange() === 'all'"
-                  (change)="ocrPageRange.set('all'); validateOcrPageRange()" />
-                <span>All pages ({{ pages().length }})</span>
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="ocrPageRange" value="custom" [checked]="ocrPageRange() === 'custom'"
-                  (change)="ocrPageRange.set('custom'); validateOcrPageRange()" />
-                <span>Custom range</span>
-              </label>
-            </div>
-
-            @if (ocrPageRange() === 'custom') {
-            <input type="text" class="custom-range-input" placeholder="e.g. 1-3, 5" [ngModel]="ocrCustomRange()"
-              (ngModelChange)="ocrCustomRange.set($event); validateOcrPageRange()" />
-            @if (ocrRangeError()) {
-            <span class="range-error-text">{{ ocrRangeError() }}</span>
-            }
-            }
-          </div>
-
-          <!-- Languages Multi-Select -->
-          <div class="property-group">
-            <label class="property-label">Languages (max 3)</label>
-            <div class="language-chips-grid">
-              @for (lang of ocrAvailableLanguages(); track lang.code) {
-              <button type="button" class="lang-chip" [class.selected]="ocrSelectedLanguages().includes(lang.code)"
-                (click)="toggleOcrLanguage(lang.code)">
-                {{ lang.name }}
-                @if (lang.nativeName) {
-                <span class="native-name">({{ lang.nativeName }})</span>
-                }
-              </button>
-              }
-            </div>
-          </div>
-
-          <!-- Deskew Option -->
-          <div class="property-group">
-            <label class="checkbox-option">
-              <input type="checkbox" [checked]="ocrDeskew()" (change)="ocrDeskew.set(!ocrDeskew())" />
-              <span>Straighten skewed pages</span>
-            </label>
-          </div>
-
-          <!-- Result Mode Radio Cards -->
-          <div class="property-group">
-            <label class="property-label">Result mode</label>
-            <div class="result-mode-cards">
-              <label class="mode-card" [class.active]="ocrMode() === 'searchable'">
-                <input type="radio" name="ocrResultMode" value="searchable" [checked]="ocrMode() === 'searchable'"
-                  (change)="ocrMode.set('searchable')" />
-                <div class="mode-card-text">
-                  <span class="mode-card-title">Searchable text</span>
-                  <span class="mode-card-desc">Keeps page looking identical with invisible selectable text.</span>
-                </div>
-              </label>
-
-              <label class="mode-card" [class.active]="ocrMode() === 'editable'">
-                <input type="radio" name="ocrResultMode" value="editable" [checked]="ocrMode() === 'editable'"
-                  (change)="ocrMode.set('editable')" />
-                <div class="mode-card-text">
-                  <span class="mode-card-title">Editable text boxes</span>
-                  <span class="mode-card-desc">Replaces lines with text boxes you can edit and change.</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Recognize Button -->
-          <button type="button" class="btn-recognize" [disabled]="isOcrRunning() || ocrRangeError() !== null"
-            (click)="startOcrRecognition()">
-            <svg class="lucide-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-            </svg>
-            <span>Recognise text</span>
-          </button>
-
-          <!-- Low Confidence Review List -->
-          @if (lowConfidenceReviewWords().length > 0) {
-          <div class="review-box">
-            <div class="review-header">
-              <span class="review-title">Review Flagged Words</span>
-              <span class="review-badge">{{ lowConfidenceReviewWords().length }}</span>
-            </div>
-            <div class="review-list">
-              @for (w of lowConfidenceReviewWords(); track w.text) {
-              <button type="button" class="review-item-btn" (click)="jumpToLowConfidenceWord(w)">
-                <span class="review-word-text">"{{ w.text }}"</span>
-                <span class="review-page-tag">p. {{ w.pageIndex + 1 }} ({{ w.confidence }}%)</span>
-              </button>
-              }
-            </div>
-          </div>
-          }
-        </div>
-        }
-
-        <!-- (J) Selection Tool Properties Panel (Element info or Document summary) -->
-        @else {
-        @if (selectedElement(); as el) {
-        <div class="section-badge-title">ELEMENT PROPERTIES</div>
-        <div class="property-panel-card">
-          <div class="selected-meta-row">
-            <span class="selected-type-tag">{{ el.type | uppercase }}</span>
-            <span class="selected-id-tag">Page {{ (el.pageIndex || 0) + 1 }}</span>
-          </div>
-
-          <div class="element-action-buttons">
-            <button type="button" class="el-action-btn" (click)="duplicateSelectedElement()" title="Duplicate">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-              <span>Duplicate</span>
-            </button>
-
-            <button type="button" class="el-action-btn" (click)="bringToFront()" title="Bring to Front">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-              <span>Forward</span>
-            </button>
-
-            <button type="button" class="el-action-btn danger" (click)="deleteSelectedElement()" title="Delete Element">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-              <span>Delete</span>
-            </button>
-          </div>
-        </div>
+          <app-shape-panel
+            [shapeType]="shapeType()"
+            [strokeColor]="strokeColor()"
+            [fillColor]="fillColor()"
+            [strokeWidth]="strokeWidth()"
+            [isElementSelected]="!!(selectedElement() && selectedElement()?.type === 'shape')"
+            (shapeTypeChange)="setShapeType($event)"
+            (strokeColorChange)="setStrokeColor($event)"
+            (fillColorChange)="setFillColor($event)"
+            (strokeWidthChange)="setStrokeWidth($event)"
+            (addShape)="addShapeElement()"
+            (duplicate)="duplicateSelectedElement()"
+            (bringForward)="bringToFront()"
+            (delete)="deleteSelectedElement()" />
+        } @else if (editorMode() === 'edit' || activeTool() === 'text' || (selectedElement() && selectedElement()?.type === 'text')) {
+          <app-text-panel
+            [textFont]="textFont()"
+            [textSize]="textSize()"
+            [textColor]="textColor()"
+            [isTextBold]="isTextBold()"
+            [isTextItalic]="isTextItalic()"
+            [isTextUnderline]="isTextUnderline()"
+            [textAlign]="textAlign()"
+            [showTextLinkInput]="showTextLinkInput()"
+            [textLinkUrl]="textLinkUrl()"
+            [isTextLinked]="isTextLinked()"
+            (textFontChange)="setTextFont($event)"
+            (textSizeChange)="setTextSize($event)"
+            (textColorChange)="setTextColor($event)"
+            (toggleBold)="toggleTextBold()"
+            (toggleItalic)="toggleTextItalic()"
+            (toggleUnderline)="toggleTextUnderline()"
+            (textAlignChange)="setTextAlign($event)"
+            (toggleLinkInput)="toggleTextLinkInput()"
+            (applyLink)="applyTextLink($event)"
+            (removeLink)="removeTextLink()"
+            (closeLinkInput)="closeTextLinkInput()"
+            (addTextElement)="addTextElement()" />
+        } @else if (activeTool() === 'draw') {
+          <app-draw-panel
+            [strokeWidth]="drawStrokeWidth()"
+            [color]="drawColor()"
+            (strokeWidthChange)="drawStrokeWidth.set($event)"
+            (colorChange)="drawColor.set($event)" />
+        } @else if (activeTool() === 'highlight' || (selectedElement() && selectedElement()?.type === 'highlight')) {
+          <app-highlight-panel
+            [color]="highlightColor()"
+            [opacity]="highlightOpacity()"
+            [isElementSelected]="!!(selectedElement() && selectedElement()?.type === 'highlight')"
+            (colorChange)="setHighlightColor($event)"
+            (opacityChange)="setHighlightOpacity($event)"
+            (placeBox)="addHighlightElement(100, 100)"
+            (duplicate)="duplicateSelectedElement()"
+            (bringForward)="bringToFront()"
+            (delete)="deleteSelectedElement()" />
+        } @else if (activeTool() === 'whiteout') {
+          <app-whiteout-panel (placeBlock)="addWhiteoutElement(100, 100)" />
+        } @else if (activeTool() === 'image') {
+          <app-image-panel (chooseImage)="fileInputImage.click()" />
+        } @else if (activeTool() === 'sign' || (selectedElement() && selectedElement()?.type === 'sign')) {
+          <app-sign-panel
+            [signatureTab]="signatureTab()"
+            [signatureText]="signatureText()"
+            [signatureFont]="signatureFont()"
+            [signatureColor]="signatureColor()"
+            [signatureSize]="signatureSize()"
+            [signatureDrawnDataUrl]="signatureDrawnDataUrl()"
+            [isElementSelected]="!!(selectedElement() && selectedElement()?.type === 'sign')"
+            (setSignatureTab)="setSignatureTab($event)"
+            (setSignatureText)="setSignatureText($event)"
+            (setSignatureFont)="setSignatureFont($event)"
+            (setSignatureColor)="setSignatureColor($event)"
+            (setSignatureSize)="setSignatureSize($event)"
+            (drawnDataUrlChange)="signatureDrawnDataUrl.set($event)"
+            (addSignatureElement)="addSignatureElement()"
+            (duplicate)="duplicateSelectedElement()"
+            (bringForward)="bringToFront()"
+            (delete)="deleteSelectedElement()" />
+        } @else if (activeTool() === 'link') {
+          <app-link-panel
+            [linkUrl]="linkUrl()"
+            (linkUrlChange)="linkUrl.set($event)"
+            (placeLink)="addLinkElement(100, 100)" />
+        } @else if (activeTool() === 'ocr') {
+          <app-ocr-panel
+            [pageRange]="ocrPageRange()"
+            [customRange]="ocrCustomRange()"
+            [rangeError]="ocrRangeError()"
+            [currentPageIndex]="currentPageIndex()"
+            [totalPages]="pages().length"
+            [availableLanguages]="ocrAvailableLanguages()"
+            [selectedLanguages]="ocrSelectedLanguages()"
+            [deskew]="ocrDeskew()"
+            [mode]="ocrMode()"
+            [isRunning]="isOcrRunning()"
+            [lowConfidenceReviewWords]="lowConfidenceReviewWords()"
+            (pageRangeChange)="ocrPageRange.set($event)"
+            (customRangeChange)="ocrCustomRange.set($event)"
+            (validatePageRange)="validateOcrPageRange()"
+            (toggleLanguage)="toggleOcrLanguage($event)"
+            (deskewChange)="ocrDeskew.set($event)"
+            (modeChange)="ocrMode.set($event)"
+            (startRecognition)="startOcrRecognition()"
+            (jumpToWord)="jumpToLowConfidenceWord($event)" />
         } @else {
-        <div class="section-badge-title">DOCUMENT INFO</div>
-        <div class="property-panel-card">
-          <div class="doc-stats-grid">
-            <div class="stat-item">
-              <span class="stat-label">Current Page</span>
-              <span class="stat-value">{{ currentPageIndex() + 1 }} of {{ pages().length }}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Elements on Page</span>
-              <span class="stat-value">{{ currentPageElements().length }}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Zoom Level</span>
-              <span class="stat-value">{{ (zoom() * 100) | number:'1.0-0' }}%</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Page Dimensions</span>
-              <span class="stat-value">{{ currentPage()?.widthPt }} × {{ currentPage()?.heightPt }} pt</span>
-            </div>
-          </div>
-
-          <p class="property-tip">Select a tool above to annotate, draw, place shapes, or run OCR.</p>
-        </div>
-        }
+          <app-element-info-panel
+            [selectedElement]="selectedElement()"
+            [currentPageIndex]="currentPageIndex()"
+            [totalPages]="pages().length"
+            [elementsOnPage]="currentPageElements().length"
+            [zoom]="zoom()"
+            [pageDimensionsText]="(currentPage()?.widthPt || 0) + ' × ' + (currentPage()?.heightPt || 0) + ' pt'"
+            (duplicate)="duplicateSelectedElement()"
+            (bringForward)="bringToFront()"
+            (delete)="deleteSelectedElement()" />
         }
       </div>
-
       <!-- Section: Footer Note & CTA -->
       <div class="sidebar-footer-area">
         <button type="button" class="btn-save-download" [disabled]="isExporting()" (click)="saveAndDownload()">

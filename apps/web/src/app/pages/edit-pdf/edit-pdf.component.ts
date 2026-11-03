@@ -7,7 +7,8 @@ import {
   computed,
   ElementRef,
   ViewChild,
-  HostListener
+  HostListener,
+  ViewEncapsulation
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -50,6 +51,17 @@ import { CommandHistoryService, Command } from './services/command-history';
 import { PdfExportService } from './services/pdf-export.service';
 import { OcrService } from './services/ocr.service';
 import { ContentEditableModelDirective } from './directives/content-editable-model.directive';
+import { EditPdfTopNavComponent } from './components/edit-pdf-top-nav/edit-pdf-top-nav.component';
+import { ShapePanelComponent } from './components/panels/shape-panel/shape-panel.component';
+import { TextPanelComponent } from './components/panels/text-panel/text-panel.component';
+import { DrawPanelComponent } from './components/panels/draw-panel/draw-panel.component';
+import { HighlightPanelComponent } from './components/panels/highlight-panel/highlight-panel.component';
+import { WhiteoutPanelComponent } from './components/panels/whiteout-panel/whiteout-panel.component';
+import { ImagePanelComponent } from './components/panels/image-panel/image-panel.component';
+import { SignPanelComponent } from './components/panels/sign-panel/sign-panel.component';
+import { LinkPanelComponent } from './components/panels/link-panel/link-panel.component';
+import { OcrPanelComponent } from './components/panels/ocr-panel/ocr-panel.component';
+import { ElementInfoPanelComponent } from './components/panels/element-info-panel/element-info-panel.component';
 
 type EditorViewMode = 'upload' | 'editor';
 
@@ -65,10 +77,22 @@ if (typeof window !== 'undefined' && pdfjsLib && (pdfjsLib as any).GlobalWorkerO
     FormsModule,
     RouterModule,
     DropzoneComponent,
-    ContentEditableModelDirective
+    ContentEditableModelDirective,
+    EditPdfTopNavComponent,
+    ShapePanelComponent,
+    TextPanelComponent,
+    DrawPanelComponent,
+    HighlightPanelComponent,
+    WhiteoutPanelComponent,
+    ImagePanelComponent,
+    SignPanelComponent,
+    LinkPanelComponent,
+    OcrPanelComponent,
+    ElementInfoPanelComponent
   ],
   templateUrl: './edit-pdf.component.html',
-  styleUrl: './edit-pdf.component.css'
+  styleUrl: './edit-pdf.component.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class EditPdfComponent implements OnInit, OnDestroy {
   private uploadConsent = inject(UploadConsentService);
@@ -103,6 +127,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private wheelAccumulator = 0;
   private wheelResetTimer: any = null;
   @ViewChild('fileInputSigUpload') fileInputSigUpload!: ElementRef<HTMLInputElement>;
+  @ViewChild(SignPanelComponent) signPanel?: SignPanelComponent;
 
   private _sigPadRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('sigPad') set sigPad(ref: ElementRef<HTMLCanvasElement> | undefined) {
@@ -1952,11 +1977,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   clearSigPad(): void {
+    if (this.signPanel) {
+      this.signPanel.clearSigPad();
+    }
     const canvas = this.sigPadRef?.nativeElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
     this.signatureDrawnDataUrl.set(null);
     this.sigPadPoints = [];
@@ -2522,6 +2551,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
 
     this.showTextLinkInput.update(v => !v);
+  }
+
+  closeTextLinkInput(): void {
+    this.showTextLinkInput.set(false);
   }
 
   applyTextLink(inputUrl?: string): void {
