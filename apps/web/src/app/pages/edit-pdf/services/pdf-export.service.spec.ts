@@ -174,5 +174,44 @@ describe('PdfExportService', () => {
     expect(resultBlob.type).toBe('application/pdf');
     expect(resultBlob.size).toBeGreaterThan(0);
   });
+
+  it('should export PDF with custom polygon shapes', async () => {
+    const testDoc = await PDFDocument.create();
+    testDoc.addPage([600, 800]);
+    const pdfBytes = await testDoc.save();
+
+    const elements = [
+      {
+        id: 'poly-1',
+        pageIndex: 0,
+        type: 'shape',
+        shapeType: 'polygon',
+        xPt: 100,
+        yPt: 400,
+        widthPt: 120,
+        heightPt: 100,
+        strokeColor: 'var(--pt-teal-700)',
+        fillColor: 'var(--pt-teal-50)',
+        strokeWidth: 3,
+        points: [
+          { x: 50, y: 0 },
+          { x: 100, y: 50 },
+          { x: 80, y: 100 },
+          { x: 20, y: 100 },
+          { x: 0, y: 50 }
+        ]
+      } as ShapeEditElement
+    ];
+
+    const resultBlob = await service.exportPdf(
+      pdfBytes,
+      [{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }],
+      elements
+    );
+
+    expect(resultBlob).toBeTruthy();
+    expect(resultBlob.type).toBe('application/pdf');
+    expect(resultBlob.size).toBeGreaterThan(0);
+  });
 });
 

@@ -104,10 +104,11 @@ export interface DrawEditElement extends BaseEditElement {
 
 export interface ShapeEditElement extends BaseEditElement {
   type: 'shape';
-  shapeType: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star';
+  shapeType: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star' | 'polygon';
   strokeColor: string;
   fillColor: string;
   strokeWidth: number;
+  points?: Array<{ x: number; y: number }>;
 }
 
 export interface HighlightEditElement extends BaseEditElement {

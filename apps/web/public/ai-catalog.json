@@ -141,6 +141,24 @@
         "to",
         "pdf"
       ]
+    },
+    {
+      "identifier": "urn:air:pdftailor:tools:edit-pdf",
+      "displayName": "Edit PDF",
+      "type": "application/mcp-server-card+json",
+      "description": "Add text, images, shapes, annotations, and make scanned text editable with OCR.",
+      "url": "https://pdftailor.com/edit-pdf",
+      "representativeQueries": [
+        "edit pdf online",
+        "how to edit pdf",
+        "free edit pdf tool"
+      ],
+      "tags": [
+        "pdf",
+        "edit",
+        "edit",
+        "pdf"
+      ]
     }
   ]
 }

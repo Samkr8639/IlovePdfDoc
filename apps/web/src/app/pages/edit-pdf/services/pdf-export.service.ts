@@ -295,6 +295,52 @@ export class PdfExportService {
         borderWidth,
         color: fillColor
       });
+    } else if (el.shapeType === 'polygon') {
+      const pts = (el.points && el.points.length >= 3)
+        ? el.points
+        : [
+            { x: 50, y: 0 },
+            { x: 95, y: 25 },
+            { x: 95, y: 75 },
+            { x: 50, y: 100 },
+            { x: 5, y: 75 },
+            { x: 5, y: 25 }
+          ];
+
+      const pathSegments = pts.map((p, idx) => {
+        const x = ((p.x / 100) * el.widthPt).toFixed(2);
+        const y = ((p.y / 100) * el.heightPt).toFixed(2);
+        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+      });
+      const svgPath = `${pathSegments.join(' ')} Z`;
+
+      try {
+        page.drawSvgPath(svgPath, {
+          x: el.xPt,
+          y: el.yPt + el.heightPt,
+          borderColor: strokeColor || undefined,
+          borderWidth: borderWidth || 1,
+          color: fillColor || undefined
+        });
+      } catch {
+        // Fallback: draw connecting lines
+        for (let i = 0; i < pts.length; i++) {
+          const p1 = pts[i];
+          const p2 = pts[(i + 1) % pts.length];
+          page.drawLine({
+            start: {
+              x: el.xPt + (p1.x / 100) * el.widthPt,
+              y: (el.yPt + el.heightPt) - (p1.y / 100) * el.heightPt
+            },
+            end: {
+              x: el.xPt + (p2.x / 100) * el.widthPt,
+              y: (el.yPt + el.heightPt) - (p2.y / 100) * el.heightPt
+            },
+            color: strokeColor || rgb(0, 0, 0),
+            thickness: borderWidth
+          });
+        }
+      }
     }
   }
 

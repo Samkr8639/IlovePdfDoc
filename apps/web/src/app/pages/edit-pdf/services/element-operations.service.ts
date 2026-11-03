@@ -51,16 +51,31 @@ export class ElementOperationsService {
   createShapeElement(
     page: PageDimensions,
     params: {
-      shapeType: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star';
+      shapeType: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star' | 'polygon';
       strokeColor: string;
       fillColor: string;
       strokeWidth: number;
       xPt?: number;
       yPt?: number;
+      widthPt?: number;
+      heightPt?: number;
+      points?: Array<{ x: number; y: number }>;
     }
   ): ShapeEditElement {
-    const widthPt = params.shapeType === 'line' || params.shapeType === 'arrow' ? 140 : 160;
-    const heightPt = params.shapeType === 'line' || params.shapeType === 'arrow' ? 70 : 100;
+    const defaultPoints = [
+      { x: 50, y: 0 },
+      { x: 95, y: 25 },
+      { x: 95, y: 75 },
+      { x: 50, y: 100 },
+      { x: 5, y: 75 },
+      { x: 5, y: 25 }
+    ];
+    const widthPt = params.widthPt !== undefined
+      ? params.widthPt
+      : (params.shapeType === 'line' || params.shapeType === 'arrow' ? 140 : 160);
+    const heightPt = params.heightPt !== undefined
+      ? params.heightPt
+      : (params.shapeType === 'line' || params.shapeType === 'arrow' ? 70 : 100);
     const finalX = params.xPt !== undefined ? params.xPt : Math.round((page.widthPt - widthPt) / 2);
     const finalY = params.yPt !== undefined ? params.yPt : Math.round((page.heightPt - heightPt) / 2);
 
@@ -75,7 +90,8 @@ export class ElementOperationsService {
       heightPt,
       strokeColor: params.strokeColor,
       fillColor: params.fillColor,
-      strokeWidth: params.strokeWidth
+      strokeWidth: params.strokeWidth,
+      points: params.shapeType === 'polygon' ? (params.points || defaultPoints) : undefined
     };
   }
 

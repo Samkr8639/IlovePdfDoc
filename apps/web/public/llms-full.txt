@@ -74,6 +74,16 @@
 - **Max File Size**: 50 MB
 - **Description**: Convert Microsoft Word files into standardized, read-only PDF documents that display identically on every screen.
 
+### Edit PDF
+- **URL**: https://pdftailor.com/edit-pdf
+- **Identifier**: urn:air:pdftailor:tools:edit-pdf
+- **Category**: edit
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 1
+- **Max File Size**: 50 MB
+- **Description**: Directly annotate, redact, highlight, and recognize scanned text in your PDF files with hybrid client-first processing.
+
 
 ## Security & Verification
 All PDFTailor tools support programmatic browser automation and WebMCP form interaction. Documents processed client-side remain in sandbox RAM. Server conversions are subject to strict per-request execution limits and instantaneous memory purges.

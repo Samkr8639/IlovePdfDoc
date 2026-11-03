@@ -7,6 +7,7 @@ import { ServerActionGuard } from '../../core/guards/server-action.guard';
 import { OcrService } from './services/ocr.service';
 import { TextFormattingService } from './services/text-formatting.service';
 import { EditPdfOcrResult } from '@paperflow/contracts';
+import { ShapeEditElement } from './models/document-model';
 
 describe('EditPdfComponent Integration Tests', () => {
   let component: EditPdfComponent;
@@ -269,6 +270,83 @@ describe('EditPdfComponent Integration Tests', () => {
     const shape = component.elements()[0];
     expect(shape.xPt).toBe((600 - shape.widthPt) / 2);
     expect(shape.yPt).toBe((800 - shape.heightPt) / 2);
+  });
+
+  it('supports custom polygon shape point-to-point drawing and closure', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }
+    ]);
+    component.zoom.set(1);
+    component.setShapeType('polygon');
+    expect(component.shapeType()).toBe('polygon');
+
+    // Plot point 1: (100, 700) in PDF coords -> screen coords (100, 100)
+    component.handlePolygonCanvasClick({ xPt: 100, yPt: 700 }, { x: 100, y: 100 }, 0);
+    expect(component.draftPolygonPoints().length).toBe(1);
+    expect(component.draftPolygonPageIndex()).toBe(0);
+
+    // Plot point 2: (200, 700) in PDF coords -> screen coords (200, 100)
+    component.handlePolygonCanvasClick({ xPt: 200, yPt: 700 }, { x: 200, y: 100 }, 0);
+    expect(component.draftPolygonPoints().length).toBe(2);
+
+    // Plot point 3: (150, 600) in PDF coords -> screen coords (150, 200)
+    component.handlePolygonCanvasClick({ xPt: 150, yPt: 600 }, { x: 150, y: 200 }, 0);
+    expect(component.draftPolygonPoints().length).toBe(3);
+
+    // Test cursor near start point (100, 100)
+    component.draftPolygonCursor.set({ xScreen: 105, yScreen: 103 });
+    expect(component.isDraftCursorNearStart(component.pages()[0])).toBe(true);
+
+    // Click near start point to close shape
+    component.handlePolygonCanvasClick({ xPt: 102, yPt: 698 }, { x: 102, y: 102 }, 0);
+
+    // Shape should be created and draft cleared
+    expect(component.draftPolygonPoints().length).toBe(0);
+    expect(component.draftPolygonPageIndex()).toBeNull();
+    expect(component.elements().length).toBe(1);
+
+    const polygonEl = component.elements()[0] as ShapeEditElement;
+    expect(polygonEl.type).toBe('shape');
+    expect(polygonEl.shapeType).toBe('polygon');
+    expect(polygonEl.points?.length).toBe(3);
+    expect(component.activeTool()).toBe('select');
+    expect(component.selectedElementId()).toBe(polygonEl.id);
+
+    // Undo removes the shape
+    component.history.undo();
+    expect(component.elements().length).toBe(0);
+
+    // Redo restores the shape
+    component.history.redo();
+    expect(component.elements().length).toBe(1);
+  });
+
+  it('supports double-click or cancel when creating custom polygon shapes', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }
+    ]);
+    component.setShapeType('polygon');
+    component.activeTool.set('shapes');
+
+    // Plot 3 points
+    component.handlePolygonCanvasClick({ xPt: 50, yPt: 750 }, { x: 50, y: 50 }, 0);
+    component.handlePolygonCanvasClick({ xPt: 150, yPt: 750 }, { x: 150, y: 50 }, 0);
+    component.handlePolygonCanvasClick({ xPt: 100, yPt: 650 }, { x: 100, y: 150 }, 0);
+    expect(component.draftPolygonPoints().length).toBe(3);
+
+    // Double click to finish
+    component.onPageDblClick(0, new MouseEvent('dblclick'));
+    expect(component.draftPolygonPoints().length).toBe(0);
+    expect(component.elements().length).toBe(1);
+    expect((component.elements()[0] as ShapeEditElement).shapeType).toBe('polygon');
+
+    // Test cancelling
+    component.setShapeType('polygon');
+    component.handlePolygonCanvasClick({ xPt: 10, yPt: 10 }, { x: 10, y: 10 }, 0);
+    expect(component.draftPolygonPoints().length).toBe(1);
+    component.cancelPolygonShape();
+    expect(component.draftPolygonPoints().length).toBe(0);
+    expect(component.draftPolygonPageIndex()).toBeNull();
   });
 
   it('handles Google Drive and Dropbox external openers safely', () => {

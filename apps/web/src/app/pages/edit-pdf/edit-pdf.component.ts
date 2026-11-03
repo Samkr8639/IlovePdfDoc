@@ -191,7 +191,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly isTextLinked = signal<boolean>(false);
 
   // Shape Properties
-  readonly shapeType = signal<'rectangle' | 'circle' | 'line' | 'arrow' | 'star'>('rectangle');
+  readonly shapeType = signal<'rectangle' | 'circle' | 'line' | 'arrow' | 'star' | 'polygon'>('rectangle');
+  // Custom Shape (Polygon) Maker State
+  readonly draftPolygonPoints = signal<Array<{ xPt: number; yPt: number }>>([]);
+  readonly draftPolygonPageIndex = signal<number | null>(null);
+  readonly draftPolygonCursor = signal<{ xScreen: number; yScreen: number } | null>(null);
   readonly strokeColor = signal<string>('var(--pt-navy)');
   readonly fillColor = signal<string>('transparent');
   readonly strokeWidth = signal<number>(2);
@@ -404,6 +408,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onPageMouseMove(pageIndex: number, event: MouseEvent): void {
+    if (this.activeTool() === 'shapes' && this.shapeType() === 'polygon' && this.draftPolygonPoints().length > 0) {
+      if (this.draftPolygonPageIndex() === pageIndex) {
+        const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
+          || this.pageCanvasRef?.nativeElement;
+        if (canvas) {
+          const rect = canvas.getBoundingClientRect();
+          this.draftPolygonCursor.set({
+            xScreen: event.clientX - rect.left,
+            yScreen: event.clientY - rect.top
+          });
+        }
+      }
+    }
     if (this.isHighlighting) {
       this.moveHighlightDrag(event.clientX, event.clientY);
       return;
@@ -834,7 +851,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         this.addTextElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
         break;
       case 'shapes':
-        this.addShapeElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
+        if (this.shapeType() === 'polygon') {
+          this.handlePolygonCanvasClick(pdfPt, { x: screenX, y: screenY }, page.pageIndex);
+        } else {
+          this.addShapeElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
+        }
         break;
       case 'highlight':
         this.addHighlightElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
@@ -1413,7 +1434,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  setShapeType(type: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star'): void {
+  setShapeType(type: 'rectangle' | 'circle' | 'line' | 'arrow' | 'star' | 'polygon'): void {
+    if (type !== 'polygon') {
+      this.cancelPolygonShape();
+    }
     this.shapeType.set(type);
     this.updateSelectedShapeProperty('shapeType', type);
   }
@@ -1484,6 +1508,151 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     };
 
     this.history.execute(cmd);
+  }
+
+  handlePolygonCanvasClick(
+    pdfPt: { xPt: number; yPt: number },
+    screenPt: { x: number; y: number },
+    pageIndex: number
+  ): void {
+    const currentPoints = this.draftPolygonPoints();
+    const currentPageIdx = this.draftPolygonPageIndex();
+
+    if (currentPageIdx !== null && currentPageIdx !== pageIndex) {
+      this.cancelPolygonShape();
+    }
+
+    const page = this.pages()[pageIndex] || this.currentPage();
+    if (currentPoints.length >= 3 && page) {
+      const startScreen = this.transform.pdfPointToScreenPoint(currentPoints[0], page, this.zoom());
+      const dist = Math.hypot(screenPt.x - startScreen.x, screenPt.y - startScreen.y);
+      if (dist <= 22) {
+        this.finishPolygonShape();
+        return;
+      }
+    }
+
+    this.draftPolygonPageIndex.set(pageIndex);
+    this.draftPolygonPoints.update(pts => [...pts, { xPt: pdfPt.xPt, yPt: pdfPt.yPt }]);
+  }
+
+  onPageDblClick(pageIndex: number, event: MouseEvent): void {
+    if (this.activeTool() === 'shapes' && this.shapeType() === 'polygon') {
+      if (this.draftPolygonPoints().length >= 3) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.finishPolygonShape();
+      }
+    }
+  }
+
+  finishPolygonShape(): void {
+    const currentPoints = this.draftPolygonPoints();
+    const pageIndex = this.draftPolygonPageIndex();
+    if (currentPoints.length < 3 || pageIndex === null) {
+      return;
+    }
+
+    const page = this.pages()[pageIndex] || this.currentPage();
+    if (!page) return;
+
+    const screenPoints = currentPoints.map(p => this.transform.pdfPointToScreenPoint(p, page, this.zoom()));
+    const screenXs = screenPoints.map(p => p.x);
+    const screenYs = screenPoints.map(p => p.y);
+    const minScreenX = Math.min(...screenXs);
+    const maxScreenX = Math.max(...screenXs);
+    const minScreenY = Math.min(...screenYs);
+    const maxScreenY = Math.max(...screenYs);
+
+    const screenWidth = Math.max(20, maxScreenX - minScreenX);
+    const screenHeight = Math.max(20, maxScreenY - minScreenY);
+
+    const normalizedPoints = screenPoints.map(p => ({
+      x: Math.round(((p.x - minScreenX) / screenWidth) * 100 * 10) / 10,
+      y: Math.round(((p.y - minScreenY) / screenHeight) * 100 * 10) / 10
+    }));
+
+    const pdfRect = this.transform.screenRectToPdfRect(
+      { x: minScreenX, y: minScreenY, width: screenWidth, height: screenHeight },
+      page,
+      this.zoom()
+    );
+
+    const newElement = this.elementOps.createShapeElement(page, {
+      shapeType: 'polygon',
+      strokeColor: this.strokeColor(),
+      fillColor: this.fillColor(),
+      strokeWidth: this.strokeWidth(),
+      xPt: pdfRect.xPt,
+      yPt: pdfRect.yPt,
+      widthPt: pdfRect.widthPt,
+      heightPt: pdfRect.heightPt,
+      points: normalizedPoints
+    });
+    newElement.pageIndex = pageIndex;
+
+    const cmd: Command = {
+      description: 'Add Custom Polygon Shape',
+      execute: () => {
+        this.elements.update(list => [...list, newElement]);
+        this.selectedElementId.set(newElement.id);
+        this.activeTool.set('select');
+      },
+      undo: () => {
+        this.elements.update(list => list.filter(e => e.id !== newElement.id));
+        this.selectedElementId.set(null);
+      }
+    };
+
+    this.history.execute(cmd);
+    this.cancelPolygonShape();
+  }
+
+  cancelPolygonShape(): void {
+    this.draftPolygonPoints.set([]);
+    this.draftPolygonPageIndex.set(null);
+    this.draftPolygonCursor.set(null);
+  }
+
+  getPolygonPoints(el: ShapeEditElement): string {
+    const pts = (el.points && el.points.length >= 3)
+      ? el.points
+      : [
+          { x: 50, y: 0 },
+          { x: 95, y: 25 },
+          { x: 95, y: 75 },
+          { x: 50, y: 100 },
+          { x: 5, y: 75 },
+          { x: 5, y: 25 }
+        ];
+    return pts.map(p => `${p.x},${p.y}`).join(' ');
+  }
+
+  getDraftScreenPoints(page: PageDimensions): Array<{ x: number; y: number }> {
+    return this.draftPolygonPoints().map(p =>
+      this.transform.pdfPointToScreenPoint(p, page, this.zoom())
+    );
+  }
+
+  getDraftPolylinePoints(page: PageDimensions): string {
+    return this.getDraftScreenPoints(page).map(sp => `${sp.x},${sp.y}`).join(' ');
+  }
+
+  getDraftFirstScreenPoint(page: PageDimensions): { x: number; y: number } | null {
+    const pts = this.getDraftScreenPoints(page);
+    return pts.length > 0 ? pts[0] : null;
+  }
+
+  getDraftLastScreenPoint(page: PageDimensions): { x: number; y: number } | null {
+    const pts = this.getDraftScreenPoints(page);
+    return pts.length > 0 ? pts[pts.length - 1] : null;
+  }
+
+  isDraftCursorNearStart(page: PageDimensions): boolean {
+    const start = this.getDraftFirstScreenPoint(page);
+    const cursor = this.draftPolygonCursor();
+    if (!start || !cursor || this.draftPolygonPoints().length < 2) return false;
+    return Math.hypot(cursor.xScreen - start.x, cursor.yScreen - start.y) <= 22;
   }
 
   addHighlightElement(xPt = 100, yPt = 100, targetPageIndex?: number): void {
@@ -2721,6 +2890,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       if (!isEditingText && this.selectedElementId()) {
         event.preventDefault();
         this.deleteSelectedElement();
+      }
+    } else if (event.key === 'Escape') {
+      if (this.draftPolygonPoints().length > 0) {
+        this.cancelPolygonShape();
       }
     }
   }

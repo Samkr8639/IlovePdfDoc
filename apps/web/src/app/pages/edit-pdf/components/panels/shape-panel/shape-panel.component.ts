@@ -49,7 +49,43 @@ import { Component, input, output } from '@angular/core';
           </svg>
           <span>Star</span>
         </button>
+
+        <button type="button" class="shape-choice-btn" [class.active]="shapeType() === 'polygon'"
+          (click)="shapeTypeChange.emit('polygon')" title="Custom Polygon Shape (Point to Point)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5" />
+            <circle cx="12" cy="3" r="1.5" fill="currentColor" />
+            <circle cx="20" cy="7.5" r="1.5" fill="currentColor" />
+            <circle cx="20" cy="16.5" r="1.5" fill="currentColor" />
+            <circle cx="12" cy="21" r="1.5" fill="currentColor" />
+            <circle cx="4" cy="16.5" r="1.5" fill="currentColor" />
+            <circle cx="4" cy="7.5" r="1.5" fill="currentColor" />
+          </svg>
+          <span>Custom</span>
+        </button>
       </div>
+
+      @if (shapeType() === 'polygon') {
+        <div class="custom-shape-guide-box">
+          @if (draftPolygonPointCount() > 0) {
+            <div class="guide-text">
+              <strong>{{ draftPolygonPointCount() }} points plotted.</strong> Click the start point or double-click to close shape.
+            </div>
+            <div class="draft-action-btns">
+              <button type="button" class="btn-sm-finish" (click)="completeCustomShape.emit()" [disabled]="draftPolygonPointCount() < 3">
+                ✓ Close Shape
+              </button>
+              <button type="button" class="btn-sm-cancel" (click)="cancelCustomShape.emit()">
+                ✕ Cancel
+              </button>
+            </div>
+          } @else {
+            <div class="guide-text">
+              ✨ <strong>Custom Shape Maker:</strong> Click anywhere on the PDF page to start plotting points. Connect back to the start point (or double-click) to close the shape.
+            </div>
+          }
+        </div>
+      }
 
       <label class="property-sublabel">Border Thickness</label>
       <div class="thickness-btn-group">
@@ -127,13 +163,14 @@ import { Component, input, output } from '@angular/core';
   `
 })
 export class ShapePanelComponent {
-  readonly shapeType = input.required<'rectangle' | 'circle' | 'line' | 'arrow' | 'star'>();
+  readonly shapeType = input.required<'rectangle' | 'circle' | 'line' | 'arrow' | 'star' | 'polygon'>();
   readonly strokeColor = input.required<string>();
   readonly fillColor = input.required<string>();
   readonly strokeWidth = input.required<number>();
   readonly isElementSelected = input<boolean>(false);
+  readonly draftPolygonPointCount = input<number>(0);
 
-  readonly shapeTypeChange = output<'rectangle' | 'circle' | 'line' | 'arrow' | 'star'>();
+  readonly shapeTypeChange = output<'rectangle' | 'circle' | 'line' | 'arrow' | 'star' | 'polygon'>();
   readonly strokeColorChange = output<string>();
   readonly fillColorChange = output<string>();
   readonly strokeWidthChange = output<number>();
@@ -141,5 +178,7 @@ export class ShapePanelComponent {
   readonly duplicate = output<void>();
   readonly bringForward = output<void>();
   readonly delete = output<void>();
+  readonly completeCustomShape = output<void>();
+  readonly cancelCustomShape = output<void>();
 }
 
