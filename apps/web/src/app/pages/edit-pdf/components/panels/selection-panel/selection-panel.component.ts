@@ -143,3 +143,4 @@ export class SelectionPanelComponent {
 
   readonly Math = Math;
 }
+

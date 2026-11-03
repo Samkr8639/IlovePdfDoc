@@ -158,3 +158,4 @@ describe('AreaSelectionService', () => {
     expect(service.selection()?.yPt).toBe(95);
   });
 });
+
