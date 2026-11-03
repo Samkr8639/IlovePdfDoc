@@ -569,6 +569,23 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       ? dprParam
       : (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1);
 
+    if (!textEl.backgroundColor) {
+      const overlappingHighlight = this.elements().find(el =>
+        el.type === 'highlight' &&
+        el.pageIndex === pageIndex &&
+        !(
+          textEl.xPt + textEl.widthPt < el.xPt ||
+          textEl.xPt > el.xPt + el.widthPt ||
+          textEl.yPt + textEl.heightPt < el.yPt ||
+          textEl.yPt > el.yPt + el.heightPt
+        )
+      ) as HighlightEditElement | undefined;
+
+      if (overlappingHighlight) {
+        textEl.backgroundColor = overlappingHighlight.color || '#fef08a';
+      }
+    }
+
     this.pdfRendering.whiteoutOriginalText(textEl, ctx, pageInfo, dpr, this.zoom());
   }
 

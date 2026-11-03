@@ -61,6 +61,7 @@ export interface TextEditElement extends BaseEditElement {
   fontFamily: string;
   fontSizePt: number;
   color: string;
+  backgroundColor?: string;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;

@@ -75,7 +75,29 @@ export class PdfRenderingService {
           heightPt: textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt
         }];
 
-    ctx.fillStyle = '#ffffff';
+    // Determine background color: use cached textEl.backgroundColor or sample from canvas
+    if (!textEl.backgroundColor) {
+      const firstLine = linesToWhiteout[0];
+      const screenRect = this.transform.pdfRectToScreenRect(
+        {
+          xPt: Math.max(0, firstLine.xPt),
+          yPt: firstLine.yPt,
+          widthPt: firstLine.widthPt,
+          heightPt: firstLine.heightPt
+        },
+        pageInfo,
+        zoom
+      );
+      textEl.backgroundColor = this.detectBackgroundColor(
+        ctx,
+        Math.floor(screenRect.x * dpr),
+        Math.floor(screenRect.y * dpr),
+        Math.ceil(screenRect.width * dpr),
+        Math.ceil(screenRect.height * dpr)
+      );
+    }
+
+    ctx.fillStyle = textEl.backgroundColor || '#ffffff';
 
     for (const line of linesToWhiteout) {
       const screenRect = this.transform.pdfRectToScreenRect(
@@ -96,6 +118,92 @@ export class PdfRenderingService {
         Math.ceil(screenRect.height * dpr)
       );
     }
+  }
+
+  /**
+   * Samples the background color around a text region on the canvas so that
+   * in-place text erasing blends seamlessly with highlights, colored rows, or tinted backgrounds.
+   */
+  detectBackgroundColor(
+    ctx: CanvasRenderingContext2D,
+    canvasX: number,
+    canvasY: number,
+    canvasW: number,
+    canvasH: number
+  ): string {
+    try {
+      const cWidth = ctx.canvas?.width || 0;
+      const cHeight = ctx.canvas?.height || 0;
+      if (typeof ctx.getImageData !== 'function' || cWidth === 0 || cHeight === 0 || canvasW <= 0 || canvasH <= 0) {
+        return '#ffffff';
+      }
+
+      // Sample points along perimeter and just outside (margins) where glyph strokes are absent
+      const samplePoints: { x: number; y: number }[] = [];
+
+      const outTop = Math.max(0, canvasY - 2);
+      const outBottom = Math.min(cHeight - 1, canvasY + canvasH + 1);
+      const outLeft = Math.max(0, canvasX - 2);
+      const outRight = Math.min(cWidth - 1, canvasX + canvasW + 1);
+
+      // Top and bottom margin points
+      const steps = 6;
+      for (let i = 0; i <= steps; i++) {
+        const x = Math.min(cWidth - 1, Math.max(0, Math.floor(canvasX + (canvasW * i) / steps)));
+        samplePoints.push({ x, y: outTop });
+        samplePoints.push({ x, y: outBottom });
+      }
+
+      // Left and right margin points
+      for (let j = 1; j < steps; j++) {
+        const y = Math.min(cHeight - 1, Math.max(0, Math.floor(canvasY + (canvasH * j) / steps)));
+        samplePoints.push({ x: outLeft, y });
+        samplePoints.push({ x: outRight, y });
+      }
+
+      // Inside corners (almost always blank background even in full-width text)
+      samplePoints.push({ x: Math.min(cWidth - 1, Math.max(0, canvasX + 1)), y: Math.min(cHeight - 1, Math.max(0, canvasY + 1)) });
+      samplePoints.push({ x: Math.min(cWidth - 1, Math.max(0, canvasX + canvasW - 2)), y: Math.min(cHeight - 1, Math.max(0, canvasY + 1)) });
+      samplePoints.push({ x: Math.min(cWidth - 1, Math.max(0, canvasX + 1)), y: Math.min(cHeight - 1, Math.max(0, canvasY + canvasH - 2)) });
+      samplePoints.push({ x: Math.min(cWidth - 1, Math.max(0, canvasX + canvasW - 2)), y: Math.min(cHeight - 1, Math.max(0, canvasY + canvasH - 2)) });
+
+      // Count colors into clusters
+      const colorGroups: { r: number; g: number; b: number; count: number }[] = [];
+
+      for (const pt of samplePoints) {
+        const pixel = ctx.getImageData(pt.x, pt.y, 1, 1).data;
+        if (!pixel || pixel[3] < 50) continue;
+
+        const r = pixel[0];
+        const g = pixel[1];
+        const b = pixel[2];
+
+        let matched = false;
+        for (const group of colorGroups) {
+          const dist = Math.abs(group.r - r) + Math.abs(group.g - g) + Math.abs(group.b - b);
+          if (dist < 24) {
+            group.count++;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          colorGroups.push({ r, g, b, count: 1 });
+        }
+      }
+
+      if (colorGroups.length > 0) {
+        colorGroups.sort((a, b) => b.count - a.count);
+        const best = colorGroups[0];
+        if (best.r >= 250 && best.g >= 250 && best.b >= 250) {
+          return '#ffffff';
+        }
+        return `rgb(${best.r}, ${best.g}, ${best.b})`;
+      }
+    } catch {
+      // Fallback on canvas security/context error
+    }
+    return '#ffffff';
   }
 }
 

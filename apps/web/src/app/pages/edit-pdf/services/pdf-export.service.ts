@@ -46,8 +46,17 @@ export class PdfExportService {
       const page = pages[i];
       const pageElements = elementsByPage.get(i) || [];
 
-      // Sort elements by z-index or visual rendering order
-      // Whiteouts and OCR layers first, then shapes, highlights, images, text, signatures
+      // 1. Erase original text for any edited page text lines first, preserving background color
+      for (const el of pageElements) {
+        if (el.type === 'text') {
+          const textEl = el as TextEditElement;
+          if (textEl.isPageTextLine && textEl.isEdited) {
+            this.eraseOriginalPageText(page, textEl, pageElements);
+          }
+        }
+      }
+
+      // 2. Render elements in visual layer order: whiteouts, shapes, highlights, images, signatures, draw, text
       for (const el of pageElements) {
         try {
           switch (el.type) {
@@ -74,28 +83,6 @@ export class PdfExportService {
               // Skip unedited page text elements (they are already in the original PDF)
               if (textEl.isPageTextLine && !textEl.isEdited) {
                 break;
-              }
-              // If user edited this page text block, whiteout the old text first at its original position
-              if (textEl.isPageTextLine && textEl.isEdited) {
-                const linesToWhiteout = textEl.originalLines && textEl.originalLines.length > 0
-                  ? textEl.originalLines
-                  : [{
-                      text: textEl.text,
-                      xPt: (textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt) - 0.5,
-                      yPt: textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt,
-                      widthPt: (textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt) + 1.0,
-                      heightPt: textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt
-                    }];
-
-                for (const line of linesToWhiteout) {
-                  page.drawRectangle({
-                    x: Math.max(0, line.xPt),
-                    y: line.yPt,
-                    width: line.widthPt,
-                    height: line.heightPt,
-                    color: rgb(1, 1, 1)
-                  });
-                }
               }
               this.renderText(
                 page,
@@ -179,6 +166,46 @@ export class PdfExportService {
       }
     }
     return trimmed;
+  }
+
+  private eraseOriginalPageText(page: PDFPage, textEl: TextEditElement, pageElements: EditElement[]): void {
+    const linesToWhiteout = textEl.originalLines && textEl.originalLines.length > 0
+      ? textEl.originalLines
+      : [{
+          text: textEl.text,
+          xPt: (textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt) - 0.5,
+          yPt: textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt,
+          widthPt: (textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt) + 1.0,
+          heightPt: textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt
+        }];
+
+    let fillColor = textEl.backgroundColor ? this.parseColor(textEl.backgroundColor) : undefined;
+    if (!fillColor) {
+      const overlappingHighlight = pageElements.find(el =>
+        el.type === 'highlight' &&
+        !(
+          textEl.xPt + textEl.widthPt < el.xPt ||
+          textEl.xPt > el.xPt + el.widthPt ||
+          textEl.yPt + textEl.heightPt < el.yPt ||
+          textEl.yPt > el.yPt + el.heightPt
+        )
+      ) as HighlightEditElement | undefined;
+
+      if (overlappingHighlight) {
+        fillColor = this.parseColor(overlappingHighlight.color);
+      }
+    }
+
+    const finalColor = fillColor || rgb(1, 1, 1);
+    for (const line of linesToWhiteout) {
+      page.drawRectangle({
+        x: Math.max(0, line.xPt),
+        y: line.yPt,
+        width: line.widthPt,
+        height: line.heightPt,
+        color: finalColor
+      });
+    }
   }
 
   private renderWhiteout(page: PDFPage, el: WhiteoutEditElement): void {
