@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PDFDocument, rgb, StandardFonts, PDFPage, Color, PDFString } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFPage, Color, PDFString, degrees } from 'pdf-lib';
 import {
   EditElement,
   PageDimensions,
@@ -210,13 +210,53 @@ export class PdfExportService {
 
   private renderWhiteout(page: PDFPage, el: WhiteoutEditElement): void {
     const color = this.parseColor(el.fillColor || '#ffffff') || rgb(1, 1, 1);
+    const pos = this.getRotatedBottomLeft(el.xPt, el.yPt, el.widthPt, el.heightPt, el.rotation);
     page.drawRectangle({
-      x: el.xPt,
-      y: el.yPt,
+      x: pos.x,
+      y: pos.y,
       width: el.widthPt,
       height: el.heightPt,
-      color
+      color,
+      rotate: el.rotation ? degrees(-el.rotation) : undefined
     });
+  }
+
+  private getRotatedBottomLeft(
+    xPt: number,
+    yPt: number,
+    widthPt: number,
+    heightPt: number,
+    rotationDeg = 0
+  ): { x: number; y: number } {
+    if (!rotationDeg) return { x: xPt, y: yPt };
+    const cx = xPt + widthPt / 2;
+    const cy = yPt + heightPt / 2;
+    const rad = (-rotationDeg * Math.PI) / 180;
+    const dx = -widthPt / 2;
+    const dy = -heightPt / 2;
+    return {
+      x: cx + dx * Math.cos(rad) - dy * Math.sin(rad),
+      y: cy + dx * Math.sin(rad) + dy * Math.cos(rad)
+    };
+  }
+
+  private getRotatedTopLeft(
+    xPt: number,
+    yPt: number,
+    widthPt: number,
+    heightPt: number,
+    rotationDeg = 0
+  ): { x: number; y: number } {
+    if (!rotationDeg) return { x: xPt, y: yPt + heightPt };
+    const cx = xPt + widthPt / 2;
+    const cy = yPt + heightPt / 2;
+    const rad = (-rotationDeg * Math.PI) / 180;
+    const dx = -widthPt / 2;
+    const dy = heightPt / 2;
+    return {
+      x: cx + dx * Math.cos(rad) - dy * Math.sin(rad),
+      y: cy + dx * Math.sin(rad) + dy * Math.cos(rad)
+    };
   }
 
   private renderShape(page: PDFPage, el: ShapeEditElement): void {
@@ -225,14 +265,16 @@ export class PdfExportService {
     const borderWidth = el.strokeWidth || 1;
 
     if (el.shapeType === 'rectangle') {
+      const pos = this.getRotatedBottomLeft(el.xPt, el.yPt, el.widthPt, el.heightPt, el.rotation);
       page.drawRectangle({
-        x: el.xPt,
-        y: el.yPt,
+        x: pos.x,
+        y: pos.y,
         width: el.widthPt,
         height: el.heightPt,
         borderColor: strokeColor,
         borderWidth,
-        color: fillColor
+        color: fillColor,
+        rotate: el.rotation ? degrees(-el.rotation) : undefined
       });
     } else if (el.shapeType === 'circle') {
       const radius = Math.min(el.widthPt, el.heightPt) / 2;
@@ -314,13 +356,15 @@ export class PdfExportService {
       });
       const svgPath = `${pathSegments.join(' ')} Z`;
 
+      const pos = this.getRotatedTopLeft(el.xPt, el.yPt, el.widthPt, el.heightPt, el.rotation);
       try {
         page.drawSvgPath(svgPath, {
-          x: el.xPt,
-          y: el.yPt + el.heightPt,
+          x: pos.x,
+          y: pos.y,
           borderColor: strokeColor || undefined,
           borderWidth: borderWidth || 1,
-          color: fillColor || undefined
+          color: fillColor || undefined,
+          rotate: el.rotation ? degrees(-el.rotation) : undefined
         });
       } catch {
         // Fallback: draw connecting lines
@@ -346,13 +390,15 @@ export class PdfExportService {
 
   private renderHighlight(page: PDFPage, el: HighlightEditElement): void {
     const color = this.parseColor(el.color || '#D97706') || rgb(0.85, 0.47, 0.02);
+    const pos = this.getRotatedBottomLeft(el.xPt, el.yPt, el.widthPt, el.heightPt, el.rotation);
     page.drawRectangle({
-      x: el.xPt,
-      y: el.yPt,
+      x: pos.x,
+      y: pos.y,
       width: el.widthPt,
       height: el.heightPt,
       color,
-      opacity: el.opacity || 0.35
+      opacity: el.opacity || 0.35,
+      rotate: el.rotation ? degrees(-el.rotation) : undefined
     });
   }
 
@@ -386,11 +432,13 @@ export class PdfExportService {
         drawY = el.yPt + (el.heightPt - drawH) / 2;
       }
 
+      const pos = this.getRotatedBottomLeft(drawX, drawY, drawW, drawH, el.rotation);
       page.drawImage(embedded, {
-        x: drawX,
-        y: drawY,
+        x: pos.x,
+        y: pos.y,
         width: drawW,
-        height: drawH
+        height: drawH,
+        rotate: el.rotation ? degrees(-el.rotation) : undefined
       });
     } catch {
       // Ignore corrupt images on export
@@ -423,11 +471,13 @@ export class PdfExportService {
           drawY = el.yPt + (el.heightPt - drawH) / 2;
         }
 
+        const pos = this.getRotatedBottomLeft(drawX, drawY, drawW, drawH, el.rotation);
         page.drawImage(embedded, {
-          x: drawX,
-          y: drawY,
+          x: pos.x,
+          y: pos.y,
           width: drawW,
-          height: drawH
+          height: drawH,
+          rotate: el.rotation ? degrees(-el.rotation) : undefined
         });
       } else {
         // High-DPI offscreen canvas render for cursive / styled text signatures
@@ -449,11 +499,13 @@ export class PdfExportService {
           const dataUrl = offscreen.toDataURL('image/png');
           const imageBytes = this.base64ToBytes(dataUrl);
           const embedded = await pdfDoc.embedPng(imageBytes);
+          const pos = this.getRotatedBottomLeft(el.xPt, el.yPt, el.widthPt, el.heightPt, el.rotation);
           page.drawImage(embedded, {
-            x: el.xPt,
-            y: el.yPt,
+            x: pos.x,
+            y: pos.y,
             width: el.widthPt,
-            height: el.heightPt
+            height: el.heightPt,
+            rotate: el.rotation ? degrees(-el.rotation) : undefined
           });
         }
       }

@@ -132,6 +132,12 @@ import { Component, input, output } from '@angular/core';
       @if (isElementSelected()) {
         <div class="selected-element-actions-divider">
           <div class="element-action-buttons">
+            <button type="button" class="el-action-btn" (click)="rotate.emit()" title="Rotate 90°">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+              <span>Rotate</span>
+            </button>
             <button type="button" class="el-action-btn" (click)="duplicate.emit()" title="Duplicate Shape">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -175,6 +181,7 @@ export class ShapePanelComponent {
   readonly fillColorChange = output<string>();
   readonly strokeWidthChange = output<number>();
   readonly addShape = output<void>();
+  readonly rotate = output<void>();
   readonly duplicate = output<void>();
   readonly bringForward = output<void>();
   readonly delete = output<void>();

@@ -723,6 +723,7 @@ describe('EditPdfComponent Integration Tests', () => {
 
   it('records move element as an undoable command in history and restores position on undo', () => {
     component.pages.set([{ pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 }]);
+    component.zoom.set(1.0);
     component.selectTool('select');
     component.addShapeElement(100, 100, 0);
 
@@ -913,5 +914,30 @@ describe('EditPdfComponent Integration Tests', () => {
     const restoredEl = component.elements()[0] as any;
     expect(restoredEl.linkUrl).toBe('https://github.com');
     expect(restoredEl.html).toContain('href="https://github.com"');
+  });
+
+  it('supports rotating selected element with drag handle and 90-degree step', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }]);
+    component.selectTool('select');
+    component.addShapeElement(100, 100, 0);
+
+    const el = component.elements()[0];
+    expect(el.rotation).toBeUndefined();
+
+    // Rotate by 90 degrees
+    component.rotateSelectedElement(90);
+    expect(component.elements()[0].rotation).toBe(90);
+
+    // Rotate again by 90 degrees -> 180
+    component.rotateSelectedElement(90);
+    expect(component.elements()[0].rotation).toBe(180);
+
+    // Undo rotation
+    component.history.undo();
+    expect(component.elements()[0].rotation).toBe(90);
+
+    // Redo rotation
+    component.history.redo();
+    expect(component.elements()[0].rotation).toBe(180);
   });
 });

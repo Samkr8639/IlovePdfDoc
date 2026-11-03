@@ -530,12 +530,18 @@
 }
 
 @keyframes thumbPulse {
-  from { opacity: 1; }
-  to   { opacity: 0.65; }
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.65;
+  }
 }
 
 .mode-pill-tab {
-  position: relative; /* sits above the sliding thumb via z-index */
+  position: relative;
+  /* sits above the sliding thumb via z-index */
   z-index: 1;
   background: transparent;
   border: none;
@@ -553,7 +559,8 @@
   white-space: nowrap;
   /* Color and opacity transition — background is handled by the thumb */
   transition: color 0.2s ease, opacity 0.2s ease;
-  min-width: 100px; /* ensures both tabs are equal width for the 50% thumb */
+  min-width: 100px;
+  /* ensures both tabs are equal width for the 50% thumb */
   user-select: none;
 }
 
@@ -579,8 +586,13 @@
 }
 
 @keyframes spinIcon {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .mode-pill-star {
@@ -641,6 +653,7 @@
   .history-btn span {
     display: none;
   }
+
   .mode-pill-tab {
     padding: 0.375rem 0.625rem;
     min-width: 80px;
@@ -651,13 +664,15 @@
 .workspace-main {
   display: flex;
   flex: 1;
-  min-height: 0; /* critical — allows flex child to scroll inside bounded height */
+  min-height: 0;
+  /* critical — allows flex child to scroll inside bounded height */
   overflow: hidden;
   position: relative;
 }
 
 /* 1. Left Thumbnails Panel */
 .left-thumbnails-panel {
+  height: 100%;
   width: 130px;
   background: var(--pt-surface-white);
   border-right: 1px solid var(--pt-soft-outline);
@@ -1174,10 +1189,12 @@
     r: 6;
     stroke-opacity: 1;
   }
+
   50% {
     r: 12;
     stroke-opacity: 0.4;
   }
+
   100% {
     r: 6;
     stroke-opacity: 1;
@@ -1219,14 +1236,53 @@
   box-sizing: border-box;
 }
 
-.resize-handle.handle-nw { top: -4.5px; left: -4.5px; cursor: nwse-resize; }
-.resize-handle.handle-n  { top: -4.5px; left: calc(50% - 4.5px); cursor: ns-resize; }
-.resize-handle.handle-ne { top: -4.5px; right: -4.5px; cursor: nesw-resize; }
-.resize-handle.handle-e  { top: calc(50% - 4.5px); right: -4.5px; cursor: ew-resize; }
-.resize-handle.handle-se { bottom: -4.5px; right: -4.5px; cursor: nwse-resize; }
-.resize-handle.handle-s  { bottom: -4.5px; left: calc(50% - 4.5px); cursor: ns-resize; }
-.resize-handle.handle-sw { bottom: -4.5px; left: -4.5px; cursor: nesw-resize; }
-.resize-handle.handle-w  { top: calc(50% - 4.5px); left: -4.5px; cursor: ew-resize; }
+.resize-handle.handle-nw {
+  top: -4.5px;
+  left: -4.5px;
+  cursor: nwse-resize;
+}
+
+.resize-handle.handle-n {
+  top: -4.5px;
+  left: calc(50% - 4.5px);
+  cursor: ns-resize;
+}
+
+.resize-handle.handle-ne {
+  top: -4.5px;
+  right: -4.5px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.handle-e {
+  top: calc(50% - 4.5px);
+  right: -4.5px;
+  cursor: ew-resize;
+}
+
+.resize-handle.handle-se {
+  bottom: -4.5px;
+  right: -4.5px;
+  cursor: nwse-resize;
+}
+
+.resize-handle.handle-s {
+  bottom: -4.5px;
+  left: calc(50% - 4.5px);
+  cursor: ns-resize;
+}
+
+.resize-handle.handle-sw {
+  bottom: -4.5px;
+  left: -4.5px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.handle-w {
+  top: calc(50% - 4.5px);
+  left: -4.5px;
+  cursor: ew-resize;
+}
 
 /* Quick Floating Delete Button on Selected Element */
 .element-quick-delete-btn {
@@ -1254,6 +1310,38 @@
   color: #ffffff;
   transform: scale(1.15);
   box-shadow: 0 3px 8px rgba(239, 68, 68, 0.35);
+}
+
+/* Quick Floating Rotate Handle on Selected Element (Bottom-Left) */
+.element-quick-rotate-btn {
+  position: absolute;
+  bottom: -14px;
+  left: -14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid var(--pt-teal-700, #0f766e);
+  color: var(--pt-teal-700, #0f766e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+  transition: all 0.15s ease-in-out;
+  padding: 0;
+}
+
+.element-quick-rotate-btn:hover {
+  background: var(--pt-teal-700, #0f766e);
+  color: #ffffff;
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(15, 118, 110, 0.35);
+}
+
+.element-quick-rotate-btn:active {
+  cursor: grabbing;
 }
 
 .sign-element {
@@ -1603,20 +1691,54 @@
   transform: scale(1.15);
 }
 
-.color-dot.navy { background: var(--pt-navy); }
-.color-dot.teal { background: var(--pt-teal-700); }
-.color-dot.coral { background: var(--pt-coral); }
-.color-dot.amber { background: var(--pt-amber); }
-.color-dot.black { background: var(--pt-navy-deep); }
-.color-dot.green { background: var(--pt-emerald); }
-.color-dot.white { background: var(--pt-surface-white); border: 1px solid var(--pt-outline); }
+.color-dot.navy {
+  background: var(--pt-navy);
+}
+
+.color-dot.teal {
+  background: var(--pt-teal-700);
+}
+
+.color-dot.coral {
+  background: var(--pt-coral);
+}
+
+.color-dot.amber {
+  background: var(--pt-amber);
+}
+
+.color-dot.black {
+  background: var(--pt-navy-deep);
+}
+
+.color-dot.green {
+  background: var(--pt-emerald);
+}
+
+.color-dot.white {
+  background: var(--pt-surface-white);
+  border: 1px solid var(--pt-outline);
+}
+
 .color-dot.transparent {
   background: repeating-linear-gradient(45deg, var(--pt-soft-outline), var(--pt-soft-outline) 4px, var(--pt-surface-white) 4px, var(--pt-surface-white) 8px);
   border: 1px solid var(--pt-outline);
 }
-.color-dot.teal-tint { background: var(--pt-teal-50); border: 1px solid var(--pt-teal-600); }
-.color-dot.amber-tint { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--pt-amber); }
-.color-dot.coral-tint { background: rgba(244, 63, 94, 0.2); border: 1px solid var(--pt-coral); }
+
+.color-dot.teal-tint {
+  background: var(--pt-teal-50);
+  border: 1px solid var(--pt-teal-600);
+}
+
+.color-dot.amber-tint {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid var(--pt-amber);
+}
+
+.color-dot.coral-tint {
+  background: rgba(244, 63, 94, 0.2);
+  border: 1px solid var(--pt-coral);
+}
 
 .color-dot.active {
   border-color: var(--pt-surface-white);
@@ -2182,7 +2304,8 @@
   gap: 0.375rem;
 }
 
-.radio-option, .checkbox-option {
+.radio-option,
+.checkbox-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -2489,8 +2612,13 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes slideInToast {
@@ -2498,6 +2626,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2509,10 +2638,12 @@
   .left-thumbnails-panel {
     width: 90px;
   }
+
   .page-mini-sheet {
     width: 60px;
     height: 85px;
   }
+
   .right-properties-sidebar {
     width: 300px;
     min-width: 300px;
@@ -2523,6 +2654,7 @@
   .left-thumbnails-panel {
     display: none;
   }
+
   .right-properties-sidebar {
     position: fixed;
     right: 0;
@@ -2535,9 +2667,11 @@
     box-shadow: var(--pt-shadow-float);
     z-index: 50;
   }
+
   .right-properties-sidebar.mobile-open {
     transform: translateX(0);
   }
+
   .mobile-close-btn {
     display: block;
   }

@@ -202,6 +202,18 @@
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                     </svg>
                   </button>
+                  <button
+                    type="button"
+                    class="element-quick-rotate-btn"
+                    (mousedown)="onRotateHandleMouseDown(el, $event)"
+                    (click)="$event.stopPropagation()"
+                    title="Drag to rotate (or click to rotate 90°)"
+                    aria-label="Rotate element"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                  </button>
                   }
                 </ng-template>
 
@@ -213,6 +225,7 @@
                   [class.in-edit-mode]="editorMode() === 'edit'" [class.is-user-edited]="el.isEdited"
                   [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                   [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                  [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                   (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                   <div [id]="'text-editable-' + el.id"
                     class="canvas-text-area canvas-text-content"
@@ -243,6 +256,7 @@
               <div class="canvas-element whiteout-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 [style.background-color]="el.fillColor || 'var(--pt-surface-white)'"
                 (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                 <ng-container *ngTemplateOutlet="resizeHandles; context: { el: el }"></ng-container>
@@ -253,6 +267,7 @@
               <div class="canvas-element shape-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                 @if (el.shapeType === 'rectangle') {
                 <div class="shape-inner rect" [style.border-color]="el.strokeColor || 'var(--pt-navy)'"
@@ -303,6 +318,7 @@
               <div class="canvas-element highlight-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 [style.background-color]="el.color || 'var(--pt-amber)'" [style.opacity]="el.opacity || 0.35"
                 (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                 <ng-container *ngTemplateOutlet="resizeHandles; context: { el: el }"></ng-container>
@@ -313,6 +329,7 @@
               <svg class="canvas-element draw-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 [attr.viewBox]="'0 0 ' + el.widthPt + ' ' + el.heightPt" (mousedown)="onElementMouseDown(el, $event)"
                 (click)="selectElement(el, $event)">
                 <path [attr.d]="getDrawPath(el)" [attr.stroke]="el.strokeColor || 'var(--pt-teal-700)'"
@@ -325,6 +342,7 @@
               <div class="canvas-element sign-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                 @if (el.dataUrl && el.dataUrl.startsWith('data:image')) {
                 <img [src]="el.dataUrl" alt="Signature" class="signature-img" />
@@ -342,6 +360,7 @@
               <div class="canvas-element image-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                 <img [src]="el.dataUrl" alt="Inserted image" class="inserted-image-tag" />
                 <ng-container *ngTemplateOutlet="resizeHandles; context: { el: el }"></ng-container>
@@ -352,6 +371,7 @@
               <div class="canvas-element link-element" [class.selected]="selectedElementId() === el.id"
                 [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                 [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
+                [style.transform]="getElementScreenRect(el).transform" [style.transform-origin]="'center center'"
                 (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
                 <a [href]="el.url" target="_blank" rel="noopener noreferrer" class="link-anchor"
                   (click)="$event.stopPropagation()">
@@ -426,6 +446,7 @@
             (fillColorChange)="setFillColor($event)"
             (strokeWidthChange)="setStrokeWidth($event)"
             (addShape)="addShapeElement()"
+            (rotate)="rotateSelectedElement(90)"
             (duplicate)="duplicateSelectedElement()"
             (bringForward)="bringToFront()"
             (delete)="deleteSelectedElement()"

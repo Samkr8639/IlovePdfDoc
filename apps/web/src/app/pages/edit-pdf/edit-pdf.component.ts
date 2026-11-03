@@ -157,7 +157,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly currentFileName = signal<string>('document.pdf');
   readonly pages = signal<PageDimensions[]>([]);
   readonly currentPageIndex = signal<number>(0);
-  readonly zoom = signal<number>(1.0);
+  readonly zoom = signal<number>(0.85);
   readonly elements = signal<EditElement[]>([]);
   readonly selectedElementId = signal<string | null>(null);
   readonly pageThumbnails = signal<Map<number, string>>(new Map());
@@ -268,6 +268,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private resizeStartMouse = { x: 0, y: 0 };
   private resizeStartRect = { xPt: 0, yPt: 0, widthPt: 0, heightPt: 0 };
   private resizingElementId: string | null = null;
+
+  // Element rotation state
+  isRotatingElement = false;
+  private rotatingElementId: string | null = null;
+  private rotateStartAngle = 0;
+  private rotateCenter: { x: number; y: number } = { x: 0, y: 0 };
+  private rotateStartMouseAngle = 0;
+  private hasRotatedMoved = false;
 
   // Active inline text selection state
   private savedTextRange: Range | null = null;
@@ -381,7 +389,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.pageThumbnails.set(thumbs);
   }
 
-  
+
   getPageDisplaySize(page: PageDimensions): { width: number; height: number } {
     return this.transform.getPageDisplaySize(page, this.zoom());
   }
@@ -509,7 +517,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-    async renderAllPages(): Promise<void> {
+  async renderAllPages(): Promise<void> {
     if (!this.cachedPdfDoc) {
       const bytes = this.currentPdfBytes();
       if (bytes) {
@@ -872,6 +880,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   handleDragOrResizeMove(event: MouseEvent): void {
+    if (this.isRotatingElement && this.rotatingElementId) {
+      this.handleRotateMove(event);
+      return;
+    }
     if (this.isDraggingElement && this.draggedElementId) {
       const draggedEl = this.elements().find(e => e.id === this.draggedElementId);
       const page = draggedEl
@@ -948,6 +960,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   finishDragOrResize(): void {
+    if (this.isRotatingElement) {
+      this.finishRotate();
+      return;
+    }
     if (this.isDraggingElement && this.draggedElementId) {
       const draggedId = this.draggedElementId;
       const el = this.elements().find(e => e.id === draggedId);
@@ -1027,12 +1043,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
               list.map(e =>
                 e.id === draggedId
                   ? {
-                      ...e,
-                      pageIndex: targetPageIndex,
-                      xPt: finalX,
-                      yPt: finalY,
-                      ...(e.type === 'text' && (e as TextEditElement).isPageTextLine ? { isEdited: true } : {})
-                    }
+                    ...e,
+                    pageIndex: targetPageIndex,
+                    xPt: finalX,
+                    yPt: finalY,
+                    ...(e.type === 'text' && (e as TextEditElement).isPageTextLine ? { isEdited: true } : {})
+                  }
                   : e
               )
             );
@@ -1100,7 +1116,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.moveHighlightDrag(event.clientX, event.clientY);
       return;
     }
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.handleDragOrResizeMove(event);
     }
   }
@@ -1111,7 +1127,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.finishHighlightDrag();
       return;
     }
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.finishDragOrResize();
     }
     if (this.isDrawing) {
@@ -1125,7 +1141,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.finishHighlightDrag();
       return;
     }
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.finishDragOrResize();
     }
     if (this.isDrawing) {
@@ -1138,7 +1154,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.moveHighlightDrag(event.clientX, event.clientY);
       return;
     }
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.handleDragOrResizeMove(event);
       return;
     }
@@ -1152,7 +1168,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.finishHighlightDrag();
       return;
     }
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.finishDragOrResize();
       return;
     }
@@ -1188,7 +1204,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.finishHighlightDrag();
       return;
     }
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.finishDragOrResize();
       return;
     }
@@ -1295,7 +1311,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   private endDrawing(): void {
-    if (this.isDraggingElement || this.isResizingElement) {
+    if (this.isDraggingElement || this.isResizingElement || this.isRotatingElement) {
       this.finishDragOrResize();
       return;
     }
@@ -1374,6 +1390,122 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       widthPt: el.widthPt,
       heightPt: el.heightPt
     };
+  }
+
+  onRotateHandleMouseDown(el: EditElement, event: MouseEvent): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.selectElement(el, event);
+    this.isRotatingElement = true;
+    this.rotatingElementId = el.id;
+    this.rotateStartAngle = el.rotation || 0;
+    this.hasRotatedMoved = false;
+
+    const target = event.currentTarget as HTMLElement | null;
+    const canvasElement = target?.closest('.canvas-element') as HTMLElement | null;
+    if (canvasElement) {
+      const rect = canvasElement.getBoundingClientRect();
+      this.rotateCenter = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    } else {
+      this.rotateCenter = { x: event.clientX, y: event.clientY };
+    }
+
+    this.rotateStartMouseAngle = Math.atan2(
+      event.clientY - this.rotateCenter.y,
+      event.clientX - this.rotateCenter.x
+    ) * (180 / Math.PI);
+  }
+
+  handleRotateMove(event: MouseEvent): void {
+    if (!this.isRotatingElement || !this.rotatingElementId) return;
+    const el = this.elements().find(e => e.id === this.rotatingElementId);
+    if (!el) return;
+
+    const currentMouseAngle = Math.atan2(
+      event.clientY - this.rotateCenter.y,
+      event.clientX - this.rotateCenter.x
+    ) * (180 / Math.PI);
+
+    const deltaAngle = currentMouseAngle - this.rotateStartMouseAngle;
+    if (Math.abs(deltaAngle) > 2) {
+      this.hasRotatedMoved = true;
+    }
+
+    let newAngle = Math.round((this.rotateStartAngle + deltaAngle) % 360);
+    if (newAngle < 0) newAngle += 360;
+
+    if (event.shiftKey) {
+      newAngle = Math.round(newAngle / 15) * 15;
+    } else {
+      if (Math.abs(newAngle - 0) <= 3 || Math.abs(newAngle - 360) <= 3) newAngle = 0;
+      else if (Math.abs(newAngle - 90) <= 3) newAngle = 90;
+      else if (Math.abs(newAngle - 180) <= 3) newAngle = 180;
+      else if (Math.abs(newAngle - 270) <= 3) newAngle = 270;
+    }
+
+    this.elements.update(list =>
+      list.map(e => (e.id === el.id ? { ...e, rotation: newAngle } : e))
+    );
+  }
+
+  finishRotate(): void {
+    if (!this.isRotatingElement || !this.rotatingElementId) return;
+
+    const elId = this.rotatingElementId;
+    const oldAngle = this.rotateStartAngle;
+    const currentEl = this.elements().find(e => e.id === elId);
+    const finalAngle = currentEl?.rotation || 0;
+
+    this.isRotatingElement = false;
+    this.rotatingElementId = null;
+
+    if (!this.hasRotatedMoved) {
+      this.rotateSelectedElement(90);
+      return;
+    }
+
+    if (finalAngle !== oldAngle) {
+      const cmd: Command = {
+        description: `Rotate element to ${finalAngle}°`,
+        execute: () => {
+          this.elements.update(list =>
+            list.map(e => (e.id === elId ? { ...e, rotation: finalAngle } : e))
+          );
+        },
+        undo: () => {
+          this.elements.update(list =>
+            list.map(e => (e.id === elId ? { ...e, rotation: oldAngle } : e))
+          );
+        }
+      };
+      this.history.execute(cmd);
+    }
+  }
+
+  rotateSelectedElement(delta = 90): void {
+    const el = this.selectedElement();
+    if (!el) return;
+
+    const oldAngle = el.rotation || 0;
+    const newAngle = ((oldAngle + delta) % 360 + 360) % 360;
+
+    const cmd: Command = {
+      description: `Rotate element by ${delta}°`,
+      execute: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === el.id ? { ...e, rotation: newAngle } : e))
+        );
+      },
+      undo: () => {
+        this.elements.update(list =>
+          list.map(e => (e.id === el.id ? { ...e, rotation: oldAngle } : e))
+        );
+      }
+    };
+    this.history.execute(cmd);
   }
 
   onTextareaMouseDown(event: MouseEvent, el: EditElement): void {
@@ -1618,13 +1750,13 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const pts = (el.points && el.points.length >= 3)
       ? el.points
       : [
-          { x: 50, y: 0 },
-          { x: 95, y: 25 },
-          { x: 95, y: 75 },
-          { x: 50, y: 100 },
-          { x: 5, y: 75 },
-          { x: 5, y: 25 }
-        ];
+        { x: 50, y: 0 },
+        { x: 95, y: 25 },
+        { x: 95, y: 75 },
+        { x: 50, y: 100 },
+        { x: 5, y: 75 },
+        { x: 5, y: 25 }
+      ];
     return pts.map(p => `${p.x},${p.y}`).join(' ');
   }
 
@@ -2398,12 +2530,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           list.map(e =>
             e.id === el.id
               ? ({
-                  ...e,
-                  html: newHtml,
-                  text: newText,
-                  linkUrl: newLinkUrl,
-                  isEdited: el.isPageTextLine ? true : (e as TextEditElement).isEdited
-                } as TextEditElement)
+                ...e,
+                html: newHtml,
+                text: newText,
+                linkUrl: newLinkUrl,
+                isEdited: el.isPageTextLine ? true : (e as TextEditElement).isEdited
+              } as TextEditElement)
               : e
           )
         );
@@ -2413,11 +2545,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           list.map(e =>
             e.id === el.id
               ? ({
-                  ...e,
-                  html: oldHtml,
-                  text: oldText,
-                  linkUrl: oldLinkUrl
-                } as TextEditElement)
+                ...e,
+                html: oldHtml,
+                text: oldText,
+                linkUrl: oldLinkUrl
+              } as TextEditElement)
               : e
           )
         );
@@ -2463,11 +2595,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           list.map(e =>
             e.id === el.id
               ? ({
-                  ...e,
-                  html: oldHtml,
-                  text: oldText,
-                  linkUrl: oldLinkUrl
-                } as TextEditElement)
+                ...e,
+                html: oldHtml,
+                text: oldText,
+                linkUrl: oldLinkUrl
+              } as TextEditElement)
               : e
           )
         );
@@ -2793,7 +2925,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   // UI coordinate calculation helper for element bounding boxes on canvas
   getElementScreenRect(el: EditElement) {
     const page = this.pages().find(p => p.pageIndex === el.pageIndex) || this.currentPage();
-    if (!page) return { left: '0px', top: '0px', width: '0px', height: '0px' };
+    if (!page) return { left: '0px', top: '0px', width: '0px', height: '0px', transform: 'none' };
 
     const screenRect = this.transform.pdfRectToScreenRect(
       {
@@ -2810,6 +2942,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       left: `${screenRect.x}px`,
       top: `${screenRect.y}px`,
       width: `${screenRect.width}px`,
+      transform: el.rotation ? `rotate(${el.rotation}deg)` : 'none',
       height: `${screenRect.height}px`
     };
   }
