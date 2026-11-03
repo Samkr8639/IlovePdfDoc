@@ -89,3 +89,4 @@ export class EditPdfTopNavComponent {
   readonly undo = output<void>();
   readonly redo = output<void>();
 }
+

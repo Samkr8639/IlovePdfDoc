@@ -16,3 +16,4 @@ import { Component, output } from '@angular/core';
 export class WhiteoutPanelComponent {
   readonly placeBlock = output<void>();
 }
+

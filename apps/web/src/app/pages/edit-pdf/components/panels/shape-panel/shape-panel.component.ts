@@ -142,3 +142,4 @@ export class ShapePanelComponent {
   readonly bringForward = output<void>();
   readonly delete = output<void>();
 }
+

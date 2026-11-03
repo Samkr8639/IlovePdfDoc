@@ -50,3 +50,4 @@ export class DrawPanelComponent {
     { value: 'var(--pt-navy-deep)', cssClass: 'black', title: 'Deep Navy' }
   ];
 }
+

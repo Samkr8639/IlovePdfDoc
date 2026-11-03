@@ -22,3 +22,4 @@ export class LinkPanelComponent {
   readonly linkUrlChange = output<string>();
   readonly placeLink = output<void>();
 }
+

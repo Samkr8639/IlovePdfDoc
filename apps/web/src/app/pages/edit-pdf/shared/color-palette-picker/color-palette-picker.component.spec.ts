@@ -42,3 +42,4 @@ describe('ColorPalettePickerComponent', () => {
     expect(emitted).toBe('#6366F1');
   });
 });
+

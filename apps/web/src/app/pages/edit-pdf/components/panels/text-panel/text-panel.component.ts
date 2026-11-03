@@ -165,3 +165,4 @@ export class TextPanelComponent {
     { value: 'var(--pt-navy-deep)', cssClass: 'black', title: 'Deep Navy' }
   ];
 }
+

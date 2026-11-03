@@ -79,3 +79,4 @@ export class ElementInfoPanelComponent {
   readonly bringForward = output<void>();
   readonly delete = output<void>();
 }
+

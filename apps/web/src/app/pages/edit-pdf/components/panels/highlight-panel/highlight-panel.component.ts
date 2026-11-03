@@ -82,3 +82,4 @@ export class HighlightPanelComponent {
     { value: 'var(--pt-coral)', cssClass: 'coral', title: 'Pink' }
   ];
 }
+

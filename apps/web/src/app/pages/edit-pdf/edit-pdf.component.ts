@@ -50,8 +50,20 @@ import { CoordinateTransformService } from './services/coordinate-transform';
 import { CommandHistoryService, Command } from './services/command-history';
 import { PdfExportService } from './services/pdf-export.service';
 import { OcrService } from './services/ocr.service';
+import { PdfTextExtractionService } from './services/pdf-text-extraction.service';
+import { ElementOperationsService } from './services/element-operations.service';
+import { OcrWorkflowService } from './services/ocr-workflow.service';
+import { CanvasInteractionService } from './services/canvas-interaction.service';
+import { TextFormattingService } from './services/text-formatting.service';
+import { PdfRenderingService } from './services/pdf-rendering.service';
+import { FreehandDrawingService, LiveHighlightRect } from './services/freehand-drawing.service';
+import { ViewportNavigationService } from './services/viewport-navigation.service';
 import { ContentEditableModelDirective } from './directives/content-editable-model.directive';
 import { EditPdfTopNavComponent } from './components/edit-pdf-top-nav/edit-pdf-top-nav.component';
+import { EditPdfHeroComponent } from './components/edit-pdf-hero/edit-pdf-hero.component';
+import { PdfThumbnailsPanelComponent } from './components/pdf-thumbnails-panel/pdf-thumbnails-panel.component';
+import { PdfBottomBarComponent } from './components/pdf-bottom-bar/pdf-bottom-bar.component';
+import { ToolsGridComponent } from './components/tools-grid/tools-grid.component';
 import { ShapePanelComponent } from './components/panels/shape-panel/shape-panel.component';
 import { TextPanelComponent } from './components/panels/text-panel/text-panel.component';
 import { DrawPanelComponent } from './components/panels/draw-panel/draw-panel.component';
@@ -76,8 +88,11 @@ if (typeof window !== 'undefined' && pdfjsLib && (pdfjsLib as any).GlobalWorkerO
     CommonModule,
     FormsModule,
     RouterModule,
-    DropzoneComponent,
     ContentEditableModelDirective,
+    EditPdfHeroComponent,
+    PdfThumbnailsPanelComponent,
+    PdfBottomBarComponent,
+    ToolsGridComponent,
     EditPdfTopNavComponent,
     ShapePanelComponent,
     TextPanelComponent,
@@ -103,6 +118,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly history = inject(CommandHistoryService);
   private exportService = inject(PdfExportService);
   private ocrService = inject(OcrService);
+  private textExtraction = inject(PdfTextExtractionService);
+  private elementOps = inject(ElementOperationsService);
+  private ocrWorkflow = inject(OcrWorkflowService);
+  private canvasInteraction = inject(CanvasInteractionService);
+  private textFormatting = inject(TextFormattingService);
+  private pdfRendering = inject(PdfRenderingService);
+  private freehandDrawing = inject(FreehandDrawingService);
+  private viewportNav = inject(ViewportNavigationService);
 
   private _pageCanvasRef?: ElementRef<HTMLCanvasElement>;
 
@@ -126,16 +149,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private isPageSwitching = false;
   private wheelAccumulator = 0;
   private wheelResetTimer: any = null;
-  @ViewChild('fileInputSigUpload') fileInputSigUpload!: ElementRef<HTMLInputElement>;
   @ViewChild(SignPanelComponent) signPanel?: SignPanelComponent;
-
-  private _sigPadRef?: ElementRef<HTMLCanvasElement>;
-  @ViewChild('sigPad') set sigPad(ref: ElementRef<HTMLCanvasElement> | undefined) {
-    this._sigPadRef = ref;
-  }
-  get sigPadRef(): ElementRef<HTMLCanvasElement> | undefined {
-    return this._sigPadRef;
-  }
 
   // Document state
   readonly viewMode = signal<EditorViewMode>('upload');
@@ -186,7 +200,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly drawColor = signal<string>('var(--pt-teal-700)');
   readonly isDrawingActive = signal<boolean>(false);
   readonly activeDrawingPath = signal<string>('');
-  private currentDrawingScreenPoints: Array<{ x: number; y: number }> = [];
+  private isDrawing = false;
 
   // Highlight Properties
   readonly highlightColor = signal<string>('var(--pt-amber)');
@@ -206,8 +220,6 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly signatureSize = signal<number>(26);
   readonly signatureCustomColor = signal<string>('#14213D');
   readonly signatureDrawnDataUrl = signal<string | null>(null);
-  private isSigPadDrawing = false;
-  private sigPadPoints: Array<{ x: number; y: number }> = [];
 
   // Link Properties
   readonly linkUrl = signal<string>('https://');
@@ -237,10 +249,6 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly isSidePanelOpenMobile = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
   readonly isExporting = signal<boolean>(false);
-
-  // Freehand drawing state
-  private isDrawing = false;
-  private currentDrawingPoints: Array<{ xPt: number; yPt: number }> = [];
 
   // Element dragging state
   private isDraggingElement = false;
@@ -364,25 +372,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   private async generateThumbnails(): Promise<void> {
     if (!this.cachedPdfDoc) return;
-    const thumbs = new Map<number, string>();
-    const total = this.cachedPdfDoc.numPages;
-
-    for (let i = 1; i <= total; i++) {
-      try {
-        const page = await this.cachedPdfDoc.getPage(i);
-        const viewport = page.getViewport({ scale: 0.18 });
-        const offscreen = document.createElement('canvas');
-        offscreen.width = Math.floor(viewport.width);
-        offscreen.height = Math.floor(viewport.height);
-        const ctx = offscreen.getContext('2d');
-        if (ctx) {
-          await page.render({ canvasContext: ctx, viewport }).promise;
-          thumbs.set(i - 1, offscreen.toDataURL('image/jpeg', 0.8));
-        }
-      } catch {
-        // Fallback to CSS doc lines for thumbnail
-      }
-    }
+    const thumbs = await this.pdfRendering.generateThumbnails(this.cachedPdfDoc);
     this.pageThumbnails.set(thumbs);
   }
 
@@ -522,21 +512,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       if (!canvas) continue;
 
       try {
-        const pdfPage = await this.cachedPdfDoc.getPage(pageInfo.pageIndex + 1);
-        const display = this.getPageDisplaySize(pageInfo);
-        const unscaledViewport = pdfPage.getViewport({ scale: 1.0, rotation: pageInfo.rotation || 0 });
-        const scale = (display.width / unscaledViewport.width) * dpr;
-        const viewport = pdfPage.getViewport({ scale, rotation: pageInfo.rotation || 0 });
+        const ctx = await this.pdfRendering.renderPageToCanvas(
+          this.cachedPdfDoc,
+          pageInfo,
+          canvas,
+          dpr,
+          this.zoom()
+        );
 
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        canvas.style.width = `${display.width}px`;
-        canvas.style.height = `${display.height}px`;
-
-        const ctx = canvas.getContext('2d');
         if (ctx) {
-          await pdfPage.render({ canvasContext: ctx, viewport }).promise;
-
           // Erase original text on canvas for all page text blocks that are edited or currently selected
           for (const el of this.elements()) {
             if (el.pageIndex === i && el.type === 'text') {
@@ -584,37 +568,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       ? dprParam
       : (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1);
 
-    const linesToWhiteout = textEl.originalLines && textEl.originalLines.length > 0
-      ? textEl.originalLines
-      : [{
-          text: textEl.text,
-          xPt: (textEl.originalXPt !== undefined ? textEl.originalXPt : textEl.xPt) - 0.5,
-          yPt: textEl.originalYPt !== undefined ? textEl.originalYPt : textEl.yPt,
-          widthPt: (textEl.originalWidthPt !== undefined ? textEl.originalWidthPt : textEl.widthPt) + 1.0,
-          heightPt: textEl.originalHeightPt !== undefined ? textEl.originalHeightPt : textEl.heightPt
-        }];
-
-    ctx.fillStyle = '#ffffff';
-
-    for (const line of linesToWhiteout) {
-      const screenRect = this.transform.pdfRectToScreenRect(
-        {
-          xPt: Math.max(0, line.xPt),
-          yPt: line.yPt,
-          widthPt: line.widthPt,
-          heightPt: line.heightPt
-        },
-        pageInfo,
-        this.zoom()
-      );
-
-      ctx.fillRect(
-        Math.floor(screenRect.x * dpr),
-        Math.floor(screenRect.y * dpr),
-        Math.ceil(screenRect.width * dpr),
-        Math.ceil(screenRect.height * dpr)
-      );
-    }
+    this.pdfRendering.whiteoutOriginalText(textEl, ctx, pageInfo, dpr, this.zoom());
   }
 
   // --- Page Navigation & Zoom ---
@@ -710,27 +664,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   prevPage(): void {
-    this.scrollToPage(this.currentPageIndex() - 1);
+    this.scrollToPage(this.viewportNav.prevPage(this.currentPageIndex()));
   }
 
   nextPage(): void {
-    this.scrollToPage(this.currentPageIndex() + 1);
+    this.scrollToPage(this.viewportNav.nextPage(this.currentPageIndex(), this.pages().length));
   }
 
   zoomIn(): void {
-    const nextZoom = Math.min(3.0, Math.round((this.zoom() + 0.15) * 100) / 100);
-    this.zoom.set(nextZoom);
+    this.zoom.set(this.viewportNav.zoomIn(this.zoom()));
     setTimeout(() => this.renderCurrentPageToCanvas(), 20);
   }
 
   zoomOut(): void {
-    const nextZoom = Math.max(0.5, Math.round((this.zoom() - 0.15) * 100) / 100);
-    this.zoom.set(nextZoom);
+    this.zoom.set(this.viewportNav.zoomOut(this.zoom()));
     setTimeout(() => this.renderCurrentPageToCanvas(), 20);
   }
 
   resetZoom(): void {
-    this.zoom.set(1.0);
+    this.zoom.set(this.viewportNav.resetZoom());
     setTimeout(() => this.renderCurrentPageToCanvas(), 20);
   }
 
@@ -898,13 +850,17 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
       const dxScreen = event.clientX - this.dragStartMouse.x;
       const dyScreen = event.clientY - this.dragStartMouse.y;
-      const dxPt = dxScreen / this.zoom();
-      const dyPt = -dyScreen / this.zoom();
+      const moved = this.canvasInteraction.calculateDragMove(
+        dxScreen,
+        dyScreen,
+        this.zoom(),
+        this.dragStartElementPos
+      );
 
       this.elements.update(list =>
         list.map(e =>
           e.id === this.draggedElementId
-            ? { ...e, xPt: Math.round(this.dragStartElementPos.xPt + dxPt), yPt: Math.round(this.dragStartElementPos.yPt + dyPt) }
+            ? { ...e, xPt: moved.xPt, yPt: moved.yPt }
             : e
         )
       );
@@ -930,83 +886,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
       const dx = event.clientX - this.resizeStartMouse.x;
       const dy = event.clientY - this.resizeStartMouse.y;
+      const isPreserveAspect = resizingEl.type === 'image' || resizingEl.type === 'sign';
 
-      let newLeft = startScreen.x;
-      let newTop = startScreen.y;
-      let newWidth = startScreen.width;
-      let newHeight = startScreen.height;
-
-      const handle = this.resizeHandle;
-
-      if (resizingEl.type === 'image' || resizingEl.type === 'sign') {
-        const aspect = (startScreen.width > 0 && startScreen.height > 0)
-          ? (startScreen.width / startScreen.height)
-          : 1;
-
-        if (handle === 'se') {
-          newWidth = Math.max(20, startScreen.width + dx);
-          newHeight = Math.max(16, newWidth / aspect);
-        } else if (handle === 'sw') {
-          newWidth = Math.max(20, startScreen.width - dx);
-          newLeft = startScreen.x + startScreen.width - newWidth;
-          newHeight = Math.max(16, newWidth / aspect);
-        } else if (handle === 'ne') {
-          newWidth = Math.max(20, startScreen.width + dx);
-          newHeight = Math.max(16, newWidth / aspect);
-          newTop = startScreen.y + startScreen.height - newHeight;
-        } else if (handle === 'nw') {
-          newWidth = Math.max(20, startScreen.width - dx);
-          newLeft = startScreen.x + startScreen.width - newWidth;
-          newHeight = Math.max(16, newWidth / aspect);
-          newTop = startScreen.y + startScreen.height - newHeight;
-        } else if (handle === 'e' || handle === 'w') {
-          if (handle === 'e') {
-            newWidth = Math.max(20, startScreen.width + dx);
-          } else {
-            newWidth = Math.max(20, startScreen.width - dx);
-            newLeft = startScreen.x + startScreen.width - newWidth;
-          }
-          newHeight = Math.max(16, newWidth / aspect);
-        } else if (handle === 's' || handle === 'n') {
-          if (handle === 's') {
-            newHeight = Math.max(16, startScreen.height + dy);
-          } else {
-            newHeight = Math.max(16, startScreen.height - dy);
-            newTop = startScreen.y + startScreen.height - newHeight;
-          }
-          newWidth = Math.max(20, newHeight * aspect);
-        }
-      } else {
-        if (handle.includes('e')) {
-          newWidth = Math.max(20, startScreen.width + dx);
-        }
-        if (handle.includes('s')) {
-          newHeight = Math.max(16, startScreen.height + dy);
-        }
-        if (handle.includes('w')) {
-          const potentialW = startScreen.width - dx;
-          if (potentialW >= 20) {
-            newLeft = startScreen.x + dx;
-            newWidth = potentialW;
-          } else {
-            newLeft = startScreen.x + startScreen.width - 20;
-            newWidth = 20;
-          }
-        }
-        if (handle.includes('n')) {
-          const potentialH = startScreen.height - dy;
-          if (potentialH >= 16) {
-            newTop = startScreen.y + dy;
-            newHeight = potentialH;
-          } else {
-            newTop = startScreen.y + startScreen.height - 16;
-            newHeight = 16;
-          }
-        }
-      }
-
-      const newPdfRect = this.transform.screenRectToPdfRect(
-        { x: newLeft, y: newTop, width: newWidth, height: newHeight },
+      const resized = this.canvasInteraction.calculateResize(
+        this.resizeHandle,
+        dx,
+        dy,
+        startScreen,
+        isPreserveAspect,
         page,
         this.zoom()
       );
@@ -1014,13 +901,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.elements.update(list =>
         list.map(e =>
           e.id === this.resizingElementId
-            ? {
-                ...e,
-                xPt: Math.round(newPdfRect.xPt),
-                yPt: Math.round(newPdfRect.yPt),
-                widthPt: Math.max(10, Math.round(newPdfRect.widthPt)),
-                heightPt: Math.max(8, Math.round(newPdfRect.heightPt))
-              }
+            ? { ...e, ...resized }
             : e
         )
       );
@@ -1278,36 +1159,29 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private startHighlightDrag(pageIndex: number, clientX: number, clientY: number): void {
     const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
     if (!pageEl) return;
-    const rect = pageEl.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
     this.isHighlighting = true;
     this.highlightPageIndex = pageIndex;
-    this.highlightStartPos = { x, y };
-    this.liveHighlightRect.set({ x, y, width: 0, height: 0, pageIndex });
+    const initialRect = this.freehandDrawing.startHighlightDrag(
+      pageIndex,
+      clientX,
+      clientY,
+      pageEl.getBoundingClientRect()
+    );
+    this.liveHighlightRect.set(initialRect);
   }
 
   private moveHighlightDrag(clientX: number, clientY: number): void {
     if (!this.isHighlighting) return;
     const pageEl = document.getElementById(`pdf-page-${this.highlightPageIndex}`);
     if (!pageEl) return;
-    const rect = pageEl.getBoundingClientRect();
-    const curX = Math.max(0, Math.min(rect.width, clientX - rect.left));
-    const curY = Math.max(0, Math.min(rect.height, clientY - rect.top));
-
-    const left = Math.min(this.highlightStartPos.x, curX);
-    const top = Math.min(this.highlightStartPos.y, curY);
-    const width = Math.abs(curX - this.highlightStartPos.x);
-    const height = Math.abs(curY - this.highlightStartPos.y);
-
-    this.liveHighlightRect.set({
-      x: left,
-      y: top,
-      width,
-      height,
-      pageIndex: this.highlightPageIndex
-    });
+    const rect = this.freehandDrawing.moveHighlightDrag(
+      clientX,
+      clientY,
+      pageEl.getBoundingClientRect()
+    );
+    if (rect) {
+      this.liveHighlightRect.set(rect);
+    }
   }
 
   private finishHighlightDrag(): void {
@@ -1320,29 +1194,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
-    if (liveRect && (liveRect.width > 6 || liveRect.height > 6)) {
+    const newElement = this.freehandDrawing.finishHighlightDrag(
+      liveRect,
+      page,
+      this.zoom(),
+      this.highlightColor(),
+      this.highlightOpacity()
+    );
+
+    if (newElement) {
       this.justFinishedHighlightDrag = true;
       setTimeout(() => {
         this.justFinishedHighlightDrag = false;
       }, 150);
-
-      const pdfRect = this.transform.screenRectToPdfRect(
-        { x: liveRect.x, y: liveRect.y, width: liveRect.width, height: liveRect.height },
-        page,
-        this.zoom()
-      );
-
-      const newElement: HighlightEditElement = {
-        id: `hl-${Date.now()}`,
-        pageIndex,
-        type: 'highlight',
-        xPt: Math.round(pdfRect.xPt),
-        yPt: Math.round(pdfRect.yPt),
-        widthPt: Math.max(12, Math.round(pdfRect.widthPt)),
-        heightPt: Math.max(8, Math.round(pdfRect.heightPt)),
-        color: this.highlightColor(),
-        opacity: this.highlightOpacity()
-      };
 
       const cmd: Command = {
         description: 'Add Highlight',
@@ -1374,8 +1238,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     this.isDrawing = true;
     this.isDrawingActive.set(true);
-    this.currentDrawingScreenPoints = [{ x: screenX, y: screenY }];
-    this.activeDrawingPath.set(`M ${screenX} ${screenY} L ${screenX + 0.1} ${screenY + 0.1}`);
+    const path = this.freehandDrawing.startDrawing(screenX, screenY);
+    this.activeDrawingPath.set(path);
   }
 
   private moveDrawing(clientX: number, clientY: number): void {
@@ -1385,19 +1249,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const screenX = clientX - rect.left;
-    const screenY = clientY - rect.top;
-
-    const pts = this.currentDrawingScreenPoints;
-    if (pts.length > 0) {
-      const last = pts[pts.length - 1];
-      const dist = Math.hypot(screenX - last.x, screenY - last.y);
-      if (dist < 1.5) return;
+    const path = this.freehandDrawing.moveDrawing(clientX - rect.left, clientY - rect.top);
+    if (path) {
+      this.activeDrawingPath.set(path);
     }
-
-    pts.push({ x: screenX, y: screenY });
-    const smooth = this.screenPointsToSmoothSvgPath(pts);
-    this.activeDrawingPath.set(smooth);
   }
 
   private endDrawing(): void {
@@ -1416,37 +1271,18 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.isDrawingActive.set(false);
     const pageIndex = this.activeDrawingPageIndex();
     const page = this.pages()[pageIndex] || this.currentPage();
-    const screenPts = this.currentDrawingScreenPoints;
-    if (!page || screenPts.length < 2) {
-      this.activeDrawingPath.set('');
-      this.currentDrawingScreenPoints = [];
-      return;
-    }
 
-    // Convert screen points to PDF points
-    const pdfPts = screenPts.map(p =>
-      this.transform.screenPointToPdfPoint({ x: p.x, y: p.y }, page, this.zoom())
+    const newElement = this.freehandDrawing.finishDrawing(
+      page,
+      this.zoom(),
+      this.drawColor(),
+      this.drawStrokeWidth()
     );
 
-    const xs = pdfPts.map(p => p.xPt);
-    const ys = pdfPts.map(p => p.yPt);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-
-    const newElement: DrawEditElement = {
-      id: `draw-${Date.now()}`,
-      pageIndex: page.pageIndex,
-      type: 'draw',
-      xPt: minX,
-      yPt: minY,
-      widthPt: Math.max(8, maxX - minX),
-      heightPt: Math.max(8, maxY - minY),
-      points: pdfPts,
-      strokeColor: this.drawColor(),
-      strokeWidth: this.drawStrokeWidth()
-    };
+    if (!newElement) {
+      this.activeDrawingPath.set('');
+      return;
+    }
 
     const cmd: Command = {
       description: 'Freehand Draw',
@@ -1462,29 +1298,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     this.history.execute(cmd);
     this.activeDrawingPath.set('');
-    this.currentDrawingScreenPoints = [];
   }
 
   screenPointsToSmoothSvgPath(points: Array<{ x: number; y: number }>): string {
-    if (points.length === 0) return '';
-    if (points.length === 1) {
-      return `M ${points[0].x} ${points[0].y} L ${points[0].x + 0.1} ${points[0].y + 0.1}`;
-    }
-    if (points.length === 2) {
-      return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
-    }
-
-    let d = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 1; i < points.length - 1; i++) {
-      const p0 = points[i];
-      const p1 = points[i + 1];
-      const midX = (p0.x + p1.x) / 2;
-      const midY = (p0.y + p1.y) / 2;
-      d += ` Q ${p0.x} ${p0.y}, ${midX} ${midY}`;
-    }
-    const last = points[points.length - 1];
-    d += ` L ${last.x} ${last.y}`;
-    return d;
+    return this.canvasInteraction.smoothSplinePoints(points);
   }
 
   onElementMouseDown(el: EditElement, event: MouseEvent): void {
@@ -1552,21 +1369,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
-    const newElement: TextEditElement = {
-      id: `text-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      pageIndex: page.pageIndex,
-      type: 'text',
+    const newElement = this.elementOps.createTextElement(page, {
       xPt,
       yPt,
-      widthPt: 220,
-      heightPt: 28,
-      text: 'Click or edit text',
       fontFamily: this.textFont(),
       fontSizePt: this.textSize(),
       color: this.textColor(),
       bold: this.isTextBold(),
       italic: this.isTextItalic()
-    };
+    });
 
     const cmd: Command = {
       description: 'Add Text Box',
@@ -1632,24 +1443,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
-    const widthPt = this.shapeType() === 'line' || this.shapeType() === 'arrow' ? 140 : 160;
-    const heightPt = this.shapeType() === 'line' || this.shapeType() === 'arrow' ? 70 : 100;
-    const finalX = xPt !== undefined ? xPt : Math.round((page.widthPt - widthPt) / 2);
-    const finalY = yPt !== undefined ? yPt : Math.round((page.heightPt - heightPt) / 2);
-
-    const newElement: ShapeEditElement = {
-      id: `shape-${Date.now()}`,
-      pageIndex: page.pageIndex,
-      type: 'shape',
+    const newElement = this.elementOps.createShapeElement(page, {
       shapeType: this.shapeType(),
-      xPt: finalX,
-      yPt: finalY,
-      widthPt,
-      heightPt,
       strokeColor: this.strokeColor(),
       fillColor: this.fillColor(),
-      strokeWidth: this.strokeWidth()
-    };
+      strokeWidth: this.strokeWidth(),
+      xPt,
+      yPt
+    });
 
     const cmd: Command = {
       description: `Add Shape (${this.shapeType()})`,
@@ -1672,17 +1473,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
-    const newElement: HighlightEditElement = {
-      id: `hl-${Date.now()}`,
-      pageIndex: page.pageIndex,
-      type: 'highlight',
+    const newElement = this.elementOps.createHighlightElement(page, {
       xPt,
       yPt,
-      widthPt: 180,
-      heightPt: 22,
       color: this.highlightColor(),
       opacity: this.highlightOpacity()
-    };
+    });
 
     const cmd: Command = {
       description: 'Add Highlight',
@@ -1761,16 +1557,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
-    const newElement: WhiteoutEditElement = {
-      id: `wo-${Date.now()}`,
-      pageIndex: page.pageIndex,
-      type: 'whiteout',
-      xPt,
-      yPt,
-      widthPt: 160,
-      heightPt: 30,
-      fillColor: 'var(--pt-surface-white)'
-    };
+    const newElement = this.elementOps.createWhiteoutElement(page, { xPt, yPt });
 
     const cmd: Command = {
       description: 'Add Whiteout',
@@ -1888,107 +1675,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
-  // Signature Pad Drawing
-  onSigPadMouseDown(event: MouseEvent): void {
-    this.startSigPadDrawing(event.offsetX, event.offsetY);
-  }
-
-  onSigPadMouseMove(event: MouseEvent): void {
-    if (!this.isSigPadDrawing) return;
-    this.moveSigPadDrawing(event.offsetX, event.offsetY);
-  }
-
-  onSigPadMouseUp(): void {
-    this.endSigPadDrawing();
-  }
-
-  onSigPadTouchStart(event: TouchEvent): void {
-    const canvas = this.sigPadRef?.nativeElement;
-    if (!canvas || event.touches.length === 0) return;
-    event.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const x = event.touches[0].clientX - rect.left;
-    const y = event.touches[0].clientY - rect.top;
-    this.startSigPadDrawing(x, y);
-  }
-
-  onSigPadTouchMove(event: TouchEvent): void {
-    if (!this.isSigPadDrawing) return;
-    const canvas = this.sigPadRef?.nativeElement;
-    if (!canvas || event.touches.length === 0) return;
-    event.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const x = event.touches[0].clientX - rect.left;
-    const y = event.touches[0].clientY - rect.top;
-    this.moveSigPadDrawing(x, y);
-  }
-
-  onSigPadTouchEnd(): void {
-    this.endSigPadDrawing();
-  }
-
-  private startSigPadDrawing(x: number, y: number): void {
-    const canvas = this.sigPadRef?.nativeElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    this.isSigPadDrawing = true;
-    this.sigPadPoints = [{ x, y }];
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = this.resolveColorToCss(this.signatureColor());
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + 0.1, y + 0.1);
-    ctx.stroke();
-  }
-
-  private moveSigPadDrawing(x: number, y: number): void {
-    const canvas = this.sigPadRef?.nativeElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    this.sigPadPoints.push({ x, y });
-    const pts = this.sigPadPoints;
-    if (pts.length < 3) {
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      return;
-    }
-
-    const p0 = pts[pts.length - 2];
-    const p1 = pts[pts.length - 1];
-    const midX = (p0.x + p1.x) / 2;
-    const midY = (p0.y + p1.y) / 2;
-    ctx.quadraticCurveTo(p0.x, p0.y, midX, midY);
-    ctx.stroke();
-  }
-
-  private endSigPadDrawing(): void {
-    if (!this.isSigPadDrawing) return;
-    this.isSigPadDrawing = false;
-    const canvas = this.sigPadRef?.nativeElement;
-    if (canvas) {
-      this.signatureDrawnDataUrl.set(canvas.toDataURL('image/png'));
-    }
-  }
-
   clearSigPad(): void {
     if (this.signPanel) {
       this.signPanel.clearSigPad();
     }
-    const canvas = this.sigPadRef?.nativeElement;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }
     this.signatureDrawnDataUrl.set(null);
-    this.sigPadPoints = [];
   }
 
   onSignatureFileSelected(event: Event): void {
@@ -2010,12 +1701,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     if (!page) return;
 
     const mode = this.signatureTab();
-    let dataUrl = '';
-    let widthPt = 180;
-    let heightPt = 48;
-
     if (mode === 'draw' || mode === 'upload') {
-      dataUrl = this.signatureDrawnDataUrl() || '';
+      const dataUrl = this.signatureDrawnDataUrl();
       if (!dataUrl) {
         if (mode === 'draw') {
           this.errorMessage.set('Please draw your signature on the pad first.');
@@ -2024,33 +1711,18 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         }
         return;
       }
-      widthPt = 160;
-      heightPt = 60;
-    } else {
-      // Type mode
-      dataUrl = this.signatureText() || 'John Doe';
-      widthPt = Math.max(120, (this.signatureText().length || 8) * 14);
-      heightPt = Math.round(this.signatureSize() * 1.6);
     }
 
-    const finalX = xPt !== undefined ? xPt : Math.round((page.widthPt - widthPt) / 2);
-    const finalY = yPt !== undefined ? yPt : Math.round((page.heightPt - heightPt) / 2);
-
-    const newElement: SignEditElement = {
-      id: `sign-${Date.now()}`,
-      pageIndex: page.pageIndex,
-      type: 'sign',
-      signMode: mode,
-      xPt: finalX,
-      yPt: finalY,
-      widthPt,
-      heightPt,
-      dataUrl,
-      signatureText: mode === 'type' ? (this.signatureText() || 'John Doe') : undefined,
-      fontFamily: mode === 'type' ? this.signatureFont() : undefined,
-      color: mode === 'type' ? this.signatureColor() : undefined,
-      fontSizePt: mode === 'type' ? this.signatureSize() : undefined
-    };
+    const newElement = this.elementOps.createSignElement(page, {
+      tab: mode,
+      text: this.signatureText(),
+      fontFamily: this.signatureFont(),
+      color: this.signatureColor(),
+      fontSizePt: this.signatureSize(),
+      drawnDataUrl: this.signatureDrawnDataUrl(),
+      xPt,
+      yPt
+    });
 
     const cmd: Command = {
       description: 'Add Signature',
@@ -2073,16 +1745,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const page = this.pages()[pageIndex] || this.currentPage();
     if (!page) return;
 
-    const newElement: LinkEditElement = {
-      id: `link-${Date.now()}`,
-      pageIndex: page.pageIndex,
-      type: 'link',
+    const newElement = this.elementOps.createLinkElement(page, {
       xPt,
       yPt,
-      widthPt: 180,
-      heightPt: 30,
       url: this.linkUrl()
-    };
+    });
 
     const cmd: Command = {
       description: 'Add Link',
@@ -2258,12 +1925,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const el = this.selectedElement();
     if (!el) return;
 
-    const cloned: EditElement = {
-      ...el,
-      id: `${el.type}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      xPt: el.xPt + 20,
-      yPt: el.yPt - 20
-    } as EditElement;
+    const cloned = this.elementOps.duplicateElement(el);
 
     const cmd: Command = {
       description: `Duplicate ${el.type}`,
@@ -2286,10 +1948,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const cmd: Command = {
       description: 'Bring to Front',
       execute: () => {
-        this.elements.update(list => [...list.filter(e => e.id !== el.id), el]);
+        this.elements.update(list => this.elementOps.bringToFront(list, el.id));
       },
       undo: () => {
-        this.elements.update(list => [el, ...list.filter(e => e.id !== el.id)]);
+        this.elements.update(list => this.elementOps.sendToBack(list, el.id));
       }
     };
     this.history.execute(cmd);
@@ -2302,10 +1964,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const cmd: Command = {
       description: 'Send to Back',
       execute: () => {
-        this.elements.update(list => [el, ...list.filter(e => e.id !== el.id)]);
+        this.elements.update(list => this.elementOps.sendToBack(list, el.id));
       },
       undo: () => {
-        this.elements.update(list => [...list.filter(e => e.id !== el.id), el]);
+        this.elements.update(list => this.elementOps.bringToFront(list, el.id));
       }
     };
     this.history.execute(cmd);
@@ -2336,11 +1998,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         description: 'Delete text',
         execute: () => {
           this.whiteoutOriginalTextOnCanvas(textEl);
-          this.elements.update(list => [...list.filter(e => e.id !== el.id), coverEl]);
+          this.elements.update(list => [...this.elementOps.deleteElement(list, el.id), coverEl]);
           this.selectedElementId.set(null);
         },
         undo: () => {
-          this.elements.update(list => [...list.filter(e => e.id !== coverEl.id), el]);
+          this.elements.update(list => [...this.elementOps.deleteElement(list, coverEl.id), el]);
           this.selectedElementId.set(el.id);
         }
       };
@@ -2351,7 +2013,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const cmd: Command = {
       description: `Delete ${el.type}`,
       execute: () => {
-        this.elements.update(list => list.filter(e => e.id !== el.id));
+        this.elements.update(list => this.elementOps.deleteElement(list, el.id));
         this.selectedElementId.set(null);
       },
       undo: () => {
@@ -2398,6 +2060,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.updateTextProperty('fontSizePt', size);
   }
 
+  setTextAlign(align: 'left' | 'center' | 'right'): void {
+    this.textAlign.set(align);
+    this.updateTextProperty('align', align);
+  }
+
   resolveColorToCss(colorStr?: string): string {
     if (!colorStr) return '#14213D';
     const colorMap: Record<string, string> = {
@@ -2415,45 +2082,17 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   private restoreTextSelection(el: TextEditElement): { hasSelection: boolean; activeEl: HTMLElement | null } {
-    if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return { hasSelection: false, activeEl: null };
-    }
-    const activeEl = document.querySelector(`.text-element.selected .canvas-text-content`) as HTMLElement;
-    if (!activeEl) return { hasSelection: false, activeEl: null };
-
-    activeEl.focus();
-
-    const sel = window.getSelection();
-    if (sel && this.savedTextRange && this.savedTextElementId === el.id) {
-      try {
-        sel.removeAllRanges();
-        sel.addRange(this.savedTextRange);
-      } catch {
-        // Stale range
-      }
-    }
-
-    const hasSelection = !!(sel && !sel.isCollapsed && sel.rangeCount > 0);
-    return { hasSelection, activeEl };
+    const res = this.textFormatting.restoreTextSelection(el, this.savedTextRange);
+    return { hasSelection: res.hasSelection, activeEl: res.activeEl };
   }
 
   toggleTextBold(): void {
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
-
-    if (hasSelection && activeEl) {
-      document.execCommand('bold', false);
-      el.html = activeEl.innerHTML;
-      el.text = activeEl.innerText;
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        this.savedTextRange = sel.getRangeAt(0).cloneRange();
-      }
+    const res = this.textFormatting.applyInlineFormatting('bold', el, this.savedTextRange);
+    if (res.handled) {
+      this.savedTextRange = res.updatedRange;
       this.elements.update(list => [...list]);
       return;
     }
@@ -2467,19 +2106,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
-
-    if (hasSelection && activeEl) {
-      document.execCommand('italic', false);
-      el.html = activeEl.innerHTML;
-      el.text = activeEl.innerText;
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        this.savedTextRange = sel.getRangeAt(0).cloneRange();
-      }
+    const res = this.textFormatting.applyInlineFormatting('italic', el, this.savedTextRange);
+    if (res.handled) {
+      this.savedTextRange = res.updatedRange;
       this.elements.update(list => [...list]);
       return;
     }
@@ -2493,19 +2122,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
-
-    if (hasSelection && activeEl) {
-      document.execCommand('underline', false);
-      el.html = activeEl.innerHTML;
-      el.text = activeEl.innerText;
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        this.savedTextRange = sel.getRangeAt(0).cloneRange();
-      }
+    const res = this.textFormatting.applyInlineFormatting('underline', el, this.savedTextRange);
+    if (res.handled) {
+      this.savedTextRange = res.updatedRange;
       this.elements.update(list => [...list]);
       return;
     }
@@ -2519,27 +2138,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    // Check if selection or whole element has a link
-    let existingUrl = '';
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
-
-    if (hasSelection && activeEl) {
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        let parent: Node | null = sel.getRangeAt(0).commonAncestorContainer;
-        if (parent && parent.nodeType === Node.TEXT_NODE) parent = parent.parentElement;
-        const anchor = (parent as HTMLElement)?.closest?.('a');
-        if (anchor) {
-          existingUrl = anchor.getAttribute('href') || '';
-        }
-      }
-    } else if (el.html && el.html.includes('href="')) {
-      const match = el.html.match(/href="([^"]*)"/i);
-      if (match) existingUrl = match[1];
-    } else if (el.linkUrl) {
-      existingUrl = el.linkUrl;
-    }
-
+    const existingUrl = this.textFormatting.detectLinkUrl(el, this.savedTextRange);
     if (existingUrl) {
       this.textLinkUrl.set(existingUrl);
       this.isTextLinked.set(true);
@@ -2561,57 +2160,21 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    let targetUrl = (inputUrl !== undefined ? inputUrl : this.textLinkUrl()).trim();
+    const targetUrl = (inputUrl !== undefined ? inputUrl : this.textLinkUrl()).trim();
     if (!targetUrl || targetUrl === 'https://' || targetUrl === 'http://') {
       this.removeTextLink();
       return;
     }
 
-    // Auto-prefix https:// if no protocol given
-    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(targetUrl)) {
-      targetUrl = 'https://' + targetUrl;
-    }
-    this.textLinkUrl.set(targetUrl);
+    const formattedUrl = this.textFormatting.formatUrl(targetUrl);
+    this.textLinkUrl.set(formattedUrl);
 
     const oldHtml = el.html || el.text;
     const oldText = el.text;
     const oldLinkUrl = el.linkUrl;
 
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
-
-    if (hasSelection && activeEl) {
-      document.execCommand('createLink', false, targetUrl);
-
-      // Enhance anchors in active element
-      const anchors = activeEl.querySelectorAll('a');
-      anchors.forEach(a => {
-        if (a.getAttribute('href') === targetUrl || !a.getAttribute('href')) {
-          a.setAttribute('href', targetUrl);
-          a.setAttribute('target', '_blank');
-          a.setAttribute('rel', 'noopener noreferrer');
-          a.style.color = '#2563EB';
-          a.style.textDecoration = 'underline';
-        }
-      });
-
-      el.html = activeEl.innerHTML;
-      el.text = activeEl.innerText;
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        this.savedTextRange = sel.getRangeAt(0).cloneRange();
-      }
-    } else {
-      // Entire text element link
-      el.linkUrl = targetUrl;
-      const textToWrap = el.text || 'Link';
-      el.html = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: underline;">${el.html || textToWrap}</a>`;
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-    }
+    const res = this.textFormatting.applyLink(el, formattedUrl, this.savedTextRange);
+    this.savedTextRange = res.updatedRange;
 
     this.isTextLinked.set(true);
     this.showTextLinkInput.set(false);
@@ -2664,28 +2227,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const oldText = el.text;
     const oldLinkUrl = el.linkUrl;
 
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
-
-    if (hasSelection && activeEl) {
-      document.execCommand('unlink', false);
-      el.html = activeEl.innerHTML;
-      el.text = activeEl.innerText;
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        this.savedTextRange = sel.getRangeAt(0).cloneRange();
-      }
-    } else {
-      delete el.linkUrl;
-      if (el.html) {
-        el.html = el.html.replace(/<\/?a[^>]*>/gi, '');
-      }
-      if (el.isPageTextLine) {
-        el.isEdited = true;
-      }
-    }
+    const res = this.textFormatting.removeLink(el, this.savedTextRange);
+    this.savedTextRange = res.updatedRange;
 
     this.isTextLinked.set(false);
     this.showTextLinkInput.set(false);
@@ -2726,17 +2269,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.elements.update(list => [...list]);
   }
 
-  setTextAlign(align: 'left' | 'center' | 'right'): void {
-    this.textAlign.set(align);
-    this.updateTextProperty('align', align);
-  }
-
   setTextColor(color: string): void {
     this.textColor.set(color);
+    if (color && !color.startsWith('var(')) {
+      this.textCustomColor.set(color);
+    }
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    const { hasSelection, activeEl } = this.restoreTextSelection(el);
+    const { hasSelection, activeEl } = this.textFormatting.restoreTextSelection(el, this.savedTextRange);
 
     if (hasSelection && activeEl) {
       const cssColor = this.resolveColorToCss(color);
@@ -2800,274 +2341,6 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  private buildLineSegment(
-    items: Array<{ text: string; x: number; width: number; fontSize: number; height: number }>,
-    baselineY: number
-  ) {
-    let fullText = '';
-    for (let j = 0; j < items.length; j++) {
-      const it = items[j];
-      if (j > 0) {
-        const prev = items[j - 1];
-        const gap = it.x - (prev.x + prev.width);
-        if (gap > 1.5) {
-          fullText += ' ';
-        }
-      }
-      fullText += it.text;
-    }
-
-    const minX = Math.min(...items.map(it => it.x));
-    const maxX = Math.max(...items.map(it => it.x + it.width));
-    const maxFont = Math.max(...items.map(it => it.fontSize));
-    const fontSize = Math.round(maxFont * 10) / 10;
-    const y0 = baselineY - fontSize * 0.22;
-    const y1 = baselineY + fontSize * 0.78;
-
-    return {
-      text: fullText,
-      x0: minX,
-      x1: maxX,
-      width: Math.max(10, maxX - minX),
-      baselineY,
-      fontSize,
-      y0,
-      y1
-    };
-  }
-
-  private async extractTextForSinglePage(page: PageDimensions): Promise<EditElement[]> {
-    if (!this.cachedPdfDoc) return [];
-
-    const pdfPage = await this.cachedPdfDoc.getPage(page.pageIndex + 1);
-    const textContent = await pdfPage.getTextContent();
-    const rawItems = (textContent.items || []).filter(
-      (it: any) => it.str && it.str.trim().length > 0
-    );
-
-    if (rawItems.length === 0) {
-      return [];
-    }
-
-    // 1. Convert raw PDF items to structured glyph objects
-    interface GlyphItem {
-      text: string;
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-      fontSize: number;
-    }
-
-    const glyphs: GlyphItem[] = rawItems.map((item: any) => {
-      const tx = item.transform[4];
-      const ty = item.transform[5];
-      const fontSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
-      const width = item.width || (fontSize * item.str.length * 0.55);
-      const height = item.height || fontSize;
-      return { text: item.str, x: tx, y: ty, width, height, fontSize };
-    });
-
-    const baselineRows: Array<{ baselineY: number; items: GlyphItem[] }> = [];
-    for (const g of glyphs) {
-      let row = baselineRows.find(r => Math.abs(r.baselineY - g.y) <= 3.0);
-      if (row) {
-        row.items.push(g);
-      } else {
-        baselineRows.push({ baselineY: g.y, items: [g] });
-      }
-    }
-
-    // 2. Within each baseline row, sort left-to-right and split into LineSegments by large horizontal gaps
-    interface LineSegment {
-      text: string;
-      x0: number;
-      x1: number;
-      width: number;
-      baselineY: number;
-      fontSize: number;
-      y0: number;
-      y1: number;
-    }
-
-    const lineSegments: LineSegment[] = [];
-
-    for (const row of baselineRows) {
-      row.items.sort((a, b) => a.x - b.x);
-
-      let currentSegmentItems: GlyphItem[] = [];
-
-      for (let i = 0; i < row.items.length; i++) {
-        const item = row.items[i];
-        if (currentSegmentItems.length === 0) {
-          currentSegmentItems.push(item);
-          continue;
-        }
-
-        const prev = currentSegmentItems[currentSegmentItems.length - 1];
-        const gap = item.x - (prev.x + prev.width);
-
-        // If gap exceeds 2.0x font size or 16pt, it is a separate column or table cell
-        const maxGap = Math.max(16, prev.fontSize * 2.0);
-        if (gap > maxGap) {
-          lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
-          currentSegmentItems = [item];
-        } else {
-          currentSegmentItems.push(item);
-        }
-      }
-
-      if (currentSegmentItems.length > 0) {
-        lineSegments.push(this.buildLineSegment(currentSegmentItems, row.baselineY));
-      }
-    }
-
-    // Sort line segments from top to bottom (in PDF coordinates, higher baselineY is higher)
-    lineSegments.sort((a, b) => b.baselineY - a.baselineY);
-
-    // 3. Semantic Block Clustering: Group vertically adjacent line segments that share column alignment
-    //    and typographic scale into unified multi-line Paragraph Blocks
-    interface TextBlock {
-      lines: LineSegment[];
-      x0: number;
-      x1: number;
-      y0: number;
-      y1: number;
-      fontSize: number;
-    }
-
-    const isBulletLine = (text: string) => {
-      const t = text.trim();
-      return /^[•\-\*\u2022\u25cf\u25cb\u25aa\u25b8\u2013\u2014]/.test(t);
-    };
-
-    const isSectionHeading = (text: string) => {
-      const t = text.trim();
-      if (t.length >= 3 && t.length <= 50 && t === t.toUpperCase() && /[A-Z]/.test(t)) {
-        return true;
-      }
-      return false;
-    };
-
-    const textBlocks: TextBlock[] = [];
-
-    for (const seg of lineSegments) {
-      if (!seg.text.trim()) continue;
-
-      const isSegHeading = isSectionHeading(seg.text);
-      const isSegBullet = isBulletLine(seg.text);
-
-      let merged = false;
-
-      if (!isSegHeading) {
-        for (const block of textBlocks) {
-          const firstLine = block.lines[0];
-          const lastLine = block.lines[block.lines.length - 1];
-
-          if (isSectionHeading(firstLine.text)) {
-            continue;
-          }
-
-          const blockHasBullets = block.lines.some(l => isBulletLine(l.text));
-          if (!blockHasBullets && isSegBullet) {
-            continue;
-          }
-
-          // Do NOT merge table cells, invoice summary rows, or short standalone labels (e.g. Subtotal, Total, Amount due, numbers)
-          const isShortOrTableCell = (text: string, w: number) => {
-            const words = text.trim().split(/\s+/);
-            return words.length <= 4 && w < 160;
-          };
-          if (isShortOrTableCell(lastLine.text, lastLine.width) || isShortOrTableCell(seg.text, seg.width)) {
-            continue;
-          }
-
-          const deltaY = lastLine.baselineY - seg.baselineY;
-          const avgFont = (lastLine.fontSize + seg.fontSize) / 2;
-
-          const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 1.8);
-
-          const overlap = Math.min(block.x1, seg.x1) - Math.max(block.x0, seg.x0);
-          const minW = Math.min(block.x1 - block.x0, seg.width);
-          const hasColumnOverlap = overlap > 0 && (overlap / minW >= 0.65 || Math.abs(block.x0 - seg.x0) <= 8);
-
-          const isSameFontSize = Math.abs(lastLine.fontSize - seg.fontSize) <= 1.5;
-
-          if (isVerticallyAdjacent && hasColumnOverlap && isSameFontSize) {
-            block.lines.push(seg);
-            block.x0 = Math.min(block.x0, seg.x0);
-            block.x1 = Math.max(block.x1, seg.x1);
-            block.y0 = Math.min(block.y0, seg.y0);
-            block.y1 = Math.max(block.y1, seg.y1);
-            merged = true;
-            break;
-          }
-        }
-      }
-
-      if (!merged) {
-        textBlocks.push({
-          lines: [seg],
-          x0: seg.x0,
-          x1: seg.x1,
-          y0: seg.y0,
-          y1: seg.y1,
-          fontSize: seg.fontSize
-        });
-      }
-    }
-
-    const generatedElements: EditElement[] = [];
-
-    for (let idx = 0; idx < textBlocks.length; idx++) {
-      const block = textBlocks[idx];
-      const fullBlockText = block.lines.map(l => l.text).join('\n');
-      if (!fullBlockText.trim()) continue;
-
-      const xPt = block.x0;
-      const widthPt = Math.max(20, block.x1 - block.x0 + 4);
-      const heightPt = Math.max(block.fontSize, block.y1 - block.y0);
-      const yPt = block.y0;
-      const baselineY = block.lines[0].baselineY;
-      const fontSizePt = Math.round(block.fontSize * 10) / 10;
-
-      const originalLines: TextLineBounds[] = block.lines.map(l => ({
-        text: l.text,
-        xPt: l.x0 - 0.5,
-        yPt: l.y0,
-        widthPt: l.width + 1.0,
-        heightPt: Math.max(l.fontSize * 0.95, l.y1 - l.y0)
-      }));
-
-      const textEl: TextEditElement = {
-        id: `page-text-${page.pageIndex}-${idx}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-        pageIndex: page.pageIndex,
-        type: 'text',
-        isPageTextLine: true,
-        isEdited: false,
-        originalText: fullBlockText,
-        originalXPt: xPt,
-        originalYPt: yPt,
-        originalWidthPt: widthPt,
-        originalHeightPt: heightPt,
-        originalLines,
-        xPt,
-        yPt,
-        baselineY,
-        widthPt,
-        heightPt,
-        text: fullBlockText,
-        fontFamily: 'Inter',
-        fontSizePt,
-        color: 'var(--pt-navy)'
-      };
-
-      generatedElements.push(textEl);
-    }
-
-    return generatedElements;
-  }
-
   async makePageTextEditable(targetPageIndex?: number): Promise<void> {
     if (!this.cachedPdfDoc) return;
 
@@ -3101,7 +2374,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
       for (const page of unextractedPages) {
         try {
-          const pageElements = await this.extractTextForSinglePage(page);
+          const pageElements = await this.textExtraction.extractTextForSinglePage(this.cachedPdfDoc, page);
           allGeneratedElements.push(...pageElements);
         } catch (pageErr) {
           console.warn(`Could not extract text for page ${page.pageIndex + 1}:`, pageErr);
@@ -3147,72 +2420,22 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- OCR Cloud Tool Flow ---
   validateOcrPageRange(): boolean {
-    const mode = this.ocrPageRange();
-    if (mode === 'current' || mode === 'all') {
-      this.ocrRangeError.set(null);
-      return true;
-    }
-
-    const rangeStr = this.ocrCustomRange().trim();
-    if (!rangeStr) {
-      this.ocrRangeError.set('Please specify page range (e.g. 1-3, 5).');
-      return false;
-    }
-
-    const total = this.pages().length;
-    const parts = rangeStr.split(',');
-    for (const part of parts) {
-      const trimmed = part.trim();
-      if (trimmed.includes('-')) {
-        const [startStr, endStr] = trimmed.split('-');
-        const start = parseInt(startStr, 10);
-        const end = parseInt(endStr, 10);
-        if (isNaN(start) || isNaN(end) || start < 1 || end > total || start > end) {
-          this.ocrRangeError.set(`Invalid range '${trimmed}'. Valid pages are 1 to ${total}.`);
-          return false;
-        }
-      } else {
-        const pageNum = parseInt(trimmed, 10);
-        if (isNaN(pageNum) || pageNum < 1 || pageNum > total) {
-          this.ocrRangeError.set(`Page '${trimmed}' is out of bounds (1-${total}).`);
-          return false;
-        }
-      }
-    }
-
-    this.ocrRangeError.set(null);
-    return true;
+    const res = this.ocrWorkflow.validatePageRange(
+      this.ocrPageRange(),
+      this.ocrCustomRange(),
+      this.pages().length
+    );
+    this.ocrRangeError.set(res.error);
+    return res.valid;
   }
 
   getSelectedPageIndicesForOcr(): number[] {
-    const total = this.pages().length;
-    const mode = this.ocrPageRange();
-
-    if (mode === 'current') {
-      return [this.currentPageIndex()];
-    }
-    if (mode === 'all') {
-      return Array.from({ length: total }, (_, i) => i);
-    }
-
-    // Custom
-    const indices = new Set<number>();
-    const parts = this.ocrCustomRange().split(',');
-    for (const part of parts) {
-      const trimmed = part.trim();
-      if (trimmed.includes('-')) {
-        const [startStr, endStr] = trimmed.split('-');
-        const start = parseInt(startStr, 10) - 1;
-        const end = parseInt(endStr, 10) - 1;
-        for (let i = start; i <= end; i++) {
-          if (i >= 0 && i < total) indices.add(i);
-        }
-      } else {
-        const p = parseInt(trimmed, 10) - 1;
-        if (p >= 0 && p < total) indices.add(p);
-      }
-    }
-    return Array.from(indices).sort((a, b) => a - b);
+    return this.ocrWorkflow.parsePageIndices(
+      this.ocrPageRange(),
+      this.ocrCustomRange(),
+      this.pages().length,
+      this.currentPageIndex()
+    );
   }
 
   toggleOcrLanguage(code: string): void {
@@ -3295,178 +2518,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     targetPageIndices: number[],
     mode: EditPdfOcrMode
   ): void {
-    const generatedElements: EditElement[] = [];
-    const lowConfWords: LowConfidenceWord[] = [];
-    let totalLines = 0;
-
-    for (let i = 0; i < result.pages.length; i++) {
-      const pageResult = result.pages[i];
-      const actualPageIndex = targetPageIndices[i] ?? pageResult.index;
-
-      if (mode === 'searchable') {
-        const layerEl: OcrTextLayerElement = {
-          id: `ocr-layer-${actualPageIndex}-${Date.now()}`,
-          pageIndex: actualPageIndex,
-          type: 'ocr-layer',
-          xPt: 0,
-          yPt: 0,
-          widthPt: pageResult.widthPt,
-          heightPt: pageResult.heightPt,
-          lines: pageResult.lines,
-          language: result.language,
-          averageConfidence: result.averageConfidence
-        };
-        generatedElements.push(layerEl);
-        totalLines += pageResult.lines.length;
-
-        for (const line of pageResult.lines) {
-          for (const word of line.words) {
-            if (word.confidence < 60) {
-              lowConfWords.push({
-                text: word.text,
-                pageIndex: actualPageIndex,
-                bbox: word.bbox,
-                confidence: word.confidence
-              });
-            }
-          }
-        }
-      } else {
-        interface OcrBlock {
-          lines: EditPdfOcrLine[];
-          x0: number;
-          x1: number;
-          y0: number;
-          y1: number;
-          fontSizePt: number;
-          baselineY: number;
-          avgConfidence: number;
-        }
-
-        const isBulletLine = (text: string) => {
-          const t = text.trim();
-          return /^[•\-\*\u2022\u25cf\u25cb\u25aa\u25b8\u2013\u2014]/.test(t);
-        };
-
-        const isSectionHeading = (text: string) => {
-          const t = text.trim();
-          if (t.length >= 3 && t.length <= 50 && t === t.toUpperCase() && /[A-Z]/.test(t)) {
-            return true;
-          }
-          return false;
-        };
-
-        const ocrBlocks: OcrBlock[] = [];
-        const sortedLines = [...pageResult.lines].sort((a, b) => b.bbox[1] - a.bbox[1]);
-
-        for (const line of sortedLines) {
-          totalLines++;
-          const [lx0, ly0, lx1, ly1] = line.bbox;
-          const fontSize = line.fontSizePt || 14;
-
-          const isSegHeading = isSectionHeading(line.text);
-          const isSegBullet = isBulletLine(line.text);
-
-          let merged = false;
-
-          if (!isSegHeading) {
-            for (const b of ocrBlocks) {
-              const firstL = b.lines[0];
-              const lastL = b.lines[b.lines.length - 1];
-
-              if (isSectionHeading(firstL.text)) {
-                continue;
-              }
-
-              const blockHasBullets = b.lines.some(l => isBulletLine(l.text));
-              if (!blockHasBullets && isSegBullet) {
-                continue;
-              }
-
-              const deltaY = lastL.bbox[1] - line.bbox[1];
-              const avgFont = (b.fontSizePt + fontSize) / 2;
-
-              const isVerticallyAdjacent = deltaY >= (avgFont * 0.8) && deltaY <= (avgFont * 2.4);
-              const overlap = Math.min(b.x1, lx1) - Math.max(b.x0, lx0);
-              const minW = Math.min(b.x1 - b.x0, lx1 - lx0);
-              const hasOverlap = overlap > 0 && (overlap / minW >= 0.45 || Math.abs(b.x0 - lx0) <= 20);
-              const isSameFont = Math.abs(b.fontSizePt - fontSize) <= 2.5;
-
-              if (isVerticallyAdjacent && hasOverlap && isSameFont) {
-                b.lines.push(line);
-                b.x0 = Math.min(b.x0, lx0);
-                b.x1 = Math.max(b.x1, lx1);
-                b.y0 = Math.min(b.y0, ly0);
-                b.y1 = Math.max(b.y1, ly1);
-                merged = true;
-                break;
-              }
-            }
-          }
-
-          if (!merged) {
-            ocrBlocks.push({
-              lines: [line],
-              x0: lx0,
-              x1: lx1,
-              y0: ly0,
-              y1: ly1,
-              fontSizePt: fontSize,
-              baselineY: line.baselineY,
-              avgConfidence: line.confidence
-            });
-          }
-
-          for (const word of line.words) {
-            if (word.confidence < 60) {
-              lowConfWords.push({
-                text: word.text,
-                pageIndex: actualPageIndex,
-                bbox: word.bbox,
-                confidence: word.confidence
-              });
-            }
-          }
-        }
-
-        for (const block of ocrBlocks) {
-          const w = Math.max(30, block.x1 - block.x0 + 6);
-          const h = Math.max(16, block.y1 - block.y0 + 4);
-          const fullText = block.lines.map(l => l.text).join('\n');
-
-          const coverEl: WhiteoutEditElement = {
-            id: `ocr-cover-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-            pageIndex: actualPageIndex,
-            type: 'whiteout',
-            xPt: Math.max(0, block.x0 - 2),
-            yPt: Math.max(0, block.y0 - 2),
-            widthPt: w + 4,
-            heightPt: h + 4,
-            fillColor: 'var(--pt-surface-white)'
-          };
-
-          const textEl: TextEditElement = {
-            id: `ocr-text-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-            pageIndex: actualPageIndex,
-            type: 'text',
-            xPt: block.x0,
-            yPt: block.y0,
-            widthPt: w,
-            heightPt: h,
-            text: fullText,
-            fontFamily: 'Inter',
-            fontSizePt: block.fontSizePt,
-            color: 'var(--pt-navy)',
-            baselineY: block.baselineY,
-            isOcrLine: true,
-            isPageTextLine: true,
-            ocrConfidence: block.avgConfidence
-          };
-
-          generatedElements.push(coverEl, textEl);
-        }
-      }
-    }
+    const { elements: generatedElements, lowConfidenceWords: lowConfWords, totalLines } =
+      this.ocrWorkflow.convertOcrResultToElements(result, targetPageIndices, mode);
 
     this.lowConfidenceReviewWords.set(lowConfWords);
 

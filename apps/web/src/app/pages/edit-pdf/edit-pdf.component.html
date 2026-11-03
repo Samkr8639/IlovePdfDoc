@@ -52,180 +52,10 @@
   }
 
   <!-- ===================================================================
-       1. UPLOAD STATE: HERO & DROPZONE (MATCHING ALL OTHER TOOL PAGES)
+       1. UPLOAD STATE: HERO & DROPZONE
        =================================================================== -->
   @if (viewMode() === 'upload') {
-  <section class="unified-hero-section">
-    <div class="container hero-content">
-      <h1 class="tool-h1">Edit PDF</h1>
-      <p class="tool-lead">
-        Add text, shapes, comments, and highlights to your PDF document. 100% free and in-browser.
-      </p>
-
-      <!-- UPLOADER COMPONENT -->
-      <div class="hero-dropzone-wrap">
-        <app-dropzone title="Select PDF file" subtitle="or drop PDF here" acceptedTypes=".pdf,application/pdf"
-          [multiple]="false" limitInfo="" (filesSelected)="onFilesSelected($event)"></app-dropzone>
-      </div>
-    </div>
-  </section>
-
-  <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
-  <section class="adsense-section">
-    <div class="container">
-      <div class="adsense-wrapper" aria-label="Advertisement">
-        <span class="adsense-label">Advertisement</span>
-        <div class="adsense-slot adsense-leaderboard">
-          <div class="adsense-placeholder-content">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              opacity="0.5">
-              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FEATURES & VALUE PROPOSITION -->
-  <section class="features-section">
-    <div class="container">
-      <div class="section-heading">
-        <h2 class="section-title">The easiest & safest way to edit PDF documents</h2>
-        <p class="section-subtitle">Engineered for privacy, speed, and precision.</p>
-      </div>
-
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon-badge">
-            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
-              <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white" />
-              <circle cx="24" cy="23" r="2.5" fill="#1E3A8A" />
-            </svg>
-          </div>
-          <h3 class="feature-title">100% In-Browser Privacy</h3>
-          <p class="feature-desc">
-            Your PDF documents stay on your device. Client-side editing runs directly inside your browser memory using
-            WebAssembly.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-badge">
-            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
-              <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </div>
-          <h3 class="feature-title">In-Place Text Editing</h3>
-          <p class="feature-desc">
-            Edit existing text directly in your PDF. Change words, fonts, sizes, colors, and formatting without losing
-            alignment.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-badge">
-            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
-              <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </div>
-          <h3 class="feature-title">Draw, Sign & Annotate</h3>
-          <p class="feature-desc">
-            Add handwritten signatures, highlights, custom shapes, drawings, and images to any page effortlessly.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-badge">
-            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
-              <path
-                d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z"
-                stroke="white" stroke-width="2.5" fill="none" />
-            </svg>
-          </div>
-          <h3 class="feature-title">Free & Unlimited</h3>
-          <p class="feature-desc">
-            Edit as many documents as you need with no subscriptions, watermark additions, or hidden paywalls.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3-STEP GUIDE SECTION -->
-  <section class="seo-guide-section">
-    <div class="container">
-      <div class="guide-header">
-        <h2 class="guide-title">How to edit PDF files online</h2>
-        <p class="guide-lead">Three effortless steps to edit your documents with precision.</p>
-      </div>
-
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-num">01</div>
-          <h3 class="step-title">Select document</h3>
-          <p class="step-desc">
-            Click "Select PDF file", drag and drop your file into the dropzone, or import from Google Drive or Dropbox.
-          </p>
-        </div>
-
-        <div class="step-card">
-          <div class="step-num">02</div>
-          <h3 class="step-title">Edit & annotate</h3>
-          <p class="step-desc">
-            Use Annotate to add signatures, shapes, and highlights, or toggle to Edit Text to update existing document
-            text in-place.
-          </p>
-        </div>
-
-        <div class="step-card">
-          <div class="step-num">03</div>
-          <h3 class="step-title">Save & download</h3>
-          <p class="step-desc">
-            Click "Save & Download" to instantly export your edited PDF document with all modifications preserved
-            losslessly.
-          </p>
-        </div>
-      </div>
-
-      <!-- FAQ SECTION FOR EDIT PDF -->
-      <div class="tool-faqs">
-        <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
-        <div class="tool-faqs-list">
-          <div class="faq-card">
-            <h4 class="faq-q">Are my files uploaded to your servers when editing?</h4>
-            <p class="faq-a">
-              No. PDF editing runs completely client-side in your browser memory using WebAssembly. Your files are never
-              uploaded to any remote server during editing.
-            </p>
-          </div>
-          <div class="faq-card">
-            <h4 class="faq-q">Can I edit existing text in a PDF document?</h4>
-            <p class="faq-a">
-              Yes! Simply click the "Edit Text" toggle in the top bar. The editor recognizes text blocks on your page
-              and lets you update words, fix typos, and change styling in-place.
-            </p>
-          </div>
-          <div class="faq-card">
-            <h4 class="faq-q">Can I sign and fill PDF forms?</h4>
-            <p class="faq-a">
-              Yes. You can create cursive or drawn signatures, place dates and text boxes, and insert whiteout or shapes
-              anywhere on the document.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <app-edit-pdf-hero (filesSelected)="onFilesSelected($event)" />
   }
 
   <!-- VIEW 2: FULL-FEATURED CANVAS WORKSPACE -->
@@ -244,66 +74,15 @@
     <!-- MAIN WORKSPACE ROW -->
     <div class="workspace-main">
       <!-- 1. LEFT THUMBNAILS STRIP -->
-      <aside class="left-thumbnails-panel" [class.collapsed]="isLeftSidebarCollapsed()"
-        aria-label="Pages thumbnail list">
-        <div class="thumbnails-header">
-          <span class="thumbnails-count-title">{{ pages().length }} Pages</span>
-          <button type="button" class="collapse-toggle-btn" (click)="toggleLeftSidebar()"
-            [title]="isLeftSidebarCollapsed() ? 'Expand Thumbnails' : 'Collapse Thumbnails'">
-            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              @if (isLeftSidebarCollapsed()) {
-              <polyline points="9 18 15 12 9 6" />
-              } @else {
-              <polyline points="15 18 9 12 15 6" />
-              }
-            </svg>
-          </button>
-        </div>
-
-        <div class="thumbnails-scroll-list">
-          @for (page of pages(); track page.pageIndex; let i = $index) {
-          <div class="thumbnail-card" [id]="'thumb-page-' + i" [class.active]="currentPageIndex() === i"
-            (click)="setPageIndex(i)">
-            <!-- Card Header Overlay Buttons -->
-            <div class="card-overlay-actions">
-              <button type="button" class="card-action-btn" (click)="rotatePage(i); $event.stopPropagation()"
-                title="Rotate page">
-                <svg class="lucide-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="23 4 23 10 17 10" />
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                </svg>
-              </button>
-              <button type="button" class="card-action-btn danger" (click)="deletePage(i); $event.stopPropagation()"
-                title="Delete page">
-                <svg class="lucide-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Page Preview Mini Sheet -->
-            <div class="page-mini-sheet">
-              @if (pageThumbnails().has(i)) {
-              <img [src]="pageThumbnails().get(i)" alt="Page {{ i + 1 }}" class="page-thumb-img" />
-              } @else {
-              <div class="mini-doc-lines">
-                <span class="mini-line header"></span>
-                <span class="mini-line accent"></span>
-                <span class="mini-line body"></span>
-                <span class="mini-line body short"></span>
-              </div>
-              }
-            </div>
-
-            <div class="page-number-label">{{ i + 1 }}</div>
-          </div>
-          }
-        </div>
-      </aside>
+      <app-pdf-thumbnails-panel
+        [pages]="pages()"
+        [currentPageIndex]="currentPageIndex()"
+        [pageThumbnails]="pageThumbnails()"
+        [isCollapsed]="isLeftSidebarCollapsed()"
+        (toggleCollapse)="toggleLeftSidebar()"
+        (selectPage)="setPageIndex($event)"
+        (rotatePage)="rotatePage($event)"
+        (deletePage)="deletePage($event)" />
 
       <!-- 2. CENTER CANVAS VIEWPORT (Continuous Smooth Multi-Page Document) -->
       <div class="canvas-viewport-wrapper">
@@ -536,62 +315,17 @@
       <input #fileInputAddMore type="file" hidden accept=".pdf,application/pdf" (change)="onAddMoreFiles($event)" />
       </main>
 
-      <!-- BOTTOM FLOATING CAPSULE BAR (FLOATING PERMANENTLY AT THE BOTTOM CENTER) -->
       <!-- BOTTOM FLOATING CAPSULE BAR -->
-      <div class="bottom-floating-bar" aria-label="Page navigation and zoom controls">
-        <button type="button" class="bar-icon-btn" [disabled]="currentPageIndex() <= 0" (click)="prevPage()"
-          title="Previous Page">
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="18 15 12 9 6 15" />
-          </svg>
-        </button>
-
-        <button type="button" class="bar-icon-btn" [disabled]="currentPageIndex() >= pages().length - 1"
-          (click)="nextPage()" title="Next Page">
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-
-        <div class="page-indicator-wrap">
-          <input type="number" class="page-number-input" [ngModel]="currentPageIndex() + 1"
-            (ngModelChange)="setPageIndex($event - 1)" min="1" [max]="pages().length" />
-          <span class="page-total">/ {{ pages().length }}</span>
-        </div>
-
-        <div class="bar-divider"></div>
-
-        <button type="button" class="bar-icon-btn" (click)="zoomOut()" title="Zoom out">
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-
-        <button type="button" class="bar-icon-btn" (click)="zoomIn()" title="Zoom in">
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-
-        <button type="button" class="bar-text-btn" (click)="resetZoom()" title="Reset Zoom">
-          {{ (zoom() * 100) | number:'1.0-0' }}%
-        </button>
-
-        <button type="button" class="bar-icon-btn" (click)="resetZoom()" title="Fit to Screen">
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 3 21 3 21 9" />
-            <polyline points="9 21 3 21 3 15" />
-            <line x1="21" y1="3" x2="14" y2="10" />
-            <line x1="3" y1="21" x2="10" y2="14" />
-          </svg>
-        </button>
-      </div>
+      <app-pdf-bottom-bar
+        [currentPageIndex]="currentPageIndex()"
+        [totalPages]="pages().length"
+        [zoom]="zoom()"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="setPageIndex($event)"
+        (zoomIn)="zoomIn()"
+        (zoomOut)="zoomOut()"
+        (resetZoom)="resetZoom()" />
     </div>
 
     <!-- 3. RIGHT SIDEBAR -->
@@ -605,109 +339,9 @@
       </div>
 
       <!-- Section: TOOLS Grid -->
-      <div class="sidebar-section">
-        <div class="section-badge-title">TOOLS</div>
-        <div class="tools-grid">
-          <!-- 1. Select -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'select'"
-            (click)="selectTool('select')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="3 3 10 21 13 13 21 10 3 3" />
-            </svg>
-            <span class="tool-tile-name">Select</span>
-          </button>
-
-          <!-- 2. Text -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'text'" (click)="selectTool('text')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="4 7 4 4 20 4 20 7" />
-              <line x1="9" y1="20" x2="15" y2="20" />
-              <line x1="12" y1="4" x2="12" y2="20" />
-            </svg>
-            <span class="tool-tile-name">Text</span>
-          </button>
-
-          <!-- 3. Image -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'image'"
-            (click)="selectTool('image')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
-            <span class="tool-tile-name">Image</span>
-          </button>
-
-          <!-- 4. Draw -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'draw'" (click)="selectTool('draw')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 19l7-7 3 3-7 7-3-3z" />
-              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-              <path d="M2 2l7.586 7.586" />
-              <circle cx="11" cy="11" r="2" />
-            </svg>
-            <span class="tool-tile-name">Draw</span>
-          </button>
-
-          <!-- 5. Shapes -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'shapes'"
-            (click)="selectTool('shapes')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-            </svg>
-            <span class="tool-tile-name">Shapes</span>
-          </button>
-
-          <!-- 6. Highlight -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'highlight'"
-            (click)="selectTool('highlight')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m9 11-6 6v3h3l6-6" />
-              <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" />
-            </svg>
-            <span class="tool-tile-name">Highlight</span>
-          </button>
-
-          <!-- 7. Whiteout -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'whiteout'"
-            (click)="selectTool('whiteout')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
-              <path d="M22 21H7" />
-              <path d="m5 11 9 9" />
-            </svg>
-            <span class="tool-tile-name">Whiteout</span>
-          </button>
-
-          <!-- 8. Sign -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'sign'" (click)="selectTool('sign')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
-              <line x1="16" y1="8" x2="2" y2="22" />
-              <line x1="17.5" y1="15" x2="9" y2="15" />
-            </svg>
-            <span class="tool-tile-name">Sign</span>
-          </button>
-
-          <!-- 9. Link -->
-          <button type="button" class="tool-tile" [class.active]="activeTool() === 'link'" (click)="selectTool('link')">
-            <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
-            <span class="tool-tile-name">Link</span>
-          </button>
-        </div>
-      </div>
+      <app-tools-grid
+        [activeTool]="activeTool()"
+        (selectTool)="selectTool($event)" />
 
       <input #fileInputImage type="file" accept="image/*" style="display: none"
         (change)="onImageFileSelected($event)" />

@@ -21,3 +21,4 @@ import { Component, output } from '@angular/core';
 export class ImagePanelComponent {
   readonly chooseImage = output<void>();
 }
+
