@@ -170,3 +170,25 @@ export type EditElement =
   | LinkEditElement
   | OcrTextLayerElement;
 
+export interface AreaSelectionState {
+  pageIndex: number;
+  xPt: number;
+  yPt: number;
+  widthPt: number;
+  heightPt: number;
+  rotation: number;
+  snapshotDataUrl: string | null;
+  naturalWidth?: number;
+  naturalHeight?: number;
+  isDragging?: boolean;
+  dragTargetPageIndex?: number;
+  dragCurrentXPt?: number;
+  dragCurrentYPt?: number;
+  originalXPt: number;
+  originalYPt: number;
+  originalPageIndex: number;
+  originalWidthPt: number;
+  originalHeightPt: number;
+  capturedElementIds?: string[];
+}
+

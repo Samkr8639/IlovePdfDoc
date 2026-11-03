@@ -104,6 +104,15 @@
               <!-- Native PDF Page Render Canvas -->
               <canvas [id]="'pdf-canvas-' + i" class="pdf-page-canvas"></canvas>
 
+              <!-- Area (Marquee) Selection Overlay -->
+              <app-selection-overlay
+                [pageIndex]="i"
+                [page]="page"
+                [zoom]="zoom()"
+                (moveSelection)="onAreaSelectionMoved($event)"
+                (deleteArea)="deleteAreaSelection()"
+                (duplicateArea)="duplicateAreaSelection()" />
+
               <!-- Real-time Live Drawing Stroke Layer -->
               @if (isDrawingActive() && activeDrawingPageIndex() === i && activeDrawingPath()) {
               <svg class="live-drawing-stroke-overlay" [style.width.px]="getPageDisplaySize(page).width"
@@ -544,6 +553,16 @@
             (modeChange)="ocrMode.set($event)"
             (startRecognition)="startOcrRecognition()"
             (jumpToWord)="jumpToLowConfidenceWord($event)" />
+        } @else if (areaSelectionService.hasSelection() || (activeTool() === 'select' && !selectedElement() && areaSelectionService.canPaste())) {
+          <app-selection-panel
+            [selection]="areaSelectionService.selection()"
+            [canPaste]="areaSelectionService.canPaste()"
+            (copy)="copyAreaSelection()"
+            (paste)="pasteAreaSelection()"
+            (cut)="cutAreaSelection()"
+            (duplicate)="duplicateAreaSelection()"
+            (bringForward)="bringToFront()"
+            (delete)="deleteAreaSelection()" />
         } @else {
           <app-element-info-panel
             [selectedElement]="selectedElement()"

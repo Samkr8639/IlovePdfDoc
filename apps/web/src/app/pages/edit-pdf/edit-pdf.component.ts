@@ -74,6 +74,9 @@ import { SignPanelComponent } from './components/panels/sign-panel/sign-panel.co
 import { LinkPanelComponent } from './components/panels/link-panel/link-panel.component';
 import { OcrPanelComponent } from './components/panels/ocr-panel/ocr-panel.component';
 import { ElementInfoPanelComponent } from './components/panels/element-info-panel/element-info-panel.component';
+import { AreaSelectionService } from './services/area-selection.service';
+import { SelectionOverlayComponent } from './components/selection-overlay/selection-overlay.component';
+import { SelectionPanelComponent } from './components/panels/selection-panel/selection-panel.component';
 
 type EditorViewMode = 'upload' | 'editor';
 
@@ -103,7 +106,9 @@ if (typeof window !== 'undefined' && pdfjsLib && (pdfjsLib as any).GlobalWorkerO
     SignPanelComponent,
     LinkPanelComponent,
     OcrPanelComponent,
-    ElementInfoPanelComponent
+    ElementInfoPanelComponent,
+    SelectionOverlayComponent,
+    SelectionPanelComponent
   ],
   templateUrl: './edit-pdf.component.html',
   styleUrl: './edit-pdf.component.css',
@@ -126,6 +131,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private pdfRendering = inject(PdfRenderingService);
   private freehandDrawing = inject(FreehandDrawingService);
   private viewportNav = inject(ViewportNavigationService);
+  readonly areaSelectionService = inject(AreaSelectionService);
+  private wasMarqueeDragged = false;
 
   private _pageCanvasRef?: ElementRef<HTMLCanvasElement>;
 
@@ -401,6 +408,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   onPageClick(pageIndex: number, event: MouseEvent): void {
     event.stopPropagation();
     this.currentPageIndex.set(pageIndex);
+    if (this.wasMarqueeDragged) {
+      this.wasMarqueeDragged = false;
+      return;
+    }
     this.onCanvasClick(event, pageIndex);
   }
 
@@ -411,11 +422,30 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.startHighlightDrag(pageIndex, event.clientX, event.clientY);
       return;
     }
+    if (this.activeTool() === 'select' && this.editorMode() === 'annotate' && event.button === 0) {
+      this.selectedElementId.set(null);
+      const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
+      if (pageEl) {
+        const rect = pageEl.getBoundingClientRect();
+        this.areaSelectionService.startMarquee(pageIndex, event.clientX - rect.left, event.clientY - rect.top);
+        this.wasMarqueeDragged = false;
+      }
+      return;
+    }
     this.activeDrawingPageIndex.set(pageIndex);
     this.onCanvasMouseDown(event);
   }
 
   onPageMouseMove(pageIndex: number, event: MouseEvent): void {
+    if (this.areaSelectionService.marquee()) {
+      const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
+      if (pageEl) {
+        this.wasMarqueeDragged = true;
+        const rect = pageEl.getBoundingClientRect();
+        this.areaSelectionService.updateMarquee(event.clientX - rect.left, event.clientY - rect.top);
+      }
+      return;
+    }
     if (this.activeTool() === 'shapes' && this.shapeType() === 'polygon' && this.draftPolygonPoints().length > 0) {
       if (this.draftPolygonPageIndex() === pageIndex) {
         const canvas = (document.getElementById(`pdf-canvas-${pageIndex}`) as HTMLCanvasElement | null)
@@ -450,11 +480,32 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.startHighlightDrag(pageIndex, t.clientX, t.clientY);
       return;
     }
+    if (this.activeTool() === 'select' && this.editorMode() === 'annotate' && event.touches.length > 0) {
+      this.selectedElementId.set(null);
+      const t = event.touches[0];
+      const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
+      if (pageEl) {
+        const rect = pageEl.getBoundingClientRect();
+        this.areaSelectionService.startMarquee(pageIndex, t.clientX - rect.left, t.clientY - rect.top);
+        this.wasMarqueeDragged = false;
+      }
+      return;
+    }
     this.activeDrawingPageIndex.set(pageIndex);
     this.onCanvasTouchStart(event);
   }
 
   onPageTouchMove(pageIndex: number, event: TouchEvent): void {
+    if (this.areaSelectionService.marquee() && event.touches.length > 0) {
+      const t = event.touches[0];
+      const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
+      if (pageEl) {
+        this.wasMarqueeDragged = true;
+        const rect = pageEl.getBoundingClientRect();
+        this.areaSelectionService.updateMarquee(t.clientX - rect.left, t.clientY - rect.top);
+      }
+      return;
+    }
     if (this.isHighlighting && event.touches.length > 0) {
       event.preventDefault();
       const t = event.touches[0];
@@ -837,6 +888,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.activeTool.set(tool);
     if (tool !== 'select') {
       this.selectedElementId.set(null);
+      this.areaSelectionService.clearSelection();
     }
   }
 
@@ -855,6 +907,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const pdfPt = this.transform.screenPointToPdfPoint({ x: screenX, y: screenY }, page, this.zoom());
 
     switch (this.activeTool()) {
+      case 'select':
+        if (!this.wasMarqueeDragged) {
+          this.areaSelectionService.clearSelection();
+          this.selectedElementId.set(null);
+        }
+        break;
       case 'text':
         this.addTextElement(pdfPt.xPt, pdfPt.yPt, page.pageIndex);
         break;
@@ -1123,6 +1181,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:mouseup')
   onWindowMouseUp(): void {
+    if (this.areaSelectionService.marquee()) {
+      const m = this.areaSelectionService.marquee();
+      if (m) {
+        const page = this.pages().find(p => p.pageIndex === m.pageIndex);
+        if (page) {
+          const pageElements = this.getElementsByPage(m.pageIndex);
+          this.areaSelectionService.finishMarquee(page, pageElements, this.zoom());
+        } else {
+          this.areaSelectionService.clearSelection();
+        }
+      }
+      return;
+    }
     if (this.isHighlighting) {
       this.finishHighlightDrag();
       return;
@@ -1137,6 +1208,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:touchend')
   onWindowTouchEnd(): void {
+    if (this.areaSelectionService.marquee()) {
+      const m = this.areaSelectionService.marquee();
+      if (m) {
+        const page = this.pages().find(p => p.pageIndex === m.pageIndex);
+        if (page) {
+          const pageElements = this.getElementsByPage(m.pageIndex);
+          this.areaSelectionService.finishMarquee(page, pageElements, this.zoom());
+        } else {
+          this.areaSelectionService.clearSelection();
+        }
+      }
+      return;
+    }
     if (this.isHighlighting) {
       this.finishHighlightDrag();
       return;
@@ -1164,6 +1248,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasMouseUp(): void {
+    if (this.areaSelectionService.marquee()) {
+      const m = this.areaSelectionService.marquee();
+      if (m) {
+        const page = this.pages().find(p => p.pageIndex === m.pageIndex);
+        if (page) {
+          const pageElements = this.getElementsByPage(m.pageIndex);
+          this.areaSelectionService.finishMarquee(page, pageElements, this.zoom());
+        } else {
+          this.areaSelectionService.clearSelection();
+        }
+      }
+      return;
+    }
     if (this.isHighlighting) {
       this.finishHighlightDrag();
       return;
@@ -1200,6 +1297,19 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onCanvasTouchEnd(): void {
+    if (this.areaSelectionService.marquee()) {
+      const m = this.areaSelectionService.marquee();
+      if (m) {
+        const page = this.pages().find(p => p.pageIndex === m.pageIndex);
+        if (page) {
+          const pageElements = this.getElementsByPage(m.pageIndex);
+          this.areaSelectionService.finishMarquee(page, pageElements, this.zoom());
+        } else {
+          this.areaSelectionService.clearSelection();
+        }
+      }
+      return;
+    }
     if (this.isHighlighting) {
       this.finishHighlightDrag();
       return;
@@ -2345,6 +2455,51 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.history.execute(cmd);
   }
 
+  // --- Area Selection Action Handlers ---
+  onAreaSelectionMoved(event: { targetPageIndex: number; newXPt: number; newYPt: number }): void {
+    const current = this.areaSelectionService.selection();
+    if (!current) return;
+    const sourcePage = this.pages().find(p => p.pageIndex === current.originalPageIndex) || this.currentPage()!;
+    const targetPage = this.pages().find(p => p.pageIndex === event.targetPageIndex) || sourcePage;
+    this.areaSelectionService.commitMove(
+      this.elements,
+      event.targetPageIndex,
+      event.newXPt,
+      event.newYPt,
+      sourcePage,
+      targetPage,
+      newId => this.selectedElementId.set(newId)
+    );
+  }
+
+  deleteAreaSelection(): void {
+    const p = this.currentPage();
+    if (p) this.areaSelectionService.deleteArea(this.elements, p);
+  }
+
+  cutAreaSelection(): void {
+    const p = this.currentPage();
+    if (p) this.areaSelectionService.cut(this.elements, p);
+  }
+
+  copyAreaSelection(): void {
+    this.areaSelectionService.copy();
+  }
+
+  pasteAreaSelection(): void {
+    const p = this.currentPage();
+    if (p) {
+      this.areaSelectionService.paste(this.elements, p, newId => this.selectedElementId.set(newId));
+    }
+  }
+
+  duplicateAreaSelection(): void {
+    const p = this.currentPage();
+    if (p) {
+      this.areaSelectionService.duplicate(this.elements, p, newId => this.selectedElementId.set(newId));
+    }
+  }
+
   // Text Property Updaters
   updateTextProperty(field: keyof TextEditElement, value: any): void {
     const el = this.selectedElement();
@@ -3020,13 +3175,97 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           Boolean(target.closest?.('[contenteditable="true"]')) ||
           Boolean(target.closest?.('.canvas-text-area')));
 
-      if (!isEditingText && this.selectedElementId()) {
-        event.preventDefault();
-        this.deleteSelectedElement();
+      if (!isEditingText) {
+        if (this.areaSelectionService.hasSelection()) {
+          event.preventDefault();
+          this.deleteAreaSelection();
+        } else if (this.selectedElementId()) {
+          event.preventDefault();
+          this.deleteSelectedElement();
+        }
       }
     } else if (event.key === 'Escape') {
-      if (this.draftPolygonPoints().length > 0) {
+      if (this.areaSelectionService.hasSelection()) {
+        this.areaSelectionService.clearSelection();
+      } else if (this.draftPolygonPoints().length > 0) {
         this.cancelPolygonShape();
+      }
+    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'c') {
+      const target = event.target as HTMLElement | null;
+      const isEditingText =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          Boolean(target.closest?.('[contenteditable="true"]')) ||
+          Boolean(target.closest?.('.canvas-text-area')));
+
+      if (!isEditingText && this.areaSelectionService.hasSelection()) {
+        event.preventDefault();
+        this.copyAreaSelection();
+      }
+    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'v') {
+      const target = event.target as HTMLElement | null;
+      const isEditingText =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          Boolean(target.closest?.('[contenteditable="true"]')) ||
+          Boolean(target.closest?.('.canvas-text-area')));
+
+      if (!isEditingText && this.areaSelectionService.canPaste()) {
+        event.preventDefault();
+        this.pasteAreaSelection();
+      }
+    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'x') {
+      const target = event.target as HTMLElement | null;
+      const isEditingText =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          Boolean(target.closest?.('[contenteditable="true"]')) ||
+          Boolean(target.closest?.('.canvas-text-area')));
+
+      if (!isEditingText && this.areaSelectionService.hasSelection()) {
+        event.preventDefault();
+        this.cutAreaSelection();
+      }
+    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
+      const target = event.target as HTMLElement | null;
+      const isEditingText =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          Boolean(target.closest?.('[contenteditable="true"]')) ||
+          Boolean(target.closest?.('.canvas-text-area')));
+
+      if (!isEditingText && this.areaSelectionService.hasSelection()) {
+        event.preventDefault();
+        this.duplicateAreaSelection();
+      }
+    } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      const target = event.target as HTMLElement | null;
+      const isEditingText =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          Boolean(target.closest?.('[contenteditable="true"]')) ||
+          Boolean(target.closest?.('.canvas-text-area')));
+
+      if (!isEditingText && this.areaSelectionService.hasSelection() && this.currentPage()) {
+        event.preventDefault();
+        const step = event.shiftKey ? 10 : 1;
+        let dx = 0;
+        let dy = 0;
+        if (event.key === 'ArrowUp') dy = step;
+        if (event.key === 'ArrowDown') dy = -step;
+        if (event.key === 'ArrowLeft') dx = -step;
+        if (event.key === 'ArrowRight') dx = step;
+        this.areaSelectionService.nudge(dx, dy, this.currentPage()!);
       }
     }
   }
