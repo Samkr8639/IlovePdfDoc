@@ -409,7 +409,7 @@ export class PdfExportService {
   private parseRichTextToLines(
     el: TextEditElement,
     defaultColor: Color
-  ): Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color; linkUrl?: string }> }> {
+  ): Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; strikeout?: boolean; color?: Color; linkUrl?: string }> }> {
     const rawHtml = el.html;
     if (!rawHtml || !rawHtml.includes('<') || typeof DOMParser === 'undefined') {
       const lines = (el.text || '').split('\n');
@@ -419,6 +419,7 @@ export class PdfExportService {
           bold: !!el.bold,
           italic: !!el.italic,
           underline: !!el.underline || !!el.linkUrl,
+          strikeout: !!el.strikeout,
           color: el.linkUrl ? (this.parseColor('#2563EB') || defaultColor) : defaultColor,
           linkUrl: el.linkUrl
         }]
@@ -433,14 +434,15 @@ export class PdfExportService {
         .replace(/<\/p>/gi, '\n</p>');
 
       const doc = parser.parseFromString(`<body>${normalizedHtml}</body>`, 'text/html');
-      const lines: Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color; linkUrl?: string }> }> = [];
-      let currentLineSpans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; color?: Color; linkUrl?: string }> = [];
+      const lines: Array<{ spans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; strikeout?: boolean; color?: Color; linkUrl?: string }> }> = [];
+      let currentLineSpans: Array<{ text: string; bold: boolean; italic: boolean; underline: boolean; strikeout?: boolean; color?: Color; linkUrl?: string }> = [];
 
       const traverse = (
         node: Node,
         boldState: boolean,
         italicState: boolean,
         underlineState: boolean,
+        strikeoutState: boolean,
         colorState: Color,
         linkUrlState?: string
       ) => {
@@ -460,6 +462,7 @@ export class PdfExportService {
                 bold: boldState,
                 italic: italicState,
                 underline: underlineState || !!spanLink,
+                strikeout: strikeoutState,
                 color: spanLink && colorState === defaultColor ? (this.parseColor('#2563EB') || colorState) : colorState,
                 linkUrl: spanLink
               });
@@ -489,6 +492,13 @@ export class PdfExportService {
             tag === 'u' ||
             (elem.style.textDecoration && elem.style.textDecoration.includes('underline'))
           );
+          const isS: boolean = !!(
+            strikeoutState ||
+            tag === 's' ||
+            tag === 'strike' ||
+            tag === 'del' ||
+            (elem.style.textDecoration && elem.style.textDecoration.includes('line-through'))
+          );
           let col = colorState;
           if (elem.style.color) {
             const parsed = this.parseColor(elem.style.color);
@@ -504,12 +514,12 @@ export class PdfExportService {
           }
 
           for (let child = elem.firstChild; child; child = child.nextSibling) {
-            traverse(child, isB, isI, isU, col, link);
+            traverse(child, isB, isI, isU, isS, col, link);
           }
         }
       };
 
-      traverse(doc.body, !!el.bold, !!el.italic, !!el.underline, defaultColor, el.linkUrl);
+      traverse(doc.body, !!el.bold, !!el.italic, !!el.underline, !!el.strikeout, defaultColor, el.linkUrl);
       if (currentLineSpans.length > 0 || lines.length === 0) {
         lines.push({ spans: currentLineSpans });
       }
@@ -523,6 +533,7 @@ export class PdfExportService {
           bold: !!el.bold,
           italic: !!el.italic,
           underline: !!el.underline || !!el.linkUrl,
+          strikeout: !!el.strikeout,
           color: el.linkUrl ? (this.parseColor('#2563EB') || defaultColor) : defaultColor,
           linkUrl: el.linkUrl
         }]
@@ -590,6 +601,14 @@ export class PdfExportService {
             page.drawLine({
               start: { x: currentX, y: currentY - 2 },
               end: { x: currentX + spanWidth, y: currentY - 2 },
+              color: spanColor,
+              thickness: Math.max(0.75, size / 14)
+            });
+          }
+          if (span.strikeout) {
+            page.drawLine({
+              start: { x: currentX, y: currentY + size * 0.35 },
+              end: { x: currentX + spanWidth, y: currentY + size * 0.35 },
               color: spanColor,
               thickness: Math.max(0.75, size / 14)
             });

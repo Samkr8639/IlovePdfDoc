@@ -44,7 +44,7 @@ export class TextFormattingService {
   }
 
   applyInlineFormatting(
-    command: 'bold' | 'italic' | 'underline',
+    command: 'bold' | 'italic' | 'underline' | 'strikeThrough',
     el: TextEditElement,
     savedRange: Range | null
   ): { handled: boolean; updatedRange: Range | null } {

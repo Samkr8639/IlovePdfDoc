@@ -1659,6 +1659,10 @@
   text-underline-offset: 2px;
 }
 
+.style-toggle-btn.strikeout-btn {
+  text-decoration: line-through;
+}
+
 .style-toggle-btn.link-btn {
   display: flex;
   align-items: center;

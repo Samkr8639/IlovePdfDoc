@@ -46,6 +46,10 @@ import {
             (mousedown)="$event.preventDefault()" (click)="toggleUnderline.emit()" title="Underline">
             U
           </button>
+          <button type="button" class="style-toggle-btn strikeout-btn" [class.active]="isTextStrikeout()"
+            (mousedown)="$event.preventDefault()" (click)="toggleStrikeout.emit()" title="Strikeout">
+            S
+          </button>
           <button type="button" class="style-toggle-btn link-btn"
             [class.active]="showTextLinkInput() || isTextLinked()"
             (mousedown)="$event.preventDefault()" (click)="toggleLinkInput.emit()" title="Embed Link">
@@ -138,6 +142,7 @@ export class TextPanelComponent {
   readonly isTextBold = input.required<boolean>();
   readonly isTextItalic = input.required<boolean>();
   readonly isTextUnderline = input.required<boolean>();
+  readonly isTextStrikeout = input<boolean>(false);
   readonly textAlign = input.required<'left' | 'center' | 'right'>();
   readonly showTextLinkInput = input.required<boolean>();
   readonly textLinkUrl = input.required<string>();
@@ -149,6 +154,7 @@ export class TextPanelComponent {
   readonly toggleBold = output<void>();
   readonly toggleItalic = output<void>();
   readonly toggleUnderline = output<void>();
+  readonly toggleStrikeout = output<void>();
   readonly textAlignChange = output<'left' | 'center' | 'right'>();
   readonly toggleLinkInput = output<void>();
   readonly applyLink = output<string>();

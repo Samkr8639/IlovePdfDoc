@@ -64,6 +64,7 @@ export interface TextEditElement extends BaseEditElement {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  strikeout?: boolean;
   align?: 'left' | 'center' | 'right';
   baselineY?: number;
   isOcrLine?: boolean;

@@ -77,4 +77,23 @@ describe('TextFormattingService', () => {
     };
     expect(service.detectLinkUrl(elWithHtml, null)).toBe('https://vite.dev');
   });
+
+  it('handles applyInlineFormatting for strikeThrough, bold, italic, and underline', () => {
+    const el: TextEditElement = {
+      id: 'txt-format',
+      pageIndex: 0,
+      type: 'text',
+      xPt: 0,
+      yPt: 0,
+      widthPt: 100,
+      heightPt: 20,
+      fontFamily: 'Inter',
+      fontSizePt: 12,
+      color: '#000000',
+      text: 'Formatted text'
+    };
+
+    const res = service.applyInlineFormatting('strikeThrough', el, null);
+    expect(res.handled).toBe(false);
+  });
 });

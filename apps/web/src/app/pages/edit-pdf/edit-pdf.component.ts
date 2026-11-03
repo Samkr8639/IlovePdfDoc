@@ -183,6 +183,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly isTextBold = signal<boolean>(false);
   readonly isTextItalic = signal<boolean>(false);
   readonly isTextUnderline = signal<boolean>(false);
+  readonly isTextStrikeout = signal<boolean>(false);
   readonly textAlign = signal<'left' | 'center' | 'right'>('left');
   readonly textCustomColor = signal<string>('#14213D');
   readonly showTextLinkInput = signal<boolean>(false);
@@ -1874,6 +1875,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.isTextBold.set(!!textEl.bold);
       this.isTextItalic.set(!!textEl.italic);
       this.isTextUnderline.set(!!textEl.underline);
+      this.isTextStrikeout.set(!!textEl.strikeout);
       this.textAlign.set(textEl.align || 'left');
       const hasLink = !!(textEl.linkUrl || (textEl.html && textEl.html.includes('<a ')));
       this.isTextLinked.set(hasLink);
@@ -2132,6 +2134,22 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const next = !this.isTextUnderline();
     this.isTextUnderline.set(next);
     this.updateTextProperty('underline', next);
+  }
+
+  toggleTextStrikeout(): void {
+    const el = this.selectedElement() as TextEditElement;
+    if (!el || el.type !== 'text') return;
+
+    const res = this.textFormatting.applyInlineFormatting('strikeThrough', el, this.savedTextRange);
+    if (res.handled) {
+      this.savedTextRange = res.updatedRange;
+      this.elements.update(list => [...list]);
+      return;
+    }
+
+    const next = !this.isTextStrikeout();
+    this.isTextStrikeout.set(next);
+    this.updateTextProperty('strikeout', next);
   }
 
   toggleTextLinkInput(): void {

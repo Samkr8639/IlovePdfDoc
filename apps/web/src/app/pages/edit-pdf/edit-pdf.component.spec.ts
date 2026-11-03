@@ -389,6 +389,10 @@ describe('EditPdfComponent Integration Tests', () => {
     component.toggleTextUnderline();
     expect((component.elements()[0] as any).underline).toBe(true);
 
+    component.toggleTextStrikeout();
+    expect((component.elements()[0] as any).strikeout).toBe(true);
+    expect(component.isTextStrikeout()).toBe(true);
+
     component.setTextAlign('center');
     expect((component.elements()[0] as any).align).toBe('center');
 
