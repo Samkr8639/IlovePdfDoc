@@ -20,7 +20,11 @@ export class ContentEditableModelDirective implements OnChanges {
   constructor(private el: ElementRef<HTMLElement>) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (typeof document !== 'undefined' && document.activeElement === this.el.nativeElement) {
+    if (
+      typeof document !== 'undefined' &&
+      (document.activeElement === this.el.nativeElement ||
+        this.el.nativeElement.contains(document.activeElement))
+    ) {
       return; // Do not overwrite DOM while user is actively typing inside
     }
     const targetHtml = this.model?.html || (this.model?.text ? this.model.text.replace(/\n/g, '<br>') : '');

@@ -2676,8 +2676,16 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         this.prevPage();
       }
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
-      const target = event.target as HTMLElement;
-      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && this.selectedElementId()) {
+      const target = event.target as HTMLElement | null;
+      const isEditingText =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          Boolean(target.closest?.('[contenteditable="true"]')) ||
+          Boolean(target.closest?.('.canvas-text-area')));
+
+      if (!isEditingText && this.selectedElementId()) {
         event.preventDefault();
         this.deleteSelectedElement();
       }

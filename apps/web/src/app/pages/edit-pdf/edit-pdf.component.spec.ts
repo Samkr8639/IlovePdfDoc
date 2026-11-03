@@ -511,6 +511,33 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.currentPageIndex()).toBe(0);
   });
 
+  it('does not delete the text element when Backspace or Delete is pressed while editing text', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }]);
+    component.addTextElement(100, 100);
+    const textElId = component.selectedElementId()!;
+    expect(component.elements().length).toBe(1);
+
+    // Target is a contenteditable div
+    const editableDiv = document.createElement('div');
+    editableDiv.className = 'canvas-text-area';
+    editableDiv.contentEditable = 'true';
+
+    const backspaceEvent = { key: 'Backspace', target: editableDiv, preventDefault: vi.fn() };
+    component.onKeydown(backspaceEvent as unknown as KeyboardEvent);
+
+    expect(backspaceEvent.preventDefault).not.toHaveBeenCalled();
+    expect(component.elements().length).toBe(1);
+    expect(component.elements()[0].id).toBe(textElId);
+
+    // When target is not an editor (e.g. document body or canvas wrapper), element should be deleted
+    const normalDiv = document.createElement('div');
+    const deleteElementEvent = { key: 'Delete', target: normalDiv, preventDefault: vi.fn() };
+    component.onKeydown(deleteElementEvent as unknown as KeyboardEvent);
+
+    expect(deleteElementEvent.preventDefault).toHaveBeenCalled();
+    expect(component.elements().length).toBe(0);
+  });
+
   it('extracts digital PDF text across ALL pages in multi-page document with makePageTextEditable', async () => {
     component.pages.set([
       { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
