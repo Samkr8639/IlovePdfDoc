@@ -94,3 +94,4 @@ export class PdfThumbnailsPanelComponent {
   readonly rotatePage = output<number>();
   readonly deletePage = output<number>();
 }
+

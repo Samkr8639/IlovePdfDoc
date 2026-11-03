@@ -182,3 +182,4 @@ export class TextFormattingService {
     return { updatedRange: newRange };
   }
 }
+

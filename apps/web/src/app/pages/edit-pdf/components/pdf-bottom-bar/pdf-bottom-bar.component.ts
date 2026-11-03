@@ -104,3 +104,4 @@ export class PdfBottomBarComponent {
   readonly zoomOut = output<void>();
   readonly resetZoom = output<void>();
 }
+

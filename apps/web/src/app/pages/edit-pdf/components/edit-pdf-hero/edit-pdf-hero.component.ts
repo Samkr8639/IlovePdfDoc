@@ -188,3 +188,4 @@ import { DropzoneComponent } from '../../../../shared/components/dropzone/dropzo
 export class EditPdfHeroComponent {
   readonly filesSelected = output<File[]>();
 }
+

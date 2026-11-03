@@ -27,3 +27,4 @@ describe('ViewportNavigationService', () => {
     expect(service.clampPageIndex(10, 3)).toBe(2);
   });
 });
+

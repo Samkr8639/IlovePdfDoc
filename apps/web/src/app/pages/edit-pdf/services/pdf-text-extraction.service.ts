@@ -274,3 +274,4 @@ export class PdfTextExtractionService {
     return generatedElements;
   }
 }
+

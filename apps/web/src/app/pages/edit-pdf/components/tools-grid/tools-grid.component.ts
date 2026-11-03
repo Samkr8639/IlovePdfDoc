@@ -147,3 +147,4 @@ export class ToolsGridComponent {
   readonly activeTool = input<EditToolType>('select');
   readonly selectTool = output<EditToolType>();
 }
+

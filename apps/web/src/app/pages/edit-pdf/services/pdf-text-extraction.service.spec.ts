@@ -60,3 +60,4 @@ describe('PdfTextExtractionService', () => {
     expect(blocks[0].lines.length).toBe(2);
   });
 });
+

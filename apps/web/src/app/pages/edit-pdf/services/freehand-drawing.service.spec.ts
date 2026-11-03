@@ -53,3 +53,4 @@ describe('FreehandDrawingService', () => {
     expect(hl?.opacity).toBe(0.4);
   });
 });
+
