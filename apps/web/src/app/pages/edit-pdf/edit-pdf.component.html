@@ -161,7 +161,8 @@
                   [style.left]="getElementScreenRect(el).left" [style.top]="getElementScreenRect(el).top"
                   [style.width]="getElementScreenRect(el).width" [style.height]="getElementScreenRect(el).height"
                   (mousedown)="onElementMouseDown(el, $event)" (click)="selectElement(el, $event)">
-                  <div class="canvas-text-area canvas-text-content"
+                  <div [id]="'text-editable-' + el.id"
+                    class="canvas-text-area canvas-text-content"
                     contenteditable="true"
                     [appContentEditableModel]="{ html: el.html, text: el.text }"
                     (contentChange)="onTextContentChange(el, $event)"

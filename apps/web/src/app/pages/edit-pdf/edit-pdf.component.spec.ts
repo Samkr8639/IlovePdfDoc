@@ -5,6 +5,7 @@ import { EditPdfComponent } from './edit-pdf.component';
 import { UploadConsentService } from '../../core/services/upload-consent.service';
 import { ServerActionGuard } from '../../core/guards/server-action.guard';
 import { OcrService } from './services/ocr.service';
+import { TextFormattingService } from './services/text-formatting.service';
 import { EditPdfOcrResult } from '@paperflow/contracts';
 
 describe('EditPdfComponent Integration Tests', () => {
@@ -404,6 +405,36 @@ describe('EditPdfComponent Integration Tests', () => {
 
     component.setTextColor('#e05d44');
     expect((component.elements()[0] as any).color).toBe('#e05d44');
+  });
+
+  it('applies inline color to selected word or text range', () => {
+    component.elements.set([
+      {
+        id: 't-inline-col',
+        pageIndex: 0,
+        type: 'text',
+        xPt: 10,
+        yPt: 10,
+        widthPt: 100,
+        heightPt: 20,
+        fontFamily: 'Inter',
+        fontSizePt: 12,
+        color: '#14213D',
+        text: 'Hello World',
+        html: 'Hello World'
+      } as any
+    ]);
+    component.selectedElementId.set('t-inline-col');
+
+    const textFormatting = TestBed.inject(TextFormattingService);
+    vi.spyOn(textFormatting, 'applyInlineColor').mockReturnValue({
+      handled: true,
+      updatedRange: null
+    });
+
+    component.setTextColor('var(--pt-teal-700)');
+    expect(textFormatting.applyInlineColor).toHaveBeenCalledWith('#0F766E', expect.anything(), null);
+    expect(component.textColor()).toBe('var(--pt-teal-700)');
   });
 
   it('extracts digital PDF text and creates in-place editable lines with makePageTextEditable', async () => {

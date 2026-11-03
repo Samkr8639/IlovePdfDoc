@@ -13,7 +13,11 @@ export class TextFormattingService {
       return { hasSelection: false, activeEl: null, updatedRange: savedRange };
     }
 
-    const activeEl = document.getElementById(`text-editable-${el.id}`);
+    let activeEl = document.getElementById(`text-editable-${el.id}`);
+    if (!activeEl) {
+      activeEl = (document.querySelector(`.text-element[data-id="${el.id}"] .canvas-text-area`) as HTMLElement | null)
+        || (document.querySelector(`.text-element.selected .canvas-text-area`) as HTMLElement | null);
+    }
     if (!activeEl) {
       return { hasSelection: false, activeEl: null, updatedRange: savedRange };
     }
@@ -52,6 +56,31 @@ export class TextFormattingService {
 
     if (hasSelection && activeEl) {
       document.execCommand(command, false);
+      el.html = activeEl.innerHTML;
+      el.text = activeEl.innerText;
+      if (el.isPageTextLine) {
+        el.isEdited = true;
+      }
+      const sel = window.getSelection();
+      const newRange = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : updatedRange;
+      return { handled: true, updatedRange: newRange };
+    }
+
+    return { handled: false, updatedRange };
+  }
+
+  applyInlineColor(
+    color: string,
+    el: TextEditElement,
+    savedRange: Range | null
+  ): { handled: boolean; updatedRange: Range | null } {
+    const { hasSelection, activeEl, updatedRange } = this.restoreTextSelection(el, savedRange);
+
+    if (hasSelection && activeEl) {
+      try {
+        document.execCommand('styleWithCSS', false, 'true');
+      } catch {}
+      document.execCommand('foreColor', false, color);
       el.html = activeEl.innerHTML;
       el.text = activeEl.innerText;
       if (el.isPageTextLine) {

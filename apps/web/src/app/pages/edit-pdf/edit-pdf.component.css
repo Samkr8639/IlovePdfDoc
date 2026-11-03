@@ -1005,7 +1005,12 @@
 .paper-canvas-container.edit-mode .text-element.page-text-line.is-user-edited .canvas-text-area,
 .text-element.page-text-line.is-user-edited .canvas-text-area,
 .text-element.page-text-line.selected .canvas-text-area {
-  color: var(--pt-navy) !important;
+  color: inherit;
+}
+
+.canvas-text-area font[color],
+.canvas-text-area span[style*="color"] {
+  display: inline;
 }
 
 .canvas-text-area {

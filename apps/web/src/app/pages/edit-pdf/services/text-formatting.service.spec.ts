@@ -96,4 +96,23 @@ describe('TextFormattingService', () => {
     const res = service.applyInlineFormatting('strikeThrough', el, null);
     expect(res.handled).toBe(false);
   });
+
+  it('handles applyInlineColor when no active range selection exists', () => {
+    const el: TextEditElement = {
+      id: 'txt-color',
+      pageIndex: 0,
+      type: 'text',
+      xPt: 0,
+      yPt: 0,
+      widthPt: 100,
+      heightPt: 20,
+      fontFamily: 'Inter',
+      fontSizePt: 12,
+      color: '#000000',
+      text: 'Colored text'
+    };
+
+    const res = service.applyInlineColor('#E05D44', el, null);
+    expect(res.handled).toBe(false);
+  });
 });

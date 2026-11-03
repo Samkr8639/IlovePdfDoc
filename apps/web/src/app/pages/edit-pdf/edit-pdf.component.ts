@@ -2055,6 +2055,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const cmd: Command = {
       description: `Change text ${field}`,
       execute: () => {
+        if (textEl.isPageTextLine) {
+          textEl.isEdited = true;
+          this.whiteoutOriginalTextOnCanvas(textEl);
+        }
         this.elements.update(list =>
           list.map(e => (e.id === textEl.id ? { ...e, [field]: value, ...(textEl.isPageTextLine ? { isEdited: true } : {}) } : e))
         );
@@ -2312,20 +2316,14 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     const el = this.selectedElement() as TextEditElement;
     if (!el || el.type !== 'text') return;
 
-    const { hasSelection, activeEl } = this.textFormatting.restoreTextSelection(el, this.savedTextRange);
-
-    if (hasSelection && activeEl) {
-      const cssColor = this.resolveColorToCss(color);
-      document.execCommand('foreColor', false, cssColor);
-      el.html = activeEl.innerHTML;
-      el.text = activeEl.innerText;
+    const cssColor = this.resolveColorToCss(color);
+    const res = this.textFormatting.applyInlineColor(cssColor, el, this.savedTextRange);
+    if (res.handled) {
       if (el.isPageTextLine) {
         el.isEdited = true;
+        this.whiteoutOriginalTextOnCanvas(el);
       }
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        this.savedTextRange = sel.getRangeAt(0).cloneRange();
-      }
+      this.savedTextRange = res.updatedRange;
       this.elements.update(list => [...list]);
       return;
     }
