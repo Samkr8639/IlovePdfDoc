@@ -1,8 +1,5 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
-import { MergePdfComponent } from './pages/merge-pdf/merge-pdf.component';
-import { PdfToWordComponent } from './pages/pdf-to-word/pdf-to-word.component';
-import { ToolPlaceholderComponent } from './pages/tool-placeholder/tool-placeholder.component';
 
 export const routes: Routes = [
   {
@@ -12,22 +9,22 @@ export const routes: Routes = [
   },
   {
     path: 'merge-pdf',
-    component: MergePdfComponent,
+    loadComponent: () => import('./pages/merge-pdf/merge-pdf.component').then(m => m.MergePdfComponent),
     title: 'Merge PDF Online Free - Combine PDF Files Privately | PDFTailor'
   },
   {
     path: 'split-pdf',
-    component: ToolPlaceholderComponent,
+    loadComponent: () => import('./pages/tool-placeholder/tool-placeholder.component').then(m => m.ToolPlaceholderComponent),
     title: 'Split PDF Online - Separate PDF Pages | PDFTailor'
   },
   {
     path: 'compress-pdf',
-    component: ToolPlaceholderComponent,
+    loadComponent: () => import('./pages/tool-placeholder/tool-placeholder.component').then(m => m.ToolPlaceholderComponent),
     title: 'Compress PDF Online | PDFTailor'
   },
   {
     path: 'pdf-to-word',
-    component: PdfToWordComponent,
+    loadComponent: () => import('./pages/pdf-to-word/pdf-to-word.component').then(m => m.PdfToWordComponent),
     title: 'PDF to Word Converter Online | PDFTailor'
   },
   {
