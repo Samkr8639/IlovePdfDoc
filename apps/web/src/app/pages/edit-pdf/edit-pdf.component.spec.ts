@@ -84,6 +84,18 @@ describe('EditPdfComponent Integration Tests', () => {
     component.selectTool('shapes');
     expect(component.activeTool()).toBeNull();
     expect(component.draftPolygonPoints().length).toBe(0);
+
+    // 9. When activeTool is null (deselected), tool features do not work
+    const mockEl = { id: 'el-test', type: 'text', xPt: 50, yPt: 50, widthPt: 100, heightPt: 30 } as any;
+    component.elements.set([mockEl]);
+    component.selectElement(mockEl);
+    expect(component.selectedElementId()).toBeNull();
+
+    // 10. Re-selecting 'select' tool re-enables element selection
+    component.selectTool('select');
+    expect(component.activeTool()).toBe('select');
+    component.selectElement(mockEl);
+    expect(component.selectedElementId()).toBe('el-test');
   });
 
   it('validates OCR page ranges accurately', () => {

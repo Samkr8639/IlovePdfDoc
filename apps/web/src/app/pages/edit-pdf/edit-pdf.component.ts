@@ -422,7 +422,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.startHighlightDrag(pageIndex, event.clientX, event.clientY);
       return;
     }
-    if ((this.activeTool() === 'select' || this.activeTool() === null) && this.editorMode() === 'annotate' && event.button === 0) {
+    if (this.activeTool() === 'select' && this.editorMode() === 'annotate' && event.button === 0) {
       this.selectedElementId.set(null);
       const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
       if (pageEl) {
@@ -480,7 +480,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.startHighlightDrag(pageIndex, t.clientX, t.clientY);
       return;
     }
-    if ((this.activeTool() === 'select' || this.activeTool() === null) && this.editorMode() === 'annotate' && event.touches.length > 0) {
+    if (this.activeTool() === 'select' && this.editorMode() === 'annotate' && event.touches.length > 0) {
       this.selectedElementId.set(null);
       const t = event.touches[0];
       const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
@@ -964,6 +964,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- Freehand Draw Handlers & Real-Time Smooth Spline ---
   onCanvasMouseDown(event: MouseEvent): void {
+    if (this.activeTool() !== 'draw') return;
     this.startDrawing(event.clientX, event.clientY);
   }
 
@@ -1515,7 +1516,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onElementMouseDown(el: EditElement, event: MouseEvent): void {
-    if (this.activeTool() !== 'select' && this.activeTool() !== null) return;
+    if (this.activeTool() !== 'select') return;
     if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event.stopPropagation();
     this.selectElement(el, event);
@@ -2329,6 +2330,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   selectElement(el: EditElement, event?: Event): void {
+    if (this.activeTool() !== 'select') return;
     if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event?.stopPropagation();
     if (el.pageIndex !== undefined && el.pageIndex !== this.currentPageIndex()) {

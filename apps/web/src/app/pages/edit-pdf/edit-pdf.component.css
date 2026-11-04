@@ -2792,3 +2792,7 @@
   z-index: 50;
   pointer-events: auto;
 }
+.canvas-elements-overlay.no-select-tool .canvas-element {
+  pointer-events: none !important;
+  cursor: default !important;
+}

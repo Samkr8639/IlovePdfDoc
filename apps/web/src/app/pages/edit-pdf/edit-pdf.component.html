@@ -187,7 +187,7 @@
               }
 
               <!-- Interactive Annotation / Edit Elements Overlay for Page i -->
-              <div class="canvas-elements-overlay">
+              <div class="canvas-elements-overlay" [class.no-select-tool]="activeTool() !== 'select'">
                 <ng-template #resizeHandles let-el="el">
                   @if (selectedElementId() === el.id) {
                   <div class="resize-handle handle-nw" (mousedown)="onResizeHandleMouseDown(el, 'nw', $event)"></div>
