@@ -1,0 +1,42 @@
+[
+  {
+    "fixture": "Letter Portrait",
+    "tool": "Text (Unrotated)",
+    "expected": "x:100, y:506",
+    "actual": "x:100, y:506",
+    "diffPt": "0.00",
+    "verdict": "PASS (<1pt)"
+  },
+  {
+    "fixture": "Letter Portrait",
+    "tool": "Rectangle (Rotated 45°)",
+    "expected": "Center (200, 380)",
+    "actual": "Center (200.0, 380.0)",
+    "diffPt": "0.00",
+    "verdict": "PASS (<1pt)"
+  },
+  {
+    "fixture": "Page Rotated 90°",
+    "tool": "Text on 90° Rotated Page",
+    "expected": "Text renders oriented with viewer orientation",
+    "actual": "Text drawn in raw PDF coordinate space without rotation angle",
+    "diffPt": "180.00",
+    "verdict": "FAIL (>1pt - Orientation Mismatch)"
+  },
+  {
+    "fixture": "Letter Portrait",
+    "tool": "Whiteout Box",
+    "expected": "Original text scrubbed from stream",
+    "actual": "Opaque rectangle drawn over text; stream unmodified",
+    "diffPt": "0.00",
+    "verdict": "FAIL (Security/Redaction)"
+  },
+  {
+    "fixture": "Letter Portrait",
+    "tool": "Freehand Draw (Rotated 90°)",
+    "expected": "Path segments rotated by 90°",
+    "actual": "Path segments drawn at 0° (rotation parameter ignored)",
+    "diffPt": "90.00°",
+    "verdict": "FAIL (Rotation Ignored)"
+  }
+]

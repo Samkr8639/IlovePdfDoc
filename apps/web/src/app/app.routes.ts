@@ -57,6 +57,7 @@ export const routes: Routes = [
   {
     path: 'edit-pdf',
     loadComponent: () => import('./pages/edit-pdf/edit-pdf.component').then(m => m.EditPdfComponent),
+    canDeactivate: [(comp: any) => comp?.canDeactivate ? comp.canDeactivate() : true],
     title: 'Edit PDF Online Free - Add Text, Shapes & OCR | PDFTailor'
   },
   {

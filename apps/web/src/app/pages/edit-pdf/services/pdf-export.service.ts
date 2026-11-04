@@ -84,7 +84,8 @@ export class PdfExportService {
               if (textEl.isPageTextLine && !textEl.isEdited) {
                 break;
               }
-              this.renderText(
+              await this.renderText(
+                pdfDoc,
                 page,
                 textEl,
                 fontRegular,
@@ -408,11 +409,27 @@ export class PdfExportService {
     el: ImageEditElement
   ): Promise<void> {
     try {
-      const imageBytes = this.base64ToBytes(el.dataUrl);
+      let embedded: any;
       const isPng = el.dataUrl.includes('image/png');
-      const embedded = isPng
-        ? await pdfDoc.embedPng(imageBytes)
-        : await pdfDoc.embedJpg(imageBytes);
+      const isJpg = el.dataUrl.includes('image/jpeg') || el.dataUrl.includes('image/jpg');
+
+      if (isPng) {
+        embedded = await pdfDoc.embedPng(this.base64ToBytes(el.dataUrl));
+      } else if (isJpg) {
+        embedded = await pdfDoc.embedJpg(this.base64ToBytes(el.dataUrl));
+      } else {
+        // SVG, WebP, GIF, or other format: rasterize to PNG via offscreen canvas
+        const rasterized = await this.rasterizeToPng(el.dataUrl, el.naturalWidth || el.widthPt * 2, el.naturalHeight || el.heightPt * 2);
+        if (rasterized) {
+          embedded = await pdfDoc.embedPng(this.base64ToBytes(rasterized));
+        } else {
+          try {
+            embedded = await pdfDoc.embedPng(this.base64ToBytes(el.dataUrl));
+          } catch {
+            embedded = await pdfDoc.embedJpg(this.base64ToBytes(el.dataUrl));
+          }
+        }
+      }
 
       // Compute proportional display rectangle matching CSS object-fit: contain
       const imgAspect = (embedded.width && embedded.height) ? (embedded.width / embedded.height) : 1;
@@ -443,6 +460,33 @@ export class PdfExportService {
     } catch {
       // Ignore corrupt images on export
     }
+  }
+
+  private async rasterizeToPng(dataUrl: string, width: number, height: number): Promise<string | null> {
+    if (typeof document === 'undefined') return null;
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(width || img.naturalWidth || img.width || 100));
+            canvas.height = Math.max(1, Math.round(height || img.naturalHeight || img.height || 100));
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/png'));
+              return;
+            }
+          } catch {}
+          resolve(null);
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      } catch {
+        resolve(null);
+      }
+    });
   }
 
   private async renderSignature(
@@ -518,13 +562,27 @@ export class PdfExportService {
     if (!el.points || el.points.length < 2) return;
     const color = this.parseColor(el.strokeColor || '#000000') || rgb(0, 0, 0);
     const thickness = el.strokeWidth || 2;
+    const rotationDeg = el.rotation || 0;
+    const cx = el.xPt + el.widthPt / 2;
+    const cy = el.yPt + el.heightPt / 2;
+    const rad = (-rotationDeg * Math.PI) / 180;
+
+    const rotatePt = (p: any) => {
+      if (!rotationDeg) return { x: p.xPt, y: p.yPt };
+      const dx = p.xPt - cx;
+      const dy = p.yPt - cy;
+      return {
+        x: cx + dx * Math.cos(rad) - dy * Math.sin(rad),
+        y: cy + dx * Math.sin(rad) + dy * Math.cos(rad)
+      };
+    };
 
     for (let i = 0; i < el.points.length - 1; i++) {
-      const p1 = el.points[i];
-      const p2 = el.points[i + 1];
+      const p1 = rotatePt(el.points[i]);
+      const p2 = rotatePt(el.points[i + 1]);
       page.drawLine({
-        start: { x: p1.xPt, y: p1.yPt },
-        end: { x: p2.xPt, y: p2.yPt },
+        start: { x: p1.x, y: p1.y },
+        end: { x: p2.x, y: p2.y },
         color,
         thickness
       });
@@ -666,14 +724,15 @@ export class PdfExportService {
     }
   }
 
-  private renderText(
+  private async renderText(
+    pdfDoc: PDFDocument,
     page: PDFPage,
     el: TextEditElement,
     regularFont: any,
     boldFont: any,
     italicFont: any,
     boldItalicFont: any
-  ): void {
+  ): Promise<void> {
     const baseColor = this.parseColor(el.color || '#14213D') || rgb(0.08, 0.13, 0.24);
     const size = el.fontSizePt || 14;
     const lineHeight = size * 1.35;
@@ -708,16 +767,51 @@ export class PdfExportService {
             color: spanColor
           });
         } catch {
-          const sanitized = span.text.replace(/[•●○▪▸]/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ');
-          try {
-            page.drawText(sanitized, {
-              x: currentX,
-              y: currentY,
-              font,
-              size,
-              color: spanColor
-            });
-          } catch {}
+          let renderedUnicode = false;
+          if (typeof document !== 'undefined') {
+            try {
+              const offscreen = document.createElement('canvas');
+              const scale = 3;
+              const approxW = Math.max(30, Math.ceil(size * span.text.length * 1.5));
+              const approxH = Math.max(20, Math.ceil(size * 1.6));
+              offscreen.width = approxW * scale;
+              offscreen.height = approxH * scale;
+              const ctx = offscreen.getContext('2d');
+              if (ctx) {
+                ctx.scale(scale, scale);
+                const fontWeight = (span.bold || el.bold) ? 'bold' : 'normal';
+                const fontStyle = (span.italic || el.italic) ? 'italic' : 'normal';
+                const fontFamily = el.fontFamily || 'sans-serif';
+                ctx.font = `${fontStyle} ${fontWeight} ${size}px ${fontFamily}, "Segoe UI", Arial, sans-serif`;
+                ctx.fillStyle = el.color ? this.resolveColorToCss(el.color) : '#14213D';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillText(span.text, 0, size * 0.95);
+
+                const dataUrl = offscreen.toDataURL('image/png');
+                const imageBytes = this.base64ToBytes(dataUrl);
+                const embedded = await pdfDoc.embedPng(imageBytes);
+                page.drawImage(embedded, {
+                  x: currentX,
+                  y: currentY - size * 0.25,
+                  width: approxW,
+                  height: approxH
+                });
+                renderedUnicode = true;
+              }
+            } catch {}
+          }
+          if (!renderedUnicode) {
+            const sanitized = span.text.replace(/[•●○▪▸]/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, '?');
+            try {
+              page.drawText(sanitized, {
+                x: currentX,
+                y: currentY,
+                font,
+                size,
+                color: spanColor
+              });
+            } catch {}
+          }
         }
 
         try {
@@ -762,6 +856,10 @@ export class PdfExportService {
     height: number
   ): void {
     try {
+      const cleanUrl = (url || '').trim();
+      if (!/^(https?:\/\/|mailto:|tel:)/i.test(cleanUrl)) {
+        return;
+      }
       const doc = page.doc;
       const linkAnnot = doc.context.obj({
         Type: 'Annot',
@@ -771,7 +869,7 @@ export class PdfExportService {
         A: {
           Type: 'Action',
           S: 'URI',
-          URI: PDFString.of(url)
+          URI: PDFString.of(cleanUrl)
         }
       });
       const annotRef = doc.context.register(linkAnnot);

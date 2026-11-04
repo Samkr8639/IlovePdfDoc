@@ -769,7 +769,8 @@
   z-index: 5;
 }
 
-.thumbnail-card:hover .card-overlay-actions {
+.thumbnail-card:hover .card-overlay-actions,
+.thumbnail-card:focus-within .card-overlay-actions {
   display: flex;
 }
 

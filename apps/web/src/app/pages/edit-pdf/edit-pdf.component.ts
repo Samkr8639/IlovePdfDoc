@@ -830,7 +830,11 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           const updated = list.filter((_, i) => i !== pageIndex);
           return updated.map((p, i) => ({ ...p, pageIndex: i }));
         });
-        this.elements.update(list => list.filter(e => e.pageIndex !== pageIndex));
+        this.elements.update(list =>
+          list
+            .filter(e => e.pageIndex !== pageIndex)
+            .map(e => (e.pageIndex > pageIndex ? { ...e, pageIndex: e.pageIndex - 1 } : e))
+        );
         this.currentPageIndex.set(Math.min(pageIndex, this.pages().length - 1));
         this.generateThumbnails();
         setTimeout(() => this.renderCurrentPageToCanvas(), 20);
@@ -841,7 +845,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           copy.splice(pageIndex, 0, removedPage);
           return copy.map((p, i) => ({ ...p, pageIndex: i }));
         });
-        this.elements.update(list => [...list, ...removedElements]);
+        this.elements.update(list => {
+          const shifted = list.map(e => (e.pageIndex >= pageIndex ? { ...e, pageIndex: e.pageIndex + 1 } : e));
+          return [...shifted, ...removedElements];
+        });
         this.currentPageIndex.set(pageIndex);
         this.generateThumbnails();
         setTimeout(() => this.renderCurrentPageToCanvas(), 20);
@@ -885,6 +892,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- Tool Selection & Canvas Interaction ---
   selectTool(tool: EditToolType): void {
+    if (this.draftPolygonPoints().length > 0 && tool !== 'shapes') {
+      this.cancelPolygonShape();
+    }
     this.activeTool.set(tool);
     if (tool !== 'select') {
       this.selectedElementId.set(null);
@@ -1165,6 +1175,21 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         };
         this.history.execute(cmd);
       }
+    }
+  }
+
+    canDeactivate(): boolean {
+    if (this.elements().length > 0 && this.viewMode() === 'editor') {
+      return window.confirm('You have unsaved edits in your document. Are you sure you want to leave?');
+    }
+    return true;
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.elements().length > 0 && this.viewMode() === 'editor') {
+      event.preventDefault();
+      event.returnValue = '';
     }
   }
 
@@ -3047,6 +3072,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- Export and Download ---
   async saveAndDownload(): Promise<void> {
+    if (this.isExporting()) return;
     const bytes = this.currentPdfBytes();
     if (!bytes) return;
 
@@ -3068,7 +3094,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
     } catch (err) {
       console.error('Failed to export edited PDF document:', err);
       this.errorMessage.set('Failed to export edited PDF document.');
@@ -3139,10 +3165,39 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.isSidePanelOpenMobile.set(false);
   }
 
+    nudgeSelectedElement(dx: number, dy: number): void {
+    const id = this.selectedElementId();
+    if (!id) return;
+    this.elements.update(list =>
+      list.map(el => {
+        if (el.id !== id) return el;
+        return {
+          ...el,
+          xPt: Math.round(el.xPt + dx),
+          yPt: Math.round(el.yPt + dy)
+        };
+      })
+    );
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
-    if ((event.metaKey || event.ctrlKey) && event.key === 'z') {
-      if (event.shiftKey) {
+    const target = event.target as HTMLElement | null;
+    const isEditingText =
+      target &&
+      (target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        Boolean(target.closest?.('[contenteditable="true"]')) ||
+        Boolean(target.closest?.('.canvas-text-area')));
+
+    const keyLower = event.key.toLowerCase();
+    if ((event.metaKey || event.ctrlKey) && (keyLower === 'z' || keyLower === 'y')) {
+      if (isEditingText) {
+        return; // Allow native undo/redo in text fields
+      }
+      const isRedo = (keyLower === 'z' && event.shiftKey) || keyLower === 'y';
+      if (isRedo) {
         if (this.history.canRedo()) {
           event.preventDefault();
           this.history.redo();
@@ -3153,6 +3208,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           this.history.undo();
         }
       }
+      return;
     } else if (event.key === 'PageDown' || (event.altKey && event.key === 'ArrowDown')) {
       const target = event.target as HTMLElement;
       if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
@@ -3256,7 +3312,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
           Boolean(target.closest?.('[contenteditable="true"]')) ||
           Boolean(target.closest?.('.canvas-text-area')));
 
-      if (!isEditingText && this.areaSelectionService.hasSelection() && this.currentPage()) {
+      if (!isEditingText && this.currentPage()) {
         event.preventDefault();
         const step = event.shiftKey ? 10 : 1;
         let dx = 0;
@@ -3265,7 +3321,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         if (event.key === 'ArrowDown') dy = -step;
         if (event.key === 'ArrowLeft') dx = -step;
         if (event.key === 'ArrowRight') dx = step;
-        this.areaSelectionService.nudge(dx, dy, this.currentPage()!);
+
+        if (this.areaSelectionService.hasSelection()) {
+          this.areaSelectionService.nudge(dx, dy, this.currentPage()!);
+        } else if (this.selectedElementId()) {
+          this.nudgeSelectedElement(dx, dy);
+        }
       }
     }
   }

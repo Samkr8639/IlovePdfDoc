@@ -1,0 +1,112 @@
+[
+  {
+    "id": "BUG-WHITEOUT-01",
+    "title": "Whiteout draws opaque box without stripping underlying text stream (False Redaction)",
+    "category": "Security-Privacy",
+    "severity": "Critical",
+    "passed": false,
+    "expected": "Confidential text \"000-12-3456\" must be removed from the PDF content stream",
+    "actual": "Underlying text \"000-12-3456\" is still 100% extractable from the PDF",
+    "details": "Text extracted by pdf.js: \"Invoice #1001 - PaperFlow Corp  Original Price: $29.00 USD due August 14, 2026  Confidential Client Information: SSN 000-12-3456\""
+  },
+  {
+    "id": "BUG-EDIT-TEXT-01",
+    "title": "In-place text replacement leaves original text in PDF stream under white rectangle",
+    "category": "Export-fidelity",
+    "severity": "High",
+    "passed": false,
+    "expected": "Original text is replaced in content stream and cannot be extracted",
+    "actual": "Both original text (\"$29.00 USD\") AND new text (\"$99.00 USD\") exist simultaneously in stream",
+    "details": "Extracted text contains original: true"
+  },
+  {
+    "id": "BUG-UNICODE-HINDIDEVANAGARI",
+    "title": "Non-Latin Unicode characters (Hindi/Devanagari) throw error with StandardFonts.Helvetica",
+    "category": "Functional",
+    "severity": "High",
+    "passed": false,
+    "expected": "Text \"नमस्ते भारत\" successfully encoded and exported in PDF",
+    "actual": "Throws WinAnsi encoding failure: \"WinAnsi cannot encode \"न\" (0x0928)\"",
+    "details": "Error thrown: WinAnsi cannot encode \"न\" (0x0928)"
+  },
+  {
+    "id": "BUG-UNICODE-ARABIC",
+    "title": "Non-Latin Unicode characters (Arabic) throw error with StandardFonts.Helvetica",
+    "category": "Functional",
+    "severity": "High",
+    "passed": false,
+    "expected": "Text \"مرحبا بكم\" successfully encoded and exported in PDF",
+    "actual": "Throws WinAnsi encoding failure: \"WinAnsi cannot encode \"م\" (0x0645)\"",
+    "details": "Error thrown: WinAnsi cannot encode \"م\" (0x0645)"
+  },
+  {
+    "id": "BUG-UNICODE-EMOJI",
+    "title": "Non-Latin Unicode characters (Emoji) throw error with StandardFonts.Helvetica",
+    "category": "Functional",
+    "severity": "High",
+    "passed": false,
+    "expected": "Text \"Document Approved 🚀✨\" successfully encoded and exported in PDF",
+    "actual": "Throws WinAnsi encoding failure: \"WinAnsi cannot encode \"\" (0x1f680)\"",
+    "details": "Error thrown: WinAnsi cannot encode \"\" (0x1f680)"
+  },
+  {
+    "id": "BUG-IMAGE-SVG-01",
+    "title": "SVG images advertised in UI tooltip fail to export and are silently dropped",
+    "category": "Functional",
+    "severity": "High",
+    "passed": false,
+    "expected": "SVG image is converted and embedded into exported PDF",
+    "actual": "pdfDoc.embedJpg throws \"SOI not found in JPEG\" and drops image entirely",
+    "details": "embedJpg rejection: SOI not found in JPEG"
+  },
+  {
+    "id": "BUG-DRAW-ROTATION-01",
+    "title": "Rotated drawing annotations ignore rotation angle and export unrotated at 0 degrees",
+    "category": "Export-fidelity",
+    "severity": "Medium",
+    "passed": false,
+    "expected": "Draw element stroke points are rotated around center point by el.rotation",
+    "actual": "renderDraw does not compute rotated coordinates or apply rotation to line segments",
+    "details": "renderDraw source lines 517-531 lack rotation coordinate transformation"
+  },
+  {
+    "id": "BUG-LINK-SECURITY-JAVASCRIPT",
+    "title": "Link tool allows unsafe URI scheme \"javascript:\" without allowlist",
+    "category": "Security-Privacy",
+    "severity": "High",
+    "passed": false,
+    "expected": "Reject unsafe URI schemes; only allow http:, https:, mailto:",
+    "actual": "Accepted dangerous URI as-is: \"javascript:alert(document.cookie)\"",
+    "details": "Regex matched unsafe protocol javascript"
+  },
+  {
+    "id": "BUG-LINK-SECURITY-FILE",
+    "title": "Link tool allows unsafe URI scheme \"file:\" without allowlist",
+    "category": "Security-Privacy",
+    "severity": "High",
+    "passed": false,
+    "expected": "Reject unsafe URI schemes; only allow http:, https:, mailto:",
+    "actual": "Accepted dangerous URI as-is: \"file:///C:/Windows/win.ini\"",
+    "details": "Regex matched unsafe protocol file"
+  },
+  {
+    "id": "BUG-LINK-SECURITY-DATA",
+    "title": "Link tool allows unsafe URI scheme \"data:\" without allowlist",
+    "category": "Security-Privacy",
+    "severity": "High",
+    "passed": false,
+    "expected": "Reject unsafe URI schemes; only allow http:, https:, mailto:",
+    "actual": "Accepted dangerous URI as-is: \"data:text/html,<script>alert(1)</script>\"",
+    "details": "Regex matched unsafe protocol data"
+  },
+  {
+    "id": "BUG-PAGE-DELETE-01",
+    "title": "Deleting a page desynchronizes pageIndex for elements on subsequent pages, orphaning them",
+    "category": "State",
+    "severity": "Critical",
+    "passed": false,
+    "expected": "Elements on pages > deletedPageIndex must have their pageIndex decremented by 1",
+    "actual": "Element on former page 2 still has pageIndex: 2 (exceeding document max index 1) and is lost",
+    "details": "Orphaned element pageIndex: 2"
+  }
+]

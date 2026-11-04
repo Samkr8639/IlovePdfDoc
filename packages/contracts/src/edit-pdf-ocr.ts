@@ -98,7 +98,7 @@ export const EDIT_PDF_FEATURES: readonly EditPdfFeatureConfig[] = [
     icon: 'eraser',
     category: 'tools',
     runsOn: 'browser',
-    tooltip: 'Redact or erase content'
+    tooltip: 'Cover or hide content with an opaque whiteout block'
   },
   {
     id: 'sign',

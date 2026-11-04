@@ -17,7 +17,8 @@ import { PageDimensions } from '../../models/document-model';
           type="button"
           class="collapse-toggle-btn"
           (click)="toggleCollapse.emit()"
-          [title]="isCollapsed() ? 'Expand Thumbnails' : 'Collapse Thumbnails'">
+          [title]="isCollapsed() ? 'Expand Thumbnails' : 'Collapse Thumbnails'"
+          [attr.aria-label]="isCollapsed() ? 'Expand Thumbnails' : 'Collapse Thumbnails'">
           <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             @if (isCollapsed()) {
@@ -35,6 +36,11 @@ import { PageDimensions } from '../../models/document-model';
             class="thumbnail-card"
             [id]="'thumb-page-' + i"
             [class.active]="currentPageIndex() === i"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Select page ' + (i + 1)"
+            (keydown.enter)="selectPage.emit(i)"
+            (keydown.space)="selectPage.emit(i); $event.preventDefault()"
             (click)="selectPage.emit(i)">
             <!-- Card Header Overlay Buttons -->
             <div class="card-overlay-actions">
@@ -42,7 +48,8 @@ import { PageDimensions } from '../../models/document-model';
                 type="button"
                 class="card-action-btn"
                 (click)="rotatePage.emit(i); $event.stopPropagation()"
-                title="Rotate page">
+                title="Rotate page"
+                [attr.aria-label]="'Rotate page ' + (i + 1)">
                 <svg class="lucide-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="23 4 23 10 17 10" />
@@ -53,7 +60,8 @@ import { PageDimensions } from '../../models/document-model';
                 type="button"
                 class="card-action-btn danger"
                 (click)="deletePage.emit(i); $event.stopPropagation()"
-                title="Delete page">
+                title="Delete page"
+                [attr.aria-label]="'Delete page ' + (i + 1)">
                 <svg class="lucide-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6" />

@@ -17,6 +17,9 @@ describe('TextFormattingService', () => {
     expect(service.formatUrl('http://example.com')).toBe('http://example.com');
     expect(service.formatUrl('https://')).toBe('');
     expect(service.formatUrl('   ')).toBe('');
+    expect(service.formatUrl('javascript:alert(1)')).toBe('');
+    expect(service.formatUrl('data:text/html,<script>alert(1)</script>')).toBe('');
+    expect(service.formatUrl('file:///C:/Windows/win.ini')).toBe('');
   });
 
   it('applies whole element link when no active range selection exists', () => {

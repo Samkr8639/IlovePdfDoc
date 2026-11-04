@@ -115,7 +115,18 @@ export class OcrWorkflowService {
           yPt: 0,
           widthPt: pageResult.widthPt,
           heightPt: pageResult.heightPt,
-          lines: pageResult.lines,
+          lines: pageResult.lines.map(l => ({
+            text: l.text,
+            bbox: [l.bbox[0] || 0, l.bbox[1] || 0, l.bbox[2] || 0, l.bbox[3] || 0] as [number, number, number, number],
+            baselineY: l.baselineY,
+            fontSizePt: l.fontSizePt,
+            confidence: l.confidence,
+            words: (l.words || []).map(w => ({
+              text: w.text,
+              bbox: [w.bbox[0] || 0, w.bbox[1] || 0, w.bbox[2] || 0, w.bbox[3] || 0] as [number, number, number, number],
+              confidence: w.confidence
+            }))
+          })),
           language: result.language,
           averageConfidence: result.averageConfidence
         };
@@ -128,7 +139,7 @@ export class OcrWorkflowService {
               lowConfWords.push({
                 text: word.text,
                 pageIndex: actualPageIndex,
-                bbox: word.bbox,
+                bbox: [word.bbox[0] || 0, word.bbox[1] || 0, word.bbox[2] || 0, word.bbox[3] || 0] as [number, number, number, number],
                 confidence: word.confidence
               });
             }
@@ -222,7 +233,7 @@ export class OcrWorkflowService {
               lowConfWords.push({
                 text: word.text,
                 pageIndex: actualPageIndex,
-                bbox: word.bbox,
+                bbox: [word.bbox[0] || 0, word.bbox[1] || 0, word.bbox[2] || 0, word.bbox[3] || 0] as [number, number, number, number],
                 confidence: word.confidence
               });
             }

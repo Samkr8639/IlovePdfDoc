@@ -940,4 +940,80 @@ describe('EditPdfComponent Integration Tests', () => {
     component.history.redo();
     expect(component.elements()[0].rotation).toBe(180);
   });
+  it('decrements pageIndex of elements on subsequent pages when a page is deleted', () => {
+    component.pages.set([
+      { pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 },
+      { pageIndex: 1, widthPt: 600, heightPt: 800, rotation: 0 },
+      { pageIndex: 2, widthPt: 600, heightPt: 800, rotation: 0 }
+    ]);
+    component.elements.set([
+      { id: 'el-p0', pageIndex: 0, type: 'shape', xPt: 50, yPt: 50, widthPt: 100, heightPt: 50, shapeType: 'rectangle', strokeColor: '#000000', fillColor: '#ffffff', strokeWidth: 1 },
+      { id: 'el-p1', pageIndex: 1, type: 'shape', xPt: 50, yPt: 50, widthPt: 100, heightPt: 50, shapeType: 'rectangle', strokeColor: '#000000', fillColor: '#ffffff', strokeWidth: 1 },
+      { id: 'el-p2', pageIndex: 2, type: 'shape', xPt: 50, yPt: 50, widthPt: 100, heightPt: 50, shapeType: 'rectangle', strokeColor: '#000000', fillColor: '#ffffff', strokeWidth: 1 }
+    ]);
+
+    component.deletePage(1);
+
+    expect(component.pages().length).toBe(2);
+    expect(component.pages()[0].pageIndex).toBe(0);
+    expect(component.pages()[1].pageIndex).toBe(1);
+
+    const remainingElements = component.elements();
+    expect(remainingElements.length).toBe(2);
+    expect(remainingElements.find(e => e.id === 'el-p0')?.pageIndex).toBe(0);
+    expect(remainingElements.find(e => e.id === 'el-p2')?.pageIndex).toBe(1);
+
+    component.history.undo();
+    expect(component.pages().length).toBe(3);
+    expect(component.elements().length).toBe(3);
+    expect(component.elements().find(e => e.id === 'el-p2')?.pageIndex).toBe(2);
+  });
+
+  it('cancels draft polygon shape when switching to a different tool', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }]);
+    component.activeTool.set('shapes');
+    component.shapeType.set('polygon');
+    component.draftPolygonPageIndex.set(0);
+    component.draftPolygonPoints.set([{ xPt: 10, yPt: 10 }, { xPt: 50, yPt: 50 }]);
+
+    expect(component.draftPolygonPoints().length).toBe(2);
+
+    component.selectTool('text');
+    expect(component.activeTool()).toBe('text');
+    expect(component.draftPolygonPoints().length).toBe(0);
+  });
+
+  it('nudges single selected element by dx and dy with arrow keys', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }]);
+    component.elements.set([
+      { id: 'nudge-me', pageIndex: 0, type: 'shape', xPt: 100, yPt: 200, widthPt: 50, heightPt: 50, shapeType: 'rectangle', strokeColor: '#000000', fillColor: '#ffffff', strokeWidth: 1 }
+    ]);
+    component.selectedElementId.set('nudge-me');
+
+    const arrowRightEvent = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+    component.onKeydown(arrowRightEvent);
+    expect(component.elements()[0].xPt).toBe(101);
+
+    const arrowUpShift = new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true });
+    component.onKeydown(arrowUpShift);
+    expect(component.elements()[0].yPt).toBe(210);
+  });
+
+  it('does not trigger canvas undo when Ctrl+Z is pressed inside an input field', () => {
+    component.pages.set([{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }]);
+    component.elements.set([]);
+    component.addShapeElement(10, 10, 0);
+    expect(component.history.canUndo()).toBe(true);
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    const inputEvent = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true });
+    Object.defineProperty(inputEvent, 'target', { value: input });
+    component.onKeydown(inputEvent);
+
+    expect(component.elements().length).toBe(1);
+    document.body.removeChild(input);
+  });
 });

@@ -126,7 +126,11 @@ export class TextFormattingService {
     if (!targetUrl || targetUrl === 'https://' || targetUrl === 'http://') {
       return '';
     }
-    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(targetUrl)) {
+    // Strict allowlist: reject dangerous protocols (javascript:, data:, file:, etc.)
+    if (/^(javascript|data|file|vbscript):/i.test(targetUrl)) {
+      return '';
+    }
+    if (!/^(https?:\/\/|mailto:|tel:)/i.test(targetUrl)) {
       targetUrl = 'https://' + targetUrl;
     }
     return targetUrl;

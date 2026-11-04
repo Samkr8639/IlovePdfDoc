@@ -21,7 +21,10 @@ export class CommandHistoryService {
    */
   execute(command: Command): void {
     command.execute();
-    this.undoStack.update(stack => [...stack, command]);
+    this.undoStack.update(stack => {
+      const next = [...stack, command];
+      return next.length > 50 ? next.slice(next.length - 50) : next;
+    });
     this.redoStack.set([]);
   }
 

@@ -6,7 +6,7 @@ import { Component, output } from '@angular/core';
   template: `
     <div class="section-badge-title">WHITEOUT</div>
     <div class="property-panel-card">
-      <p class="property-tip">Erase or hide sensitive text with an opaque cover rectangle.</p>
+      <p class="property-tip">Cover or hide content with an opaque whiteout rectangle (visual cover-up).</p>
       <button type="button" class="btn-action-primary" (click)="placeBlock.emit()">
         <span>+ Place Whiteout Block</span>
       </button>
