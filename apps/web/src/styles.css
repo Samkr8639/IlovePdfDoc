@@ -347,3 +347,33 @@ a:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* ==========================================================================
+   PERF: CUMULATIVE LAYOUT SHIFT (CLS) ZERO-DRIFT SIZING RESERVATIONS
+   Guarantees immediate block dimensions and height reservations for dropzone
+   and tool hero wrappers prior to JS execution and font hydration.
+   ========================================================================== */
+app-dropzone {
+  display: block;
+  width: 100%;
+  min-height: 340px;
+}
+
+app-edit-pdf-hero {
+  display: block;
+  width: 100%;
+  min-height: 600px;
+}
+
+.hero-dropzone-wrap {
+  min-height: 340px;
+}
+
+.unified-hero-section {
+  min-height: 520px;
+  box-sizing: border-box;
+}
+
+.unified-hero-section .tool-lead {
+  min-height: 54px;
+}

@@ -6,6 +6,13 @@ import { DropzoneComponent } from '../../../../shared/components/dropzone/dropzo
   selector: 'app-edit-pdf-hero',
   standalone: true,
   imports: [CommonModule, DropzoneComponent],
+  styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      min-height: 600px;
+    }
+  `],
   template: `
     <section class="unified-hero-section">
       <div class="container hero-content">
