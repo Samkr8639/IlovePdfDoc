@@ -9,12 +9,14 @@ import { EditToolType } from '../../models/document-model';
   template: `
     <div class="sidebar-section">
       <div class="section-badge-title">TOOLS</div>
-      <div class="tools-grid">
+      <div class="tools-grid" role="toolbar" aria-label="PDF editing tools">
         <!-- 1. Select -->
         <button
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'select'"
+          [attr.aria-pressed]="activeTool() === 'select'"
+          aria-label="Select tool"
           (click)="selectTool.emit('select')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -28,6 +30,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'text'"
+          [attr.aria-pressed]="activeTool() === 'text'"
+          aria-label="Text tool"
           (click)="selectTool.emit('text')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,6 +47,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'image'"
+          [attr.aria-pressed]="activeTool() === 'image'"
+          aria-label="Image tool"
           (click)="selectTool.emit('image')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -58,6 +64,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'draw'"
+          [attr.aria-pressed]="activeTool() === 'draw'"
+          aria-label="Draw tool"
           (click)="selectTool.emit('draw')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -74,6 +82,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'shapes'"
+          [attr.aria-pressed]="activeTool() === 'shapes'"
+          aria-label="Shapes tool"
           (click)="selectTool.emit('shapes')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -87,6 +97,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'highlight'"
+          [attr.aria-pressed]="activeTool() === 'highlight'"
+          aria-label="Highlight tool"
           (click)="selectTool.emit('highlight')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -101,6 +113,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'whiteout'"
+          [attr.aria-pressed]="activeTool() === 'whiteout'"
+          aria-label="Whiteout tool"
           (click)="selectTool.emit('whiteout')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -116,6 +130,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'sign'"
+          [attr.aria-pressed]="activeTool() === 'sign'"
+          aria-label="Signature tool"
           (click)="selectTool.emit('sign')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -131,6 +147,8 @@ import { EditToolType } from '../../models/document-model';
           type="button"
           class="tool-tile"
           [class.active]="activeTool() === 'link'"
+          [attr.aria-pressed]="activeTool() === 'link'"
+          aria-label="Link tool"
           (click)="selectTool.emit('link')">
           <svg class="lucide-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -147,4 +165,3 @@ export class ToolsGridComponent {
   readonly activeTool = input<EditToolType>('select');
   readonly selectTool = output<EditToolType>();
 }
-

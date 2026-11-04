@@ -892,8 +892,27 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- Tool Selection & Canvas Interaction ---
   selectTool(tool: EditToolType): void {
+    // If an active creation tool is clicked again, deselect it and revert to 'select'
+    if (this.activeTool() === tool) {
+      if (tool !== 'select') {
+        if (this.draftPolygonPoints().length > 0) {
+          this.cancelPolygonShape();
+        }
+        if (this.isDrawing) {
+          this.isDrawing = false;
+          this.isDrawingActive.set(false);
+        }
+        this.activeTool.set('select');
+      }
+      return;
+    }
+
     if (this.draftPolygonPoints().length > 0 && tool !== 'shapes') {
       this.cancelPolygonShape();
+    }
+    if (this.isDrawing && tool !== 'draw') {
+      this.isDrawing = false;
+      this.isDrawingActive.set(false);
     }
     this.activeTool.set(tool);
     if (tool !== 'select') {
@@ -3245,6 +3264,10 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         this.areaSelectionService.clearSelection();
       } else if (this.draftPolygonPoints().length > 0) {
         this.cancelPolygonShape();
+      } else if (this.activeTool() !== 'select') {
+        this.selectTool(this.activeTool());
+      } else if (this.selectedElementId()) {
+        this.selectedElementId.set(null);
       }
     } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'c') {
       const target = event.target as HTMLElement | null;

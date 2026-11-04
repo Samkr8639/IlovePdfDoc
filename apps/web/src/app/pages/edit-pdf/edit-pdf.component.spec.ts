@@ -49,6 +49,38 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.activeTool()).toBe('ocr');
   });
 
+  it('should toggle and deselect active tool back to select on re-click', () => {
+    // 1. Activate 'text' tool
+    component.selectTool('text');
+    expect(component.activeTool()).toBe('text');
+
+    // 2. Click 'text' again -> should toggle / deselect and revert to 'select'
+    component.selectTool('text');
+    expect(component.activeTool()).toBe('select');
+
+    // 3. Activate 'draw' tool
+    component.selectTool('draw');
+    expect(component.activeTool()).toBe('draw');
+
+    // 4. Click 'draw' again -> should revert to 'select'
+    component.selectTool('draw');
+    expect(component.activeTool()).toBe('select');
+
+    // 5. Activate 'shapes' tool with draft polygon points
+    component.selectTool('shapes');
+    expect(component.activeTool()).toBe('shapes');
+    component.draftPolygonPoints.set([{ xPt: 10, yPt: 10 }, { xPt: 20, yPt: 20 }]);
+    component.selectTool('shapes');
+    expect(component.activeTool()).toBe('select');
+    expect(component.draftPolygonPoints().length).toBe(0);
+
+    // 6. Clicking 'select' stays on 'select' and preserves selected element
+    component.selectedElementId.set('elem-1');
+    component.selectTool('select');
+    expect(component.activeTool()).toBe('select');
+    expect(component.selectedElementId()).toBe('elem-1');
+  });
+
   it('validates OCR page ranges accurately', () => {
     component.pages.set([
       { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },
