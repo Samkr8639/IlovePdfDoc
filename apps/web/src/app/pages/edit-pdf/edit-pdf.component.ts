@@ -181,7 +181,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly features = EDIT_PDF_FEATURES;
   readonly browserTools = computed(() => this.features.filter(f => f.category === 'tools'));
   readonly cloudTools = computed(() => this.features.filter(f => f.category === 'cloud_tools'));
-  readonly activeTool = signal<EditToolType>('select');
+  readonly activeTool = signal<EditToolType | null>('select');
 
   // Text Properties
   readonly textFont = signal<string>('Inter');
@@ -422,7 +422,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.startHighlightDrag(pageIndex, event.clientX, event.clientY);
       return;
     }
-    if (this.activeTool() === 'select' && this.editorMode() === 'annotate' && event.button === 0) {
+    if ((this.activeTool() === 'select' || this.activeTool() === null) && this.editorMode() === 'annotate' && event.button === 0) {
       this.selectedElementId.set(null);
       const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
       if (pageEl) {
@@ -480,7 +480,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       this.startHighlightDrag(pageIndex, t.clientX, t.clientY);
       return;
     }
-    if (this.activeTool() === 'select' && this.editorMode() === 'annotate' && event.touches.length > 0) {
+    if ((this.activeTool() === 'select' || this.activeTool() === null) && this.editorMode() === 'annotate' && event.touches.length > 0) {
       this.selectedElementId.set(null);
       const t = event.touches[0];
       const pageEl = document.getElementById(`pdf-page-${pageIndex}`);
@@ -892,18 +892,18 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   // --- Tool Selection & Canvas Interaction ---
   selectTool(tool: EditToolType): void {
-    // If an active creation tool is clicked again, deselect it and revert to 'select'
+    // If the clicked tool is already active, deselect it (toggle off to null)
     if (this.activeTool() === tool) {
-      if (tool !== 'select') {
-        if (this.draftPolygonPoints().length > 0) {
-          this.cancelPolygonShape();
-        }
-        if (this.isDrawing) {
-          this.isDrawing = false;
-          this.isDrawingActive.set(false);
-        }
-        this.activeTool.set('select');
+      if (this.draftPolygonPoints().length > 0) {
+        this.cancelPolygonShape();
       }
+      if (this.isDrawing) {
+        this.isDrawing = false;
+        this.isDrawingActive.set(false);
+      }
+      this.selectedElementId.set(null);
+      this.areaSelectionService.clearSelection();
+      this.activeTool.set(null);
       return;
     }
 
@@ -937,6 +937,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
     switch (this.activeTool()) {
       case 'select':
+      case null:
         if (!this.wasMarqueeDragged) {
           this.areaSelectionService.clearSelection();
           this.selectedElementId.set(null);
@@ -1514,7 +1515,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   onElementMouseDown(el: EditElement, event: MouseEvent): void {
-    if (this.activeTool() !== 'select') return;
+    if (this.activeTool() !== 'select' && this.activeTool() !== null) return;
     if (this.editorMode() === 'annotate' && (el as TextEditElement).isPageTextLine) return;
     event.stopPropagation();
     this.selectElement(el, event);
@@ -2202,7 +2203,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       execute: () => {
         this.elements.update(list => [...list, newElement]);
         this.selectedElementId.set(newElement.id);
-        this.selectTool('select');
+        this.activeTool.set('select');
       },
       undo: () => {
         this.elements.update(list => list.filter(e => e.id !== newElement.id));
@@ -2932,7 +2933,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         execute: () => {
           this.elements.update(list => [...list, ...allGeneratedElements]);
           this.editorMode.set('edit');
-          this.selectTool('select');
+          this.activeTool.set('select');
           this.selectedElementId.set(null);
         },
         undo: () => {
@@ -3264,8 +3265,8 @@ export class EditPdfComponent implements OnInit, OnDestroy {
         this.areaSelectionService.clearSelection();
       } else if (this.draftPolygonPoints().length > 0) {
         this.cancelPolygonShape();
-      } else if (this.activeTool() !== 'select') {
-        this.selectTool(this.activeTool());
+      } else if (this.activeTool() !== null) {
+        this.selectTool(this.activeTool()!);
       } else if (this.selectedElementId()) {
         this.selectedElementId.set(null);
       }

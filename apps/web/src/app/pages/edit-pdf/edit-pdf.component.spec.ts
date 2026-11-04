@@ -49,36 +49,41 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.activeTool()).toBe('ocr');
   });
 
-  it('should toggle and deselect active tool back to select on re-click', () => {
-    // 1. Activate 'text' tool
+  it('should toggle and deselect active tool on re-click (including select tool)', () => {
+    // 1. Initial tool is 'select'
+    expect(component.activeTool()).toBe('select');
+
+    // 2. Click 'select' tool while active -> should deselect to null
+    component.selectTool('select');
+    expect(component.activeTool()).toBeNull();
+
+    // 3. Click 'select' tool again -> should select it
+    component.selectTool('select');
+    expect(component.activeTool()).toBe('select');
+
+    // 4. Activate 'text' tool
     component.selectTool('text');
     expect(component.activeTool()).toBe('text');
 
-    // 2. Click 'text' again -> should toggle / deselect and revert to 'select'
+    // 5. Click 'text' again -> should toggle / deselect to null
     component.selectTool('text');
-    expect(component.activeTool()).toBe('select');
+    expect(component.activeTool()).toBeNull();
 
-    // 3. Activate 'draw' tool
+    // 6. Activate 'draw' tool
     component.selectTool('draw');
     expect(component.activeTool()).toBe('draw');
 
-    // 4. Click 'draw' again -> should revert to 'select'
+    // 7. Click 'draw' again -> should deselect to null
     component.selectTool('draw');
-    expect(component.activeTool()).toBe('select');
+    expect(component.activeTool()).toBeNull();
 
-    // 5. Activate 'shapes' tool with draft polygon points
+    // 8. Activate 'shapes' tool with draft polygon points
     component.selectTool('shapes');
     expect(component.activeTool()).toBe('shapes');
     component.draftPolygonPoints.set([{ xPt: 10, yPt: 10 }, { xPt: 20, yPt: 20 }]);
     component.selectTool('shapes');
-    expect(component.activeTool()).toBe('select');
+    expect(component.activeTool()).toBeNull();
     expect(component.draftPolygonPoints().length).toBe(0);
-
-    // 6. Clicking 'select' stays on 'select' and preserves selected element
-    component.selectedElementId.set('elem-1');
-    component.selectTool('select');
-    expect(component.activeTool()).toBe('select');
-    expect(component.selectedElementId()).toBe('elem-1');
   });
 
   it('validates OCR page ranges accurately', () => {

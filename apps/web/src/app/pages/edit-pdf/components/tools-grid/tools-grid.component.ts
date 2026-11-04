@@ -162,6 +162,6 @@ import { EditToolType } from '../../models/document-model';
   `
 })
 export class ToolsGridComponent {
-  readonly activeTool = input<EditToolType>('select');
+  readonly activeTool = input<EditToolType | null>('select');
   readonly selectTool = output<EditToolType>();
 }

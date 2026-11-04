@@ -553,7 +553,7 @@
             (modeChange)="ocrMode.set($event)"
             (startRecognition)="startOcrRecognition()"
             (jumpToWord)="jumpToLowConfidenceWord($event)" />
-        } @else if (areaSelectionService.hasSelection() || (activeTool() === 'select' && !selectedElement() && areaSelectionService.canPaste())) {
+        } @else if (areaSelectionService.hasSelection() || ((activeTool() === 'select' || activeTool() === null) && !selectedElement() && areaSelectionService.canPaste())) {
           <app-selection-panel
             [selection]="areaSelectionService.selection()"
             [canPaste]="areaSelectionService.canPaste()"
