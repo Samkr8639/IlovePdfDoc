@@ -175,7 +175,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #475569;
   margin-bottom: 6px;
 }
 
@@ -200,8 +200,8 @@
   justify-content: center;
   gap: 10px;
   font-size: 13px;
-  color: #94a3b8;
-  font-weight: 500;
+  color: #334155;
+  font-weight: 600;
   padding: 16px;
 }
 

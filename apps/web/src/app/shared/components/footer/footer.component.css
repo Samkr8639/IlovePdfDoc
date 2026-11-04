@@ -90,6 +90,7 @@
   padding: 0;
   cursor: default;
   text-align: left;
+  min-height: 44px;
 }
 
 .col-toggle-chevron {
@@ -122,7 +123,11 @@
   color: #94a3b8;
   text-decoration: none;
   transition: color 0.18s ease, transform 0.18s ease;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 0;
+  box-sizing: border-box;
 }
 
 .footer-item:hover {
@@ -338,9 +343,11 @@
     padding-bottom: 24px;
   }
   .footer-col-toggle {
-    padding: 12px 0;
+    padding: 14px 0;
     cursor: pointer;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    min-height: 48px;
+    box-sizing: border-box;
   }
   .col-toggle-chevron {
     display: block;
@@ -358,6 +365,13 @@
   }
   .footer-nav-list.mobile-open {
     display: flex;
+  }
+  .footer-item {
+    min-height: 48px;
+    padding: 12px 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
   }
   .sub-bar-inner {
     flex-direction: column;
