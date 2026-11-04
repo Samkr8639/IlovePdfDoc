@@ -29,7 +29,8 @@
 
 .footer-brand-logo {
   height: 30px;
-  width: auto;
+  width: 140px;
+  aspect-ratio: 168 / 36;
   display: block;
 }
 

@@ -98,7 +98,7 @@
           [class.active]="isMenuOpen()"
           [attr.aria-expanded]="isMenuOpen()"
           aria-haspopup="true"
-          aria-label="Select Language"
+          [attr.aria-label]="'Select Language, current: ' + currentLang().nativeName"
         >
           <svg class="globe-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="12" cy="12" r="10"></circle>

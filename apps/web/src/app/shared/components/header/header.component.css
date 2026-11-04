@@ -54,7 +54,8 @@
 
 .brand-logo-img {
   height: 34px;
-  width: auto;
+  width: 158px;
+  aspect-ratio: 168 / 36;
   display: block;
   object-fit: contain;
 }
