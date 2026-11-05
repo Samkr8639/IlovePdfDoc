@@ -16,7 +16,7 @@ import fs from 'fs';
 // Helper: check if LibreOffice is available
 // ──────────────────────────────────────────────────────────────
 
-let _sofficePath: string | null = null;
+let _sofficePath: string | null | undefined = undefined;
 
 async function getSofficePath(): Promise<string | null> {
   if (_sofficePath !== undefined) return _sofficePath;

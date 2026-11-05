@@ -1,72 +1,14 @@
 import { normalizeDocx } from './normalize-docx';
-/**
- * Word to PDF conversion service using LibreOffice headless.
- *
- * Security principles:
- *  - Only execFile() with an args array is used — never exec() / shell string
- *  - Each job gets an isolated temp directory with a unique profile
- *  - No outbound network calls from LibreOffice (macros disabled, no online updates)
- *  - Temp dirs are always cleaned up (finally blocks)
- */
-
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
-import crypto from 'crypto';
 import { AppError } from '../../middleware/errorHandler';
+import {
+  checkLibreOffice,
+  getSofficeBinary,
+  formatBytes,
+  runSofficeConversion
+} from '../office-to-pdf';
 
-const execFileAsync = promisify(execFile);
-
-// ──────────────────────────────────────────────────────────────
-// Configuration
-// ──────────────────────────────────────────────────────────────
-
-function getSofficeBinary(): string {
-  if (process.env['SOFFICE_PATH']) {
-    return process.env['SOFFICE_PATH'];
-  }
-  if (process.platform === 'win32') {
-    const candidates = [
-      'C:\\Program Files\\LibreOffice\\program\\soffice.com',
-      'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
-      'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.com',
-      'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe'
-    ];
-    for (const c of candidates) {
-      if (fs.existsSync(c)) return c;
-    }
-  }
-  return 'soffice';
-}
-
-const CONVERSION_TIMEOUT_MS = parseInt(process.env['WORD_TO_PDF_TIMEOUT_MS'] || '90000', 10);
-
-// ──────────────────────────────────────────────────────────────
-// LibreOffice availability detection
-// ──────────────────────────────────────────────────────────────
-
-let libreOfficeVersion: string | null = null;
-let libreOfficeAvailable = false;
-let libreOfficeChecked = false;
-
-export async function checkLibreOffice(): Promise<{ available: boolean; version: string | null }> {
-  if (libreOfficeChecked) {
-    return { available: libreOfficeAvailable, version: libreOfficeVersion };
-  }
-  try {
-    const binary = getSofficeBinary();
-    const { stdout } = await execFileAsync(binary, ['--version'], { timeout: 10000 });
-    libreOfficeVersion = stdout.trim();
-    libreOfficeAvailable = true;
-  } catch {
-    libreOfficeAvailable = false;
-    libreOfficeVersion = null;
-  }
-  libreOfficeChecked = true;
-  return { available: libreOfficeAvailable, version: libreOfficeVersion };
-}
+export { checkLibreOffice, formatBytes, getSofficeBinary };
 
 // ──────────────────────────────────────────────────────────────
 // Input Validation
@@ -172,198 +114,36 @@ export async function convertWordToPdf(
   originalname: string,
   options: ConversionOptions = {}
 ): Promise<ConversionResult> {
-  const { available } = await checkLibreOffice();
-  if (!available) {
-    throw new AppError(
-      503,
-      'ENGINE_UNAVAILABLE',
-      'PDF conversion engine (LibreOffice) is not available on this server.'
-    );
-  }
+  const warnings: string[] = [];
+  let fileBuffer = buffer;
+  const ext = path.extname(originalname).toLowerCase() || '.docx';
 
-  const jobId = `wtp-${crypto.randomUUID()}`;
-  const tmpDir = path.join(os.tmpdir(), jobId);
-  const profileDir = path.join(os.tmpdir(), `${jobId}-profile`);
-
-  try {
-    await fs.promises.mkdir(tmpDir, { recursive: true });
-    await fs.promises.mkdir(profileDir, { recursive: true });
-
-    const warnings: string[] = [];
-    let fileBuffer = buffer;
-    const ext = path.extname(originalname).toLowerCase() || '.docx';
-
-    // Apply DOCX table fidelity normalizer (resolves exact row height clipping in LibreOffice)
-    if (ext === '.docx') {
-      try {
-        const norm = await normalizeDocx(fileBuffer);
-        fileBuffer = norm.buffer;
-        if (norm.fixes.exactToAtLeast > 0 || (norm.fixes.framesNormalized && norm.fixes.framesNormalized > 0)) {
-          warnings.push('Fixed-height table rows were adjusted so borders and shading display correctly.');
-        }
-      } catch {
-        // Fallback to original buffer if normalization fails
+  // Apply DOCX table fidelity normalizer (resolves exact row height clipping in LibreOffice)
+  if (ext === '.docx') {
+    try {
+      const norm = await normalizeDocx(fileBuffer);
+      fileBuffer = norm.buffer;
+      if (norm.fixes.exactToAtLeast > 0 || (norm.fixes.framesNormalized && norm.fixes.framesNormalized > 0)) {
+        warnings.push('Fixed-height table rows were adjusted so borders and shading display correctly.');
       }
+    } catch {
+      // Fallback to original buffer if normalization fails
     }
-
-    // Save input file with its proper extension
-    const inputPath = path.join(tmpDir, `input${ext}`);
-    await fs.promises.writeFile(inputPath, fileBuffer);
-
-    // Build LibreOffice filter options for PDF export
-    const filterString = options.output === 'pdfa'
-      ? 'pdf:writer_pdf_Export:SelectPdfVersion=1'
-      : 'pdf:writer_pdf_Export';
-
-    const cleanProfile = profileDir.split(path.sep).join('/');
-
-    // Build the LibreOffice command arguments (NO shell string — args array only)
-    // Note: -env:UserInstallation requires a single leading dash (-) in LibreOffice CLI
-    const args = [
-      `-env:UserInstallation=file:///${cleanProfile}`,
-      '--headless',
-      '--norestore',
-      '--convert-to',
-      filterString,
-      '--outdir',
-      tmpDir,
-      inputPath
-    ];
-
-    const binary = getSofficeBinary();
-    await execFileAsync(binary, args, {
-      timeout: CONVERSION_TIMEOUT_MS,
-      env: {
-        ...process.env,
-        // Prevent LibreOffice from connecting to the network
-        http_proxy: 'http://127.0.0.1:0',
-        https_proxy: 'http://127.0.0.1:0',
-        HOME: profileDir
-      }
-    });
-
-    // Locate the output PDF (LibreOffice uses the same basename)
-    const basename = path.basename(inputPath, ext);
-    const pdfPath = path.join(tmpDir, `${basename}.pdf`);
-
-    if (!fs.existsSync(pdfPath)) {
-      throw new AppError(
-        422,
-        'CONVERSION_FAILED',
-        `Conversion produced no output for '${originalname}'. The file may be corrupted or in an unsupported format.`
-      );
-    }
-
-    const pdfBuffer = await fs.promises.readFile(pdfPath);
-
-    if (!pdfBuffer || pdfBuffer.length < 100) {
-      throw new AppError(
-        422,
-        'CONVERSION_FAILED',
-        `Conversion of '${originalname}' produced an empty PDF.`
-      );
-    }
-
-    if (pdfBuffer.subarray(0, 5).toString('ascii') !== '%PDF-') {
-      throw new AppError(
-        422,
-        'CONVERSION_FAILED',
-        `Conversion of '${originalname}' did not produce a valid PDF.`
-      );
-    }
-
-    // Best-effort page count via %% markers (LibreOffice includes /Pages in cross-reference)
-    const pageCount = estimatePageCount(pdfBuffer);
-
-    return {
-      pdfBuffer,
-      pageCount,
-      fontsSubstituted: [], // LibreOffice does not easily expose font substitutions
-      warnings
-    };
-  } catch (err: unknown) {
-    if (err instanceof AppError) throw err;
-    const e = err as NodeJS.ErrnoException & { code?: string; statusCode?: number; killed?: boolean };
-
-    if (e.statusCode) throw err;
-
-    if (e.killed || String(e.message).toLowerCase().includes('timed out')) {
-      throw new AppError(
-        504,
-        'CONVERSION_TIMEOUT',
-        `Conversion of '${originalname}' timed out. Please try with a simpler document.`
-      );
-    }
-
-    throw new AppError(
-      422,
-      'CONVERSION_FAILED',
-      `Failed to convert '${originalname}': ${e.message || 'Unknown error'}`
-    );
-  } finally {
-    // Always clean up temp dirs
-    await fs.promises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
-    await fs.promises.rm(profileDir, { recursive: true, force: true }).catch(() => {});
   }
+
+  const filterString = options.output === 'pdfa'
+    ? 'pdf:writer_pdf_Export:SelectPdfVersion=1'
+    : 'pdf:writer_pdf_Export';
+
+  const res = await runSofficeConversion(fileBuffer, ext, 'wtp', {
+    profile: 'writer',
+    filterString
+  });
+
+  return {
+    pdfBuffer: res.pdfBuffer,
+    pageCount: res.pageCount,
+    fontsSubstituted: [],
+    warnings: [...warnings, ...res.warnings]
+  };
 }
-
-// ──────────────────────────────────────────────────────────────
-// Helpers
-// ──────────────────────────────────────────────────────────────
-
-function buildFilterOptions(options: ConversionOptions): Record<string, unknown> {
-  const opts: Record<string, unknown> = {};
-
-  // PDF/A compliance
-  if (options.output === 'pdfa') {
-    opts['SelectPdfVersion'] = 1; // PDF/A-1b
-    opts['UseTaggedPDF'] = true;
-  }
-
-  // Image quality
-  if (options.imageQuality === 'smaller') {
-    opts['ReduceImageResolution'] = true;
-    opts['MaxImageResolution'] = 150;
-    opts['Quality'] = 75;
-  } else {
-    opts['Quality'] = 90;
-  }
-
-  // Bookmarks
-  if (options.embedBookmarks !== undefined) {
-    opts['ExportBookmarks'] = options.embedBookmarks;
-  }
-
-  // Tagged PDF (accessibility)
-  if (options.useTaggedPdf !== undefined) {
-    opts['UseTaggedPDF'] = options.useTaggedPdf;
-  }
-
-  // Hyperlinks
-  if (options.exportHyperlinks !== undefined) {
-    opts['ExportLinksRelativeFsys'] = false;
-  }
-
-  return opts;
-}
-
-function estimatePageCount(pdfBuffer: Buffer): number {
-  try {
-    // Look for /Count N in the /Pages dictionary — a best-effort count
-    const text = pdfBuffer.toString('latin1', 0, Math.min(pdfBuffer.length, 65536));
-    const match = text.match(/\/Count\s+(\d+)/);
-    if (match) return parseInt(match[1], 10);
-  } catch {
-    // ignore
-  }
-  return 1;
-}
-
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-}
-
