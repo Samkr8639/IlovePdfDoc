@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import crypto from 'crypto';
 import { AppError } from '../../middleware/errorHandler';
-import { OfficeConversionOptions, OfficeConversionResult } from './types';
+import { OfficeConversionOptions, OfficeConversionResult, OfficeProfile } from './types';
 
 const execFileAsync = promisify(execFile);
 
@@ -176,7 +176,7 @@ export const globalOfficePool = new OfficeConversionPool();
 
 export async function createIsolatedProfile(
   profileDir: string,
-  profileType: 'writer' | 'calc',
+  profileType: OfficeProfile,
   allowRecalculation = false
 ): Promise<void> {
   const userDir = path.join(profileDir, 'user');

@@ -7,6 +7,7 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'pdf-to-excel',
   'word-to-pdf',
   'excel-to-pdf',
+  'powerpoint-to-pdf',
   'edit-pdf'
 ] as const;
 
@@ -230,22 +231,31 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     id: 'powerpoint-to-pdf',
     name: 'PowerPoint to PDF',
     shortDescription: 'Make PPT and PPTX slideshows easy to view by converting them to PDF.',
-    longDescription: 'Preserve slide animations and presentation layouts as a fixed-format PDF document.',
+    longDescription: 'Convert PPTX, PPT, PPSX, PPS, PPTM, and ODP presentations into high-fidelity PDF documents with slides, notes, or handouts layout and preserved design.',
     category: 'convert',
     route: '/powerpoint-to-pdf',
     icon: 'ppt-to-pdf',
-    processingMode: 'hybrid',
-    acceptedFileTypes: ['.ppt', '.pptx'],
+    processingMode: 'server',
+    acceptedFileTypes: ['.pptx', '.ppt', '.ppsx', '.pps', '.pptm', '.odp'],
     maxFiles: 10,
-    maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    maxFileSizeBytes: 100 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'High Fidelity',
     seo: {
-      title: 'PowerPoint to PDF Converter | PDF flow',
-      description: 'Convert PPT and PPTX presentations to PDF format.',
-      keywords: ['powerpoint to pdf', 'ppt to pdf', 'pptx to pdf'],
+      title: 'PowerPoint to PDF Converter Online Free | PDFTailor',
+      description: 'Convert PPT and PPTX presentations to high-quality PDF format. Preserve slide layout, embedded media frames, speaker notes, and handouts.',
+      keywords: ['powerpoint to pdf', 'ppt to pdf', 'pptx to pdf', 'convert ppt to pdf'],
       canonical: 'https://pdfflow.app/powerpoint-to-pdf',
-      faqs: []
+      faqs: [
+        {
+          question: 'Are animations and transitions preserved in the PDF?',
+          answer: 'Animations and transitions are dynamic screen effects not supported by static PDF documents. Each slide is exported in its final state with all elements fully visible.'
+        },
+        {
+          question: 'Can I export handouts or speaker notes?',
+          answer: 'Yes, select either "Slides with speaker notes" or "Handout" layout in the sidebar options to export slides with notes or 1, 2, 3, 4, 6, or 9 slides per page.'
+        }
+      ]
     }
   },
   {

@@ -1,4 +1,4 @@
-export type OfficeProfile = 'writer' | 'calc';
+export type OfficeProfile = 'writer' | 'calc' | 'impress';
 
 export interface OfficeConversionOptions {
   profile: OfficeProfile;
