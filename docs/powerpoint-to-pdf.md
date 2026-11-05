@@ -121,3 +121,4 @@ Substituted fonts are returned in the response metadata (`fontsSubstituted` arra
 | `INVALID_SLIDE_RANGE` | 400 | Slide range string is malformed or exceeds total slides in deck. |
 | `CONVERSION_TIMEOUT` | 504 | LibreOffice conversion took longer than 120 seconds. |
 | `SERVER_BUSY` | 503 | Concurrency queue full (>20 pending jobs). Returns `Retry-After: 5`. |
+
