@@ -1,0 +1,767 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- GLOBAL ERROR BANNER (Visible across all states) -->
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">
+      <div class="container error-banner-inner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span class="error-text">{{ errorMessage() }}</span>
+        <button type="button" class="error-close-btn" (click)="errorMessage.set(null)" aria-label="Dismiss error">✕</button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       1. UPLOAD STATE (Hero, Dropzone, 4 Features, 3-Step How-To, FAQ)
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <!-- BREADCRUMBS -->
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+          <ol class="breadcrumb-list">
+            <li><a href="/">Home</a></li>
+            <li class="separator">/</li>
+            <li><a href="/#convert">Convert PDF</a></li>
+            <li class="separator">/</li>
+            <li class="current" aria-current="page">PowerPoint to PDF</li>
+          </ol>
+        </nav>
+
+        <h1 class="tool-h1">PowerPoint to PDF Converter</h1>
+        <p class="tool-lead">
+          Convert PowerPoint presentations (.pptx, .ppt, .ppsx, .pps, .pptm, .odp) to beautifully formatted PDF documents. Keep slide layouts, speaker notes, and handouts perfectly intact.
+        </p>
+
+        <!-- UPLOADER COMPONENT -->
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            [title]="'Select PowerPoint files'"
+            [subtitle]="'or drop PPTX, PPT, PPS, ODP presentations here'"
+            [acceptedTypes]="'.pptx,.ppt,.ppsx,.pps,.pptm,.odp,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.oasis.opendocument.presentation'"
+            [multiple]="true"
+            [limitInfo]="'Up to 10 presentations • 100 MB each'"
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section">
+      <div class="container">
+        <div class="adsense-wrapper" aria-label="Advertisement">
+          <div class="adsense-placeholder">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span class="ad-label">ADVERTISEMENT</span>
+            <span class="ad-dimensions">Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4-COLUMN CANONICAL FEATURE CARDS -->
+    <section class="editorial-features-section">
+      <div class="container">
+        <div class="features-header text-center">
+          <h2 class="features-title">Flawless Presentation to PDF Conversion</h2>
+          <p class="features-subtitle">Precision slide scaling, speaker notes, and handout layouts engineered for conferences, business reports, and pitches.</p>
+        </div>
+
+        <div class="features-grid">
+          <!-- CARD 1 -->
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="20" x2="22" y2="20"></line>
+              </svg>
+            </div>
+            <h3 class="feature-heading">Handouts & Speaker Notes</h3>
+            <p class="feature-description">
+              Choose single slides, slides with speaker notes, or 1 to 9 slides per page handouts with ruled note lines.
+            </p>
+          </div>
+
+          <!-- CARD 2 -->
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-heading">Exact Visual Fidelity</h3>
+            <p class="feature-description">
+              Shapes, gradients, fonts, tables, charts, and embedded media frames are converted cleanly to vector PDF elements.
+            </p>
+          </div>
+
+          <!-- CARD 3 -->
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3 class="feature-heading">Strict Document Privacy</h3>
+            <p class="feature-description">
+              Your presentation is sent over an encrypted connection, converted on our server and deleted automatically after 10 minutes.
+            </p>
+          </div>
+
+          <!-- CARD 4 -->
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3 class="feature-heading">Batch & Merged Output</h3>
+            <p class="feature-description">
+              Convert up to 10 presentations simultaneously. Download individual PDFs in a zip or merge them into a single presentation document.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-STEP GUIDE (Numbered 01, 02, 03) -->
+    <section class="how-to-guide-section">
+      <div class="container">
+        <div class="guide-header text-center">
+          <h2 class="guide-title">How to Convert PowerPoint to PDF Online</h2>
+          <p class="guide-subtitle">Three effortless steps to transform your slides into publication-ready PDF documents.</p>
+        </div>
+
+        <div class="guide-steps-grid">
+          <!-- STEP 1 -->
+          <div class="guide-step-card">
+            <div class="step-badge">01</div>
+            <h3 class="step-title">Upload your presentation</h3>
+            <p class="step-text">
+              Drag and drop your PowerPoint (.pptx, .ppt, .odp) files into the uploader or import from Google Drive or Dropbox.
+            </p>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="guide-step-card">
+            <div class="step-badge">02</div>
+            <h3 class="step-title">Choose layout & options</h3>
+            <p class="step-text">
+              Select standard slides, speaker notes, or handouts with custom slides per page and slide range filtering.
+            </p>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="guide-step-card">
+            <div class="step-badge">03</div>
+            <h3 class="step-title">Download your PDF</h3>
+            <p class="step-text">
+              Click Convert to PDF and download your publication-ready document or merged PDF archive immediately.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FREQUENTLY ASKED QUESTIONS ACCORDION -->
+    <section class="faq-accordion-section">
+      <div class="container">
+        <div class="faq-header text-center">
+          <h2 class="faq-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3 class="faq-question">Are animations and transitions preserved in the PDF?</h3>
+            <p class="faq-answer">
+              Animations and slide transitions are dynamic on-screen effects not supported by static PDF documents. Each slide is exported in its final state with all elements fully visible.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">Can I export handouts or speaker notes?</h3>
+            <p class="faq-answer">
+              Yes, select either "Slides with speaker notes" or "Handout" layout in the sidebar options to export slides with notes or 1, 2, 3, 4, 6, or 9 slides per page with ruled note lines.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">Are my presentations uploaded to your servers securely?</h3>
+            <p class="faq-answer">
+              Your presentation is sent over an encrypted TLS connection, converted in an isolated memory sandbox on our server, and deleted automatically after 10 minutes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       2. ORGANIZE WORKSPACE STATE (Centered Cards, Floating Dock, Options Sidebar)
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- Hidden file input for adding more files -->
+      <input
+        #addMoreInput
+        type="file"
+        multiple
+        accept=".pptx,.ppt,.ppsx,.pps,.pptm,.odp,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.oasis.opendocument.presentation"
+        class="hidden-file-input"
+        (change)="onFilesAdded($any($event.target).files); addMoreInput.value = ''"
+      />
+
+      <!-- MAIN CANVAS AREA -->
+      <div class="canvas-presentation-area">
+        <div class="canvas-files-grid">
+          @for (item of selectedFiles(); track item.id; let i = $index) {
+            <div class="file-card" [class.has-thumbnail]="item.deckInfo?.thumbnailUrl">
+              <!-- Delete File Button -->
+              <button
+                type="button"
+                class="card-remove-btn"
+                (click)="removeFile(i)"
+                title="Remove presentation"
+                aria-label="Remove presentation"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+
+              <!-- CARD VISUAL PREVIEW / THUMBNAIL -->
+              <div class="card-visual-preview">
+                <div class="sheet-corner-fold"></div>
+                <div class="file-badge pptx-badge">{{ item.extension.replace('.', '').toUpperCase() }}</div>
+
+                @if (item.deckInfo?.thumbnailUrl) {
+                  <img [src]="item.deckInfo.thumbnailUrl" class="card-thumbnail-img" [alt]="item.name" />
+                } @else {
+                  <div class="ppt-slide-preview">
+                    <div class="slide-title-skeleton"></div>
+                    <div class="slide-content-skeleton">
+                      <div class="slide-bullet-skeleton"></div>
+                      <div class="slide-bullet-skeleton w-75"></div>
+                      <div class="slide-bullet-skeleton w-50"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- FILE INFO -->
+              <div class="card-file-info">
+                <span class="file-name" [title]="item.name">{{ item.name }}</span>
+                <span class="file-meta">
+                  {{ item.formattedSize }}
+                  @if (item.deckInfo?.slideCount) {
+                    • {{ item.deckInfo.slideCount }} {{ item.deckInfo.slideCount === 1 ? 'slide' : 'slides' }}
+                  }
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING MULTI-DOCUMENT UPLOAD PILL (Upper Right of Canvas) -->
+        <div class="floating-tools-dock" role="toolbar" aria-label="Add more presentations">
+          <!-- 1. Add More Files -->
+          <div class="dock-btn-wrap">
+            <button type="button" class="dock-square-btn add-more-action" (click)="addMoreInput.click()"
+              title="Add more presentations" aria-label="Add more presentations">
+              <span class="dock-count-badge">{{ selectedFiles().length }}</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"
+                stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Add presentations</span>
+          </div>
+
+          <!-- 2. Computer / Laptop Upload -->
+          <div class="dock-btn-wrap">
+            <button type="button" class="dock-icon-btn pc-action" (click)="addMoreInput.click()"
+              title="Upload from computer" aria-label="Upload from computer">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="3"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Upload from PC</span>
+          </div>
+
+          <!-- 3. Google Drive -->
+          <div class="dock-btn-wrap">
+            <button type="button" class="dock-icon-btn drive-action" (click)="openGoogleDrive($event)"
+              title="Google Drive" aria-label="Add from Google Drive">
+              <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none" aria-hidden="true">
+                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" />
+                <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47" />
+                <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335" />
+                <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" />
+                <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" />
+                <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" />
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Google Drive</span>
+          </div>
+
+          <!-- 4. Dropbox -->
+          <div class="dock-btn-wrap">
+            <button type="button" class="dock-icon-btn dropbox-action" (click)="openDropbox($event)" title="Dropbox"
+              aria-label="Add from Dropbox">
+              <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF" aria-hidden="true">
+                <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z" />
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Dropbox</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOBILE SETTINGS TOGGLE BUTTON -->
+      <button
+        type="button"
+        class="mobile-gear-btn"
+        [class.active]="isSidePanelOpen()"
+        (click)="isSidePanelOpen.set(!isSidePanelOpen())"
+        aria-label="Toggle conversion settings"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <!-- MOBILE PANEL BACKDROP -->
+      @if (isSidePanelOpen()) {
+        <div class="mobile-panel-backdrop" (click)="isSidePanelOpen.set(false)" aria-hidden="true"></div>
+      }
+
+      <!-- RIGHT SIDEBAR: OPTIONS -->
+      <aside class="sidebar-action-panel" [class.panel-open]="isSidePanelOpen()">
+        <button type="button" class="sidebar-mobile-close" (click)="isSidePanelOpen.set(false)" aria-label="Close settings">
+          ✕
+        </button>
+
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">PowerPoint to PDF</h2>
+        </div>
+
+        <div class="sidebar-scrollable-content">
+          <!-- SECTION 1: OUTPUT FORMAT -->
+          <div class="option-section">
+            <span class="option-label">OUTPUT FORMAT</span>
+            <div class="radio-card-stack">
+              <label class="radio-card" [class.selected]="outputFormat() === 'pdf'">
+                <input
+                  type="radio"
+                  name="outputFormat"
+                  value="pdf"
+                  [checked]="outputFormat() === 'pdf'"
+                  (change)="outputFormat.set('pdf')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Standard PDF</span>
+                  <span class="card-radio-desc">Best for sharing, viewing, and printing</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="outputFormat() === 'pdfa'">
+                <input
+                  type="radio"
+                  name="outputFormat"
+                  value="pdfa"
+                  [checked]="outputFormat() === 'pdfa'"
+                  (change)="outputFormat.set('pdfa')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">
+                    PDF/A-2b
+                    <span class="mini-pill">Archival</span>
+                  </span>
+                  <span class="card-radio-desc">ISO standard for long-term document archiving</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- SECTION 2: PRESENTATION LAYOUT -->
+          <div class="option-section">
+            <span class="option-label">LAYOUT</span>
+            <div class="radio-card-stack">
+              <label class="radio-card" [class.selected]="layout() === 'slides'">
+                <input
+                  type="radio"
+                  name="layout"
+                  value="slides"
+                  [checked]="layout() === 'slides'"
+                  (change)="layout.set('slides')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Slides</span>
+                  <span class="card-radio-desc">One full slide per page</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="layout() === 'notes'">
+                <input
+                  type="radio"
+                  name="layout"
+                  value="notes"
+                  [checked]="layout() === 'notes'"
+                  (change)="layout.set('notes')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Slides with speaker notes</span>
+                  <span class="card-radio-desc">Slide at top with presenter notes below</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="layout() === 'handout'">
+                <input
+                  type="radio"
+                  name="layout"
+                  value="handout"
+                  [checked]="layout() === 'handout'"
+                  (change)="layout.set('handout')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Handout</span>
+                  <span class="card-radio-desc">Multiple slides per printed sheet</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- HANDOUT SUB-SETTINGS (Only visible when layout === 'handout') -->
+            @if (layout() === 'handout') {
+              <div class="handout-suboptions">
+                <div class="setting-row">
+                  <label class="sub-label" for="handoutPerPageSelect">Slides per page</label>
+                  <select
+                    id="handoutPerPageSelect"
+                    class="pt-select"
+                    [ngModel]="handoutPerPage()"
+                    (ngModelChange)="handoutPerPage.set($any($event))"
+                  >
+                    <option [ngValue]="1">1 slide per page</option>
+                    <option [ngValue]="2">2 slides per page</option>
+                    <option [ngValue]="3">3 slides per page (with note lines)</option>
+                    <option [ngValue]="4">4 slides per page (2x2 grid)</option>
+                    <option [ngValue]="6">6 slides per page</option>
+                    <option [ngValue]="9">9 slides per page</option>
+                  </select>
+                </div>
+
+                <div class="setting-row">
+                  <label class="sub-label" for="handoutOrientationSelect">Orientation</label>
+                  <select
+                    id="handoutOrientationSelect"
+                    class="pt-select"
+                    [ngModel]="handoutOrientation()"
+                    (ngModelChange)="handoutOrientation.set($event)"
+                  >
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
+                  </select>
+                </div>
+
+                <label class="pt-checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="handoutFrames()"
+                    (change)="handoutFrames.set(!handoutFrames())"
+                  />
+                  <span>Draw a frame around each slide</span>
+                </label>
+              </div>
+            }
+          </div>
+
+          <!-- SECTION 3: SLIDES RANGE & SELECTION -->
+          <div class="option-section">
+            <span class="option-label">SLIDES TO CONVERT</span>
+            <div class="radio-card-stack">
+              <label class="radio-card" [class.selected]="slideMode() === 'all'">
+                <input
+                  type="radio"
+                  name="slideMode"
+                  value="all"
+                  [checked]="slideMode() === 'all'"
+                  (change)="slideMode.set('all')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">All slides</span>
+                  <span class="card-radio-desc">
+                    Export entire deck
+                    @if (knownSlideCount()) {
+                      ({{ knownSlideCount() }} slides)
+                    }
+                  </span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="slideMode() === 'range'">
+                <input
+                  type="radio"
+                  name="slideMode"
+                  value="range"
+                  [checked]="slideMode() === 'range'"
+                  (change)="slideMode.set('range')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Custom slide range</span>
+                  <span class="card-radio-desc">Export specific slides (e.g. 1-3, 5, 8-10)</span>
+                </div>
+              </label>
+            </div>
+
+            @if (slideMode() === 'range') {
+              <div class="slide-range-input-wrap">
+                <input
+                  type="text"
+                  class="pt-text-input"
+                  placeholder="e.g. 1-3, 5, 8-10"
+                  [ngModel]="slideRange()"
+                  (ngModelChange)="slideRange.set($event)"
+                />
+                @if (slideRangeError()) {
+                  <span class="field-error-text">{{ slideRangeError() }}</span>
+                }
+              </div>
+            }
+
+            <label class="pt-checkbox-label mt-2">
+              <input
+                type="checkbox"
+                [checked]="includeHiddenSlides()"
+                (change)="includeHiddenSlides.set(!includeHiddenSlides())"
+              />
+              <span>Include hidden slides</span>
+            </label>
+          </div>
+
+          <!-- SECTION 4: PAGE SIZE (Slides layout only) -->
+          @if (layout() === 'slides') {
+            <div class="option-section">
+              <span class="option-label">PAGE SIZE</span>
+              <select
+                class="pt-select"
+                [ngModel]="pageSize()"
+                (ngModelChange)="pageSize.set($event)"
+              >
+                <option value="as_slide">Same as slide (Preserve original size)</option>
+                <option value="a4_landscape">A4 landscape (Fit with margins)</option>
+                <option value="letter_landscape">Letter landscape (Fit with margins)</option>
+              </select>
+            </div>
+          }
+
+          <!-- SECTION 5: OPTIONS CHECKBOXES -->
+          <div class="option-section">
+            <span class="option-label">ADDITIONAL OPTIONS</span>
+            <div class="checkbox-stack">
+              <label class="pt-checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="bookmarks()"
+                  (change)="bookmarks.set(!bookmarks())"
+                />
+                <span>Create bookmarks from slide titles</span>
+              </label>
+
+              <label class="pt-checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="tagged()"
+                  (change)="tagged.set(!tagged())"
+                />
+                <span>Tagged PDF (accessibility)</span>
+              </label>
+
+              <label class="pt-checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="hyperlinks()"
+                  (change)="hyperlinks.set(!hyperlinks())"
+                />
+                <span>Keep hyperlinks</span>
+              </label>
+
+              <label class="pt-checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="comments()"
+                  (change)="comments.set(!comments())"
+                />
+                <span>Include comments (as PDF annotations)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SECTION 6: IMAGE QUALITY -->
+          <div class="option-section">
+            <span class="option-label">IMAGE QUALITY</span>
+            <div class="radio-card-stack">
+              <label class="radio-card" [class.selected]="imageQuality() === 'standard'">
+                <input
+                  type="radio"
+                  name="imageQuality"
+                  value="standard"
+                  [checked]="imageQuality() === 'standard'"
+                  (change)="imageQuality.set('standard')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Standard</span>
+                  <span class="card-radio-desc">High resolution images</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="imageQuality() === 'smaller'">
+                <input
+                  type="radio"
+                  name="imageQuality"
+                  value="smaller"
+                  [checked]="imageQuality() === 'smaller'"
+                  (change)="imageQuality.set('smaller')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Smaller file</span>
+                  <span class="card-radio-desc">Compressed images (≤ 150 DPI)</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- SECTION 7: MULTIPLE FILES BATCH -->
+          @if (selectedFiles().length > 1) {
+            <div class="option-section">
+              <span class="option-label">MULTIPLE PRESENTATIONS</span>
+              <div class="radio-card-stack">
+                <label class="radio-card" [class.selected]="!mergeFiles()">
+                  <input
+                    type="radio"
+                    name="mergeFiles"
+                    [value]="false"
+                    [checked]="!mergeFiles()"
+                    (change)="mergeFiles.set(false)"
+                  />
+                  <div class="radio-card-text">
+                    <span class="card-radio-title">Separate PDFs</span>
+                    <span class="card-radio-desc">Download separate files in a zip archive</span>
+                  </div>
+                </label>
+
+                <label class="radio-card" [class.selected]="mergeFiles()">
+                  <input
+                    type="radio"
+                    name="mergeFiles"
+                    [value]="true"
+                    [checked]="mergeFiles()"
+                    (change)="mergeFiles.set(true)"
+                  />
+                  <div class="radio-card-text">
+                    <span class="card-radio-title">Merge into one PDF</span>
+                    <span class="card-radio-desc">Combine all presentations in upload order</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          }
+
+          <!-- SIDEBAR ADVERTISEMENT SLOT -->
+          <div class="sidebar-ad-slot" aria-label="Advertisement">
+            <div class="sidebar-ad-box">
+              <span class="sidebar-ad-tag">ADVERTISEMENT</span>
+              <span class="sidebar-ad-hint">300 × 250 / Sticky Banner</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDEBAR FOOTER: PRIMARY CONVERT CTA BUTTON -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="prime-action-btn"
+            [disabled]="selectedFiles().length === 0 || isProcessing() || slideRangeError() !== null"
+            (click)="executeConversion()"
+          >
+            <span>Convert to PDF</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       3. PROCESSING STATE
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'processing') {
+    <div class="processing-workspace-screen">
+      <app-processing-state
+        [percent]="processingProgress()"
+        [message]="processingMessage()"
+      ></app-processing-state>
+      <div class="cancel-wrap">
+        <button type="button" class="cancel-link-btn" (click)="cancelConversion()">
+          Cancel Conversion
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       4. COMPLETED RESULT STATE
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'completed' && resultViewModel()) {
+    <div class="completed-workspace-screen">
+      <div class="container result-container">
+        <!-- Warnings Banner if any warnings occurred -->
+        @if (conversionResult()?.warnings?.length) {
+          <div class="conversion-warnings-box" role="alert">
+            <div class="warnings-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <strong>Conversion Notes:</strong>
+            </div>
+            <ul class="warnings-list">
+              @for (w of conversionResult()!.warnings; track w) {
+                <li>{{ w }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        <app-result-view
+          [result]="resultViewModel()!"
+          [title]="'PowerPoint has been converted to PDF!'"
+          [subtitle]="'Original: ' + conversionResult()?.formattedOriginalSize + ' → PDF: ' + conversionResult()?.formattedPdfSize + '. Processed privately.'"
+          [downloadLabel]="'Download PDF'"
+          [restartLabel]="'Convert another presentation'"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
+      </div>
+    </div>
+  }
+</div>

@@ -43,9 +43,10 @@ export const routes: Routes = [
     title: 'Word to PDF Converter Online - Convert DOCX & DOC to PDF | PDFTailor'
   },
   // COMING SOON / UNRELEASED TOOLS -> Redirect to home so users cannot navigate to them
-  {
+    {
     path: 'powerpoint-to-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/powerpoint-to-pdf/powerpoint-to-pdf.component').then(m => m.PowerPointToPdfComponent),
+    title: 'PowerPoint to PDF Converter Online - Convert PPTX & PPT to PDF | PDFTailor'
   },
   {
     path: 'excel-to-pdf',
