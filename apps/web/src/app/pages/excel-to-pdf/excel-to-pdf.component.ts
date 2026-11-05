@@ -334,3 +334,4 @@ export class ExcelToPdfComponent implements OnInit, OnDestroy {
     this.layoutService.showFooter();
   }
 }
+

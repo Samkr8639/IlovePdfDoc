@@ -16,15 +16,14 @@
   }
 
   <!-- ===================================================================
-       1. UPLOAD STATE: HERO & DROPZONE
+       1. UPLOAD STATE: HERO, ADSENSE, FEATURES, 3-STEP GUIDE & FAQS
        =================================================================== -->
   @if (currentState() === 'upload') {
   <section class="unified-hero-section">
     <div class="container hero-content">
       <h1 class="tool-h1">Excel to PDF Converter</h1>
       <p class="tool-lead">
-        Convert Excel spreadsheets (.xlsx, .xls, .xlsm, .ods, .csv, .tsv) to beautifully formatted PDF documents.
-        Keep tables aligned, columns intact, and formulas accurately displayed.
+        Convert Excel spreadsheets (.xlsx, .xls, .xlsm, .ods, .csv, .tsv) to beautifully formatted PDF documents. Keep tables aligned, columns intact, and formulas accurately displayed.
       </p>
 
       <!-- UPLOADER COMPONENT -->
@@ -34,7 +33,7 @@
           subtitle="or drop XLSX, XLS, CSV, ODS spreadsheets here"
           acceptedTypes=".xlsx,.xls,.xlsm,.ods,.csv,.tsv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,text/csv,text/tab-separated-values"
           [multiple]="true"
-          limitInfo="Max 50MB per file • Up to 10 files"
+          limitInfo=""
           (filesSelected)="onFilesAdded($event)">
         </app-dropzone>
       </div>
@@ -44,105 +43,154 @@
   <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
   <section class="adsense-section">
     <div class="container">
-      <div class="adsense-card">
-        <span class="ad-label">ADVERTISEMENT</span>
-        <div class="ad-placeholder-content">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            opacity="0.4" aria-hidden="true">
-            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-            <line x1="8" y1="21" x2="16" y2="21"></line>
-            <line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-          <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+      <div class="adsense-wrapper" aria-label="Advertisement">
+        <span class="adsense-label">Advertisement</span>
+        <div class="adsense-slot adsense-leaderboard">
+          <div class="adsense-placeholder-content">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              opacity="0.5" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- EDITORIAL / SEO CONTENT SECTION -->
-  <section class="editorial-features-section">
+  <!-- FEATURES & VALUE PROPOSITION -->
+  <section class="features-section">
     <div class="container">
-      <div class="section-title-wrap">
-        <h2 class="editorial-heading">Flawless Spreadsheet to PDF Conversion</h2>
-        <p class="editorial-subheading">
-          Smart pagination, column-width scaling, and formula preservation engineered specifically for financial models,
-          spreadsheets, and reports.
-        </p>
+      <div class="section-heading">
+        <h2 class="section-title">The easiest & safest way to convert Excel to PDF</h2>
+        <p class="section-subtitle">Fast, accurate spreadsheet conversion engineered for privacy and precision.</p>
       </div>
 
       <div class="features-grid">
+        <!-- Feature 1: Privacy -->
         <div class="feature-card">
-          <div class="feature-icon-box green-box">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              aria-hidden="true">
-              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-              <line x1="3" y1="9" x2="21" y2="9"></line>
-              <line x1="3" y1="15" x2="21" y2="15"></line>
-              <line x1="9" y1="3" x2="9" y2="21"></line>
-              <line x1="15" y1="3" x2="15" y2="21"></line>
-            </svg>
-          </div>
-          <h3 class="feature-title">Fit Wide Columns Smartly</h3>
-          <p class="feature-desc">
-            No more truncated tables or cut-off columns. Auto-scaling fits all columns on a single page while letting
-            rows flow naturally.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box blue-box">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              aria-hidden="true">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-            </svg>
-          </div>
-          <h3 class="feature-title">Exact Calculated Values</h3>
-          <p class="feature-desc">
-            Your figures stay identical to Excel. Cached values are preserved without unexpected recalculations or
-            errors.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box amber-box">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              aria-hidden="true">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          <div class="feature-icon-badge">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+              <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white" />
+              <circle cx="24" cy="23" r="2.5" fill="#1E3A8A" />
             </svg>
           </div>
           <h3 class="feature-title">Strict Document Privacy</h3>
           <p class="feature-desc">
-            Files are transferred over TLS encryption, isolated during processing, and deleted automatically after 10
-            minutes.
+            Your files are transmitted over TLS encryption, isolated during processing, and deleted automatically after 10 minutes.
+          </p>
+        </div>
+
+        <!-- Feature 2: Scaling -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
+              <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Fit Columns Smartly</h3>
+          <p class="feature-desc">
+            No more truncated tables or cut-off columns. Auto-scaling fits all columns on a single page while letting rows flow naturally.
+          </p>
+        </div>
+
+        <!-- Feature 3: Calculated Values -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
+              <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Exact Calculated Values</h3>
+          <p class="feature-desc">
+            Your figures stay identical to Excel. Cached calculation values are preserved without unexpected recalculations or formula errors.
+          </p>
+        </div>
+
+        <!-- Feature 4: Free & Unlimited -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
+              <path
+                d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z"
+                stroke="white" stroke-width="2.5" fill="none" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Free & Unlimited</h3>
+          <p class="feature-desc">
+            Convert as many workbooks and sheets as you need with no subscriptions, watermark additions, or hidden paywalls.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- HOW TO CONVERT SECTION -->
-  <section class="how-it-works-section">
+  <!-- 3-STEP GUIDE & FAQS SECTION -->
+  <section class="seo-guide-section">
     <div class="container">
-      <h2 class="editorial-heading centered">How to Convert Excel to PDF Online</h2>
+      <div class="guide-header">
+        <h2 class="guide-title">How to convert Excel to PDF online</h2>
+        <p class="guide-lead">Three effortless steps to transform your spreadsheets with precision.</p>
+      </div>
+
       <div class="steps-grid">
         <div class="step-card">
-          <span class="step-badge">1</span>
-          <h3>Upload your spreadsheet</h3>
-          <p>Drag and drop your Excel (.xlsx, .xls) or CSV files into the uploader box above.</p>
+          <div class="step-num">01</div>
+          <h3 class="step-title">Select spreadsheet</h3>
+          <p class="step-desc">
+            Click "Select Excel files", drag and drop your files into the uploader, or import spreadsheets from Google Drive or Dropbox.
+          </p>
         </div>
+
         <div class="step-card">
-          <span class="step-badge">2</span>
-          <h3>Choose layout & scaling</h3>
-          <p>Select target sheets, page size, margins, and fit options to ensure clean pagination.</p>
+          <div class="step-num">02</div>
+          <h3 class="step-title">Choose layout & scaling</h3>
+          <p class="step-desc">
+            Pick target sheets, page size, orientation, and scaling modes like "Fit all columns on one page" to ensure clean layout.
+          </p>
         </div>
+
         <div class="step-card">
-          <span class="step-badge">3</span>
-          <h3>Download your PDF</h3>
-          <p>Click Convert to PDF and download your publication-ready PDF or merged document immediately.</p>
+          <div class="step-num">03</div>
+          <h3 class="step-title">Save & download</h3>
+          <p class="step-desc">
+            Click "Convert to PDF" and instantly download your clean, publication-ready PDF or merged document.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ ACCORDION CARDS -->
+      <div class="tool-faqs">
+        <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
+        <div class="tool-faqs-list">
+          <div class="faq-card">
+            <h4 class="faq-q">Are my spreadsheets kept private and secure?</h4>
+            <p class="faq-a">
+              Yes. Your documents are transmitted over encrypted TLS connections, processed in isolated volatile sandboxes, and automatically deleted from our servers after 10 minutes. We never store or inspect your data.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h4 class="faq-q">Will wide tables or columns be cut off in the PDF?</h4>
+            <p class="faq-a">
+              No. With our smart scaling options (such as "Fit all columns on one page"), all columns are scaled proportionally to fit the page width, allowing rows to flow naturally across pages without truncating tables.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h4 class="faq-q">Can I convert multiple sheets or multiple files at once?</h4>
+            <p class="faq-a">
+              Yes! You can choose to convert all visible sheets, select specific sheets from your workbook, or upload up to 10 spreadsheet files simultaneously and download them individually in a ZIP or merged into a single PDF.
+            </p>
+          </div>
         </div>
       </div>
     </div>
