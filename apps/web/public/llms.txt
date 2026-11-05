@@ -11,6 +11,7 @@
 - [PDF to PowerPoint](https://pdftailor.com/pdf-to-powerpoint): Turn your PDF files into easy to edit PPT and PPTX slide decks.
 - [PDF to Excel](https://pdftailor.com/pdf-to-excel): Pull data straight from PDFs into Excel spreadsheets in a few short seconds.
 - [Word to PDF](https://pdftailor.com/word-to-pdf): Make DOC and DOCX files easy to read by converting them to PDF.
+- [Excel to PDF](https://pdftailor.com/excel-to-pdf): Convert Excel spreadsheets and CSV tables to high-fidelity PDF documents.
 - [Edit PDF](https://pdftailor.com/edit-pdf): Add text, images, shapes, annotations, and make scanned text editable with OCR.
 
 ## Privacy & Security Architecture

@@ -11,6 +11,7 @@ export const LIVE_TOOL_IDS = new Set<string>([
   'pdf-to-powerpoint',
   'pdf-to-excel',
   'word-to-pdf',
+  'excel-to-pdf',
   'edit-pdf'
 ]);
 

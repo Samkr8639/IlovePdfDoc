@@ -74,6 +74,16 @@
 - **Max File Size**: 50 MB
 - **Description**: Convert Microsoft Word files into standardized, read-only PDF documents that display identically on every screen.
 
+### Excel to PDF
+- **URL**: https://pdftailor.com/excel-to-pdf
+- **Identifier**: urn:air:pdftailor:tools:excel-to-pdf
+- **Category**: convert
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .xlsx, .xlsm, .xls, .ods, .csv, .tsv
+- **Max Files Allowed**: 10
+- **Max File Size**: 50 MB
+- **Description**: Convert XLSX, XLS, XLSM, ODS, and CSV spreadsheets into clean, printable PDF documents with custom page scaling and preserved formatting.
+
 ### Edit PDF
 - **URL**: https://pdftailor.com/edit-pdf
 - **Identifier**: urn:air:pdftailor:tools:edit-pdf

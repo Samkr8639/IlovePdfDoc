@@ -9,6 +9,10 @@ export type ExcelPageSize = 'as_file' | 'a4' | 'letter' | 'legal' | 'a3';
 export type ExcelOrientation = 'as_file' | 'auto' | 'portrait' | 'landscape';
 export type ExcelScalingMode = 'as_file' | 'fit_width' | 'fit_page' | 'custom';
 export type ExcelMargins = 'as_file' | 'narrow' | 'normal' | 'wide';
+export type PageSize = ExcelPageSize;
+export type Orientation = ExcelOrientation;
+export type ScalingMode = ExcelScalingMode;
+export type Margins = ExcelMargins;
 export type ExcelSheetSelectionMode = 'all' | 'first' | 'selected';
 
 export interface ExcelSheetSelectionOptions {

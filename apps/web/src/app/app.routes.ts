@@ -49,7 +49,8 @@ export const routes: Routes = [
   },
   {
     path: 'excel-to-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/excel-to-pdf/excel-to-pdf.component').then(m => m.ExcelToPdfComponent),
+    title: 'Excel to PDF Converter Online - Convert XLSX, XLS, CSV to PDF | PDFTailor'
   },
   {
     path: 'edit-pdf',

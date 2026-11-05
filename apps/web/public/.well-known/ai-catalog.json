@@ -143,6 +143,25 @@
       ]
     },
     {
+      "identifier": "urn:air:pdftailor:tools:excel-to-pdf",
+      "displayName": "Excel to PDF",
+      "type": "application/mcp-server-card+json",
+      "description": "Convert Excel spreadsheets and CSV tables to high-fidelity PDF documents.",
+      "url": "https://pdftailor.com/excel-to-pdf",
+      "representativeQueries": [
+        "excel to pdf online",
+        "how to excel to pdf",
+        "free excel to pdf tool"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "excel",
+        "to",
+        "pdf"
+      ]
+    },
+    {
       "identifier": "urn:air:pdftailor:tools:edit-pdf",
       "displayName": "Edit PDF",
       "type": "application/mcp-server-card+json",

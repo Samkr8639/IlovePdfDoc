@@ -23,7 +23,6 @@ describe('App Routes: Live vs Coming Soon Navigation', () => {
 
   const comingSoonPaths = [
     'powerpoint-to-pdf',
-    'excel-to-pdf',
     'pdf-to-jpg',
     'images-to-pdf',
     'sign-pdf',

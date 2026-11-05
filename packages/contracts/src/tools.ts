@@ -6,6 +6,7 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'pdf-to-powerpoint',
   'pdf-to-excel',
   'word-to-pdf',
+  'excel-to-pdf',
   'edit-pdf'
 ] as const;
 
@@ -250,22 +251,21 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   {
     id: 'excel-to-pdf',
     name: 'Excel to PDF',
-    shortDescription: 'Make EXCEL spreadsheets easy to read by converting them to PDF.',
-    longDescription: 'Convert XLS and XLSX workbooks into clean, printable PDF documents with custom page orientation.',
+    shortDescription: 'Convert Excel spreadsheets and CSV tables to high-fidelity PDF documents.',
+    longDescription: 'Convert XLSX, XLS, XLSM, ODS, and CSV spreadsheets into clean, printable PDF documents with custom page scaling and preserved formatting.',
     category: 'convert',
     route: '/excel-to-pdf',
     icon: 'excel-to-pdf',
     processingMode: 'hybrid',
-    acceptedFileTypes: ['.xls', '.xlsx'],
+    acceptedFileTypes: ['.xlsx', '.xlsm', '.xls', '.ods', '.csv', '.tsv'],
     maxFiles: 10,
     maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    status: 'available',
     seo: {
-      title: 'Excel to PDF Converter | PDF flow',
-      description: 'Convert Excel spreadsheets to PDF documents.',
-      keywords: ['excel to pdf', 'xls to pdf', 'xlsx to pdf'],
-      canonical: 'https://pdfflow.app/excel-to-pdf',
+      title: 'Excel to PDF Converter Online - Convert XLSX, XLS, CSV to PDF | PDFTailor',
+      description: 'Convert Excel spreadsheets (.xlsx, .xls, .xlsm, .ods, .csv) to high-fidelity PDF documents with preserved tables and layout.',
+      keywords: ['excel to pdf', 'xlsx to pdf', 'xls to pdf', 'csv to pdf', 'convert spreadsheet to pdf'],
+      canonical: 'https://pdftailor.com/excel-to-pdf',
       faqs: []
     }
   },
