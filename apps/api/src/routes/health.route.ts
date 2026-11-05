@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { ApiResponse, HealthCheckData } from '@paperflow/contracts';
 import { env } from '../config/env';
+import { checkLibreOffice } from '../services/office-to-pdf';
 
 export const healthRouter = Router();
 
-healthRouter.get('/', (_req: Request, res: Response) => {
+healthRouter.get('/', async (_req: Request, res: Response) => {
+  const lo = await checkLibreOffice();
   const mem = process.memoryUsage();
   
   const healthData: HealthCheckData = {
@@ -19,7 +21,9 @@ healthRouter.get('/', (_req: Request, res: Response) => {
     },
     features: {
       browserProcessingAvailable: true,
-      serverProcessingAvailable: true
+      serverProcessingAvailable: true,
+      libreOfficeAvailable: lo.available,
+      libreOfficeCalcAvailable: lo.available
     }
   };
 

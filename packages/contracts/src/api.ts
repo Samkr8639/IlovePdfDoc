@@ -39,6 +39,8 @@ export interface HealthCheckData {
   features: {
     browserProcessingAvailable: boolean;
     serverProcessingAvailable: boolean;
+    libreOfficeAvailable?: boolean;
+    libreOfficeCalcAvailable?: boolean;
   };
 }
 

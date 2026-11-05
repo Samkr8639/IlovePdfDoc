@@ -1,8 +1,9 @@
 FROM node:20-bookworm-slim
 
-# Install LibreOffice Writer, Tesseract OCR with Indic and English language packs, and metric-compatible fonts
+# Install LibreOffice Writer and Calc, Tesseract OCR with Indic and English language packs, and metric-compatible fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libreoffice-writer \
+    libreoffice-calc \
     tesseract-ocr \
     tesseract-ocr-eng \
     tesseract-ocr-hin \
