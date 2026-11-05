@@ -11,6 +11,7 @@ import { pdfToPowerPointRouter } from './routes/pdf-to-powerpoint.route';
 import { pdfToExcelRouter } from './routes/pdf-to-excel.route';
 import { wordToPdfRouter } from './routes/word-to-pdf.route';
 import { excelToPdfRouter } from './routes/excel-to-pdf.route';
+import { powerpointToPdfRouter } from './routes/powerpoint-to-pdf.route';
 import { editPdfOcrRouter } from './routes/edit-pdf-ocr.route';
 import { errorHandler, AppError } from './middleware/errorHandler';
 import { apiRateLimiter, conversionRateLimiter, contactRateLimiter, ocrRateLimiter } from './middleware/rateLimiter';
@@ -69,6 +70,7 @@ export function createApp(): Express {
   app.use('/api/v1/pdf-to-excel', conversionRateLimiter, pdfToExcelRouter);
   app.use('/api/v1/word-to-pdf', conversionRateLimiter, wordToPdfRouter);
   app.use('/api/v1/excel-to-pdf', conversionRateLimiter, excelToPdfRouter);
+  app.use('/api/v1/powerpoint-to-pdf', conversionRateLimiter, powerpointToPdfRouter);
   app.use('/api/v1/edit-pdf/ocr', ocrRateLimiter, editPdfOcrRouter);
 
   // 404 Route Catch-all

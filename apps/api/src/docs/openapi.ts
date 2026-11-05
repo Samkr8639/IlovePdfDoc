@@ -655,6 +655,51 @@ export const openApiSpec = {
         responses: { '200': { description: 'Binary PDF or ZIP stream' }, '404': { description: 'Job not found or expired' } }
       }
     },
+    '/api/v1/powerpoint-to-pdf/convert': {
+      post: {
+        tags: ['PowerPoint to PDF'],
+        summary: 'Convert presentations (.pptx, .ppt, .ppsx, .pps, .pptm, .odp) to PDF',
+        requestBody: {
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  files: { type: 'array', items: { type: 'string', format: 'binary' } },
+                  options: { type: 'string', description: 'JSON-serialized PowerPointToPdfOptions' }
+                },
+                required: ['files']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Presentations converted successfully' },
+          '400': { description: 'Validation error (zero byte, too many files, invalid options)' },
+          '413': { description: 'File too large or file too complex (zip bomb / excessive slides)' },
+          '415': { description: 'Unsupported file type' },
+          '422': { description: 'Encrypted presentation, empty presentation, or conversion failed' },
+          '503': { description: 'Server busy or engine unavailable' },
+          '504': { description: 'Conversion timeout' }
+        }
+      }
+    },
+    '/api/v1/powerpoint-to-pdf/jobs/{jobId}/download': {
+      get: {
+        tags: ['PowerPoint to PDF'],
+        summary: 'Download converted PDF (or ZIP for multiple files / merged PDF)',
+        parameters: [{ name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { '200': { description: 'Binary PDF or ZIP stream' }, '404': { description: 'Job not found or expired' } }
+      }
+    },
+    '/api/v1/powerpoint-to-pdf/jobs/{jobId}': {
+      delete: {
+        tags: ['PowerPoint to PDF'],
+        summary: 'Delete conversion job immediately from server memory',
+        parameters: [{ name: 'jobId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { '200': { description: 'Job deleted' }, '404': { description: 'Job not found' } }
+      }
+    },
     '/api/v1/excel-to-pdf/jobs/{jobId}': {
       delete: {
         tags: ['Excel to PDF'],

@@ -23,7 +23,8 @@ healthRouter.get('/', async (_req: Request, res: Response) => {
       browserProcessingAvailable: true,
       serverProcessingAvailable: true,
       libreOfficeAvailable: lo.available,
-      libreOfficeCalcAvailable: lo.available
+      libreOfficeCalcAvailable: lo.available,
+      libreOfficeImpressAvailable: lo.available
     }
   };
 
