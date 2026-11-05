@@ -563,90 +563,129 @@
   margin-top: 2px;
 }
 
-/* FLOATING MULTI-DOCUMENT DOCK */
+/* FLOATING TOOLS DOCK (Vertical Stack on Upper Right of Canvas) */
 .floating-tools-dock {
-  position: fixed;
-  bottom: 28px;
-  left: calc((100vw - 380px) / 2);
-  transform: translateX(-50%);
+  position: absolute;
+  top: 36px;
+  right: 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  background: var(--pt-card-bg, #ffffff);
-  border: 1px solid var(--pt-soft-outline, #e4e7ec);
-  border-radius: var(--pt-radius-pill, 9999px);
-  padding: 8px 14px;
-  box-shadow: var(--pt-shadow-float, 0 24px 48px -12px rgba(11, 18, 32, 0.18));
-  z-index: 20;
-}
-
-@media (max-width: 1024px) {
-  .floating-tools-dock {
-    left: 50%;
-  }
+  gap: 14px;
+  background: #ffffff;
+  padding: 8px 6px 14px;
+  border-radius: 28px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 10px 28px -4px rgba(11, 18, 32, 0.12), 0 2px 6px -1px rgba(11, 18, 32, 0.04);
+  z-index: 25;
+  width: 58px;
 }
 
 .dock-btn-wrap {
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 .dock-square-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--pt-radius-pill, 9999px);
-  background: var(--pt-teal-700, #0f766e);
-  color: var(--pt-surface-white, #ffffff);
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--pt-teal-700, #0F766E);
+  color: #ffffff;
   border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   position: relative;
-  transition: transform 0.15s, background 0.15s;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dock-square-btn:hover {
-  background: var(--pt-teal-800, #0b5d57);
+  background: var(--pt-teal-800, #0B5D57);
   transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.45);
 }
 
 .dock-count-badge {
   position: absolute;
   top: -4px;
   right: -4px;
-  background: var(--pt-navy, #14213d);
-  color: var(--pt-surface-white, #ffffff);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0B1220;
+  color: #ffffff;
   font-size: 11px;
-  font-weight: 700;
-  border-radius: var(--pt-radius-pill, 9999px);
-  padding: 1px 6px;
-  border: 2px solid var(--pt-card-bg, #ffffff);
-}
-
-.dock-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--pt-radius-pill, 9999px);
-  background: transparent;
-  border: 1px solid var(--pt-soft-outline, #e4e7ec);
-  cursor: pointer;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--pt-muted, #4b5563);
-  transition: background 0.15s, border-color 0.15s;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  line-height: 1;
+}
+
+.dock-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.18s ease;
 }
 
 .dock-icon-btn:hover {
-  background: var(--pt-subtle-bg, #f6f8fa);
-  border-color: var(--pt-outline, #d0d5dd);
+  background: #F1F5F9;
+  transform: scale(1.1);
+}
+
+.dock-icon-btn.pc-action:hover {
+  color: var(--pt-teal-700, #0F766E);
 }
 
 .dock-tooltip-label {
-  display: none;
+  position: absolute;
+  right: calc(100% + 12px);
+  background: #0F172A;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(4px);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+}
+
+.dock-tooltip-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  border-width: 4px 0 4px 4px;
+  border-style: solid;
+  border-color: transparent transparent transparent #0F172A;
+}
+
+.dock-btn-wrap:hover .dock-tooltip-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
 }
 
 /* ===================================================================
@@ -1029,8 +1068,34 @@
     padding: 20px 16px 120px;
   }
 
+  /* Horizontal pill on mobile */
   .floating-tools-dock {
-    bottom: 84px;
+    position: static;
+    margin-top: 20px;
+    flex-direction: row;
+    width: auto;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    gap: 12px;
+    align-self: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+  }
+
+  .dock-tooltip-label {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    bottom: calc(100% + 8px);
+    top: auto;
+  }
+
+  .dock-tooltip-label::after {
+    top: auto;
+    bottom: -4px;
+    right: auto;
+    left: 50%;
+    border-width: 4px 4px 0 4px;
+    border-color: #0F172A transparent transparent transparent;
   }
 
   .mobile-gear-btn {
