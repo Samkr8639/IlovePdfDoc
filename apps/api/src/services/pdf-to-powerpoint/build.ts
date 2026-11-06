@@ -304,8 +304,46 @@ export async function buildPptx(
       slide.addShape(pptx.ShapeType.rect, shapeOpts);
     }
 
+    // Detect and consume horizontal lines that correspond to text underlines
+    const consumedLineIndices = new Set<number>();
+    for (const block of page.blocks || []) {
+      const linePitch = block.pitch > 0 ? block.pitch : (block.fs || 12) * 1.2;
+      (block.lines || []).forEach((line, lIdx) => {
+        const lineLeft = block.x;
+        const lineRight = block.right;
+        const lineWidth = block.width;
+        const lineY = block.y + lIdx * linePitch;
+        const lineFs = block.fs || 12;
+
+        (page.lines || []).forEach((l, idx) => {
+          if (l.vertical || consumedLineIndices.has(idx)) return;
+          if ((l.thickness || 1) > 2.5) return;
+          if (l.w > lineWidth + 35) return;
+          if (l.w < 10) return;
+
+          const yDiff = Math.abs(l.y - lineY);
+          if (yDiff <= Math.max(4.0, lineFs * 0.45)) {
+            const lLeft = l.x;
+            const lRight = l.x + l.w;
+            const overlapStart = Math.max(lineLeft, lLeft);
+            const overlapEnd = Math.min(lineRight, lRight);
+            const overlap = Math.max(0, overlapEnd - overlapStart);
+
+            if (overlap >= lineWidth * 0.75 || overlap >= l.w * 0.75) {
+              consumedLineIndices.add(idx);
+              line.forEach((r) => {
+                (r as any).underline = true;
+              });
+            }
+          }
+        });
+      });
+    }
+
     // 2. Lines (solid rules, dotted and dashed borders)
-    for (const line of page.lines || []) {
+    (page.lines || []).forEach((line, idx) => {
+      if (consumedLineIndices.has(idx)) return;
+
       const isDotted = line.style === 'dotted';
       const isDashed = line.style === 'dashed';
       const dashType = isDotted ? 'sysDot' : (isDashed ? 'dash' : 'solid');
@@ -336,7 +374,7 @@ export async function buildPptx(
           }
         });
       }
-    }
+    });
 
     // 3. Images
     for (const img of page.images || []) {
@@ -445,6 +483,7 @@ export async function buildPptx(
               fontSize: effectiveFs,
               bold: Boolean(run.bold),
               italic: Boolean(run.italic),
+              underline: (run as any).underline ? { style: 'sng' as const } : undefined,
               color: cleanHex(run.color),
               breakLine: !isLastLine && isLastRun
             }
