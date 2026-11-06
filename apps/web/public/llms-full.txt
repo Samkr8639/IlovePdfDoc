@@ -74,6 +74,16 @@
 - **Max File Size**: 50 MB
 - **Description**: Convert Microsoft Word files into standardized, read-only PDF documents that display identically on every screen.
 
+### PowerPoint to PDF
+- **URL**: https://pdftailor.com/powerpoint-to-pdf
+- **Identifier**: urn:air:pdftailor:tools:powerpoint-to-pdf
+- **Category**: convert
+- **Processing Mode**: Ephemeral Secure Server Conversion
+- **Accepted File Types**: .pptx, .ppt, .ppsx, .pps, .pptm, .odp
+- **Max Files Allowed**: 10
+- **Max File Size**: 100 MB
+- **Description**: Convert PPTX, PPT, PPSX, PPS, PPTM, and ODP presentations into high-fidelity PDF documents with slides, notes, or handouts layout and preserved design.
+
 ### Excel to PDF
 - **URL**: https://pdftailor.com/excel-to-pdf
 - **Identifier**: urn:air:pdftailor:tools:excel-to-pdf

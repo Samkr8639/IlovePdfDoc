@@ -143,6 +143,25 @@
       ]
     },
     {
+      "identifier": "urn:air:pdftailor:tools:powerpoint-to-pdf",
+      "displayName": "PowerPoint to PDF",
+      "type": "application/mcp-server-card+json",
+      "description": "Make PPT and PPTX slideshows easy to view by converting them to PDF.",
+      "url": "https://pdftailor.com/powerpoint-to-pdf",
+      "representativeQueries": [
+        "powerpoint to pdf online",
+        "how to powerpoint to pdf",
+        "free powerpoint to pdf tool"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "powerpoint",
+        "to",
+        "pdf"
+      ]
+    },
+    {
       "identifier": "urn:air:pdftailor:tools:excel-to-pdf",
       "displayName": "Excel to PDF",
       "type": "application/mcp-server-card+json",

@@ -363,46 +363,9 @@
         </div>
 
         <div class="sidebar-scrollable-content">
-          <!-- SECTION 1: OUTPUT FORMAT -->
+          <!-- SECTION 1: PRESENTATION LAYOUT -->
           <div class="option-section">
-            <span class="option-label">OUTPUT FORMAT</span>
-            <div class="radio-card-stack">
-              <label class="radio-card" [class.selected]="outputFormat() === 'pdf'">
-                <input
-                  type="radio"
-                  name="outputFormat"
-                  value="pdf"
-                  [checked]="outputFormat() === 'pdf'"
-                  (change)="outputFormat.set('pdf')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">Standard PDF</span>
-                  <span class="card-radio-desc">Best for sharing, viewing, and printing</span>
-                </div>
-              </label>
-
-              <label class="radio-card" [class.selected]="outputFormat() === 'pdfa'">
-                <input
-                  type="radio"
-                  name="outputFormat"
-                  value="pdfa"
-                  [checked]="outputFormat() === 'pdfa'"
-                  (change)="outputFormat.set('pdfa')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">
-                    PDF/A-2b
-                    <span class="mini-pill">Archival</span>
-                  </span>
-                  <span class="card-radio-desc">ISO standard for long-term document archiving</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- SECTION 2: PRESENTATION LAYOUT -->
-          <div class="option-section">
-            <span class="option-label">LAYOUT</span>
+            <span class="option-label">SLIDE LAYOUT</span>
             <div class="radio-card-stack">
               <label class="radio-card" [class.selected]="layout() === 'slides'">
                 <input
@@ -492,7 +455,7 @@
             }
           </div>
 
-          <!-- SECTION 3: SLIDES RANGE & SELECTION -->
+          <!-- SECTION 2: SLIDES RANGE & SELECTION -->
           <div class="option-section">
             <span class="option-label">SLIDES TO CONVERT</span>
             <div class="radio-card-stack">
@@ -544,144 +507,153 @@
                 }
               </div>
             }
-
-            <label class="pt-checkbox-label mt-2">
-              <input
-                type="checkbox"
-                [checked]="includeHiddenSlides()"
-                (change)="includeHiddenSlides.set(!includeHiddenSlides())"
-              />
-              <span>Include hidden slides</span>
-            </label>
           </div>
 
-          <!-- SECTION 4: PAGE SIZE (Slides layout only) -->
-          @if (layout() === 'slides') {
-            <div class="option-section">
-              <span class="option-label">PAGE SIZE</span>
-              <select
-                class="pt-select"
-                [ngModel]="pageSize()"
-                (ngModelChange)="pageSize.set($event)"
-              >
-                <option value="as_slide">Same as slide (Preserve original size)</option>
-                <option value="a4_landscape">A4 landscape (Fit with margins)</option>
-                <option value="letter_landscape">Letter landscape (Fit with margins)</option>
-              </select>
-            </div>
-          }
-
-          <!-- SECTION 5: OPTIONS CHECKBOXES -->
-          <div class="option-section">
-            <span class="option-label">ADDITIONAL OPTIONS</span>
-            <div class="checkbox-stack">
-              <label class="pt-checkbox-label">
-                <input
-                  type="checkbox"
-                  [checked]="bookmarks()"
-                  (change)="bookmarks.set(!bookmarks())"
-                />
-                <span>Create bookmarks from slide titles</span>
-              </label>
-
-              <label class="pt-checkbox-label">
-                <input
-                  type="checkbox"
-                  [checked]="tagged()"
-                  (change)="tagged.set(!tagged())"
-                />
-                <span>Tagged PDF (accessibility)</span>
-              </label>
-
-              <label class="pt-checkbox-label">
-                <input
-                  type="checkbox"
-                  [checked]="hyperlinks()"
-                  (change)="hyperlinks.set(!hyperlinks())"
-                />
-                <span>Keep hyperlinks</span>
-              </label>
-
-              <label class="pt-checkbox-label">
-                <input
-                  type="checkbox"
-                  [checked]="comments()"
-                  (change)="comments.set(!comments())"
-                />
-                <span>Include comments (as PDF annotations)</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- SECTION 6: IMAGE QUALITY -->
-          <div class="option-section">
-            <span class="option-label">IMAGE QUALITY</span>
-            <div class="radio-card-stack">
-              <label class="radio-card" [class.selected]="imageQuality() === 'standard'">
-                <input
-                  type="radio"
-                  name="imageQuality"
-                  value="standard"
-                  [checked]="imageQuality() === 'standard'"
-                  (change)="imageQuality.set('standard')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">Standard</span>
-                  <span class="card-radio-desc">High resolution images</span>
-                </div>
-              </label>
-
-              <label class="radio-card" [class.selected]="imageQuality() === 'smaller'">
-                <input
-                  type="radio"
-                  name="imageQuality"
-                  value="smaller"
-                  [checked]="imageQuality() === 'smaller'"
-                  (change)="imageQuality.set('smaller')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">Smaller file</span>
-                  <span class="card-radio-desc">Compressed images (≤ 150 DPI)</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- SECTION 7: MULTIPLE FILES BATCH -->
-          @if (selectedFiles().length > 1) {
-            <div class="option-section">
-              <span class="option-label">MULTIPLE PRESENTATIONS</span>
-              <div class="radio-card-stack">
-                <label class="radio-card" [class.selected]="!mergeFiles()">
-                  <input
-                    type="radio"
-                    name="mergeFiles"
-                    [value]="false"
-                    [checked]="!mergeFiles()"
-                    (change)="mergeFiles.set(false)"
-                  />
-                  <div class="radio-card-text">
-                    <span class="card-radio-title">Separate PDFs</span>
-                    <span class="card-radio-desc">Download separate files in a zip archive</span>
-                  </div>
-                </label>
-
-                <label class="radio-card" [class.selected]="mergeFiles()">
-                  <input
-                    type="radio"
-                    name="mergeFiles"
-                    [value]="true"
-                    [checked]="mergeFiles()"
-                    (change)="mergeFiles.set(true)"
-                  />
-                  <div class="radio-card-text">
-                    <span class="card-radio-title">Merge into one PDF</span>
-                    <span class="card-radio-desc">Combine all presentations in upload order</span>
-                  </div>
-                </label>
+          <!-- SECTION 3: COLLAPSIBLE ADVANCED SETTINGS -->
+          <div class="advanced-section">
+            <button
+              type="button"
+              class="advanced-toggle-btn"
+              (click)="toggleAdvanced()"
+              [attr.aria-expanded]="showAdvanced()"
+            >
+              <div class="advanced-toggle-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Advanced Settings</span>
               </div>
-            </div>
-          }
+              <svg
+                class="chevron-icon"
+                [class.rotated]="showAdvanced()"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            @if (showAdvanced()) {
+              <div class="advanced-content">
+                <!-- OUTPUT FORMAT -->
+                <div class="setting-field">
+                  <label class="sub-label" for="outputFormatSelect">PDF Standard</label>
+                  <select
+                    id="outputFormatSelect"
+                    class="pt-select"
+                    [ngModel]="outputFormat()"
+                    (ngModelChange)="outputFormat.set($event)"
+                  >
+                    <option value="pdf">Standard PDF (Recommended)</option>
+                    <option value="pdfa">PDF/A-2b (Archival ISO Compliance)</option>
+                  </select>
+                </div>
+
+                <!-- PAGE SIZE (Slides layout only) -->
+                @if (layout() === 'slides') {
+                  <div class="setting-field">
+                    <label class="sub-label" for="pageSizeSelect">Page Size</label>
+                    <select
+                      id="pageSizeSelect"
+                      class="pt-select"
+                      [ngModel]="pageSize()"
+                      (ngModelChange)="pageSize.set($event)"
+                    >
+                      <option value="as_slide">Same as slide (Preserve original size)</option>
+                      <option value="a4_landscape">A4 Landscape (Fit with margins)</option>
+                      <option value="letter_landscape">Letter Landscape (Fit with margins)</option>
+                    </select>
+                  </div>
+                }
+
+                <!-- IMAGE QUALITY -->
+                <div class="setting-field">
+                  <label class="sub-label" for="imageQualitySelect">Image Quality</label>
+                  <select
+                    id="imageQualitySelect"
+                    class="pt-select"
+                    [ngModel]="imageQuality()"
+                    (ngModelChange)="imageQuality.set($event)"
+                  >
+                    <option value="standard">Standard (High resolution)</option>
+                    <option value="smaller">Smaller file (Compressed images)</option>
+                  </select>
+                </div>
+
+                <!-- MULTIPLE PRESENTATIONS (When > 1 file uploaded) -->
+                @if (selectedFiles().length > 1) {
+                  <div class="setting-field">
+                    <label class="sub-label" for="mergeFilesSelect">Multiple Presentations</label>
+                    <select
+                      id="mergeFilesSelect"
+                      class="pt-select"
+                      [ngModel]="mergeFiles()"
+                      (ngModelChange)="mergeFiles.set($event)"
+                    >
+                      <option [ngValue]="false">Separate PDFs (Download as ZIP)</option>
+                      <option [ngValue]="true">Merge into one single PDF</option>
+                    </select>
+                  </div>
+                }
+
+                <!-- CHECKBOXES -->
+                <div class="checkbox-stack">
+                  <span class="sub-label">Document Enhancements</span>
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="bookmarks()"
+                      (change)="bookmarks.set(!bookmarks())"
+                    />
+                    <span>Create bookmarks from slide titles</span>
+                  </label>
+
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="hyperlinks()"
+                      (change)="hyperlinks.set(!hyperlinks())"
+                    />
+                    <span>Keep hyperlinks</span>
+                  </label>
+
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="tagged()"
+                      (change)="tagged.set(!tagged())"
+                    />
+                    <span>Tagged PDF (accessibility)</span>
+                  </label>
+
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="comments()"
+                      (change)="comments.set(!comments())"
+                    />
+                    <span>Include comments (as PDF annotations)</span>
+                  </label>
+
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="includeHiddenSlides()"
+                      (change)="includeHiddenSlides.set(!includeHiddenSlides())"
+                    />
+                    <span>Include hidden slides</span>
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
 
           <!-- SIDEBAR ADVERTISEMENT SLOT -->
           <div class="sidebar-ad-slot" aria-label="Advertisement">

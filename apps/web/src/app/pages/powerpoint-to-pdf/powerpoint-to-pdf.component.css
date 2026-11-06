@@ -892,6 +892,82 @@
   margin-top: 8px;
 }
 
+/* ──────────────────────────────────────────────────────────────
+   ADVANCED SETTINGS ACCORDION
+   ────────────────────────────────────────────────────────────── */
+.advanced-section {
+  border-top: 1px solid var(--pt-soft-outline, #e2e8f0);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.advanced-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--pt-subtle-bg, #f8fafc);
+  border: 1px solid var(--pt-soft-outline, #e2e8f0);
+  border-radius: var(--pt-radius-md, 10px);
+  color: var(--pt-navy, #0f172a);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.advanced-toggle-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: var(--pt-teal-700, #0f766e);
+}
+
+.advanced-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chevron-icon {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--pt-muted, #64748b);
+}
+
+.chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.advanced-content {
+  background: var(--pt-subtle-bg, #f8fafc);
+  border: 1px solid var(--pt-soft-outline, #e2e8f0);
+  border-radius: var(--pt-radius-md, 10px);
+  padding: 16px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.setting-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 /* SIDEBAR ADVERTISEMENT SLOT */
 .sidebar-ad-slot {
   margin-top: 8px;

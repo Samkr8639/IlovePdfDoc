@@ -87,6 +87,13 @@ export class PowerPointToPdfComponent implements OnInit, OnDestroy {
   /** Controls mobile slide-in settings panel */
   readonly isSidePanelOpen = signal<boolean>(false);
 
+  /** Controls collapsible advanced settings accordion */
+  readonly showAdvanced = signal<boolean>(false);
+
+  toggleAdvanced(): void {
+    this.showAdvanced.set(!this.showAdvanced());
+  }
+
   // Known total slides from the primary file
   readonly knownSlideCount = computed<number | undefined>(() => {
     const files = this.selectedFiles();
@@ -336,6 +343,7 @@ export class PowerPointToPdfComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
     this.isProcessing.set(false);
     this.isSidePanelOpen.set(false);
+    this.showAdvanced.set(false);
     this.isWarningsDismissed.set(false);
     this.outputFormat.set('pdf');
     this.slideRange.set('');
