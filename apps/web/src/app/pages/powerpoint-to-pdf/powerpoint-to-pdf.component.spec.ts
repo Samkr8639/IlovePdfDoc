@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { PowerPointToPdfComponent } from './powerpoint-to-pdf.component';
 import { PowerPointToPdfService, ValidatedPowerPointFile } from '../../core/services/powerpoint-to-pdf.service';
+import { LayoutService } from '../../core/services/layout.service';
 
 describe('PowerPointToPdfComponent Integration Test', () => {
   let component: PowerPointToPdfComponent;
@@ -233,6 +234,8 @@ describe('PowerPointToPdfComponent Integration Test', () => {
     fixture.detectChanges();
 
     expect(component.currentState()).toBe('completed');
+    const layoutService = TestBed.inject(LayoutService);
+    expect(layoutService.isFooterVisible()).toBe(true);
     expect(component.conversionResult()).not.toBeNull();
     expect(component.conversionResult()?.filename).toBe('pitch_deck.pdf');
     expect(component.resultViewModel()).not.toBeNull();

@@ -302,11 +302,13 @@ export class PowerPointToPdfComponent implements OnInit, OnDestroy {
       this.conversionResult.set(result);
       this.isProcessing.set(false);
       this.currentState.set('completed');
+      this.layoutService.showFooter();
     } catch (err: any) {
       if (this.currentRunId !== runId) return;
 
       this.isProcessing.set(false);
       this.currentState.set('organize');
+      this.layoutService.hideFooter();
       const msg = err.message || 'PowerPoint conversion failed. Please try again.';
       this.errorMessage.set(msg);
     } finally {
@@ -322,6 +324,7 @@ export class PowerPointToPdfComponent implements OnInit, OnDestroy {
     this.currentRunId++;
     this.isProcessing.set(false);
     this.currentState.set('organize');
+    this.layoutService.hideFooter();
     this.errorMessage.set('Conversion was cancelled.');
   }
 
