@@ -66,13 +66,13 @@
   flex-shrink: 0;
 }
 
-/* 3-COLUMN MAIN GRID */
+/* 5-COLUMN MAIN GRID */
 .footer-main-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 48px;
-  padding-top: 26px;
-  padding-bottom: 26px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 32px;
+  padding-top: 36px;
+  padding-bottom: 36px;
   width: 100%;
 }
 
@@ -91,7 +91,8 @@
   padding: 0;
   cursor: default;
   text-align: left;
-  min-height: 44px;
+  min-height: auto;
+  margin-bottom: 14px;
 }
 
 .col-toggle-chevron {
@@ -107,7 +108,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #ffffff;
-  margin: 0 0 12px;
+  margin: 0;
 }
 
 .footer-nav-list {
@@ -116,18 +117,18 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .footer-item {
   font-size: 13.5px;
+  line-height: 1.5;
   color: #94a3b8;
   text-decoration: none;
   transition: color 0.18s ease, transform 0.18s ease;
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 6px 0;
+  padding: 4px 0;
   box-sizing: border-box;
 }
 
@@ -313,9 +314,10 @@
   transform: translateY(-2px);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) and (min-width: 769px) {
   .footer-main-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
   }
 }
 
@@ -337,10 +339,22 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 6px 12px;
   }
+  .footer-top-brand {
+    padding: 20px 0 16px;
+  }
+  .footer-brand-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .footer-compliance-badges {
+    width: 100%;
+    justify-content: flex-start;
+  }
   .footer-main-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
-    padding-top: 24px;
+    gap: 2px;
+    padding-top: 16px;
     padding-bottom: 24px;
   }
   .footer-col-toggle {
@@ -348,6 +362,7 @@
     cursor: pointer;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     min-height: 48px;
+    margin-bottom: 0;
     box-sizing: border-box;
   }
   .col-toggle-chevron {
@@ -361,15 +376,15 @@
   }
   .footer-nav-list {
     display: none;
-    padding: 12px 0 16px 8px;
-    gap: 10px;
+    padding: 8px 0 14px 6px;
+    gap: 4px;
   }
   .footer-nav-list.mobile-open {
     display: flex;
   }
   .footer-item {
-    min-height: 48px;
-    padding: 12px 0;
+    min-height: 44px;
+    padding: 8px 0;
     width: 100%;
     display: flex;
     align-items: center;
