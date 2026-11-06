@@ -108,3 +108,4 @@ export const PdfToJpgOptionsSchema = z.object({
   convertPages: ConvertPagesOptionsSchema,
   extractImages: ExtractImagesOptionsSchema
 });
+

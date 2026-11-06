@@ -15,3 +15,4 @@ describe('image-hash', () => {
     expect(hashA).not.toBe(hashB);
   });
 });
+

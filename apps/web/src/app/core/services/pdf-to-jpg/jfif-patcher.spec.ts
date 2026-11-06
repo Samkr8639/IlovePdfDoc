@@ -41,3 +41,4 @@ describe('jfif-patcher', () => {
     expect(info2?.yDensity).toBe(600);
   });
 });
+

@@ -59,3 +59,4 @@ Our engine incorporates proactive safety calculations (`canvas-limits.ts`):
   - Letters, digits, dots, underscores, hyphens, and Unicode en-dashes (`–`) are preserved.
   - Path traversal sequences (`..`), control characters, directory slashes (`/`, `\`), and invalid OS characters (`:`, `*`, `?`, `"`, `<`, `>`, `|`) are stripped.
   - Page numbers and image indices are formatted with dynamic zero-padding based on document page count (e.g. `document-page-001.jpg` for a 150-page PDF).
+

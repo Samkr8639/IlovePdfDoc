@@ -1,9 +1,9 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { TOOL_REGISTRY, ToolDefinition, ToolCategory, ApiResponse } from '@paperflow/contracts';
+import { TOOL_REGISTRY, ToolDefinition, ToolCategory, ApiResponse, LIVE_TOOL_IDS as CONTRACT_LIVE_TOOL_IDS } from '@paperflow/contracts';
 import { environment } from '../../../environments/environment';
 
-export const LIVE_TOOL_IDS = new Set<string>([
+export const LIVE_TOOL_IDS = new Set<string>(CONTRACT_LIVE_TOOL_IDS || [
   'merge-pdf',
   'split-pdf',
   'compress-pdf',
@@ -13,7 +13,8 @@ export const LIVE_TOOL_IDS = new Set<string>([
   'word-to-pdf',
   'excel-to-pdf',
   'powerpoint-to-pdf',
-  'edit-pdf'
+  'edit-pdf',
+  'pdf-to-jpg'
 ]);
 
 @Injectable({

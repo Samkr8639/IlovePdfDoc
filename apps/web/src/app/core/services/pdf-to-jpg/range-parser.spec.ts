@@ -46,3 +46,4 @@ describe('range-parser', () => {
     expect(formatPageRange([])).toBe('');
   });
 });
+

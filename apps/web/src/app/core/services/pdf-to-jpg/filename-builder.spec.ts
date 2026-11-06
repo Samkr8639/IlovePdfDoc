@@ -32,3 +32,4 @@ describe('filename-builder', () => {
     expect(buildCombinedFilename('Invoice.pdf')).toBe('Invoice-combined.jpg');
   });
 });
+

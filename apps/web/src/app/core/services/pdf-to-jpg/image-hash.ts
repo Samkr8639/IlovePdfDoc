@@ -37,3 +37,4 @@ export function computeImageHash(
 
   return `${hex1}-${hex2}-${lenHex}`;
 }
+

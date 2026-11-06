@@ -31,3 +31,4 @@ describe('canvas-limits', () => {
     expect(exceeded.exceedsByPx).toBe(70000 - 65535);
   });
 });
+

@@ -33,4 +33,8 @@ describe('ToolRegistryService', () => {
     expect(tool).toBeDefined();
     expect(tool?.id).toBe('merge-pdf');
   });
+
+  it('should mark pdf-to-jpg as live', () => {
+    expect(service.isLive('pdf-to-jpg')).toBe(true);
+  });
 });

@@ -56,3 +56,4 @@ Mode B extracts embedded raster graphics with duplicate detection and minimum si
 | **High (Default)** | 150 DPI | 90% ($\approx 0.90$) | Standard document viewing, crisp text readability |
 | **Print Quality** | 300 DPI | 90% ($\approx 0.90$) | Physical printing, archiving, official documentation |
 | **Ultra High Definition** | 600 DPI | 97% ($\approx 0.97$) | Fine vector line work, blueprints, architectural plans |
+

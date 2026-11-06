@@ -799,3 +799,4 @@ export class PdfToJpgService {
     ctx.putImageData(imgData, 0, 0);
   }
 }
+

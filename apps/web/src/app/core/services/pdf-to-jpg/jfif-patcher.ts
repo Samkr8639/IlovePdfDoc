@@ -123,3 +123,4 @@ export function embedJpegDpi(buffer: Uint8Array, dpi: number): Uint8Array {
 
   return result;
 }
+

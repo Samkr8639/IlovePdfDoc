@@ -81,3 +81,4 @@ export function buildCombinedFilename(originalFilename: string): string {
   const base = sanitizeBaseName(originalFilename);
   return `${base}-combined.jpg`;
 }
+

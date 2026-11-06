@@ -112,3 +112,4 @@ export function checkCombinedHeightLimit(
     exceedsByPx: Math.max(0, totalHeightPx - MAX_JPEG_DIMENSION)
   };
 }
+

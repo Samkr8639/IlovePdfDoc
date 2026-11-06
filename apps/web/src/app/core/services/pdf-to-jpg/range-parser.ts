@@ -95,3 +95,4 @@ export function formatPageRange(pages: number[]): string {
 
   return ranges.join(', ');
 }
+
