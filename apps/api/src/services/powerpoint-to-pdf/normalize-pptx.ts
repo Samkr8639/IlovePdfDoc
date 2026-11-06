@@ -304,6 +304,9 @@ export async function normalizePptx(
     const parser = new XMLParser(XML_PARSER_OPTIONS);
     const builder = new XMLBuilder(XML_BUILDER_OPTIONS);
 
+    const sldSzMatch = presXml.match(/<p:sldSz\s+cx="(\d+)"\s+cy="(\d+)"/);
+    const slideWidth = sldSzMatch ? parseInt(sldSzMatch[1], 10) : 9144000;
+
     // Check for embedded fonts list
     if (presXml.includes('<p:embeddedFontLst') || presXml.includes('<p:embeddedFontLst/')) {
       warnings.push(
@@ -372,7 +375,40 @@ export async function normalizePptx(
         let title = `Slide ${slideIndex}`;
         const sldContentFile = zip.file(slideFile);
         if (sldContentFile) {
-          const sldXml = await sldContentFile.async('text');
+          let sldXml = await sldContentFile.async('text');
+          let sldModified = false;
+
+          // Normalize squished / narrow text boxes (common in presentations converted from HTML or created with wrap="none")
+          // In PowerPoint, wrap="none" allows text to overflow horizontally without wrapping.
+          // In LibreOffice Impress, text is constrained by the shape's cx width. If cx is abnormally narrow (< 1.1 in / 1,000,000 EMU)
+          // while containing substantial text (> 60 chars) and wrap="none", it squishes into a 0.3-inch column down the margin.
+          // Expanding cx to the available slide width (slideWidth - x - rightMargin) and setting wrap="square" ensures clean, full-width wrapping.
+          const shapeRegex = /<p:sp>[\s\S]*?<\/p:sp>/g;
+          sldXml = sldXml.replace(shapeRegex, (sp) => {
+            const hasWrapNone = /wrap="none"/i.test(sp);
+            const offMatch = sp.match(/<a:off\s+x="(\d+)"\s+y="(\d+)"/);
+            const extMatch = sp.match(/<a:ext\s+cx="(\d+)"\s+cy="(\d+)"/);
+            if (offMatch && extMatch) {
+              const x = parseInt(offMatch[1], 10);
+              const cx = parseInt(extMatch[1], 10);
+              const textMatches = sp.match(/<a:t\b[^>]*>([\s\S]*?)<\/a:t>/g) || [];
+              const textLen = textMatches.reduce((acc, m) => acc + m.length, 0);
+
+              if (hasWrapNone && textLen > 60 && cx < 1000000 && x < slideWidth) {
+                const rightMargin = 514350; // standard 0.56 in margin
+                const targetCx = Math.max(cx, slideWidth - x - rightMargin);
+                let fixedSp = sp.replace(/<a:ext\s+cx="\d+"\s+cy="(\d+)"/, `<a:ext cx="${targetCx}" cy="$1"`);
+                fixedSp = fixedSp.replace(/wrap="none"/g, 'wrap="square"');
+                sldModified = true;
+                return fixedSp;
+              }
+            }
+            return sp;
+          });
+
+          if (sldModified) {
+            zip.file(slideFile, sldXml);
+          }
 
           // Check if slide has animations or transitions
           if (

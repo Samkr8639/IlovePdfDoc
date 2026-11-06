@@ -234,6 +234,40 @@ describe('PowerPoint to PDF API & Validation Tests', () => {
       // Ensure no warning refers to 'ppt/embeddings/' directory directly
       expect(norm.warnings.some((w) => w.includes("('ppt/embeddings/')"))).toBe(false);
     });
+
+    it('expands abnormally narrow text boxes with wrap="none" to prevent vertical text squishing', async () => {
+      const zip = new JSZip();
+      zip.file(
+        'ppt/presentation.xml',
+        '<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldSz cx="7555991" cy="10692384"/><p:sldIdLst><p:sldId id="256" r:id="rId1"/></p:sldIdLst></p:presentation>'
+      );
+      zip.file(
+        'ppt/_rels/presentation.xml.rels',
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide1.xml"/></Relationships>'
+      );
+      // Shape with cx=285750, wrap="none", and 100+ character paragraph
+      const longParagraph = 'All silent auctions take place on behalf of the event owner. We act as an agent on the event owner behalf in relation to the silent auction.';
+      zip.file(
+        'ppt/slides/slide1.xml',
+        `<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+          <p:sp>
+            <p:nvSpPr><p:cNvPr id="1" name="Shape"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
+            <p:spPr><a:xfrm><a:off x="514350" y="2000000"/><a:ext cx="285750" cy="800000"/></a:xfrm></p:spPr>
+            <p:txBody><a:bodyPr wrap="none"/><a:p><a:r><a:t>${longParagraph}</a:t></a:r></a:p></p:txBody>
+          </p:sp>
+        </p:sld>`
+      );
+
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      const norm = await normalizePptx(buf);
+
+      const cleanedZip = await JSZip.loadAsync(norm.buffer);
+      const cleanedSlide = await cleanedZip.file('ppt/slides/slide1.xml')?.async('text');
+
+      expect(cleanedSlide).toContain('wrap="square"');
+      // Should have expanded from 285750 to available slide width (~6527291)
+      expect(cleanedSlide).toContain('cx="6527291"');
+    });
   });
 
   describe('Route-level Conversion Tests', () => {
