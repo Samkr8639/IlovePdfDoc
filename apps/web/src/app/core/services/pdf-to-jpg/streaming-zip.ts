@@ -1,4 +1,4 @@
-import { zipSync, AsyncZipDeflate, Zip } from 'fflate';
+import { zip, zipSync } from 'fflate';
 
 export interface ZipEntryInput {
   name: string;
@@ -6,39 +6,45 @@ export interface ZipEntryInput {
 }
 
 /**
- * Creates a ZIP archive from a collection of files using fflate.
- * Streams each entry through compression chunks to keep memory bounded.
+ * Creates a standard ZIP archive from a collection of files using fflate.
+ * Uses STORE (level: 0) compression for JPEG images which are already compressed,
+ * eliminating CPU overhead, avoiding worker DataCloneError issues, and guaranteeing
+ * a 100% valid non-empty ZIP file with standard central directory headers.
  */
 export async function createStreamingZip(files: ZipEntryInput[]): Promise<Blob> {
   if (files.length === 0) {
     return new Blob([], { type: 'application/zip' });
   }
 
-  const chunks: Uint8Array[] = [];
-
-  const zip = new Zip((err, chunk, final) => {
-    if (err) {
-      throw err;
-    }
-    if (chunk) {
-      chunks.push(chunk);
-    }
-  });
-
+  const archive: Record<string, Uint8Array> = {};
   for (const file of files) {
     const arrayBuffer = await file.blob.arrayBuffer();
-    const data = new Uint8Array(arrayBuffer);
-
-    await new Promise<void>((resolve, reject) => {
-      const entry = new AsyncZipDeflate(file.name, { level: 6 });
-      zip.add(entry);
-
-      entry.push(data, true);
-      resolve();
-    });
+    archive[file.name] = new Uint8Array(arrayBuffer);
   }
 
-  zip.end();
-
-  return new Blob(chunks as any[], { type: 'application/zip' });
+  return new Promise<Blob>((resolve, reject) => {
+    try {
+      zip(archive, { level: 0 }, (err, data) => {
+        if (err || !data || data.length === 0) {
+          // Fallback to synchronous zipSync if asynchronous compression fails
+          try {
+            const syncData = zipSync(archive, { level: 0 });
+            resolve(new Blob([syncData as any], { type: 'application/zip' }));
+          } catch (syncErr) {
+            reject(err || syncErr);
+          }
+          return;
+        }
+        resolve(new Blob([data as any], { type: 'application/zip' }));
+      });
+    } catch {
+      // Synchronous fallback
+      try {
+        const syncData = zipSync(archive, { level: 0 });
+        resolve(new Blob([syncData as any], { type: 'application/zip' }));
+      } catch (syncErr) {
+        reject(syncErr);
+      }
+    }
+  });
 }

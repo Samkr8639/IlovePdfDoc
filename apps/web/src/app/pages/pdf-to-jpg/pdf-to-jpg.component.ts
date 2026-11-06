@@ -631,7 +631,10 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
       if (entries.length === 1) {
         this.downloadSingleItem(entries[0].blob, entries[0].name);
       } else {
-        const zipBlob = await createStreamingZip(entries);
+        const totalCount = res.mode === 'convert_pages' ? res.pages.length : res.images.length;
+        const zipBlob = (selectedIds.size === totalCount && res.zipBlob && res.zipBlob.size > 0)
+          ? res.zipBlob
+          : await createStreamingZip(entries);
         const zipName = res.zipFilename || 'download-selected.zip';
         this.downloadSingleItem(zipBlob, zipName);
       }
