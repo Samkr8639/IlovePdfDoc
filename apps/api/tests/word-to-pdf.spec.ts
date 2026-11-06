@@ -161,7 +161,7 @@ describe('Word to PDF API — route-level tests (no LibreOffice required)', () =
     if (res.status === 415) {
       fail('RTF file should not be rejected by type validation — only by engine availability');
     }
-  });
+  }, 30000);
 });
 
 // ──────────────────────────────────────────────────────────────

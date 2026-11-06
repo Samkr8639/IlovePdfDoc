@@ -75,7 +75,7 @@ export async function renderPdfPageToPng(
   pdfDoc: any,
   pageNumber: number,
   dpi = 200
-): Promise<{ pngBuffer: Buffer; widthPt: number; heightPt: number }> {
+): Promise<{ pngBuffer: Buffer; widthPt: number; heightPt: number; canvas?: any; ctx?: any }> {
   const page = await pdfDoc.getPage(pageNumber);
   const unscaledViewport = page.getViewport({ scale: 1 });
   const widthPt = unscaledViewport.width;
@@ -102,7 +102,7 @@ export async function renderPdfPageToPng(
     page.cleanup();
   }
 
-  return { pngBuffer, widthPt, heightPt };
+  return { pngBuffer, widthPt, heightPt, canvas, ctx };
 }
 
 /**
@@ -194,7 +194,7 @@ export async function extractPdfWithOcr(
 
   try {
     for (let p = 1; p <= totalPages; p++) {
-      const { pngBuffer, widthPt, heightPt } = await renderPdfPageToPng(pdfDoc, p, dpi);
+      const { pngBuffer, widthPt, heightPt, canvas, ctx } = await renderPdfPageToPng(pdfDoc, p, dpi);
       let lines: OcrTextLine[] = [];
       try {
         lines = await performOcrOnImage(pngBuffer, lang, dpi, timeoutMs);
@@ -203,11 +203,28 @@ export async function extractPdfWithOcr(
         lines = [];
       }
 
+      // Erase recognized text regions on the background canvas so the raster image
+      // does not contain duplicate/ghosted text under the editable text boxes
+      if (lines.length > 0 && ctx) {
+        ctx.fillStyle = '#FFFFFF';
+        const scaleToPx = dpi / 72;
+        for (const line of lines) {
+          const xPx = line.xPt * scaleToPx;
+          const yPx = line.yPt * scaleToPx;
+          const wPx = line.wPt * scaleToPx;
+          const hPx = line.hPt * scaleToPx;
+          // Whiten out the text area with a 2px margin
+          ctx.fillRect(Math.max(0, xPx - 2), Math.max(0, yPx - 2), wPx + 4, hPx + 4);
+        }
+      }
+
+      const cleanPngBuffer = canvas ? canvas.toBuffer('image/png') : pngBuffer;
+
       results.push({
         pageNumber: p,
         widthPt,
         heightPt,
-        pngBuffer,
+        pngBuffer: cleanPngBuffer,
         lines
       });
 

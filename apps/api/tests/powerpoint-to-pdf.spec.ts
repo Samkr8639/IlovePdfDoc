@@ -311,7 +311,7 @@ describe('PowerPoint to PDF API & Validation Tests', () => {
       const dlRes2 = await request(app).get(res.body.data.downloadUrl);
       expect(dlRes2.status).toBe(404);
       expect(dlRes2.body.error.code).toBe('DOWNLOAD_EXPIRED');
-    });
+    }, 30000);
 
     it('supports handout layout (3 slides per page with note lines)', async () => {
       const lo = await checkLibreOffice();

@@ -15,6 +15,7 @@ export interface BuildPptxOptions {
   mode?: PdfToPowerPointMode;
   originalFilename?: string;
   ocrPages?: OcrPageResult[];
+  scannedPageIndices?: Set<number>;
 }
 
 export interface BuildPptxResult {
@@ -164,11 +165,14 @@ export async function buildPptx(
   for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
     const slide = pptx.addSlide();
 
+    const isOcrPage = mode === 'ocr' && opts.ocrPages && Boolean(opts.ocrPages[pageIdx]) &&
+      (!opts.scannedPageIndices || opts.scannedPageIndices.has(pageIdx));
+
     // -------------------------------------------------------------------------
     // OCR MODE: Render high-fidelity background image + overlaid text boxes
     // -------------------------------------------------------------------------
-    if (mode === 'ocr' && opts.ocrPages && opts.ocrPages[pageIdx]) {
-      const ocrPage = opts.ocrPages[pageIdx];
+    if (isOcrPage) {
+      const ocrPage = opts.ocrPages![pageIdx];
       const pageW_in = ocrPage.widthPt / 72;
       const pageH_in = ocrPage.heightPt / 72;
 
@@ -190,7 +194,7 @@ export async function buildPptx(
         offsetY_in = (presHeight_in - scaledH) / 2;
       }
 
-      // Add full-slide background image for visual fidelity
+      // Add clean background image (with text areas already whited out to prevent ghosting)
       const bgBase64 = `image/png;base64,${ocrPage.pngBuffer.toString('base64')}`;
       slide.addImage({
         data: bgBase64,
@@ -231,7 +235,8 @@ export async function buildPptx(
             wrap: false,
             align: 'left',
             paraSpaceBefore: 0,
-            paraSpaceAfter: 0
+            paraSpaceAfter: 0,
+            fill: { color: 'FFFFFF' }
           }
         );
       }
