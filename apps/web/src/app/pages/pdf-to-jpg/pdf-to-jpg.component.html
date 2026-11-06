@@ -1,0 +1,972 @@
+<div class="tool-page-container">
+  <!-- GLOBAL ERROR BANNER (VISIBLE IN ALL STATES) -->
+  @if (errorMessage()) {
+    <div class="global-error-banner" role="alert">
+      <div class="error-banner-content">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="error-icon" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span class="error-text">{{ errorMessage() }}</span>
+      </div>
+      <button type="button" class="error-close-btn" (click)="errorMessage.set(null)" aria-label="Dismiss error">✕</button>
+    </div>
+  }
+
+  <!-- PASSWORD PROMPT MODAL -->
+  @if (isPasswordModalOpen()) {
+    <div class="password-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+      <div class="password-modal-card">
+        <div class="password-modal-header">
+          <div class="password-lock-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3 id="passwordModalTitle">Password Protected PDF</h3>
+          <p>This document is encrypted. Please enter the password to unlock and convert it in your browser.</p>
+        </div>
+
+        <div class="password-modal-body">
+          <input
+            type="password"
+            class="pt-text-input"
+            placeholder="Enter document password"
+            [ngModel]="passwordInput()"
+            (ngModelChange)="passwordInput.set($event)"
+            (keydown.enter)="submitPassword()"
+            autofocus
+          />
+          @if (passwordError()) {
+            <span class="field-error-text">{{ passwordError() }}</span>
+          }
+        </div>
+
+        <div class="password-modal-footer">
+          <button type="button" class="btn-secondary" (click)="cancelPasswordModal()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="submitPassword()">Unlock PDF</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       1. UPLOAD HERO STATE
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'upload') {
+    <section class="upload-hero-section">
+      <div class="container hero-container">
+        <!-- BREADCRUMBS -->
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+          <ol class="breadcrumb-list">
+            <li><a routerLink="/" class="breadcrumb-link">Home</a></li>
+            <li class="breadcrumb-separator">/</li>
+            <li class="breadcrumb-current" aria-current="page">PDF to JPG</li>
+          </ol>
+        </nav>
+
+        <!-- TITLE & SUBTITLE -->
+        <div class="hero-text-block">
+          <h1 class="hero-h1">PDF to JPG</h1>
+          <p class="hero-subtitle">
+            Convert each PDF page into a high-quality JPG image or extract all embedded images in seconds.
+            Processed 100% locally in your browser with zero server uploads.
+          </p>
+        </div>
+
+        <!-- DROPZONE -->
+        <div class="dropzone-outer-wrap">
+          <app-dropzone
+            [acceptedTypes]="'.pdf,application/pdf'"
+            [multiple]="false"
+            [limitInfo]="'Max 200MB'"
+            [title]="'Select PDF file'"
+            [subtitle]="'or drop PDF here'"
+            (filesSelected)="onFilesSelected($event)"
+          ></app-dropzone>
+        </div>
+
+        <!-- ADVERTISEMENT SLOT -->
+        <div class="hero-ad-slot" aria-label="Advertisement">
+          <div class="ad-placeholder-box">
+            <span class="ad-tag">ADVERTISEMENT</span>
+            <span class="ad-hint">728 × 90 Leaderboard</span>
+          </div>
+        </div>
+
+        <!-- EDITORIAL FEATURES -->
+        <div class="editorial-features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+            <h3 class="feature-heading">Two Powerful Modes</h3>
+            <p class="feature-desc">Convert entire pages to crisp JPG images or extract all high-resolution photos embedded within the document.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-heading">Custom DPI & Quality</h3>
+            <p class="feature-desc">Fine-tune resolution from 72 to 1200 DPI with JFIF density header embedding and real-time dimension and size estimation.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-heading">100% In-Browser Privacy</h3>
+            <p class="feature-desc">Your documents never touch an external server. Everything renders directly inside your private browser sandbox.</p>
+          </div>
+        </div>
+
+        <!-- 3-STEP HOW TO SECTION -->
+        <div class="howto-section">
+          <h2 class="howto-h2">How to Convert PDF to JPG</h2>
+          <div class="howto-steps-grid">
+            <div class="howto-step-item">
+              <span class="howto-step-num">1</span>
+              <h4 class="howto-step-title">Select or Drop PDF</h4>
+              <p class="howto-step-desc">Choose a PDF document from your device or drop it directly into the upload area.</p>
+            </div>
+            <div class="howto-step-item">
+              <span class="howto-step-num">2</span>
+              <h4 class="howto-step-title">Choose Mode & Options</h4>
+              <p class="howto-step-desc">Select "Convert pages" or "Extract images", pick your target DPI and quality, or pick specific pages.</p>
+            </div>
+            <div class="howto-step-item">
+              <span class="howto-step-num">3</span>
+              <h4 class="howto-step-title">Download JPGs</h4>
+              <p class="howto-step-desc">Get your high-fidelity JPG image directly or download all pages packaged in a ZIP archive.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       2. ORGANIZE WORKSPACE STATE
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- CENTER CANVAS WORKSPACE -->
+      <main class="organize-canvas-pane">
+        <!-- Floating Add-Files Dock -->
+        <div class="floating-file-dock">
+          <div class="dock-stack-wrapper">
+            <button
+              type="button"
+              class="dock-icon-btn dock-main-btn"
+              (click)="fileInput.click()"
+              aria-label="Add more PDF files"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span class="dock-badge-counter">{{ selectedFiles().length }}</span>
+            </button>
+            <input #fileInput type="file" accept=".pdf,application/pdf" (change)="onFilesSelected($any($event.target).files); fileInput.value=''" hidden />
+
+            <!-- Device button -->
+            <div class="dock-btn-wrap">
+              <button type="button" class="dock-icon-btn pc-action" (click)="fileInput.click()" aria-label="Upload from this device">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Device</span>
+            </div>
+
+            <!-- Google Drive button -->
+            <div class="dock-btn-wrap">
+              <button type="button" class="dock-icon-btn cloud-action disabled" disabled aria-label="Google Drive (coming soon)">
+                <svg width="20" height="18" viewBox="0 0 87.3 78" aria-hidden="true">
+                  <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066da"/>
+                  <path d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 53.6c-.8 1.4-1.2 2.95-1.2 4.5h27.5l16.15-33.1z" fill="#00ac47"/>
+                  <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 13.8 7.9 10z" fill="#ea4335"/>
+                  <path d="M43.65 25L57.4 1.2c-1.35-.8-2.9-1.2-4.5-1.2H34.4c-1.6 0-3.15.45-4.5 1.2l13.75 23.8z" fill="#00832d"/>
+                  <path d="M59.8 53.1H27.5L13.75 76.9c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2L59.8 53.1z" fill="#2684fc"/>
+                  <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28.1H87.3c0-1.55-.4-3.1-1.2-4.5l-12.7-22.1z" fill="#ffba00"/>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Drive</span>
+            </div>
+
+            <!-- Dropbox button -->
+            <div class="dock-btn-wrap">
+              <button type="button" class="dock-icon-btn cloud-action disabled" disabled aria-label="Dropbox (coming soon)">
+                <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF" aria-hidden="true">
+                  <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+                </svg>
+              </button>
+              <span class="dock-tooltip-label">Dropbox</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Center Stage -->
+        <div class="center-stage-container">
+          <!-- Document Card Info Header -->
+          @if (primaryFile(); as f) {
+            <div class="primary-file-card">
+              <div class="file-card-icon">
+                <span class="file-pdf-badge">PDF</span>
+              </div>
+              <div class="file-card-details">
+                <span class="file-card-name" [title]="f.name">{{ f.name }}</span>
+                <span class="file-card-meta">
+                  {{ f.formattedSize }}
+                  @if (f.pageCount) {
+                    · {{ f.pageCount }} pages
+                  }
+                  @if (f.firstPageWidthPt && f.firstPageHeightPt) {
+                    · {{ f.firstPageWidthPt }} × {{ f.firstPageHeightPt }} pt
+                  }
+                </span>
+              </div>
+              <button type="button" class="file-card-remove" (click)="resetWorkspace()" aria-label="Remove document">✕</button>
+            </div>
+          }
+
+          <!-- MODE A: PAGE THUMBNAILS GRID -->
+          @if (mode() === 'convert_pages') {
+            <div class="thumbnails-toolbar">
+              <div class="toolbar-left">
+                <span class="toolbar-label">
+                  Pages to convert: <strong>{{ activePagesCount() }} of {{ totalPagesCount() }}</strong>
+                </span>
+              </div>
+              <div class="toolbar-right">
+                <button type="button" class="btn-text-action" (click)="selectAllPages()">Select all</button>
+                <button type="button" class="btn-text-action" (click)="clearAllPages()">Clear</button>
+                <button type="button" class="btn-text-action" (click)="invertPageSelection()">Invert</button>
+              </div>
+            </div>
+
+            <div class="page-thumbnails-grid" role="group" aria-label="PDF Page Thumbnails">
+              @if (primaryFile(); as f) {
+                @for (pNum of selectedPageNumbers(); track pNum) {
+                  <!-- Thumbnail card -->
+                  <div
+                    class="page-thumb-card"
+                    [class.selected]="selectedPageNumbers().includes(pNum)"
+                    (click)="togglePageSelection(pNum, $event)"
+                    tabindex="0"
+                    (keydown.space)="$event.preventDefault(); togglePageSelection(pNum)"
+                    [attr.aria-label]="'Page ' + pNum + (selectedPageNumbers().includes(pNum) ? ' selected' : ' unselected')"
+                  >
+                    <div class="thumb-check-box">
+                      <input
+                        type="checkbox"
+                        [checked]="selectedPageNumbers().includes(pNum)"
+                        tabindex="-1"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div class="thumb-img-wrapper">
+                      @if (f.thumbnails?.get(pNum); as thumbUrl) {
+                        <img [src]="thumbUrl" [alt]="'Page ' + pNum" class="thumb-image" loading="lazy" />
+                      } @else {
+                        <div class="thumb-placeholder-doc">
+                          <span class="thumb-placeholder-num">{{ pNum }}</span>
+                        </div>
+                      }
+                    </div>
+                    <span class="thumb-page-label">Page {{ pNum }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+
+          <!-- MODE B: EXTRACT IMAGES OVERVIEW -->
+          @if (mode() === 'extract_images') {
+            <div class="extract-mode-banner">
+              <div class="extract-banner-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="extract-banner-text">
+                <h3>Extract All Embedded Images</h3>
+                <p>
+                  Every photo, graphic, and raster image embedded inside your PDF will be detected and extracted.
+                  Uncompressed JPEGs are passed through losslessly without re-encoding.
+                </p>
+                <div class="extract-criteria-pill">
+                  <span>Minimum size: ≥ {{ minSize() }} × {{ minSize() }} px</span>
+                  @if (keepOriginalJpegs()) {
+                    <span>· Lossless DCT extraction active</span>
+                  }
+                  @if (skipDuplicates()) {
+                    <span>· Duplicate deduplication active</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </main>
+
+      <!-- MOBILE SETTINGS TOGGLE BUTTON -->
+      <button
+        type="button"
+        class="mobile-gear-btn"
+        [class.active]="isSidePanelOpen()"
+        (click)="isSidePanelOpen.set(!isSidePanelOpen())"
+        aria-label="Toggle conversion options"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <!-- RIGHT SIDEBAR: OPTIONS -->
+      <aside class="sidebar-action-panel" [class.panel-open]="isSidePanelOpen()">
+        <button type="button" class="sidebar-mobile-close" (click)="isSidePanelOpen.set(false)" aria-label="Close settings">✕</button>
+
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">PDF to JPG</h2>
+        </div>
+
+        <div class="sidebar-scrollable-content">
+          <!-- SECTION 1: MODE SELECTOR -->
+          <div class="option-section">
+            <span class="option-label">CONVERSION MODE</span>
+            <div class="radio-card-stack">
+              <label class="radio-card" [class.selected]="mode() === 'convert_pages'">
+                <input
+                  type="radio"
+                  name="conversionMode"
+                  value="convert_pages"
+                  [checked]="mode() === 'convert_pages'"
+                  (change)="mode.set('convert_pages')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Convert pages to JPG</span>
+                  <span class="card-radio-desc">Every page is rendered to a full JPG image</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="mode() === 'extract_images'">
+                <input
+                  type="radio"
+                  name="conversionMode"
+                  value="extract_images"
+                  [checked]="mode() === 'extract_images'"
+                  (change)="mode.set('extract_images')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Extract all images</span>
+                  <span class="card-radio-desc">Extract photographs and pictures from inside PDF</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- ══════════ MODE A OPTIONS ══════════ -->
+          @if (mode() === 'convert_pages') {
+            <!-- RESOLUTION (DPI) -->
+            <div class="option-section">
+              <span class="option-label">RESOLUTION (DPI)</span>
+              <select
+                class="pt-select"
+                [ngModel]="dpiPreset()"
+                (ngModelChange)="onDpiChange($event)"
+              >
+                <option [ngValue]="72">72 DPI (Web & Screen)</option>
+                <option [ngValue]="96">96 DPI (Standard Screen)</option>
+                <option [ngValue]="150">150 DPI (Recommended / Medium)</option>
+                <option [ngValue]="200">200 DPI (High Detail)</option>
+                <option [ngValue]="300">300 DPI (Print Quality)</option>
+                <option [ngValue]="600">600 DPI (Ultra High Definition)</option>
+                <option value="custom">Custom DPI...</option>
+              </select>
+
+              @if (dpiPreset() === 'custom') {
+                <div class="custom-input-wrap mt-2">
+                  <label class="sub-label" for="customDpiInput">Custom DPI (36 – 1200):</label>
+                  <input
+                    id="customDpiInput"
+                    type="number"
+                    min="36"
+                    max="1200"
+                    class="pt-text-input"
+                    [ngModel]="customDpi()"
+                    (ngModelChange)="customDpi.set($event); onDpiChange('custom')"
+                  />
+                </div>
+              }
+
+              <!-- Live Estimate Card -->
+              <div class="resolution-estimate-card">
+                <div class="estimate-row">
+                  <span class="estimate-label">Dimensions:</span>
+                  <span class="estimate-value">{{ firstPageDimensionsText() }}</span>
+                </div>
+                <div class="estimate-row">
+                  <span class="estimate-label">Estimated size:</span>
+                  <span class="estimate-value">{{ estimatedSizeText() }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- IMAGE QUALITY -->
+            <div class="option-section">
+              <span class="option-label">IMAGE QUALITY</span>
+              <div class="radio-card-stack">
+                <label class="radio-card" [class.selected]="qualityPreset() === 'high'">
+                  <input
+                    type="radio"
+                    name="qualityPreset"
+                    value="high"
+                    [checked]="qualityPreset() === 'high'"
+                    (change)="onQualityChange('high')"
+                  />
+                  <div class="radio-card-text">
+                    <span class="card-radio-title">High Quality (90%)</span>
+                    <span class="card-radio-desc">Best balance of sharpness and file size</span>
+                  </div>
+                </label>
+
+                <label class="radio-card" [class.selected]="qualityPreset() === 'medium'">
+                  <input
+                    type="radio"
+                    name="qualityPreset"
+                    value="medium"
+                    [checked]="qualityPreset() === 'medium'"
+                    (change)="onQualityChange('medium')"
+                  />
+                  <div class="radio-card-text">
+                    <span class="card-radio-title">Medium (80%)</span>
+                    <span class="card-radio-desc">Optimized smaller size</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- SLIDES/PAGES RANGE -->
+            <div class="option-section">
+              <span class="option-label">PAGES</span>
+              <div class="radio-card-stack">
+                <label class="radio-card" [class.selected]="pagesMode() === 'all'">
+                  <input
+                    type="radio"
+                    name="pagesMode"
+                    value="all"
+                    [checked]="pagesMode() === 'all'"
+                    (change)="selectAllPages()"
+                  />
+                  <div class="radio-card-text">
+                    <span class="card-radio-title">All pages ({{ totalPagesCount() }})</span>
+                  </div>
+                </label>
+
+                <label class="radio-card" [class.selected]="pagesMode() === 'range'">
+                  <input
+                    type="radio"
+                    name="pagesMode"
+                    value="range"
+                    [checked]="pagesMode() === 'range'"
+                    (change)="pagesMode.set('range')"
+                  />
+                  <div class="radio-card-text">
+                    <span class="card-radio-title">Choose specific pages</span>
+                  </div>
+                </label>
+              </div>
+
+              @if (pagesMode() === 'range') {
+                <div class="slide-range-input-wrap">
+                  <input
+                    type="text"
+                    class="pt-text-input"
+                    placeholder="e.g. 1-3, 5, 8-10"
+                    [ngModel]="pageRangeInput()"
+                    (ngModelChange)="pageRangeInput.set($event)"
+                    (blur)="onPageRangeInputBlur()"
+                  />
+                  @if (pageRangeError()) {
+                    <span class="field-error-text">{{ pageRangeError() }}</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- COLLAPSIBLE ADVANCED SETTINGS -->
+            <div class="advanced-section">
+              <button
+                type="button"
+                class="advanced-toggle-btn"
+                (click)="showAdvanced.set(!showAdvanced())"
+                [attr.aria-expanded]="showAdvanced()"
+              >
+                <div class="advanced-toggle-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  </svg>
+                  <span>Advanced Settings</span>
+                </div>
+                <svg
+                  class="chevron-icon"
+                  [class.rotated]="showAdvanced()"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+
+              @if (showAdvanced()) {
+                <div class="advanced-content">
+                  <!-- Output arrangement -->
+                  <div class="setting-field">
+                    <label class="sub-label" for="arrangementSelect">Output arrangement</label>
+                    <select
+                      id="arrangementSelect"
+                      class="pt-select"
+                      [ngModel]="arrangement()"
+                      (ngModelChange)="arrangement.set($event)"
+                    >
+                      <option value="separate">Separate images (One JPG per page)</option>
+                      <option value="combined">Combine all pages into one long image</option>
+                    </select>
+                  </div>
+
+                  <!-- Background Color -->
+                  <div class="setting-field">
+                    <label class="sub-label" for="bgColorInput">Background color</label>
+                    <div class="color-picker-row">
+                      <input
+                        id="bgColorInput"
+                        type="color"
+                        class="pt-color-input"
+                        [ngModel]="backgroundColor()"
+                        (ngModelChange)="backgroundColor.set($event)"
+                      />
+                      <span class="color-hex-val">{{ backgroundColor() }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Quality Slider -->
+                  <div class="setting-field">
+                    <label class="sub-label">Quality Slider: {{ customQuality() }}%</label>
+                    <input
+                      type="range"
+                      min="40"
+                      max="100"
+                      class="pt-range-slider"
+                      [ngModel]="customQuality()"
+                      (ngModelChange)="customQuality.set($event); qualityPreset.set('custom'); onQualityChange('custom')"
+                    />
+                  </div>
+
+                  <!-- Checkboxes -->
+                  <div class="checkbox-stack mt-2">
+                    <label class="pt-checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="includeAnnotations()"
+                        (change)="includeAnnotations.set(!includeAnnotations())"
+                      />
+                      <span>Include annotations and form fields</span>
+                    </label>
+
+                    <label class="pt-checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="embedDpi()"
+                        (change)="embedDpi.set(!embedDpi())"
+                      />
+                      <span>Embed DPI in image file (JFIF header)</span>
+                    </label>
+
+                    <label class="pt-checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="grayscale()"
+                        (change)="grayscale.set(!grayscale())"
+                      />
+                      <span>Convert to Grayscale (B&W)</span>
+                    </label>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- ══════════ MODE B OPTIONS ══════════ -->
+          @if (mode() === 'extract_images') {
+            <!-- Minimum Size Slider -->
+            <div class="option-section">
+              <span class="option-label">MINIMUM IMAGE SIZE</span>
+              <div class="setting-field">
+                <div class="slider-val-row">
+                  <span class="sub-label">Skip icons smaller than:</span>
+                  <span class="slider-val-badge">{{ minSize() }} × {{ minSize() }} px</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="20"
+                  class="pt-range-slider"
+                  [ngModel]="minSize()"
+                  (ngModelChange)="minSize.set($event)"
+                />
+              </div>
+              <button
+                type="button"
+                class="btn-link-action"
+                (click)="minSize.set(0)"
+              >
+                Include all small icons and bullets
+              </button>
+            </div>
+
+            <!-- Extraction Checkboxes -->
+            <div class="option-section">
+              <span class="option-label">EXTRACTION OPTIONS</span>
+              <div class="checkbox-stack">
+                <label class="pt-checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="keepOriginalJpegs()"
+                    (change)="keepOriginalJpegs.set(!keepOriginalJpegs())"
+                  />
+                  <span>Keep original JPEGs untouched (lossless)</span>
+                </label>
+
+                <label class="pt-checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="skipDuplicates()"
+                    (change)="skipDuplicates.set(!skipDuplicates())"
+                  />
+                  <span>Skip duplicates (extract recurring images once)</span>
+                </label>
+
+                <label class="pt-checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="includeMasks()"
+                    (change)="includeMasks.set(!includeMasks())"
+                  />
+                  <span>Include image masks and stencils</span>
+                </label>
+              </div>
+            </div>
+          }
+
+          <!-- ADVERTISEMENT SLOT -->
+          <div class="sidebar-ad-slot" aria-label="Advertisement">
+            <div class="sidebar-ad-box">
+              <span class="sidebar-ad-tag">ADVERTISEMENT</span>
+              <span class="sidebar-ad-hint">300 × 250 Sticky Banner</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRIMARY CONVERT ACTION BUTTON -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="prime-action-btn"
+            [disabled]="selectedFiles().length === 0 || isProcessing() || (mode() === 'convert_pages' && pagesMode() === 'range' && pageRangeError() !== null)"
+            (click)="executeConversion()"
+          >
+            <span>{{ mode() === 'convert_pages' ? 'Convert to JPG' : 'Extract images' }}</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       3. PROCESSING STATE
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'processing') {
+    <div class="processing-workspace-screen">
+      <app-processing-state
+        [percent]="processingProgress()"
+        [message]="processingStatus()"
+      ></app-processing-state>
+      <div class="cancel-wrap">
+        <button type="button" class="cancel-link-btn" (click)="cancelConversion()">Cancel Operation</button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       4. COMPLETED RESULT SCREEN
+       ════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'completed' && conversionResult(); as res) {
+    <div class="result-workspace-screen">
+      <div class="container result-container">
+        <!-- SUCCESS STATUS HEADER -->
+        <div class="result-header-block">
+          <div class="success-badge-circle" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h2 class="result-h2">
+            {{ res.mode === 'convert_pages' ? 'PDF Has Been Converted to JPG!' : 'Images Extracted Successfully!' }}
+          </h2>
+          <p class="result-summary-line">
+            @if (res.mode === 'convert_pages') {
+              Converted {{ res.pages.length }} page{{ res.pages.length === 1 ? '' : 's' }} ({{ formatBytes(res.totalOutputSizeBytes) }}) in {{ (res.processingTimeMs / 1000).toFixed(1) }}s. Processed 100% in your browser.
+            } @else {
+              Found {{ res.images.length }} image{{ res.images.length === 1 ? '' : 's' }} ({{ formatBytes(res.totalOutputSizeBytes) }}) in {{ (res.processingTimeMs / 1000).toFixed(1) }}s. Processed 100% in your browser.
+            }
+          </p>
+        </div>
+
+        <!-- WARNINGS BANNER (IF ANY) -->
+        @if (res.warnings.length > 0) {
+          <div class="result-warnings-banner" role="status">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div class="warnings-list">
+              @for (w of res.warnings; track w) {
+                <span>{{ w }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- PRIMARY DOWNLOAD ACTION CARD -->
+        <div class="result-card-box">
+          <div class="result-card-file-info">
+            <div class="file-icon-square">
+              <span class="file-jpg-badge">JPG</span>
+            </div>
+            <div class="file-info-text">
+              <span class="file-download-title">
+                {{ res.isSingleImage ? (res.singleImageFilename || res.pages[0]?.filename || res.images[0]?.filename) : res.zipFilename }}
+              </span>
+              <span class="file-download-meta">
+                {{ formatBytes(res.totalOutputSizeBytes) }} · 
+                {{ res.mode === 'convert_pages' ? (res.pages.length + ' page' + (res.pages.length === 1 ? '' : 's')) : (res.images.length + ' image' + (res.images.length === 1 ? '' : 's')) }}
+                · 100% In-Browser
+              </span>
+            </div>
+          </div>
+
+          <div class="result-action-buttons-stack">
+            @if (res.isSingleImage) {
+              <button
+                type="button"
+                class="btn-download-primary"
+                (click)="downloadSingleItem(res.singleImageBlob || res.pages[0].blob, res.singleImageFilename || res.pages[0].filename)"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download JPG</span>
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn-download-primary"
+                [disabled]="isDownloadingZip()"
+                (click)="downloadSelectedAsZip()"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>
+                  {{ selectedResultItemIds().size === (res.mode === 'convert_pages' ? res.pages.length : res.images.length) ? 'Download All (ZIP)' : 'Download Selected (' + selectedResultItemIds().size + ')' }}
+                </span>
+              </button>
+            }
+
+            <div class="result-secondary-row">
+              <button type="button" class="btn-restart-action" (click)="resetWorkspace()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>Convert another PDF</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMAGE PREVIEW & SELECTION GALLERY (IF MULTIPLE) -->
+        @if (!res.isSingleImage) {
+          <div class="result-gallery-section">
+            <div class="gallery-toolbar">
+              <div class="gallery-toolbar-left">
+                <span class="gallery-title">Generated Images</span>
+                <span class="gallery-count-badge">{{ selectedResultItemIds().size }} of {{ res.mode === 'convert_pages' ? res.pages.length : res.images.length }} selected</span>
+              </div>
+              <div class="gallery-toolbar-right">
+                <button type="button" class="btn-text-action" (click)="toggleSelectAllResultItems()">
+                  {{ areAllItemsSelected() ? 'Deselect all' : 'Select all' }}
+                </button>
+              </div>
+            </div>
+
+            <div class="image-gallery-grid">
+              @if (res.mode === 'convert_pages') {
+                @for (page of res.pages; track page.filename) {
+                  <div
+                    class="gallery-item-card"
+                    [class.selected]="selectedResultItemIds().has(page.filename)"
+                    (click)="toggleResultItemSelection(page.filename)"
+                  >
+                    <div class="gallery-item-check">
+                      <input
+                        type="checkbox"
+                        [checked]="selectedResultItemIds().has(page.filename)"
+                        tabindex="-1"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div class="gallery-img-box">
+                      <img [src]="page.previewUrl" [alt]="'Page ' + page.pageNumber" loading="lazy" />
+                    </div>
+                    <div class="gallery-item-footer">
+                      <span class="gallery-item-name" [title]="page.filename">Page {{ page.pageNumber }}</span>
+                      <span class="gallery-item-meta">{{ page.width }} × {{ page.height }} · {{ formatBytes(page.sizeBytes) }}</span>
+                      <button
+                        type="button"
+                        class="gallery-item-dl-btn"
+                        (click)="$event.stopPropagation(); downloadSingleItem(page.blob, page.filename)"
+                        aria-label="Download page JPG"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                }
+              } @else {
+                @for (img of res.images; track img.id) {
+                  <div
+                    class="gallery-item-card"
+                    [class.selected]="selectedResultItemIds().has(img.id)"
+                    (click)="toggleResultItemSelection(img.id)"
+                  >
+                    <div class="gallery-item-check">
+                      <input
+                        type="checkbox"
+                        [checked]="selectedResultItemIds().has(img.id)"
+                        tabindex="-1"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div class="gallery-img-box">
+                      <img [src]="img.previewUrl" [alt]="img.filename" loading="lazy" />
+                    </div>
+                    <div class="gallery-item-footer">
+                      <span class="gallery-item-name" [title]="img.filename">p.{{ img.pageNumber }} ({{ img.width }}×{{ img.height }})</span>
+                      <span class="gallery-item-meta">
+                        {{ formatBytes(img.sizeBytes) }}
+                        @if (img.usedOnPages.length > 1) {
+                          · pages {{ img.usedOnPages.join(', ') }}
+                        }
+                      </span>
+                      <button
+                        type="button"
+                        class="gallery-item-dl-btn"
+                        (click)="$event.stopPropagation(); downloadSingleItem(img.blob, img.filename)"
+                        aria-label="Download image"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+
+            @if (hasMoreResultItems()) {
+              <div class="show-more-wrap">
+                <button type="button" class="btn-secondary" (click)="showMoreResultItems()">
+                  Show more images
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- PRIVACY ASSURANCE BANNER -->
+        <div class="result-privacy-banner">
+          <div class="privacy-shield-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="privacy-banner-text">
+            <h4>Zero Server Storage</h4>
+            <p>Your documents were processed directly inside your browser's private memory. No files are uploaded to our servers, keeping your data confidential.</p>
+          </div>
+        </div>
+
+        <!-- CONTINUE WITH YOUR DOCUMENT -->
+        <div class="next-tools-block">
+          <h3 class="next-tools-title">Continue with your document</h3>
+          <div class="next-tools-grid">
+            <a routerLink="/compress-pdf" class="next-tool-card">
+              <div class="next-tool-icon">🗜️</div>
+              <div class="next-tool-text">
+                <span class="next-tool-name">Compress PDF</span>
+                <span class="next-tool-desc">Reduce file size without quality loss</span>
+              </div>
+            </a>
+            <a routerLink="/pdf-to-word" class="next-tool-card">
+              <div class="next-tool-icon">📝</div>
+              <div class="next-tool-text">
+                <span class="next-tool-name">PDF to Word</span>
+                <span class="next-tool-desc">Convert to editable DOCX format</span>
+              </div>
+            </a>
+            <a routerLink="/merge-pdf" class="next-tool-card">
+              <div class="next-tool-icon">📑</div>
+              <div class="next-tool-text">
+                <span class="next-tool-name">Merge PDF</span>
+                <span class="next-tool-desc">Combine multiple PDFs in custom order</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
