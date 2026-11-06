@@ -205,6 +205,35 @@ describe('PowerPoint to PDF API & Validation Tests', () => {
       expect(norm.slides[0].isIncluded).toBe(true);
       expect(norm.slides[1].isIncluded).toBe(false);
     });
+
+    it('does not emit animation warnings or unused theme script font warnings on standard decks', async () => {
+      const buf = await createBasicPptxBuffer('Clean Deck', 'Second Slide');
+      const norm = await normalizePptx(buf);
+
+      // Clean deck should not have animation or theme script warnings
+      expect(norm.warnings.some((w) => w.includes('Animations and transitions'))).toBe(false);
+      expect(norm.warnings.some((w) => w.includes('游ゴシック') || w.includes('맑은 고딕'))).toBe(false);
+      expect(norm.warnings.length).toBe(0);
+    });
+
+    it('consolidates embedded OLE resource removal into a single warning and ignores directories', async () => {
+      const zip = new JSZip();
+      zip.file(
+        'ppt/presentation.xml',
+        '<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldIdLst/></p:presentation>'
+      );
+      // Add folder entry and two OLE binaries
+      zip.folder('ppt/embeddings');
+      zip.file('ppt/embeddings/oleObject1.bin', 'binary1');
+      zip.file('ppt/embeddings/oleObject2.bin', 'binary2');
+
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      const norm = await normalizePptx(buf);
+
+      expect(norm.warnings.some((w) => w.includes('Embedded active/OLE resources (2)'))).toBe(true);
+      // Ensure no warning refers to 'ppt/embeddings/' directory directly
+      expect(norm.warnings.some((w) => w.includes("('ppt/embeddings/')"))).toBe(false);
+    });
   });
 
   describe('Route-level Conversion Tests', () => {

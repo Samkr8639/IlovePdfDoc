@@ -1006,14 +1006,36 @@
 }
 
 .conversion-warnings-box {
+  position: relative;
   width: 100%;
   max-width: 600px;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  background: var(--pt-surface-warning-subtle, #fffbeb);
+  border: 1px solid var(--pt-border-warning, #fde68a);
   border-radius: var(--pt-radius-md, 12px);
-  padding: 16px 20px;
-  color: #92400e;
+  padding: 16px 40px 16px 20px;
+  color: var(--pt-text-warning, #92400e);
   font-size: 13px;
+}
+
+.warning-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+
+.warning-close-btn:hover {
+  opacity: 1;
 }
 
 .warnings-header {

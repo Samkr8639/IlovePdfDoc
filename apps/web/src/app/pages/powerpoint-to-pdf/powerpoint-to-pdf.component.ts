@@ -82,6 +82,7 @@ export class PowerPointToPdfComponent implements OnInit, OnDestroy {
   readonly processingProgress = signal<number>(0);
   readonly processingMessage = signal<string>('Preparing presentation conversion...');
   readonly conversionResult = signal<ConvertedPowerPointToPdfResult | null>(null);
+  readonly isWarningsDismissed = signal<boolean>(false);
 
   /** Controls mobile slide-in settings panel */
   readonly isSidePanelOpen = signal<boolean>(false);
@@ -332,6 +333,7 @@ export class PowerPointToPdfComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
     this.isProcessing.set(false);
     this.isSidePanelOpen.set(false);
+    this.isWarningsDismissed.set(false);
     this.outputFormat.set('pdf');
     this.slideRange.set('');
     this.slideMode.set('all');

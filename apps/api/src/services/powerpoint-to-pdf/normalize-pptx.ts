@@ -46,20 +46,37 @@ const FONT_SUBSTITUTION_MAP: Record<string, string> = {
   'calibri': 'Carlito',
   'calibri light': 'Carlito',
   'cambria': 'Caladea',
+  'cambria math': 'Caladea',
+  'aptos': 'Carlito',
+  'aptos display': 'Carlito',
+  'aptos light': 'Carlito',
+  'aptos semibold': 'Carlito',
   'arial': 'Liberation Sans',
+  'arial black': 'Liberation Sans',
   'arial narrow': 'Liberation Sans Narrow',
   'times new roman': 'Liberation Serif',
+  'times': 'Liberation Serif',
   'courier new': 'Liberation Mono',
+  'courier': 'Liberation Mono',
   'segoe ui': 'Open Sans',
+  'segoe ui semibold': 'Open Sans',
+  'segoe ui light': 'Open Sans',
   'verdana': 'DejaVu Sans',
   'tahoma': 'DejaVu Sans',
+  'georgia': 'DejaVu Serif',
+  'trebuchet ms': 'Liberation Sans',
   'century gothic': 'Liberation Sans',
   'franklin gothic': 'Noto Sans',
+  'franklin gothic medium': 'Noto Sans',
   'gill sans': 'Noto Sans',
+  'gill sans mt': 'Noto Sans',
   'gotham': 'Open Sans',
   'futura': 'Open Sans',
   'helvetica': 'Liberation Sans',
-  'helvetica neue': 'Liberation Sans'
+  'helvetica neue': 'Liberation Sans',
+  'consolas': 'Liberation Mono',
+  'impact': 'Liberation Sans',
+  'comic sans ms': 'Liberation Sans'
 };
 
 const KNOWN_OPEN_FONTS = new Set([
@@ -78,13 +95,19 @@ const KNOWN_OPEN_FONTS = new Set([
   'poppins',
   'source sans',
   'source sans pro',
+  'source sans 3',
+  'source serif pro',
   'inter',
   'raleway',
   'playfair display',
   'merriweather',
   'noto sans',
   'noto serif',
-  'noto color emoji'
+  'noto color emoji',
+  'pt sans',
+  'pt serif',
+  'ubuntu',
+  'oswald'
 ]);
 
 export function parseSlideRange(rangeStr: string, totalSlides: number): Set<number> {
@@ -128,9 +151,7 @@ export async function normalizePptx(
   const warnings: string[] = [];
   const fontsSubstituted: FontSubstitution[] = [];
   const fontsMissing: string[] = [];
-
-  // Always include the warning about animations and transitions not being part of PDF
-  warnings.push('Animations and transitions are not included in the PDF export.');
+  let hasAnimationsOrTransitions = false;
 
   // ────────────────────────────────────────────────────────────
   // 1. Security Stripping (defense in depth)
@@ -138,14 +159,19 @@ export async function normalizePptx(
 
   // 1.1 Remove VBA project and signature files
   const vbaFiles = ['ppt/vbaProject.bin', 'ppt/vbaProjectSignature.bin'];
+  let removedVbaCount = 0;
   for (const vba of vbaFiles) {
     if (zip.file(vba)) {
       zip.remove(vba);
-      warnings.push(`Embedded VBA macros ('${vba}') were removed for security.`);
+      removedVbaCount++;
     }
+  }
+  if (removedVbaCount > 0) {
+    warnings.push('Embedded VBA macros were removed for security.');
   }
 
   // 1.2 Remove ActiveX, OLE embeddings, and webextensions
+  let removedOleCount = 0;
   for (const name of Object.keys(zip.files)) {
     if (
       name.startsWith('ppt/activeX/') ||
@@ -154,9 +180,15 @@ export async function normalizePptx(
       name.startsWith('ppt/webextensions/') ||
       name.startsWith('ppt/taskpanes/')
     ) {
+      const isDir = name.endsWith('/');
       zip.remove(name);
-      warnings.push(`Embedded active/OLE resource ('${name}') was removed for security.`);
+      if (!isDir) {
+        removedOleCount++;
+      }
     }
+  }
+  if (removedOleCount > 0) {
+    warnings.push(`Embedded active/OLE resources (${removedOleCount}) were removed for security.`);
   }
 
   // 1.3 Sanitize Relationships (TargetMode="External")
@@ -341,6 +373,20 @@ export async function normalizePptx(
         const sldContentFile = zip.file(slideFile);
         if (sldContentFile) {
           const sldXml = await sldContentFile.async('text');
+
+          // Check if slide has animations or transitions
+          if (
+            isIncluded &&
+            (sldXml.includes('<p:transition') ||
+              (sldXml.includes('<p:timing') &&
+                (sldXml.includes('<p:anim') ||
+                  sldXml.includes('<p:bldLst') ||
+                  sldXml.includes('<p:seq') ||
+                  sldXml.includes('<p:par'))))
+          ) {
+            hasAnimationsOrTransitions = true;
+          }
+
           // Look for title placeholder
           const titleMatch = sldXml.match(/<p:ph\b[^>]*(?:type="(?:title|ctrTitle)")[^>]*>[\s\S]*?<\/p:ph>/i);
           if (titleMatch) {
@@ -384,6 +430,10 @@ export async function normalizePptx(
         }
       }
 
+      if (hasAnimationsOrTransitions) {
+        warnings.push('Animations and transitions were omitted from the PDF export.');
+      }
+
       // Re-serialize presentation.xml with updated visibility
       zip.file('ppt/presentation.xml', builder.build(parsedPres));
     } catch {
@@ -395,23 +445,45 @@ export async function normalizePptx(
   // 3. Font Analysis & Substitutions
   // ────────────────────────────────────────────────────────────
 
+  // 3.1 Resolve theme major and minor Latin fonts from theme1.xml (if present)
+  let themeMajorLatin = 'Calibri Light';
+  let themeMinorLatin = 'Calibri';
+  const themeFile = zip.file('ppt/theme/theme1.xml');
+  if (themeFile) {
+    const themeXml = await themeFile.async('text');
+    const majorMatch = themeXml.match(/<a:majorFont>[\s\S]*?<a:latin\s+typeface="([^"]+)"/i);
+    if (majorMatch && majorMatch[1] && !majorMatch[1].startsWith('+')) {
+      themeMajorLatin = majorMatch[1].trim();
+    }
+    const minorMatch = themeXml.match(/<a:minorFont>[\s\S]*?<a:latin\s+typeface="([^"]+)"/i);
+    if (minorMatch && minorMatch[1] && !minorMatch[1].startsWith('+')) {
+      themeMinorLatin = minorMatch[1].trim();
+    }
+  }
+
+  // 3.2 Only collect Latin fonts actually referenced on exported slides
   const requestedFonts = new Set<string>();
 
-  for (const name of Object.keys(zip.files)) {
-    if (
-      name.startsWith('ppt/theme/') ||
-      name.startsWith('ppt/slides/') ||
-      name.startsWith('ppt/slideLayouts/') ||
-      name.startsWith('ppt/slideMasters/')
-    ) {
-      const file = zip.file(name);
-      if (file) {
-        const text = await file.async('text');
-        const matches = text.match(/typeface="([^"]+)"/g);
-        if (matches) {
-          for (const m of matches) {
-            const fontName = m.slice(10, -1).trim();
-            if (fontName && !fontName.startsWith('+')) {
+  for (const slide of slides) {
+    if (!slide.isIncluded) continue;
+    const file = zip.file(slide.filename);
+    if (file) {
+      const text = await file.async('text');
+      // Look for typeface declarations inside <a:latin typeface="...">
+      const matches = text.match(/<a:latin\s+[^>]*typeface="([^"]+)"/gi);
+      if (matches) {
+        for (const m of matches) {
+          const tf = m.match(/typeface="([^"]+)"/i);
+          if (tf && tf[1]) {
+            let fontName = tf[1].trim();
+            if (fontName === '+mj-lt') {
+              fontName = themeMajorLatin;
+            } else if (fontName === '+mn-lt') {
+              fontName = themeMinorLatin;
+            } else if (fontName.startsWith('+')) {
+              continue;
+            }
+            if (fontName) {
               requestedFonts.add(fontName);
             }
           }
