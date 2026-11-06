@@ -6,4 +6,5 @@ export * from './pdf-to-excel';
 export * from './word-to-pdf';
 export * from './excel-to-pdf';
 export * from './powerpoint-to-pdf';
+export * from './pdf-to-jpg';
 export * from './edit-pdf-ocr';

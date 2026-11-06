@@ -8,7 +8,8 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'word-to-pdf',
   'excel-to-pdf',
   'powerpoint-to-pdf',
-  'edit-pdf'
+  'edit-pdf',
+  'pdf-to-jpg'
 ] as const;
 
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
@@ -304,22 +305,39 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     id: 'pdf-to-jpg',
     name: 'PDF to JPG',
     shortDescription: 'Convert each PDF page into a JPG or extract all images contained in a PDF.',
-    longDescription: 'Extract high-resolution image assets or convert every page of a document into JPG format.',
+    longDescription: 'Extract high-resolution image assets or convert every page of a PDF document into sharp JPG format with custom DPI, quality controls, and privacy-first local processing.',
     category: 'convert',
     route: '/pdf-to-jpg',
-    icon: 'pdf-to-jpg',
+    icon: 'image',
     processingMode: 'browser',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
-    maxFiles: 1,
-    maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    maxFiles: 10,
+    maxFileSizeBytes: 200 * 1024 * 1024,
+    status: 'available',
+    badgeText: '100% In-Browser',
     seo: {
-      title: 'PDF to JPG Converter Online | PDF flow',
-      description: 'Convert PDF pages to high-quality JPG images.',
-      keywords: ['pdf to jpg', 'pdf to image', 'extract images from pdf'],
-      canonical: 'https://pdfflow.app/pdf-to-jpg',
-      faqs: []
+      title: 'PDF to JPG Converter - Convert PDF to Image Online Free | PDFTailor',
+      description: 'Convert PDF pages to high-quality JPG images or extract embedded photos directly in your browser. 100% private, zero server uploads.',
+      keywords: ['pdf to jpg', 'convert pdf to jpg', 'pdf to image', 'extract images from pdf', 'free pdf to jpg converter', 'high quality pdf to jpg'],
+      canonical: 'https://pdftailor.in/pdf-to-jpg',
+      faqs: [
+        {
+          question: 'Are my PDF files uploaded to any server?',
+          answer: 'No. All conversion and extraction happens 100% locally in your web browser using WebAssembly and Web Workers. Your files never leave your device.'
+        },
+        {
+          question: 'Can I choose the output resolution (DPI)?',
+          answer: 'Yes. You can choose standard presets from 72 DPI up to 600 DPI, or specify a custom DPI from 36 to 1200 DPI.'
+        },
+        {
+          question: 'What is the difference between converting pages and extracting images?',
+          answer: 'Converting pages renders every selected PDF page into a full-page JPG image exactly as it appears. Extracting images finds all embedded photographs and illustrations inside the PDF and saves them individually.'
+        },
+        {
+          question: 'Does the tool support password-protected PDFs?',
+          answer: 'Yes. If your PDF is password-protected, you can enter the document password to unlock and convert it securely in your browser.'
+        }
+      ]
     }
   },
   {
