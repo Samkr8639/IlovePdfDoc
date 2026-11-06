@@ -104,6 +104,16 @@
 - **Max File Size**: 50 MB
 - **Description**: Directly annotate, redact, highlight, and recognize scanned text in your PDF files with hybrid client-first processing.
 
+### PDF to JPG
+- **URL**: https://pdftailor.com/pdf-to-jpg
+- **Identifier**: urn:air:pdftailor:tools:pdf-to-jpg
+- **Category**: convert
+- **Processing Mode**: 100% Client-Side (Browser WebAssembly)
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 10
+- **Max File Size**: 200 MB
+- **Description**: Extract high-resolution image assets or convert every page of a PDF document into sharp JPG format with custom DPI, quality controls, and privacy-first local processing.
+
 
 ## Security & Verification
 All PDFTailor tools support programmatic browser automation and WebMCP form interaction. Documents processed client-side remain in sandbox RAM. Server conversions are subject to strict per-request execution limits and instantaneous memory purges.

@@ -22,7 +22,6 @@ describe('App Routes: Live vs Coming Soon Navigation', () => {
   });
 
   const comingSoonPaths = [
-    'pdf-to-jpg',
     'images-to-pdf',
     'sign-pdf',
     'watermark-pdf',
@@ -57,6 +56,11 @@ describe('App Routes: Live vs Coming Soon Navigation', () => {
   it('should allow navigation to live tool /edit-pdf', async () => {
     await router.navigateByUrl('/edit-pdf');
     expect(location.path()).toBe('/edit-pdf');
+  });
+
+  it('should allow navigation to live tool /pdf-to-jpg', async () => {
+    await router.navigateByUrl('/pdf-to-jpg');
+    expect(location.path()).toBe('/pdf-to-jpg');
   });
 
   it('should allow navigation to live tool /pdf-to-excel', async () => {

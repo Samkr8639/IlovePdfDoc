@@ -197,6 +197,25 @@
         "edit",
         "pdf"
       ]
+    },
+    {
+      "identifier": "urn:air:pdftailor:tools:pdf-to-jpg",
+      "displayName": "PDF to JPG",
+      "type": "application/mcp-server-card+json",
+      "description": "Convert each PDF page into a JPG or extract all images contained in a PDF.",
+      "url": "https://pdftailor.com/pdf-to-jpg",
+      "representativeQueries": [
+        "pdf to jpg online",
+        "how to pdf to jpg",
+        "free pdf to jpg tool"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "pdf",
+        "to",
+        "jpg"
+      ]
     }
   ]
 }
