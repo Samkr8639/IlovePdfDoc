@@ -97,24 +97,47 @@ export interface ComputedPageLayout {
   clipHeightPt?: number;
   // Source crop or scale
   effectiveRotationDeg: number;
+  // Whether the image has been flipped horizontally due to EXIF correction
   needsHorizontalFlip: boolean;
+  // Whether page was clamped to PDF max 14,400 pt limit
   clampedDueToPdfLimit: boolean;
 }
 
+/** Progress event emitted during buildPdf() */
 export interface JpgToPdfProgress {
-  current: number;
-  total: number;
+  /** Fraction 0–100 */
   percent: number;
+  /** Human-readable status string */
   message: string;
+  /** Current image (1-based) */
+  current?: number;
+  /** Total number of images */
+  total?: number;
 }
 
-export interface JpgToPdfBuildResult {
-  blob: Blob;
-  downloadFilename: string;
-  isZip: boolean;
-  pageCount: number;
-  failedCount: number;
-  warnings: Array<{ fileName: string; reason: string }>;
-  outputSizeBytes: number;
-  durationMs: number;
+/** Warning generated during a build */
+export interface JpgToPdfWarning {
+  fileName: string;
+  reason: string;
 }
+
+/** Final result returned by JpgToPdfService.buildPdf() */
+export interface JpgToPdfBuildResult {
+  /** The generated Blob — either application/pdf or application/zip */
+  blob: Blob;
+  /** Filename suggested for download */
+  downloadFilename: string;
+  /** Whether the result is a ZIP archive (multiple PDFs) */
+  isZip: boolean;
+  /** Number of PDF pages (or PDFs for ZIP) generated */
+  pageCount: number;
+  /** Number of images that failed to embed */
+  failedCount?: number;
+  /** Output size in bytes */
+  outputSizeBytes: number;
+  /** Build duration in milliseconds */
+  durationMs: number;
+  /** Warnings accumulated during build */
+  warnings: JpgToPdfWarning[];
+}
+

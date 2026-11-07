@@ -415,3 +415,4 @@ export class PageLayoutService {
     return { effectiveRotationDeg, needsHorizontalFlip };
   }
 }
+

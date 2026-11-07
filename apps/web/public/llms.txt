@@ -15,6 +15,7 @@
 - [Excel to PDF](https://pdftailor.com/excel-to-pdf): Convert Excel spreadsheets and CSV tables to high-fidelity PDF documents.
 - [Edit PDF](https://pdftailor.com/edit-pdf): Add text, images, shapes, annotations, and make scanned text editable with OCR.
 - [PDF to JPG](https://pdftailor.com/pdf-to-jpg): Convert each PDF page into a JPG or extract all images contained in a PDF.
+- [JPG to PDF](https://pdftailor.com/jpg-to-pdf): Convert JPG images to PDF in seconds. Easily adjust orientation and margins.
 
 ## Privacy & Security Architecture
 

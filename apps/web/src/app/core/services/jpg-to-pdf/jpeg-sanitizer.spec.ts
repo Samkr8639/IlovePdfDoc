@@ -140,3 +140,4 @@ describe('JpegSanitizer', () => {
     expect(result.strippedExif).toBe(true);
   });
 });
+

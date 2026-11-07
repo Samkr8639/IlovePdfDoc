@@ -65,8 +65,13 @@ export const routes: Routes = [
     title: 'PDF to JPG Converter Online - Extract Images & Convert Pages | PDFTailor'
   },
   {
+    path: 'jpg-to-pdf',
+    loadComponent: () => import('./pages/jpg-to-pdf/jpg-to-pdf.component').then(m => m.JpgToPdfComponent),
+    title: 'JPG to PDF Converter Online Free - Convert Images to PDF | PDFTailor'
+  },
+  {
     path: 'images-to-pdf',
-    redirectTo: ''
+    redirectTo: 'jpg-to-pdf'
   },
   {
     path: 'sign-pdf',

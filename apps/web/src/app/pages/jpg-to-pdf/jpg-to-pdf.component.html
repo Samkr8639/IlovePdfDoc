@@ -1,0 +1,968 @@
+<div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 1. UPLOAD STATE: HERO, DROPZONE, ADS, FEATURES, GUIDE, FAQS     -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'upload') {
+    <section class="unified-hero-section">
+      <div class="container hero-content">
+        <h1 class="tool-h1">JPG to PDF</h1>
+        <p class="tool-lead">
+          Convert JPG, PNG, WebP, and BMP images into PDF documents with custom margins, orientations, and 100% in-browser privacy.
+        </p>
+
+        @if (errorMessage()) {
+          <div class="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+            <button class="error-close" (click)="errorMessage.set(null)">✕</button>
+          </div>
+        }
+
+        <div class="hero-dropzone-wrap">
+          <app-dropzone
+            title="Select JPG images"
+            subtitle="or drop images here (JPG, PNG, WebP, BMP)"
+            acceptedTypes="image/jpeg,image/png,image/webp,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.bmp"
+            [multiple]="true"
+            limitInfo="Up to 300 images • Max 50 MB per image"
+            (filesSelected)="onFilesAdded($event)"
+          ></app-dropzone>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <section class="adsense-section">
+      <div class="container">
+        <div class="adsense-wrapper" aria-label="Advertisement">
+          <span class="adsense-label">Advertisement</span>
+          <div class="adsense-slot adsense-leaderboard">
+            <div class="adsense-placeholder-content">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES & VALUE PROPOSITION -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-heading">
+          <h2 class="section-title">The fastest & most private JPG to PDF converter</h2>
+          <p class="section-subtitle">Engineered for security, speed, and precision formatting.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
+                <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">100% In-Browser Privacy</h3>
+            <p class="feature-desc">
+              Your photos and personal documents never leave your device. All rendering and PDF compilation happens strictly inside client-side WebAssembly and JavaScript.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
+                <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Lossless JPEG Embedding</h3>
+            <p class="feature-desc">
+              When Original quality is selected, DCT byte streams are embedded directly into the PDF without decoding or re-compression artifacts.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
+                <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Complete Page Layout Control</h3>
+            <p class="feature-desc">
+              Choose standard sizes (A4, Letter, Same as image), set custom margins, adjust page orientation, and configure image fit and alignments.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-badge">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
+                <path d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z" stroke="white" stroke-width="2.5" fill="none"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Free & Unlimited</h3>
+            <p class="feature-desc">
+              Convert up to 300 pictures at a time with zero watermarks, registration gates, or file size paywalls.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-STEP GUIDE SECTION -->
+    <section class="seo-guide-section">
+      <div class="container">
+        <div class="guide-header">
+          <h2 class="guide-title">How to convert JPG to PDF online</h2>
+          <p class="guide-lead">Three simple steps to transform your photos and graphics into polished PDF documents.</p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <h3 class="step-title">Select images</h3>
+            <p class="step-desc">
+              Click "Select JPG images" or drag and drop JPG, PNG, WebP, or BMP files directly into the converter.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <h3 class="step-title">Arrange & customize</h3>
+            <p class="step-desc">
+              Reorder pages, rotate pictures, and select your preferred page size, orientation, margins, and quality in the sidebar.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <h3 class="step-title">Convert & download</h3>
+            <p class="step-desc">
+              Click "Convert to PDF". Your browser compiles the PDF instantly for immediate, secure download.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ SECTION FOR JPG TO PDF -->
+        <div class="tool-faqs">
+          <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
+          <div class="tool-faqs-list">
+            <div class="faq-card">
+              <h4 class="faq-q">Are my images uploaded to any server?</h4>
+              <p class="faq-a">
+                No. PDFTailor runs 100% locally in your web browser. Your pictures and personal documents are never transmitted across the internet, ensuring complete confidentiality.
+              </p>
+            </div>
+
+            <div class="faq-card">
+              <h4 class="faq-q">Which image formats are supported?</h4>
+              <p class="faq-a">
+                You can convert JPG/JPEG, PNG (including transparency), WebP, GIF (first frame), and BMP images. TIFF and HEIC should be converted to JPG before adding.
+              </p>
+            </div>
+
+            <div class="faq-card">
+              <h4 class="faq-q">Does converting images to PDF reduce photo quality?</h4>
+              <p class="faq-a">
+                By default, the "Original" setting preserves the exact original pixels and DCT quantization tables with zero compression loss. You can also select "Optimised" or "Small file" to reduce file size.
+              </p>
+            </div>
+
+            <div class="faq-card">
+              <h4 class="faq-q">Can I convert each image into a separate PDF?</h4>
+              <p class="faq-a">
+                Yes! Uncheck "Merge all images into one PDF" in the sidebar options, and PDFTailor will package individual PDFs for each photo into a convenient ZIP archive.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MORE POPULAR TOOLS CROSS-LINKS -->
+        <div class="related-tools-box">
+          <h3 class="related-title">Explore more PDF tools</h3>
+          <div class="related-tools-grid">
+            <a routerLink="/merge-pdf" class="related-card">
+              <div class="related-info">
+                <h4>Merge PDF</h4>
+                <p>Combine multiple PDF files in seconds</p>
+              </div>
+            </a>
+
+            <a routerLink="/pdf-to-jpg" class="related-card">
+              <div class="related-info">
+                <h4>PDF to JPG</h4>
+                <p>Extract images or convert PDF pages to JPG</p>
+              </div>
+            </a>
+
+            <a routerLink="/compress-pdf" class="related-card">
+              <div class="related-info">
+                <h4>Compress PDF</h4>
+                <p>Reduce file size while saving quality</p>
+              </div>
+            </a>
+
+            <a routerLink="/edit-pdf" class="related-card">
+              <div class="related-info">
+                <h4>Edit PDF</h4>
+                <p>Add text, shapes, and annotations</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 2. ORGANIZE WORKSPACE: CANVAS GRID + RIGHT SIDEBAR OPTIONS     -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'organize') {
+    <div class="organize-workspace-screen">
+      <!-- MAIN CANVAS AREA -->
+      <div class="canvas-main-area">
+        @if (errorMessage()) {
+          <div class="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+            <button class="error-close" (click)="errorMessage.set(null)">✕</button>
+          </div>
+        }
+
+        <!-- TOOLBAR ABOVE GRID -->
+        <div class="canvas-toolbar" role="toolbar" aria-label="Image arrangement actions">
+          <div class="toolbar-left">
+            <span class="toolbar-stat">
+              <strong>{{ totalFilesCount() }}</strong> {{ totalFilesCount() === 1 ? 'image' : 'images' }} ({{ formattedTotalSize() }})
+            </span>
+          </div>
+
+          <div class="toolbar-right">
+            <button type="button" class="pt-btn-secondary btn-sm" (click)="sortByName('asc')" title="Sort images A to Z">
+              Sort A–Z
+            </button>
+            <button type="button" class="pt-btn-secondary btn-sm" (click)="sortByName('desc')" title="Sort images Z to A">
+              Sort Z–A
+            </button>
+            <button type="button" class="pt-btn-secondary btn-sm" (click)="reverseOrder()" title="Reverse sequence">
+              Reverse
+            </button>
+            <button type="button" class="pt-btn-secondary btn-sm" (click)="rotateAll(90)" title="Rotate all 90° CW">
+              Rotate all
+            </button>
+            <button type="button" class="pt-btn-secondary btn-sm text-danger" (click)="clearAll()" title="Remove all images">
+              Clear all
+            </button>
+          </div>
+        </div>
+
+        <!-- IMAGE CARDS GRID -->
+        <div class="image-cards-canvas" role="list">
+          @for (item of selectedFiles(); track item.id; let idx = $index; let first = $first; let last = $last) {
+            @let preview = getCardPreviewStyle(item);
+            <div
+              class="image-document-card"
+              draggable="true"
+              tabindex="0"
+              (dragstart)="onDragStart(idx)"
+              (dragover)="onDragOverCard($event, idx)"
+              (drop)="onDropCard($event, idx)"
+              (keydown)="onCardKeyDown($event, idx)"
+              title="Drag or press Alt+Arrow to reorder"
+              role="listitem"
+            >
+              <!-- Card Action Controls -->
+              <div class="card-action-bar">
+                <button
+                  type="button"
+                  class="card-action-btn"
+                  (click)="onRotateCard(idx, -90)"
+                  title="Rotate 90° CCW"
+                  aria-label="Rotate left"
+                >
+                  ↺
+                </button>
+                <button
+                  type="button"
+                  class="card-action-btn"
+                  (click)="onRotateCard(idx, 90)"
+                  title="Rotate 90° CW"
+                  aria-label="Rotate right"
+                >
+                  ↻
+                </button>
+                <button
+                  type="button"
+                  class="card-action-btn delete-action"
+                  (click)="onRemoveCard(idx)"
+                  title="Remove image"
+                  aria-label="Remove image"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- Live Mini Page Preview (matches layout geometry) -->
+              <div class="preview-page-container" [style.aspectRatio]="preview.pageContainer.aspectRatio" [style.backgroundColor]="preview.pageContainer.backgroundColor">
+                <!-- Margin box outline -->
+                <div
+                  class="preview-margin-box"
+                  [style.top]="preview.marginBox.top"
+                  [style.right]="preview.marginBox.right"
+                  [style.bottom]="preview.marginBox.bottom"
+                  [style.left]="preview.marginBox.left"
+                ></div>
+
+                <!-- Fitted image element -->
+                <div
+                  class="preview-image-wrapper"
+                  [style.left]="preview.imageWrapper.left"
+                  [style.top]="preview.imageWrapper.top"
+                  [style.width]="preview.imageWrapper.width"
+                  [style.height]="preview.imageWrapper.height"
+                >
+                  <img
+                    [src]="item.thumbnailUrl"
+                    [alt]="item.name"
+                    class="preview-img"
+                    [style.objectFit]="preview.imageElement.objectFit"
+                    [style.objectPosition]="preview.imageElement.objectPosition"
+                    [style.transform]="preview.imageElement.transform"
+                  />
+                </div>
+              </div>
+
+              <!-- Card Metadata -->
+              <div class="card-meta">
+                <span class="meta-filename" [title]="item.name">{{ item.name }}</span>
+                <span class="meta-subinfo">
+                  {{ item.probe.widthPx }} × {{ item.probe.heightPx }} px • {{ formatBytes(item.sizeBytes) }}
+                </span>
+              </div>
+
+              <!-- Reorder Pill Buttons -->
+              <div class="card-reorder-pills">
+                <button
+                  type="button"
+                  class="pill-arrow-btn"
+                  [disabled]="first"
+                  (click)="onMoveLeft(idx)"
+                  title="Move left (Alt+Left)"
+                  aria-label="Move image left"
+                >
+                  ‹
+                </button>
+                <span class="pill-order-num">{{ idx + 1 }}</span>
+                <button
+                  type="button"
+                  class="pill-arrow-btn"
+                  [disabled]="last"
+                  (click)="onMoveRight(idx)"
+                  title="Move right (Alt+Right)"
+                  aria-label="Move image right"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- FLOATING ADD-FILES DOCK -->
+        <div class="floating-tools-dock" role="toolbar" aria-label="Add more images">
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-square-btn add-more-action"
+              (click)="fileInput.click()"
+              title="Add more images"
+              aria-label="Add more images"
+            >
+              <span class="dock-count-badge">{{ selectedFiles().length }}</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Add images</span>
+          </div>
+
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn pc-action"
+              (click)="fileInput.click()"
+              title="Upload from PC"
+              aria-label="Upload from PC"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="3"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">From PC</span>
+          </div>
+
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn drive-action"
+              (click)="openGoogleDrive($event)"
+              title="Google Drive"
+              aria-label="Add from Google Drive"
+            >
+              <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none">
+                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
+                <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
+                <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Google Drive</span>
+          </div>
+
+          <div class="dock-btn-wrap">
+            <button
+              type="button"
+              class="dock-icon-btn dropbox-action"
+              (click)="openDropbox($event)"
+              title="Dropbox"
+              aria-label="Add from Dropbox"
+            >
+              <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF">
+                <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+              </svg>
+            </button>
+            <span class="dock-tooltip-label">Dropbox</span>
+          </div>
+
+          <input
+            #fileInput
+            type="file"
+            hidden
+            multiple
+            accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.bmp"
+            (change)="onFileInputChange($event)"
+          />
+        </div>
+      </div>
+
+      <!-- MOBILE GEAR ICON BUTTON -->
+      <button
+        type="button"
+        class="mobile-gear-btn"
+        [class.active]="isSidePanelOpen()"
+        (click)="toggleSidePanel()"
+        aria-label="Open settings panel"
+        [attr.aria-expanded]="isSidePanelOpen()"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <!-- MOBILE PANEL BACKDROP -->
+      @if (isSidePanelOpen()) {
+        <div class="mobile-panel-backdrop" (click)="closeSidePanel()" aria-hidden="true"></div>
+      }
+
+      <!-- RIGHT SIDEBAR (OPTIONS & CONVERT BUTTON) -->
+      <aside class="sidebar-action-panel" [class.panel-open]="isSidePanelOpen()">
+        <button type="button" class="sidebar-mobile-close" (click)="closeSidePanel()" aria-label="Close settings panel">
+          ✕
+        </button>
+
+        <div class="sidebar-body">
+          <h2 class="sidebar-heading">JPG to PDF</h2>
+
+          <!-- 1. PAGE ORIENTATION -->
+          <div class="option-section">
+            <div class="option-title-row">
+              <span class="option-label">PAGE ORIENTATION</span>
+              @if (options().pageSize === 'same-as-image') {
+                <span class="option-hint">(Forced by "Same as image")</span>
+              }
+            </div>
+
+            <div class="radio-card-row" [class.disabled-group]="options().pageSize === 'same-as-image'">
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().orientation === 'auto'"
+                (click)="setOrientation('auto')"
+              >
+                Auto
+              </button>
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().orientation === 'portrait'"
+                (click)="setOrientation('portrait')"
+              >
+                Portrait
+              </button>
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().orientation === 'landscape'"
+                (click)="setOrientation('landscape')"
+              >
+                Landscape
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. PAGE SIZE -->
+          <div class="option-section">
+            <span class="option-label">PAGE SIZE</span>
+            <select
+              class="pt-select"
+              [ngModel]="options().pageSize"
+              (ngModelChange)="setPageSize($event)"
+            >
+              <option value="same-as-image">Same as image (Fit natural)</option>
+              <option value="a4">A4 (210 × 297 mm)</option>
+              <option value="a3">A3 (297 × 420 mm)</option>
+              <option value="a5">A5 (148 × 210 mm)</option>
+              <option value="letter">Letter (8.5 × 11 in)</option>
+              <option value="legal">Legal (8.5 × 14 in)</option>
+              <option value="tabloid">Tabloid (11 × 17 in)</option>
+              <option value="custom">Custom size...</option>
+            </select>
+
+            @if (options().pageSize === 'custom') {
+              <div class="custom-dimensions-grid mt-2">
+                <div class="input-col">
+                  <label class="sub-label">Width</label>
+                  <input
+                    type="number"
+                    class="pt-text-input"
+                    [ngModel]="options().customPageWidth"
+                    (ngModelChange)="updateOptions({ customPageWidth: $event })"
+                  />
+                </div>
+                <div class="input-col">
+                  <label class="sub-label">Height</label>
+                  <input
+                    type="number"
+                    class="pt-text-input"
+                    [ngModel]="options().customPageHeight"
+                    (ngModelChange)="updateOptions({ customPageHeight: $event })"
+                  />
+                </div>
+                <div class="input-col">
+                  <label class="sub-label">Unit</label>
+                  <select
+                    class="pt-select"
+                    [ngModel]="options().customPageUnit"
+                    (ngModelChange)="updateOptions({ customPageUnit: $event })"
+                  >
+                    <option value="mm">mm</option>
+                    <option value="in">in</option>
+                    <option value="pt">pt</option>
+                  </select>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- 3. MARGIN -->
+          <div class="option-section">
+            <span class="option-label">MARGIN</span>
+            <div class="radio-card-row">
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().margin === 'none'"
+                (click)="setMargin('none')"
+              >
+                No margin
+              </button>
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().margin === 'small'"
+                (click)="setMargin('small')"
+              >
+                Small (10mm)
+              </button>
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().margin === 'big'"
+                (click)="setMargin('big')"
+              >
+                Big (20mm)
+              </button>
+              <button
+                type="button"
+                class="radio-pill-btn"
+                [class.selected]="options().margin === 'custom'"
+                (click)="setMargin('custom')"
+              >
+                Custom
+              </button>
+            </div>
+
+            @if (options().margin === 'custom') {
+              <div class="custom-dimensions-grid mt-2">
+                <div class="input-col span-2">
+                  <label class="sub-label">Margin Value</label>
+                  <input
+                    type="number"
+                    class="pt-text-input"
+                    min="0"
+                    max="100"
+                    [ngModel]="options().customMarginValue"
+                    (ngModelChange)="updateOptions({ customMarginValue: $event })"
+                  />
+                </div>
+                <div class="input-col">
+                  <label class="sub-label">Unit</label>
+                  <select
+                    class="pt-select"
+                    [ngModel]="options().customMarginUnit"
+                    (ngModelChange)="updateOptions({ customMarginUnit: $event })"
+                  >
+                    <option value="mm">mm</option>
+                    <option value="in">in</option>
+                    <option value="pt">pt</option>
+                  </select>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- 4. IMAGE FIT & ALIGNMENT -->
+          <div class="option-section">
+            <span class="option-label">IMAGE FIT</span>
+            <select
+              class="pt-select"
+              [ngModel]="options().fit"
+              (ngModelChange)="setFit($event)"
+            >
+              <option value="fit">Fit inside margins (Keep proportions)</option>
+              <option value="fill">Fill page (Crop to fit)</option>
+              <option value="original">Original size (1:1 at image DPI)</option>
+            </select>
+
+            <div class="alignment-row mt-2">
+              <span class="sub-label">Alignment:</span>
+              <div class="radio-pill-group">
+                <button
+                  type="button"
+                  class="pill-sm"
+                  [class.active]="options().alignment === 'center'"
+                  (click)="setAlignment('center')"
+                >
+                  Centre
+                </button>
+                <button
+                  type="button"
+                  class="pill-sm"
+                  [class.active]="options().alignment === 'top'"
+                  (click)="setAlignment('top')"
+                >
+                  Top
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. IMAGE QUALITY -->
+          <div class="option-section">
+            <span class="option-label">IMAGE QUALITY</span>
+            <div class="radio-card-stack">
+              <label class="radio-card" [class.selected]="options().quality === 'original'">
+                <input
+                  type="radio"
+                  name="imageQuality"
+                  value="original"
+                  [checked]="options().quality === 'original'"
+                  (change)="setQuality('original')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Original (Lossless)</span>
+                  <span class="card-radio-desc">Preserves original pixels without re-compression</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="options().quality === 'optimised'">
+                <input
+                  type="radio"
+                  name="imageQuality"
+                  value="optimised"
+                  [checked]="options().quality === 'optimised'"
+                  (change)="setQuality('optimised')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Optimised (~85% quality)</span>
+                  <span class="card-radio-desc">Downsampled to ≤ 200 DPI for email and web</span>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="options().quality === 'small'">
+                <input
+                  type="radio"
+                  name="imageQuality"
+                  value="small"
+                  [checked]="options().quality === 'small'"
+                  (change)="setQuality('small')"
+                />
+                <div class="radio-card-text">
+                  <span class="card-radio-title">Small file (~70% quality)</span>
+                  <span class="card-radio-desc">Downsampled to ≤ 150 DPI for minimal size</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Size Estimate Banner -->
+            <div class="estimate-callout mt-2">
+              <span class="estimate-text">Estimated PDF size: <strong>{{ estimatedSizeText() }}</strong></span>
+            </div>
+          </div>
+
+          <!-- 6. BACKGROUND COLOUR -->
+          <div class="option-section">
+            <span class="option-label">BACKGROUND COLOUR</span>
+            <div class="color-picker-row">
+              <input
+                type="color"
+                class="pt-color-input"
+                [ngModel]="options().backgroundColor"
+                (ngModelChange)="updateOptions({ backgroundColor: $event })"
+                title="Select background color"
+              />
+              <input
+                type="text"
+                class="pt-text-input color-hex-text"
+                [ngModel]="options().backgroundColor"
+                (ngModelChange)="updateOptions({ backgroundColor: $event })"
+              />
+            </div>
+          </div>
+
+          <!-- 7. CHECKBOX OPTIONS -->
+          <div class="option-section checkboxes-section">
+            <label class="pt-checkbox-label">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [ngModel]="options().mergeAll"
+                (ngModelChange)="updateOptions({ mergeAll: $event })"
+              />
+              <span>Merge all images into one PDF</span>
+            </label>
+
+            <label class="pt-checkbox-label">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [ngModel]="options().removeExif"
+                (ngModelChange)="updateOptions({ removeExif: $event })"
+              />
+              <span>Remove location & camera data (EXIF)</span>
+            </label>
+
+            <label class="pt-checkbox-label">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [ngModel]="options().addPageNumbers"
+                (ngModelChange)="updateOptions({ addPageNumbers: $event })"
+              />
+              <span>Add page numbers (n / N)</span>
+            </label>
+
+            <label class="pt-checkbox-label">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [ngModel]="options().fixExifRotation"
+                (ngModelChange)="updateOptions({ fixExifRotation: $event })"
+              />
+              <span>Fix photo rotation automatically</span>
+            </label>
+          </div>
+
+          <!-- 8. ADVANCED OPTIONS (COLLAPSED) -->
+          <div class="option-section advanced-section">
+            <button
+              type="button"
+              class="advanced-toggle-btn"
+              (click)="showAdvanced.set(!showAdvanced())"
+              [attr.aria-expanded]="showAdvanced()"
+            >
+              <span>Advanced options</span>
+              <span class="toggle-arrow">{{ showAdvanced() ? '▲' : '▼' }}</span>
+            </button>
+
+            @if (showAdvanced()) {
+              <div class="advanced-content mt-2">
+                <div class="input-wrap mb-2">
+                  <label class="sub-label">PDF Title</label>
+                  <input
+                    type="text"
+                    class="pt-text-input"
+                    placeholder="Defaults to first file name"
+                    [ngModel]="options().pdfTitle"
+                    (ngModelChange)="updateOptions({ pdfTitle: $event })"
+                  />
+                </div>
+
+                <div class="input-wrap mb-2">
+                  <label class="sub-label">PDF Author</label>
+                  <input
+                    type="text"
+                    class="pt-text-input"
+                    placeholder="Optional author name"
+                    [ngModel]="options().pdfAuthor"
+                    (ngModelChange)="updateOptions({ pdfAuthor: $event })"
+                  />
+                </div>
+
+                <div class="input-wrap">
+                  <label class="sub-label">DPI Fallback (for Same as image)</label>
+                  <select
+                    class="pt-select"
+                    [ngModel]="options().dpiFallback"
+                    (ngModelChange)="updateOptions({ dpiFallback: $event })"
+                  >
+                    <option [ngValue]="72">72 DPI</option>
+                    <option [ngValue]="96">96 DPI (Default)</option>
+                    <option [ngValue]="150">150 DPI</option>
+                  </select>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- AD SLOT IN SIDEBAR -->
+          <div class="sidebar-adsense-slot">
+            <span class="adsense-label">Advertisement</span>
+            <div class="sidebar-ad-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Google AdSense (300 × 250)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STICKY BOTTOM CONVERT BUTTON -->
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="giant-convert-submit-btn"
+            [disabled]="selectedFiles().length === 0 || isProcessing()"
+            (click)="executeConvert()"
+          >
+            <span>Convert to PDF</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 16 16 12 12 8"></polyline>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- MOBILE FLOATING CONVERT BAR -->
+      <div class="mobile-convert-bar" [class.hidden-when-panel-open]="isSidePanelOpen()">
+        <button
+          type="button"
+          class="giant-convert-submit-btn"
+          [disabled]="selectedFiles().length === 0 || isProcessing()"
+          (click)="executeConvert()"
+        >
+          <span>Convert to PDF</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 16 16 12 12 8"></polyline>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 3. PROCESSING STATE                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'processing') {
+    <div class="processing-workspace-screen">
+      <div class="processing-inner">
+        <app-processing-state
+          title="Converting Images to PDF..."
+          [message]="processingMessage()"
+          [percent]="processingProgress()"
+        ></app-processing-state>
+        <button class="btn-cancel" (click)="cancelProcessing()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Cancel Conversion
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 4. COMPLETED RESULT STATE                                      -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  @if (currentState() === 'completed' && buildResult()) {
+    <div class="completed-workspace-screen">
+      <div class="container result-container">
+        <div class="result-card">
+          <div class="result-icon-badge">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+
+          <h2 class="result-title">Your PDF is ready!</h2>
+          <p class="result-subtitle">
+            Processed {{ buildResult()!.pageCount }} {{ buildResult()!.isZip ? 'documents' : 'pages' }} in {{ (buildResult()!.durationMs / 1000).toFixed(1) }}s ({{ formatBytes(buildResult()!.outputSizeBytes) }}).
+          </p>
+
+          <div class="result-actions">
+            <button type="button" class="pt-btn-primary download-btn" (click)="downloadResult()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download {{ buildResult()!.isZip ? 'ZIP' : 'PDF' }}</span>
+            </button>
+
+            <button type="button" class="pt-btn-secondary" (click)="resetWorkspace()">
+              Convert more images
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

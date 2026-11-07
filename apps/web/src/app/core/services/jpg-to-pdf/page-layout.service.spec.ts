@@ -175,3 +175,4 @@ describe('PageLayoutService', () => {
     expect(service.formatEstimatedSize(origSize)).toContain('≈');
   });
 });
+
