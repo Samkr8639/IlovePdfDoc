@@ -24,7 +24,7 @@ export async function createStreamingZip(files: ZipEntryInput[]): Promise<Blob> 
 
   return new Promise<Blob>((resolve, reject) => {
     try {
-      zip(archive, { level: 0 }, (err, data) => {
+      zip(archive, { level: 0 }, (err: Error | null, data: Uint8Array) => {
         if (err || !data || data.length === 0) {
           // Fallback to synchronous zipSync if asynchronous compression fails
           try {
