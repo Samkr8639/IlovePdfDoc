@@ -67,26 +67,6 @@
   text-align: center;
 }
 
-.breadcrumb-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--pt-muted);
-  margin-bottom: 16px;
-}
-
-.breadcrumb-nav a {
-  color: var(--pt-teal-700);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.breadcrumb-nav a:hover {
-  text-decoration: underline;
-}
-
 .tool-h1 {
   font-family: var(--pt-font-heading);
   font-size: clamp(32px, 4vw, 50px);

@@ -200,42 +200,6 @@
   align-items: center;
 }
 
-/* BREADCRUMB */
-.breadcrumb-nav {
-  margin-bottom: 20px;
-}
-
-.breadcrumb-list {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--pt-muted-light, #667085);
-}
-
-.breadcrumb-link {
-  color: var(--pt-muted, #4b5563);
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.breadcrumb-link:hover {
-  color: var(--pt-teal-700, #0f766e);
-}
-
-.breadcrumb-separator {
-  color: var(--pt-soft-outline, #e4e7ec);
-}
-
-.breadcrumb-current {
-  color: var(--pt-navy, #14213d);
-  font-weight: 600;
-}
-
 /* HERO TEXT */
 .hero-text-block {
   text-align: center;

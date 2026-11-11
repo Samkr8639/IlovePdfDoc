@@ -224,7 +224,7 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
    - Organize sidebar: Rectangle **`300×250`** inside `.sidebar-ad-box` (`1px dashed #cbd5e1`, `#fafafa` / `#F6F8FA`).
    - Result state: Responsive Leaderboard **`728×90`** (`<app-result-view>` bottom card).
 8. **Breadcrumbs & SEO:**
-   - Optional top breadcrumb `<nav class="breadcrumb-nav" aria-label="Breadcrumb">` (`Home / <Tool Name>`, `13px`, shown on `pdf-to-jpg` & `powerpoint-to-pdf`, omitted on `merge-pdf` & `pdf-to-word`).
+   - Tool pages and static pages do **not** render breadcrumb links above hero headings; navigation stays inside `<app-header>` and `<app-footer>`.
    - Every tool component calls `this.seo.setSeoData(tool.seo)` in `ngOnInit()` (via `SeoService`), setting `<title>`, `description`, `keywords`, OpenGraph, Twitter Card, and `<link rel="canonical">`.
 
 ---
@@ -235,7 +235,7 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 
 - **Canonical references:**
   - Multi-section editorial pattern: [`apps/web/src/app/pages/merge-pdf/merge-pdf.component.html`](../apps/web/src/app/pages/merge-pdf/merge-pdf.component.html#L1-L245) & [`tool-placeholder.component.html`](../apps/web/src/app/pages/tool-placeholder/tool-placeholder.component.html)
-  - With breadcrumbs & hero ad: [`apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170`](../apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170)
+  - With hero ad: [`apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170`](../apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170)
 - **Visual baselines:** [`merge-pdf-upload-1440.png`](design-assets/merge-pdf-upload-1440.png), [`pdf-to-jpg-upload-1440.png`](design-assets/pdf-to-jpg-upload-1440.png), [`merge-pdf-upload-1024.png`](design-assets/merge-pdf-upload-1024.png), [`merge-pdf-upload-390.png`](design-assets/merge-pdf-upload-390.png)
 
 ```text
@@ -245,7 +245,6 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 | [.global-error-banner (if error, sticky/top full-width #FEF2F2/#FDF3F1)]|
 |                                                                         |
 |  section.unified-hero-section (bg #F4F5F8 / --pt-subtle-bg, pad 52/32)  |
-|   +-- (optional .breadcrumb-nav: "Home / Tool Name")                    |
 |   +-- <h1 class="tool-h1"> (Sora 50px/48px w800 --pt-navy)              |
 |   +-- <p class="hero-subtitle"> (Inter 17px --pt-muted, max-w 680px)    |
 |   +-- <app-dropzone> (max-w 960px, min-h 340px, r 24px, white)          |
@@ -268,7 +267,7 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 
 - **Measurements (measured in running app at `1440×900`):**
   - `.unified-hero-section`: `padding: 52px 0 32px` (`min-height: 520px` in `styles.css#L384`)
-  - `pdf-to-jpg` `.upload-hero-section`: `padding: 48px 0 64px`, `.breadcrumb-nav`: `127.5×16px`
+  - `pdf-to-jpg` `.upload-hero-section`: `padding: 48px 0 64px`
   - `<app-dropzone>`: `.dropzone-box` `max-width: 960px`, `min-height: 340px`, `padding: 44px 32px 36px`, `border-radius: 24px`, `border: 1.5px dashed #CBD5E1`
   - `.btn-select-file`: `height: 60px; min-width: 270px; border-radius: 14px; background: var(--pt-teal-700)`
 
@@ -610,7 +609,7 @@ Tested at `1440×900`, `1024×768`, and `390×844` in headless Chrome:
    - Enable links and switch badge from `Soon` -> `Live` in [`header.component.html`](../apps/web/src/app/shared/components/header/header.component.html) (Convert PDF dropdown, Mega Menu, Mobile Drawer) and [`footer.component.html`](../apps/web/src/app/shared/components/footer/footer.component.html).
 3. **Component Folder Structure (`apps/web/src/app/pages/<tool-slug>/`):**
    - `<tool-slug>.component.ts`, `.html`, `.css`, `.spec.ts` (optional sub-services under `apps/web/src/app/core/services/<tool-slug>/`).
-   - Copy layout skeleton from **`merge-pdf`** (multi-file card workspace) or **`pdf-to-jpg`** (latest architecture with root `.global-error-banner`, breadcrumbs, `AbortController`/`runId`, duplicate rejection, `URL.revokeObjectURL`, filename sanitizer).
+   - Copy layout skeleton from **`merge-pdf`** (multi-file card workspace) or **`pdf-to-jpg`** (latest architecture with root `.global-error-banner`, `AbortController`/`runId`, duplicate rejection, `URL.revokeObjectURL`, filename sanitizer).
    - Call `LayoutService.hideFooter()` when entering `organize` / `processing`, and `showFooter()` in `upload`, `completed`, and `ngOnDestroy()`.
 4. **Required Shared Pieces & Locked Structure:**
    - Upload State: `<app-dropzone>`, AdSense leaderboard slot, features grid, 3-step guide (`01`/`02`/`03`), FAQs, related tools.
@@ -634,8 +633,8 @@ Tested at `1440×900`, `1024×768`, and `390×844` in headless Chrome:
 1. **Three Incompatible Upload Hero Patterns:**
    - `merge-pdf` / `tool-placeholder`: `.unified-hero-section` (`#f4f5f8` bg, `50px` H1, no breadcrumbs, `4`-col features, `01/02/03` steps, FAQ, 4 related cards).
    - `pdf-to-word` / `word-to-pdf` / `pdf-to-excel` / `excel-to-pdf` / `pdf-to-powerpoint`: omits FAQ & related tools, uses `3`-col features and circular `1/2/3` `.step-badge`.
-   - `pdf-to-jpg`: adds `.breadcrumb-nav` (`Home / PDF to JPG`), places `.hero-ad-slot` inside the hero (`#F6F8FA`), `48px` H1, omits FAQ & related cards.
-   - **Intended canonical:** `.unified-hero-section` with optional `.breadcrumb-nav`, leaderboard ad below hero, features, 3 steps, FAQs, related tools (`merge-pdf` cadence + `pdf-to-jpg` breadcrumb/token styling).
+   - `pdf-to-jpg`: places `.hero-ad-slot` inside the hero (`#F6F8FA`), `48px` H1, omits FAQ & related cards.
+   - **Intended canonical:** `.unified-hero-section` without breadcrumbs, leaderboard ad below hero, features, 3 steps, FAQs, related tools (`merge-pdf` cadence + `--pt-*` token styling).
 2. **Legacy Brand Names Still in Production Paths & Contracts:**
    - `apps/web/src/app/core/services/seo.service.ts#L44` defaults to `'PaperFlow - Free & Private Online PDF Toolkit'` (`canonical: 'https://paperflow.app/'`).
    - `packages/contracts/src/tools.ts` titles use `| PDF flow` and canonicals `https://pdfflow.app/...` (observed in `pdf-to-word`, `word-to-pdf`, `pdf-to-excel`, `pdf-to-powerpoint`, `images-to-pdf`, etc.).
