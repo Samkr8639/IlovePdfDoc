@@ -9,8 +9,8 @@ export interface SignPdfFeatureFlags {
 
 export const SIGN_PDF_FEATURES: SignPdfFeatureFlags = {
   signYourself: true,
-  requestSignatures: false,
-  digitalCertificate: false
+  requestSignatures: true,
+  digitalCertificate: true
 } as const;
 
 export const SIGN_PDF_LIMITS = {
