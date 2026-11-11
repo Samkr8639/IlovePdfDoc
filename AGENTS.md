@@ -7,3 +7,4 @@ All human contributors and AI coding agents working on this repository must obey
 3. If a required pattern does not exist in `docs/design.md`, stop, describe the need under 'Proposed additions', and wait for approval.
 4. After building, run the verification steps from `docs/design.md` section 11 and attach the screenshots to the PR.
 5. When the design intentionally changes, update `docs/design.md` in the same PR.
+
