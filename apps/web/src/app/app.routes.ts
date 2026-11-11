@@ -80,6 +80,11 @@ export const routes: Routes = [
     title: 'Sign PDF Online Free - Electronically Sign PDF Documents | PDFTailor'
   },
   {
+    path: 'sign/:token',
+    loadComponent: () => import('./pages/sign-request/sign-request.component').then(m => m.SignRequestComponent),
+    title: 'Review & Sign Document | PDFTailor'
+  },
+  {
     path: 'watermark-pdf',
     redirectTo: ''
   },

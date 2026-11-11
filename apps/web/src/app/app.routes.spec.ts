@@ -71,6 +71,11 @@ describe('App Routes: Live vs Coming Soon Navigation', () => {
     expect(location.path()).toBe('/sign-pdf');
   });
 
+  it('should allow navigation to Phase 2 signer route /sign/:token', async () => {
+    await router.navigateByUrl('/sign/sample-token-123456');
+    expect(location.path()).toBe('/sign/sample-token-123456');
+  });
+
   it('should allow navigation to live tool /pdf-to-jpg', async () => {
     await router.navigateByUrl('/pdf-to-jpg');
     expect(location.path()).toBe('/pdf-to-jpg');
