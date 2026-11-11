@@ -388,7 +388,11 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     this.history.clear();
     this.selectedFieldId.set(null);
     this.currentPageIndex.set(0);
-    this.zoom.set(1.0);
+    const firstPage = summary.pagesMeta[0];
+    const initialZoom = firstPage
+      ? this.navService.computeFitWidthZoom(this.transform.getPageDisplaySize(firstPage, 1.0).width)
+      : 1.0;
+    this.zoom.set(initialZoom);
     this.flattenFormFields.set(false);
     this.revokeExportUrl();
     this.exportOutcome.set(null);
@@ -511,8 +515,25 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   }
 
   resetZoom(): void {
-    this.zoom.set(this.navService.resetZoom());
+    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+    const widthAt100 = active ? this.transform.getPageDisplaySize(active, 1.0).width : undefined;
+    this.zoom.set(this.navService.resetZoom(widthAt100));
     void this.renderVisibleWindow();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.stage() !== 'editor' || typeof window === 'undefined') return;
+    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+    if (!active) return;
+    const widthAt100 = this.transform.getPageDisplaySize(active, 1.0).width;
+    if (window.innerWidth <= 768) {
+      const fit = this.navService.computeFitWidthZoom(widthAt100, window.innerWidth);
+      if (this.zoom() * widthAt100 > window.innerWidth - 20) {
+        this.zoom.set(fit);
+        void this.renderVisibleWindow();
+      }
+    }
   }
 
   /* =========================================================================

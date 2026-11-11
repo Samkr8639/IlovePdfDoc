@@ -22,8 +22,28 @@ export class ViewportNavigationService {
     return Math.min(this.MAX_ZOOM, Math.max(this.MIN_ZOOM, Math.round(currentZoom * factor * 100) / 100));
   }
 
-  resetZoom(): number {
+  resetZoom(fitPageWidthPt?: number, viewportWidthPx?: number): number {
+    if (fitPageWidthPt) {
+      return this.computeFitWidthZoom(fitPageWidthPt, viewportWidthPx);
+    }
     return this.DEFAULT_ZOOM;
+  }
+
+  /**
+   * Fits page width cleanly inside mobile/tablet viewports (<= 768px) while preserving 100% zoom on desktop.
+   */
+  computeFitWidthZoom(
+    pageWidthPt: number,
+    viewportWidthPx = typeof window !== 'undefined' ? window.innerWidth : 1024,
+    horizontalPaddingPx = 28
+  ): number {
+    if (!viewportWidthPx || viewportWidthPx > 768 || !pageWidthPt || pageWidthPt <= 0) {
+      return this.DEFAULT_ZOOM;
+    }
+    const availablePx = Math.max(220, viewportWidthPx - horizontalPaddingPx);
+    const ratio = availablePx / pageWidthPt;
+    const clamped = Math.max(this.MIN_ZOOM, Math.min(this.DEFAULT_ZOOM, ratio));
+    return Math.round(clamped * 100) / 100;
   }
 
   clampPageIndex(target: number, totalPages: number): number {

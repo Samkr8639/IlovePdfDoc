@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { CoordinateTransformService } from './coordinate-transform';
+import { ViewportNavigationService } from './viewport-navigation.service';
 import { PageDimensions } from '../models/document-model';
 
 describe('CoordinateTransformService', () => {
@@ -60,6 +61,17 @@ describe('CoordinateTransformService', () => {
     const display = service.getPageDisplaySize(rotatedPage, 1.0);
     expect(display.width).toBe(842);
     expect(display.height).toBe(595);
+  });
+
+  it('fits wide PDF pages cleanly inside narrow mobile viewports without cropping', () => {
+    const nav = new ViewportNavigationService();
+    // 390px phone with 595pt A4 page -> ~0.61 zoom, while 1440px desktop stays 1.0
+    const mobileZoom = nav.computeFitWidthZoom(595, 390);
+    expect(mobileZoom).toBeGreaterThan(0.5);
+    expect(mobileZoom).toBeLessThan(0.7);
+    expect(595 * mobileZoom).toBeLessThanOrEqual(370);
+    expect(nav.computeFitWidthZoom(595, 1440)).toBe(1.0);
+    expect(nav.resetZoom(595, 390)).toBe(mobileZoom);
   });
 });
 

@@ -18,6 +18,7 @@ import {
 } from '@paperflow/contracts';
 import { SharedPdfjsService } from '../../core/services/shared-pdfjs.service';
 import { CoordinateTransformService } from '../edit-pdf/services/coordinate-transform';
+import { ViewportNavigationService } from '../edit-pdf/services/viewport-navigation.service';
 import {
   SignRequestService,
   SignerSessionPayload
@@ -42,11 +43,13 @@ export class SignRequestComponent implements OnInit, OnDestroy {
   private readonly titleService = inject(Title);
   private readonly pdfjs = inject(SharedPdfjsService);
   private readonly transform = inject(CoordinateTransformService);
+  private readonly navService = inject(ViewportNavigationService);
   private readonly api = inject(SignRequestService);
 
   readonly routeState = signal<SignerRouteState>('loading');
   readonly errorMessage = signal<string | null>(null);
   readonly session = signal<SignerSessionPayload | null>(null);
+  readonly pageZoom = signal<number>(1.0);
   readonly fields = signal<SignFieldElement[]>([]);
   readonly activeFieldId = signal<string | null>(null);
   readonly consentGiven = signal<boolean>(false);
@@ -114,6 +117,12 @@ export class SignRequestComponent implements OnInit, OnDestroy {
 
       const sess = await this.api.getSignerSession(this.token, ctrl.signal);
       this.session.set(sess);
+      const firstPage = sess.pagesMeta[0];
+      this.pageZoom.set(
+        firstPage
+          ? this.navService.computeFitWidthZoom(this.transform.getPageDisplaySize(firstPage, 1.0).width, undefined, 32)
+          : 1.0
+      );
 
       if (!sess.isYourTurn) {
         this.routeState.set('waiting_turn');
@@ -157,7 +166,7 @@ export class SignRequestComponent implements OnInit, OnDestroy {
   }
 
   getPageSize(page: PdfPageBoxMetrics): { width: number; height: number } {
-    return this.transform.getPageDisplaySize(page, 1.0);
+    return this.transform.getPageDisplaySize(page, this.pageZoom());
   }
 
   fieldsOnPage(pageIndex: number): SignFieldElement[] {
@@ -165,7 +174,7 @@ export class SignRequestComponent implements OnInit, OnDestroy {
   }
 
   getFieldScreenRect(field: SignFieldElement, page: PdfPageBoxMetrics) {
-    return this.transform.pdfRectToScreenRect(field, page, 1.0);
+    return this.transform.pdfRectToScreenRect(field, page, this.pageZoom());
   }
 
   activateField(field: SignFieldElement): void {
@@ -234,13 +243,19 @@ export class SignRequestComponent implements OnInit, OnDestroy {
   private async renderAllPages(): Promise<void> {
     if (!this.pdfDocProxy || typeof document === 'undefined') return;
     const pages = this.session()?.pagesMeta || [];
+    const z = this.pageZoom();
+    const dpr = typeof window !== 'undefined' ? Math.min(2, window.devicePixelRatio || 1) : 1;
     for (const p of pages) {
       const target = document.getElementById(`signer-page-canvas-${p.pageIndex}`) as HTMLCanvasElement | null;
       if (!target) continue;
       const pdfPage = await this.pdfDocProxy.getPage(p.pageIndex + 1);
-      const vp = pdfPage.getViewport({ scale: 1.0 });
+      const disp = this.transform.getPageDisplaySize(p, z);
+      const unitVp = pdfPage.getViewport({ scale: 1.0 });
+      const vp = pdfPage.getViewport({ scale: (disp.width / Math.max(1, unitVp.width)) * dpr });
       target.width = Math.round(vp.width);
       target.height = Math.round(vp.height);
+      target.style.width = `${disp.width}px`;
+      target.style.height = `${disp.height}px`;
       const ctx = target.getContext('2d');
       if (!ctx) continue;
       await pdfPage.render({ canvasContext: ctx, viewport: vp }).promise;

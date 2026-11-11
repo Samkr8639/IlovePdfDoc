@@ -70,38 +70,40 @@
 
     <div class="sr-workspace">
       <main class="sr-viewer-col" aria-label="Document pages">
-        @for (page of sess.pagesMeta; track page.pageIndex) {
-          <div
-            class="sr-page-frame"
-            [style.width.px]="getPageSize(page).width"
-            [style.height.px]="getPageSize(page).height">
-            <canvas [id]="'signer-page-canvas-' + page.pageIndex" class="sr-page-canvas"></canvas>
+        <div class="sr-pages-inner">
+          @for (page of sess.pagesMeta; track page.pageIndex) {
+            <div
+              class="sr-page-frame"
+              [style.width.px]="getPageSize(page).width"
+              [style.height.px]="getPageSize(page).height">
+              <canvas [id]="'signer-page-canvas-' + page.pageIndex" class="sr-page-canvas"></canvas>
 
-            @for (field of fieldsOnPage(page.pageIndex); track field.id) {
-              @let rect = getFieldScreenRect(field, page);
-              <button
-                type="button"
-                class="sr-field-hotspot"
-                [class.filled]="isFieldFilled(field)"
-                [class.active]="activeFieldId() === field.id"
-                [style.left.px]="rect.x"
-                [style.top.px]="rect.y"
-                [style.width.px]="rect.width"
-                [style.height.px]="rect.height"
-                (click)="activateField(field)">
-                @if (field.imageDataUrl) {
-                  <img [src]="field.imageDataUrl" [alt]="field.type + ' value'" class="sr-field-img" />
-                } @else if (field.type === 'checkbox') {
-                  <span>{{ field.checked ? '✓' : '☐' }}</span>
-                } @else if (field.text) {
-                  <span>{{ field.text }}</span>
-                } @else {
-                  <span>Click to {{ field.type }}</span>
-                }
-              </button>
-            }
-          </div>
-        }
+              @for (field of fieldsOnPage(page.pageIndex); track field.id) {
+                @let rect = getFieldScreenRect(field, page);
+                <button
+                  type="button"
+                  class="sr-field-hotspot"
+                  [class.filled]="isFieldFilled(field)"
+                  [class.active]="activeFieldId() === field.id"
+                  [style.left.px]="rect.x"
+                  [style.top.px]="rect.y"
+                  [style.width.px]="rect.width"
+                  [style.height.px]="rect.height"
+                  (click)="activateField(field)">
+                  @if (field.imageDataUrl) {
+                    <img [src]="field.imageDataUrl" [alt]="field.type + ' value'" class="sr-field-img" />
+                  } @else if (field.type === 'checkbox') {
+                    <span>{{ field.checked ? '✓' : '☐' }}</span>
+                  } @else if (field.text) {
+                    <span>{{ field.text }}</span>
+                  } @else {
+                    <span>Click to {{ field.type }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
       </main>
 
       <aside class="sr-action-panel" aria-label="Field checklist and finish">

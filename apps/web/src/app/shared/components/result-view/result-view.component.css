@@ -825,4 +825,14 @@
     width: 100%;
     justify-content: center;
   }
+  .preview-drawer-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .preview-embed-frame {
+    height: 62vh;
+    min-height: 360px;
+    max-height: 500px;
+  }
 }

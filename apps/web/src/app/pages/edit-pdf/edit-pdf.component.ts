@@ -371,6 +371,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.currentFileName.set(fileName);
     this.pages.set(pageList);
     this.currentPageIndex.set(0);
+    const firstPg = pageList[0];
+    if (firstPg) {
+      this.zoom.set(
+        this.viewportNav.computeFitWidthZoom(this.transform.getPageDisplaySize(firstPg, 1.0).width)
+      );
+    }
     this.elements.set([]);
     this.history.clear();
     this.viewMode.set('editor');
@@ -776,8 +782,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   resetZoom(): void {
-    this.zoom.set(this.viewportNav.resetZoom());
+    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+    const widthAt100 = active ? this.transform.getPageDisplaySize(active, 1.0).width : undefined;
+    this.zoom.set(this.viewportNav.resetZoom(widthAt100));
     setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.viewMode() !== 'editor' || typeof window === 'undefined') return;
+    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+    if (!active) return;
+    const widthAt100 = this.transform.getPageDisplaySize(active, 1.0).width;
+    if (window.innerWidth <= 768) {
+      const fit = this.viewportNav.computeFitWidthZoom(widthAt100, window.innerWidth);
+      if (this.zoom() * widthAt100 > window.innerWidth - 20) {
+        this.zoom.set(fit);
+        setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+      }
+    }
   }
 
   rotatePage(pageIndex: number): void {

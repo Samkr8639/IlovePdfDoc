@@ -1445,6 +1445,8 @@
   gap: 0.25rem;
   font-size: 0.8125rem;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .page-number-input {
@@ -1461,6 +1463,8 @@
 
 .page-total {
   opacity: 0.75;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .bar-divider {
@@ -2676,6 +2680,17 @@
   .mobile-close-btn {
     display: block;
   }
+
+  .canvas-viewport {
+    padding: 16px 12px 100px;
+  }
+
+  .bottom-floating-bar {
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    gap: 4px;
+    bottom: 14px;
+  }
 }
 
 
@@ -2727,7 +2742,8 @@
   align-items: center;
   gap: 24px;
   margin: 0 auto;
-  min-width: min-content;
+  width: max-content;
+  min-width: 100%;
 }
 
 .paper-canvas-container {

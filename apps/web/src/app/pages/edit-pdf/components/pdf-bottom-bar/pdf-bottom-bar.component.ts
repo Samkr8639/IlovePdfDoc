@@ -90,7 +90,21 @@ import { FormsModule } from '@angular/forms';
         </svg>
       </button>
     </div>
-  `
+  `,
+  styles: [`
+    .page-indicator-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .page-total,
+    .bar-text-btn {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  `]
 })
 export class PdfBottomBarComponent {
   readonly currentPageIndex = input<number>(0);
