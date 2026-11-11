@@ -10,7 +10,8 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'powerpoint-to-pdf',
   'edit-pdf',
   'pdf-to-jpg',
-  'jpg-to-pdf'
+  'jpg-to-pdf',
+  'sign-pdf'
 ] as const;
 
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
@@ -386,22 +387,31 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     id: 'sign-pdf',
     name: 'Sign PDF',
     shortDescription: 'Sign yourself or request electronic signatures from others.',
-    longDescription: 'Add legally binding cryptographic electronic signatures and initials to your PDF documents.',
+    longDescription: 'Draw, type, or upload your signature and stamp dates, initials, and text fields directly onto any PDF inside your browser with zero file uploads.',
     category: 'security',
     route: '/sign-pdf',
     icon: 'sign-pen',
     processingMode: 'browser',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
     maxFiles: 1,
-    maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    maxFileSizeBytes: 100 * 1024 * 1024,
+    status: 'available',
+    badgeText: 'Live',
     seo: {
-      title: 'Sign PDF Online - Free E-Signatures | PDF flow',
-      description: 'Sign PDF documents electronically online with certificate security.',
-      keywords: ['sign pdf', 'esign pdf', 'electronic signature online'],
-      canonical: 'https://pdfflow.app/sign-pdf',
-      faqs: []
+      title: 'Sign PDF Online Free - Draw, Type or Upload e-Signature | PDFTailor',
+      description: 'Sign PDF documents yourself right in your browser with zero file uploads. Draw, type, or upload your signature, initials, dates, stamps, and checkboxes.',
+      keywords: ['sign pdf', 'esign pdf', 'electronic signature online', 'free pdf signer'],
+      canonical: 'https://pdftailor.in/sign-pdf',
+      faqs: [
+        {
+          question: 'Are my PDF or signature images uploaded when I sign a document?',
+          answer: 'Signing a document yourself happens 100% in your browser memory using client-side JavaScript; your PDF and signature never leave your device.'
+        },
+        {
+          question: 'Does Sign PDF provide qualified or Aadhaar eSign digital signatures?',
+          answer: 'No. Simple signatures placed in this tool are electronic signatures visually embedded in the PDF, not CA-issued qualified or Aadhaar eSign certificates.'
+        }
+      ]
     }
   },
   {

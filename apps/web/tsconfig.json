@@ -14,7 +14,8 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@paperflow/contracts": ["../../packages/contracts/src/index.ts"]
+      "@paperflow/contracts": ["../../packages/contracts/src/index.ts"],
+      "@paperflow/sign-core": ["../../packages/sign-core/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

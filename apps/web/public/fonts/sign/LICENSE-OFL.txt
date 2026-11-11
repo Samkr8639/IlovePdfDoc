@@ -1,0 +1,11 @@
+All font files in this directory are licensed under the SIL Open Font License, Version 1.1 (OFL-1.1):
+- Alex Brush (TypeSETit)
+- Caveat (Pablo Impallari, Cyreal)
+- Dancing Script (Impallari Type)
+- Great Vibes (TypeSETit)
+- Kalam (Indian Type Foundry)
+- Noto Sans, Noto Sans Devanagari, Noto Sans Arabic (Google)
+- Patrick Hand (Patrick Wagesreiter)
+- Sacramento (Astigmatic)
+- Satisfy (Sideshow)
+Sourced via @fontsource packages for self-hosted, offline, privacy-first rendering and PDF embedding.
