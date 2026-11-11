@@ -260,3 +260,4 @@ export class SignRequestComponent implements OnInit, OnDestroy {
     }
   }
 }
+

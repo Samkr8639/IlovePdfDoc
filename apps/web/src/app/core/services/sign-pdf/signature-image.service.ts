@@ -336,3 +336,4 @@ export class SignatureImageService {
     ctx.closePath();
   }
 }
+

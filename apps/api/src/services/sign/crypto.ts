@@ -126,3 +126,4 @@ export function decryptDocumentAtRest(stored: StoredDocumentCiphertext): Buffer 
     dek.fill(0);
   }
 }
+

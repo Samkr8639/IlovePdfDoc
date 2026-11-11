@@ -1052,3 +1052,4 @@ export class SignSignatureDialogComponent implements OnInit, AfterViewInit, OnDe
     }
   }
 }
+

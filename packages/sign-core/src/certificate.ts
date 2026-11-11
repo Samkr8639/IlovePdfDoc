@@ -133,3 +133,4 @@ export async function appendCertificateOfCompletionPage(
   doc.setProducer(`${appName} Sign Engine`);
   return await doc.save({ useObjectStreams: true });
 }
+

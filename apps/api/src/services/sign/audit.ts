@@ -72,3 +72,4 @@ export function verifyAuditChain(entries: AuditLogEntry[]): boolean {
   }
   return true;
 }
+

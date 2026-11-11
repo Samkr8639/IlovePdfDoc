@@ -549,3 +549,4 @@ export type CreateSignRequestInput = z.infer<typeof CreateSignRequestSchema>;
 export interface ApiFeaturesData {
   signRequestsEnabled: boolean;
 }
+
