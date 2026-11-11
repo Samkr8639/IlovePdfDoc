@@ -98,6 +98,7 @@
     "LINK_SPLIT": "Dividir PDF",
     "LINK_COMPRESS": "Comprimir PDF",
     "LINK_EDIT": "Editar PDF",
+    "LINK_SIGN": "Firmar PDF",
     "LINK_WORD_TO_PDF": "Word a PDF",
     "LINK_EXCEL_TO_PDF": "Excel a PDF",
     "LINK_PPT_TO_PDF": "PowerPoint a PDF",

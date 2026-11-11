@@ -124,6 +124,16 @@
 - **Max File Size**: 50 MB
 - **Description**: Convert JPG, PNG, WebP, GIF, and BMP images into standardized PDF documents in seconds. Easily adjust orientation, margins, page sizes, and image fit with 100% in-browser privacy.
 
+### Sign PDF
+- **URL**: https://pdftailor.com/sign-pdf
+- **Identifier**: urn:air:pdftailor:tools:sign-pdf
+- **Category**: security
+- **Processing Mode**: 100% Client-Side (Browser WebAssembly)
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 1
+- **Max File Size**: 100 MB
+- **Description**: Draw, type, or upload your signature and stamp dates, initials, and text fields directly onto any PDF inside your browser with zero file uploads.
+
 
 ## Security & Verification
 All PDFTailor tools support programmatic browser automation and WebMCP form interaction. Documents processed client-side remain in sandbox RAM. Server conversions are subject to strict per-request execution limits and instantaneous memory purges.

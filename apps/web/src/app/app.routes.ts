@@ -75,7 +75,9 @@ export const routes: Routes = [
   },
   {
     path: 'sign-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/sign-pdf/sign-pdf.component').then(m => m.SignPdfComponent),
+    canDeactivate: [(comp: any) => comp?.canDeactivate ? comp.canDeactivate() : true],
+    title: 'Sign PDF Online Free - Electronically Sign PDF Documents | PDFTailor'
   },
   {
     path: 'watermark-pdf',
