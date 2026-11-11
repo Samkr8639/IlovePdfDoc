@@ -9,7 +9,8 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'excel-to-pdf',
   'powerpoint-to-pdf',
   'edit-pdf',
-  'pdf-to-jpg'
+  'pdf-to-jpg',
+  'jpg-to-pdf'
 ] as const;
 
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
@@ -341,25 +342,42 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     }
   },
   {
-    id: 'images-to-pdf',
+    id: 'jpg-to-pdf',
     name: 'JPG to PDF',
     shortDescription: 'Convert JPG images to PDF in seconds. Easily adjust orientation and margins.',
-    longDescription: 'Turn photos and image scans into a standardized PDF with customized orientation, margins, and page ordering.',
+    longDescription: 'Convert JPG, PNG, WebP, GIF, and BMP images into standardized PDF documents in seconds. Easily adjust orientation, margins, page sizes, and image fit with 100% in-browser privacy.',
     category: 'convert',
-    route: '/images-to-pdf',
+    route: '/jpg-to-pdf',
     icon: 'image',
     processingMode: 'browser',
-    acceptedFileTypes: ['.jpg', '.jpeg', '.png', '.webp', 'image/jpeg', 'image/png', 'image/webp'],
-    maxFiles: 50,
-    maxFileSizeBytes: 20 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Client-side',
+    acceptedFileTypes: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', 'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'],
+    maxFiles: 300,
+    maxFileSizeBytes: 50 * 1024 * 1024,
+    status: 'available',
+    badgeText: '100% In-Browser',
     seo: {
-      title: 'JPG & Images to PDF Converter Free Online | PDF flow',
-      description: 'Convert JPG, PNG, and image scans to clean PDF files directly in your web browser. Free, unlimited, private.',
-      keywords: ['jpg to pdf', 'images to pdf', 'png to pdf', 'photos to pdf converter'],
-      canonical: 'https://pdfflow.app/images-to-pdf',
-      faqs: []
+      title: 'JPG to PDF Converter Online Free - Convert Images to PDF | PDFTailor',
+      description: 'Convert JPG, PNG, and other images to PDF online for free. Adjust margins, page sizes, and orientation with 100% in-browser privacy and zero file uploads.',
+      keywords: ['jpg to pdf', 'convert jpg to pdf', 'images to pdf', 'image to pdf converter', 'free jpg to pdf online', 'png to pdf'],
+      canonical: 'https://pdftailor.in/jpg-to-pdf',
+      faqs: [
+        {
+          question: 'Are my images uploaded to your servers?',
+          answer: 'No. PDFTailor converts your images 100% locally in your browser memory. Your images never leave your computer or device.'
+        },
+        {
+          question: 'Which image formats can I convert?',
+          answer: 'You can convert JPG, JPEG, PNG, WebP, GIF, and BMP files. Up to 300 images can be combined into a single PDF or downloaded as a ZIP.'
+        },
+        {
+          question: 'Can I remove camera metadata (EXIF) from photos?',
+          answer: 'Yes. The built-in privacy protection automatically strips location coordinates, camera models, and sensitive EXIF tags while keeping your image quality intact.'
+        },
+        {
+          question: 'Will my images lose quality during conversion?',
+          answer: 'In Original mode, your JPEG images are embedded directly into the PDF without any re-encoding, preserving 100% of their original sharpness.'
+        }
+      ]
     }
   },
 

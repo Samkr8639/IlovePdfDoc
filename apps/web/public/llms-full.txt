@@ -114,6 +114,16 @@
 - **Max File Size**: 200 MB
 - **Description**: Extract high-resolution image assets or convert every page of a PDF document into sharp JPG format with custom DPI, quality controls, and privacy-first local processing.
 
+### JPG to PDF
+- **URL**: https://pdftailor.com/jpg-to-pdf
+- **Identifier**: urn:air:pdftailor:tools:jpg-to-pdf
+- **Category**: convert
+- **Processing Mode**: 100% Client-Side (Browser WebAssembly)
+- **Accepted File Types**: .jpg, .jpeg, .png, .webp, .gif, .bmp, image/jpeg, image/png, image/webp, image/gif, image/bmp
+- **Max Files Allowed**: 300
+- **Max File Size**: 50 MB
+- **Description**: Convert JPG, PNG, WebP, GIF, and BMP images into standardized PDF documents in seconds. Easily adjust orientation, margins, page sizes, and image fit with 100% in-browser privacy.
+
 
 ## Security & Verification
 All PDFTailor tools support programmatic browser automation and WebMCP form interaction. Documents processed client-side remain in sandbox RAM. Server conversions are subject to strict per-request execution limits and instantaneous memory purges.

@@ -216,6 +216,25 @@
         "to",
         "jpg"
       ]
+    },
+    {
+      "identifier": "urn:air:pdftailor:tools:jpg-to-pdf",
+      "displayName": "JPG to PDF",
+      "type": "application/mcp-server-card+json",
+      "description": "Convert JPG images to PDF in seconds. Easily adjust orientation and margins.",
+      "url": "https://pdftailor.com/jpg-to-pdf",
+      "representativeQueries": [
+        "jpg to pdf online",
+        "how to jpg to pdf",
+        "free jpg to pdf tool"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "jpg",
+        "to",
+        "pdf"
+      ]
     }
   ]
 }
