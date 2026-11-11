@@ -555,7 +555,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     const pageMeta = this.pages()[pageIdx];
     if (!pageMeta) return;
     const disp = this.getPageSize(pageMeta);
-    this.placeFieldAtScreenCenter(type, pageIdx, disp.width / 2, disp.height / 2);
+    const existingCount = this.fieldsByPage().get(pageIdx)?.length || 0;
+    const yOffset = ((existingCount % 5) - 1) * 56;
+    this.placeFieldAtScreenCenter(type, pageIdx, disp.width / 2, disp.height / 2 + yOffset);
   }
 
   onPaletteDragStart(event: DragEvent, type: SignFieldType): void {

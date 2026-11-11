@@ -3,6 +3,7 @@ import {
   ApiFeaturesData,
   ApiResponse,
   PdfPageBoxMetrics,
+  SIGN_PDF_FEATURES,
   SignFieldElement,
   SignRequestOrder
 } from '@paperflow/contracts';
@@ -44,12 +45,19 @@ export class SignRequestService {
   private csrfToken: string | null = null;
 
   async getFeatures(signal?: AbortSignal): Promise<ApiFeaturesData> {
-    const res = await fetch(`${this.baseUrl}/features`, { signal });
-    if (!res.ok) {
+    if (!SIGN_PDF_FEATURES.requestSignatures) {
       return { signRequestsEnabled: false };
     }
-    const json = (await res.json()) as ApiResponse<ApiFeaturesData>;
-    return json?.data || { signRequestsEnabled: false };
+    try {
+      const res = await fetch(`${this.baseUrl}/features`, { signal });
+      if (!res.ok) {
+        return { signRequestsEnabled: false };
+      }
+      const json = (await res.json()) as ApiResponse<ApiFeaturesData>;
+      return json?.data || { signRequestsEnabled: false };
+    } catch {
+      return { signRequestsEnabled: false };
+    }
   }
 
   async ensureCsrfToken(signal?: AbortSignal): Promise<string> {
