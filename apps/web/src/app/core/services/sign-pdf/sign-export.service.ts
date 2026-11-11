@@ -1,6 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { SignFieldElement } from '@paperflow/contracts';
-import { exportSignedPdf } from '@paperflow/sign-core';
+import {
+  applyDetachedPdfSignature,
+  buildDetachedCmsSignedData,
+  exportSignedPdf,
+  parsePkcs12WithWebCrypto
+} from '@paperflow/sign-core';
 import { SignatureImageService } from './signature-image.service';
 import { buildSignedFilename, SignExportOutcome } from './sign-pdf.models';
 
@@ -88,8 +93,117 @@ export class SignExportService {
       fieldsApplied: result.fieldsApplied,
       pagesSigned: result.pagesSigned,
       warnings: [...(params.warningsPrefix || []), ...result.warnings],
-      originalPageCount: params.pageCount
+      originalPageCount: params.pageCount,
+      signedMode: 'simple'
     };
+  }
+
+  /**
+   * Signs the PDF purely in the browser using WebCrypto PBES2 (.p12/.pfx) + PAdES detached CMS.
+   * Throws UnsupportedPkcs12CipherError if the certificate uses legacy 3DES/RC2 encryption.
+   */
+  async exportWithBrowserCertificate(params: {
+    originalBytes: Uint8Array;
+    originalFilename: string;
+    pageCount: number;
+    fields: SignFieldElement[];
+    flattenFormFields: boolean;
+    certBytes: Uint8Array;
+    password: string;
+    reason?: string;
+    location?: string;
+    warningsPrefix?: string[];
+  }): Promise<SignExportOutcome> {
+    const identity = await parsePkcs12WithWebCrypto(params.certBytes, params.password);
+
+    let workingBytes = params.originalBytes;
+    let fieldsApplied = 0;
+    let pagesSigned: number[] = [];
+    const warnings: string[] = [...(params.warningsPrefix || [])];
+
+    if (params.fields.length > 0) {
+      const visual = await exportSignedPdf(params.originalBytes, params.fields, {
+        appName: 'PDFTailor',
+        documentTitle: buildSignedFilename(params.originalFilename).replace(/\.pdf$/i, ''),
+        flattenFormFields: params.flattenFormFields,
+        fontResolver: key => this.resolveFontBytes(key),
+        downscalePng: (bytes, maxW, maxH) => this.imageService.downscalePngBytes(bytes, maxW, maxH),
+        rasterizeTextFallback: (text, size, color) => this.rasterizeUnsupportedTextFallback(text, size, color)
+      });
+      workingBytes = visual.pdfBytes;
+      fieldsApplied = visual.fieldsApplied;
+      pagesSigned = visual.pagesSigned;
+      warnings.push(...visual.warnings);
+    }
+
+    const padesResult = await applyDetachedPdfSignature(
+      workingBytes,
+      {
+        signerName: identity.commonName || 'Certificate Signer',
+        reason: params.reason?.trim() || 'Digitally signed with PDFTailor',
+        location: params.location?.trim() || ''
+      },
+      dataToSign => buildDetachedCmsSignedData(dataToSign, identity)
+    );
+
+    return this.createOutcomeFromBytes(padesResult.signedPdfBytes, {
+      originalFilename: params.originalFilename,
+      pageCount: params.pageCount,
+      fieldsApplied,
+      pagesSigned,
+      warnings,
+      certificateSubject: identity.commonName,
+      certificateIssuer: identity.issuerCommonName,
+      signedMode: 'browser_webcrypto'
+    });
+  }
+
+  createOutcomeFromBlob(
+    blob: Blob,
+    meta: {
+      originalFilename: string;
+      pageCount: number;
+      fieldsApplied: number;
+      pagesSigned: number[];
+      warnings?: string[];
+      certificateSubject?: string;
+      certificateIssuer?: string;
+      signedMode: 'simple' | 'browser_webcrypto' | 'server_openssl';
+    }
+  ): SignExportOutcome {
+    const url = URL.createObjectURL(blob);
+    const sizeBytes = blob.size;
+    return {
+      blob,
+      url,
+      filename: buildSignedFilename(meta.originalFilename),
+      sizeBytes,
+      formattedSize: this.formatBytes(sizeBytes),
+      fieldsApplied: meta.fieldsApplied,
+      pagesSigned: meta.pagesSigned,
+      warnings: meta.warnings || [],
+      originalPageCount: meta.pageCount,
+      certificateSubject: meta.certificateSubject,
+      certificateIssuer: meta.certificateIssuer,
+      signedMode: meta.signedMode
+    };
+  }
+
+  private createOutcomeFromBytes(
+    pdfBytes: Uint8Array,
+    meta: {
+      originalFilename: string;
+      pageCount: number;
+      fieldsApplied: number;
+      pagesSigned: number[];
+      warnings: string[];
+      certificateSubject?: string;
+      certificateIssuer?: string;
+      signedMode: 'simple' | 'browser_webcrypto' | 'server_openssl';
+    }
+  ): SignExportOutcome {
+    const blob = new Blob([pdfBytes.slice(0).buffer], { type: 'application/pdf' });
+    return this.createOutcomeFromBlob(blob, meta);
   }
 
   private formatBytes(bytes: number): string {

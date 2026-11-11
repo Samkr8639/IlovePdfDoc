@@ -278,6 +278,9 @@
                         [page]="page"
                         [zoom]="zoom()"
                         [selected]="selectedFieldId() === field.id"
+                        [accentColor]="getFieldAccentColor(field)"
+                        [assigneeLabel]="getFieldAssigneeName(field)"
+                        [assigneeColor]="getFieldAssigneeColor(field)"
                         (selectedField)="selectedFieldId.set($event)"
                         (dragStart)="onFieldDragStart($event)"
                         (touchDragStart)="onFieldTouchDragStart($event)"
@@ -326,7 +329,7 @@
               <span class="section-badge-title">WHO SIGNS</span>
               <div class="radio-cards-grid-2" role="radiogroup" aria-label="Who signs">
                 <label class="mode-card" [class.selected]="whoSigns() === 'only_me'">
-                  <input type="radio" name="whoSigns" value="only_me" [checked]="whoSigns() === 'only_me'" (change)="whoSigns.set('only_me')" />
+                  <input type="radio" name="whoSigns" value="only_me" [checked]="whoSigns() === 'only_me'" (change)="setWhoSigns('only_me')" />
                   <div class="mode-card-row">
                     <span class="mode-title">Only me</span>
                   </div>
@@ -343,7 +346,7 @@
                     value="several_people"
                     [disabled]="!features.requestSignatures"
                     [checked]="whoSigns() === 'several_people'"
-                    (change)="whoSigns.set('several_people')" />
+                    (change)="setWhoSigns('several_people')" />
                   <div class="mode-card-row">
                     <span class="mode-title">Several people</span>
                     @if (!features.requestSignatures) {
@@ -360,7 +363,7 @@
               <span class="section-badge-title">TYPE</span>
               <div class="radio-cards-grid-2" role="radiogroup" aria-label="Signature type">
                 <label class="mode-card" [class.selected]="signType() === 'simple'">
-                  <input type="radio" name="signType" value="simple" [checked]="signType() === 'simple'" (change)="signType.set('simple')" />
+                  <input type="radio" name="signType" value="simple" [checked]="signType() === 'simple'" (change)="setSignType('simple')" />
                   <div class="mode-card-row">
                     <span class="mode-title">Simple signature</span>
                   </div>
@@ -377,7 +380,7 @@
                     value="digital_certificate"
                     [disabled]="!features.digitalCertificate"
                     [checked]="signType() === 'digital_certificate'"
-                    (change)="signType.set('digital_certificate')" />
+                    (change)="setSignType('digital_certificate')" />
                   <div class="mode-card-row">
                     <span class="mode-title">Digital signature</span>
                     @if (!features.digitalCertificate) {
@@ -387,10 +390,167 @@
                   <span class="mode-sub">Certificate (.p12 / .pfx)</span>
                 </label>
               </div>
-              <p class="plain-legal-notice">
-                This adds an electronic signature. It is not a certificate-based digital signature.
-              </p>
+
+              @if (whoSigns() === 'only_me' && signType() === 'digital_certificate') {
+                <div class="selected-inspector-card cert-config-card">
+                  <div class="inspector-head">
+                    <strong>PKCS#12 Certificate (.p12 / .pfx)</strong>
+                    @if (certFile()) {
+                      <button type="button" class="btn-inline-clear" (click)="clearCertificateFile()">Remove</button>
+                    }
+                  </div>
+
+                  <label class="cert-file-picker">
+                    <input type="file" accept=".p12,.pfx" (change)="onCertificateFileSelected($event)" />
+                    <span class="cert-file-btn">{{ certFile() ? certFile()!.name : 'Choose .p12 or .pfx certificate…' }}</span>
+                  </label>
+
+                  <label class="inspector-field">
+                    <span>Certificate password</span>
+                    <div class="pw-input-row">
+                      <input
+                        [type]="showCertPassword() ? 'text' : 'password'"
+                        class="pt-sidebar-input"
+                        placeholder="Enter certificate passphrase"
+                        [ngModel]="certPassword()"
+                        (ngModelChange)="certPassword.set($event)" />
+                      <button
+                        type="button"
+                        class="btn-outline-xs pw-toggle-btn"
+                        (click)="showCertPassword.set(!showCertPassword())"
+                        [attr.aria-label]="showCertPassword() ? 'Hide password' : 'Show password'">
+                        {{ showCertPassword() ? 'Hide' : 'Show' }}
+                      </button>
+                    </div>
+                  </label>
+
+                  <div class="inspector-inline-equal">
+                    <label class="inspector-field">
+                      <span>Reason</span>
+                      <input
+                        type="text"
+                        class="pt-sidebar-input"
+                        placeholder="Approved"
+                        [ngModel]="certReason()"
+                        (ngModelChange)="certReason.set($event)" />
+                    </label>
+                    <label class="inspector-field">
+                      <span>Location (optional)</span>
+                      <input
+                        type="text"
+                        class="pt-sidebar-input"
+                        placeholder="City, Country"
+                        [ngModel]="certLocation()"
+                        (ngModelChange)="certLocation.set($event)" />
+                    </label>
+                  </div>
+
+                  <p class="plain-legal-notice">
+                    Modern AES certificates sign 100% in your browser. Legacy 3DES certificates ask consent for transient OpenSSL signing.
+                  </p>
+                </div>
+              } @else if (whoSigns() === 'several_people') {
+                <p class="plain-legal-notice">
+                  Each recipient receives an encrypted private link and completion audit certificate.
+                </p>
+              } @else {
+                <p class="plain-legal-notice">
+                  This adds an electronic signature. Switch to Digital signature to embed a PKCS#12 cryptographic certificate.
+                </p>
+              }
             </div>
+
+            <!-- Section 2B: RECIPIENTS (Several people) -->
+            @if (whoSigns() === 'several_people') {
+              <div class="sidebar-option-block">
+                <div class="block-header-row">
+                  <span class="section-badge-title">RECIPIENTS ({{ signers().length }}/10)</span>
+                  <div class="order-toggle-group" role="group" aria-label="Signing order">
+                    <button
+                      type="button"
+                      class="order-pill"
+                      [class.active]="signingOrder() === 'parallel'"
+                      (click)="signingOrder.set('parallel')">Any order</button>
+                    <button
+                      type="button"
+                      class="order-pill"
+                      [class.active]="signingOrder() === 'sequential'"
+                      (click)="signingOrder.set('sequential')">In order</button>
+                  </div>
+                </div>
+
+                <div class="recipients-list">
+                  @for (signer of signers(); track signer.id; let idx = $index) {
+                    <div
+                      class="recipient-row-card"
+                      [class.active]="activeSignerId() === signer.id"
+                      (click)="activeSignerId.set(signer.id)">
+                      <div class="recipient-row-head">
+                        <span class="recipient-swatch" [style.background]="signer.color">
+                          @if (signingOrder() === 'sequential') {
+                            {{ idx + 1 }}
+                          }
+                        </span>
+                        <span class="recipient-select-tag">
+                          {{ activeSignerId() === signer.id ? 'Placing fields for' : 'Click to assign fields' }}
+                        </span>
+                        <div class="recipient-row-actions">
+                          @if (signingOrder() === 'sequential') {
+                            <button
+                              type="button"
+                              class="mini-icon-btn"
+                              [disabled]="idx === 0"
+                              title="Move up"
+                              aria-label="Move recipient up"
+                              (click)="$event.stopPropagation(); moveRecipient(signer.id, -1)">↑</button>
+                            <button
+                              type="button"
+                              class="mini-icon-btn"
+                              [disabled]="idx === signers().length - 1"
+                              title="Move down"
+                              aria-label="Move recipient down"
+                              (click)="$event.stopPropagation(); moveRecipient(signer.id, 1)">↓</button>
+                          }
+                          @if (signers().length > 1) {
+                            <button
+                              type="button"
+                              class="mini-icon-btn danger"
+                              title="Remove recipient"
+                              aria-label="Remove recipient"
+                              (click)="$event.stopPropagation(); removeRecipient(signer.id)">×</button>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="recipient-inputs-grid">
+                        <input
+                          type="text"
+                          class="pt-sidebar-input"
+                          placeholder="Full name"
+                          [attr.aria-label]="'Recipient ' + (idx + 1) + ' name'"
+                          [ngModel]="signer.name"
+                          (ngModelChange)="updateRecipient(signer.id, { name: $event })"
+                          (click)="$event.stopPropagation(); activeSignerId.set(signer.id)" />
+                        <input
+                          type="email"
+                          class="pt-sidebar-input"
+                          placeholder="email@example.com"
+                          [attr.aria-label]="'Recipient ' + (idx + 1) + ' email'"
+                          [ngModel]="signer.email"
+                          (ngModelChange)="updateRecipient(signer.id, { email: $event })"
+                          (click)="$event.stopPropagation(); activeSignerId.set(signer.id)" />
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                @if (signers().length < 10) {
+                  <button type="button" class="btn-outline-xs add-recipient-btn" (click)="addRecipient()">
+                    + Add recipient
+                  </button>
+                }
+              </div>
+            }
 
             <!-- Section 3: REQUIRED FIELDS -->
             <div class="sidebar-option-block">
@@ -409,24 +569,28 @@
                   <span class="drag-grip" aria-hidden="true">⋮⋮</span>
                   <div class="tile-label-col">
                     <span class="tile-title">Signature</span>
-                    @if (signatureDataUrl()) {
+                    @if (whoSigns() === 'several_people') {
+                      <span class="tile-placeholder-hint">Click or drag for active recipient</span>
+                    } @else if (signatureDataUrl()) {
                       <img [src]="signatureDataUrl()!" alt="Current signature preview" class="tile-live-preview" />
                     } @else {
                       <span class="tile-placeholder-hint">Click to draw, type, or upload</span>
                     }
                   </div>
                 </button>
-                <button
-                  type="button"
-                  class="tile-edit-pencil"
-                  aria-label="Edit signature"
-                  title="Edit signature"
-                  (click)="signatureDialogKind.set('signature')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M12 20h9" />
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                  </svg>
-                </button>
+                @if (whoSigns() === 'only_me') {
+                  <button
+                    type="button"
+                    class="tile-edit-pencil"
+                    aria-label="Edit signature"
+                    title="Edit signature"
+                    (click)="signatureDialogKind.set('signature')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                  </button>
+                }
               </div>
             </div>
 
@@ -526,6 +690,20 @@
                     <span>Page {{ sel.pageIndex + 1 }}</span>
                   </div>
 
+                  @if (whoSigns() === 'several_people') {
+                    <label class="inspector-field">
+                      <span>Assigned recipient</span>
+                      <select
+                        class="pt-sidebar-input"
+                        [ngModel]="sel.signerId || activeSignerId()"
+                        (ngModelChange)="updateSelectedFieldProp({ signerId: $event })">
+                        @for (s of signers(); track s.id) {
+                          <option [value]="s.id">{{ s.name || s.email || s.id }}</option>
+                        }
+                      </select>
+                    </label>
+                  }
+
                   @if (sel.type === 'text' || sel.type === 'name' || sel.type === 'date') {
                     <label class="inspector-field">
                       <span>Field value</span>
@@ -571,16 +749,16 @@
 
           <!-- 5. Sticky Bottom Sign Button -->
           <div class="sidebar-footer">
-            @if (placedSignatureCount() === 0) {
-              <p id="sign-btn-hint" class="sign-helper-hint">Place your signature on the page first</p>
+            @if (actionDisabledReason(); as hintText) {
+              <p id="sign-btn-hint" class="sign-helper-hint">{{ hintText }}</p>
             }
             <button
               type="button"
               class="btn-sign-action"
               [disabled]="!canSign()"
-              [attr.aria-describedby]="placedSignatureCount() === 0 ? 'sign-btn-hint' : null"
+              [attr.aria-describedby]="actionDisabledReason() ? 'sign-btn-hint' : null"
               (click)="executeSign()">
-              <span>Sign</span>
+              <span>{{ whoSigns() === 'several_people' ? 'Review & Send' : (signType() === 'digital_certificate' ? 'Sign with Certificate' : 'Sign') }}</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />
@@ -597,7 +775,13 @@
           class="btn-sign-action"
           [disabled]="!canSign()"
           (click)="executeSign()">
-          <span>{{ placedSignatureCount() === 0 ? 'Place Signature to Sign' : 'Sign Document' }}</span>
+          <span>
+            @if (!canSign()) {
+              {{ whoSigns() === 'several_people' ? 'Add Recipients & Signature Field' : (signType() === 'digital_certificate' ? 'Choose .p12/.pfx Certificate' : 'Place Signature to Sign') }}
+            } @else {
+              {{ whoSigns() === 'several_people' ? 'Review & Send Request' : (signType() === 'digital_certificate' ? 'Sign with Certificate' : 'Sign Document') }}
+            }
+          </span>
         </button>
       </div>
     </div>
@@ -609,7 +793,8 @@
   @if (stage() === 'processing') {
     <div class="processing-wrap">
       <h1 class="sr-only">Signing PDF Document</h1>
-      <app-processing-state title="Applying signatures safely in your browser..." />
+      <app-processing-state
+        [title]="whoSigns() === 'several_people' ? 'Encrypting PDF and creating signing links...' : 'Applying signatures safely...'" />
       <div class="cancel-row">
         <button type="button" class="btn-cancel-op" (click)="cancelSigning()">Cancel</button>
       </div>
@@ -638,13 +823,114 @@
         [subtitle]="resultSubtitle()"
         downloadLabel="Download Signed PDF"
         restartLabel="Sign another document"
-        [isClientSide]="true"
+        [isClientSide]="resultIsClientSide()"
+        [privacyTitle]="resultIsClientSide() ? '100% Browser-Based Privacy' : 'Ephemeral Consented Signing'"
+        [privacyMessage]="resultIsClientSide() ? 'Your PDF and certificate stayed completely in your browser and were never uploaded.' : 'Your legacy .p12 was signed in memory with OpenSSL under your consent and scrubbed immediately.'"
         (reset)="resetAll()" />
 
       <div class="post-result-back-row">
         <button type="button" class="btn-link-secondary" (click)="backToEditorFromResult()">
           ← Return to editor to adjust fields
         </button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════
+       5. SENT REQUEST LIVE TRACKER ("Several people")
+       ════════════════════════════════════════════════════════════ -->
+  @if (stage() === 'sent' && sentStatus(); as st) {
+    <div class="sent-tracker-wrap">
+      <div class="sent-tracker-card">
+        <div class="tracker-top-row">
+          <div>
+            <span class="section-badge-title">SIGNATURE REQUEST TRACKER</span>
+            <h1 class="tracker-title">{{ st.title }}</h1>
+            <p class="tracker-meta">
+              Order: <strong>{{ st.order === 'sequential' ? 'In order' : 'Any order' }}</strong>
+              · Expires: {{ st.expiresAt | date:'mediumDate' }}
+              · SHA-256: <code>{{ st.originalSha256.slice(0, 12) }}…</code>
+            </p>
+          </div>
+          <span class="status-badge-pill" [attr.data-status]="st.status">{{ st.status }}</span>
+        </div>
+
+        @if (trackerNotice()) {
+          <div class="tracker-notice-bar" role="status">{{ trackerNotice() }}</div>
+        }
+
+        <div class="tracker-signers-list">
+          @for (s of st.signers; track s.id; let idx = $index) {
+            <div class="tracker-signer-card">
+              <div class="tracker-signer-head">
+                <div class="tracker-signer-identity">
+                  <span class="recipient-swatch" [style.background]="s.color || 'var(--pt-teal-700)'">{{ idx + 1 }}</span>
+                  <div>
+                    <strong>{{ s.name }}</strong>
+                    <div class="tracker-signer-email">{{ s.email }}</div>
+                  </div>
+                </div>
+                <span class="status-badge-pill" [attr.data-status]="s.status">{{ s.status }}</span>
+              </div>
+
+              @if (s.signedAt) {
+                <div class="tracker-signed-at">Signed {{ s.signedAt | date:'medium' }}</div>
+              }
+              @if (s.declinedReason) {
+                <div class="tracker-declined-reason">Declined: {{ s.declinedReason }}</div>
+              }
+
+              @if (s.status !== 'signed' && st.status !== 'completed' && st.status !== 'cancelled' && sentResult()?.devSigningLinks?.[s.id]; as devUrl) {
+                <div class="dev-link-box">
+                  <span class="dev-link-label">Signing link:</span>
+                  <a class="dev-link-anchor" [href]="devUrl" target="_blank" rel="noopener">{{ devUrl }}</a>
+                  <button type="button" class="btn-outline-xs dev-copy-btn" (click)="copyDevSigningLink(s.id, devUrl)">
+                    {{ copiedLinkSignerId() === s.id ? 'Copied!' : 'Copy' }}
+                  </button>
+                </div>
+              }
+
+              @if (s.status !== 'signed' && st.status !== 'completed' && st.status !== 'cancelled' && st.status !== 'declined') {
+                <div class="tracker-resend-row">
+                  <input
+                    type="email"
+                    class="pt-sidebar-input"
+                    placeholder="Optional new email to update & resend"
+                    [ngModel]="resendEmailOverrides()[s.id] || ''"
+                    (ngModelChange)="updateResendEmailOverride(s.id, $event)" />
+                  <button
+                    type="button"
+                    class="btn-outline-sm"
+                    [disabled]="trackerBusy()"
+                    (click)="resendInvitation(s.id)">
+                    Resend
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="tracker-actions-bar">
+          <button type="button" class="btn-outline-sm" [disabled]="trackerBusy()" (click)="refreshSentStatus()">
+            Refresh Status
+          </button>
+          @if (st.status === 'completed') {
+            <button type="button" class="btn-primary-sm" [disabled]="trackerBusy()" (click)="downloadSentFinalPdf()">
+              Download Signed PDF
+            </button>
+            <button type="button" class="btn-outline-sm" [disabled]="trackerBusy()" (click)="downloadSentCertificatePdf()">
+              Download Certificate
+            </button>
+          } @else if (st.status === 'draft' || st.status === 'in_progress') {
+            <button type="button" class="btn-outline-sm danger-outline" [disabled]="trackerBusy()" (click)="cancelSentRequest()">
+              Cancel Request
+            </button>
+          }
+          <button type="button" class="btn-link-secondary" (click)="resetAll()">
+            Create New Request
+          </button>
+        </div>
       </div>
     </div>
   }
@@ -723,6 +1009,115 @@
         <div class="pt-modal-actions">
           <button type="button" class="btn-outline-sm" (click)="showApplyPagesModal.set(false)">Cancel</button>
           <button type="button" class="btn-primary-sm" (click)="confirmApplyToPagesRange()">Apply</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showSendRequestModal()) {
+    <div class="pt-modal-backdrop" role="presentation">
+      <div class="pt-modal-card send-request-modal" role="dialog" aria-modal="true" aria-labelledby="send-req-title">
+        <h2 id="send-req-title">Send Signature Request</h2>
+        <p>Review details before encrypting and sending signing links to {{ signers().length }} recipient(s).</p>
+
+        @if (sendModalError()) {
+          <div class="modal-error-inline" role="alert">{{ sendModalError() }}</div>
+        }
+
+        <label class="inspector-field">
+          <span>Document title</span>
+          <input
+            type="text"
+            class="pt-sidebar-input"
+            placeholder="NDA Agreement"
+            [ngModel]="requestTitle()"
+            (ngModelChange)="requestTitle.set($event)" />
+        </label>
+
+        <div class="inspector-inline-equal">
+          <label class="inspector-field">
+            <span>Your name</span>
+            <input
+              type="text"
+              class="pt-sidebar-input"
+              placeholder="Your full name"
+              [ngModel]="fullName()"
+              (ngModelChange)="onFullNameChange($event)" />
+          </label>
+          <label class="inspector-field">
+            <span>Your email</span>
+            <input
+              type="email"
+              class="pt-sidebar-input"
+              placeholder="you@example.com"
+              [ngModel]="senderEmail()"
+              (ngModelChange)="senderEmail.set($event); senderOtpVerified.set(false)" />
+          </label>
+        </div>
+
+        <div class="otp-verify-strip">
+          @if (senderOtpVerified()) {
+            <span class="otp-verified-tag">Sender email verified</span>
+          } @else {
+            <button type="button" class="btn-outline-xs" [disabled]="senderOtpBusy()" (click)="sendSenderOtp()">
+              {{ senderOtpSent() ? 'Resend verification code' : 'Verify email with OTP (optional)' }}
+            </button>
+            @if (senderOtpSent()) {
+              <div class="otp-code-row">
+                <input
+                  type="text"
+                  maxlength="6"
+                  class="pt-sidebar-input"
+                  placeholder="6-digit code"
+                  [ngModel]="senderOtpCode()"
+                  (ngModelChange)="senderOtpCode.set($event)" />
+                <button type="button" class="btn-primary-sm" [disabled]="senderOtpBusy()" (click)="confirmSenderOtp()">
+                  Verify
+                </button>
+              </div>
+              @if (senderDevOtpHint()) {
+                <div class="dev-otp-hint">Local dev code: <strong>{{ senderDevOtpHint() }}</strong></div>
+              }
+            }
+          }
+        </div>
+
+        <label class="inspector-field">
+          <span>Message for recipients (optional)</span>
+          <textarea
+            rows="2"
+            class="pt-sidebar-input pt-modal-textarea"
+            placeholder="Please review and sign by Friday."
+            [ngModel]="requestMessage()"
+            (ngModelChange)="requestMessage.set($event)"></textarea>
+        </label>
+
+        <div class="inspector-inline-equal">
+          <label class="inspector-field">
+            <span>Expires in (days)</span>
+            <input
+              type="number"
+              min="1"
+              max="60"
+              class="pt-sidebar-input"
+              [ngModel]="expiryDays()"
+              (ngModelChange)="expiryDays.set(+$event || 14)" />
+          </label>
+          <div class="send-flags-col">
+            <label class="pt-checkbox-row">
+              <input type="checkbox" [ngModel]="remindersEnabled()" (ngModelChange)="remindersEnabled.set($event)" />
+              <span>Email reminders</span>
+            </label>
+            <label class="pt-checkbox-row">
+              <input type="checkbox" [ngModel]="requireSignerOtp()" (ngModelChange)="requireSignerOtp.set($event)" />
+              <span>Require signer OTP</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pt-modal-actions">
+          <button type="button" class="btn-outline-sm" (click)="showSendRequestModal.set(false)">Cancel</button>
+          <button type="button" class="btn-primary-sm" (click)="submitSendRequest()">Send Request</button>
         </div>
       </div>
     </div>

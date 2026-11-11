@@ -20,8 +20,10 @@ import {
   SIGN_SCRIPT_FONTS,
   SignDateFormat,
   SignFieldElement,
-  SignFieldType
+  SignFieldType,
+  SignRequestOrder
 } from '@paperflow/contracts';
+import { UnsupportedPkcs12CipherError } from '@paperflow/sign-core';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
@@ -35,11 +37,17 @@ import { LayoutService } from '../../core/services/layout.service';
 import { SeoService } from '../../core/services/seo.service';
 import { SharedPdfjsService, PdfPasswordError } from '../../core/services/shared-pdfjs.service';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
+import { UploadConsentService } from '../../core/services/upload-consent.service';
 import { MergeResult } from '../../core/services/browser-pdf.service';
 import { PdfInspectionService } from '../../core/services/sign-pdf/pdf-inspection.service';
 import { SignatureImageService } from '../../core/services/sign-pdf/signature-image.service';
 import { SignatureStorageService } from '../../core/services/sign-pdf/signature-storage.service';
 import { SignExportService } from '../../core/services/sign-pdf/sign-export.service';
+import {
+  SenderRequestCreateResult,
+  SenderRequestStatusView,
+  SignRequestService
+} from '../../core/services/sign-pdf/sign-request.service';
 import {
   PdfInspectionSummary,
   SIGN_DATE_FORMAT_OPTIONS,
@@ -101,6 +109,8 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   private readonly imageService = inject(SignatureImageService);
   private readonly storageService = inject(SignatureStorageService);
   private readonly signExport = inject(SignExportService);
+  private readonly signRequestApi = inject(SignRequestService);
+  private readonly uploadConsent = inject(UploadConsentService);
   private readonly transform = inject(CoordinateTransformService);
   private readonly navService = inject(ViewportNavigationService);
   readonly history = inject(CommandHistoryService);
@@ -161,11 +171,38 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   readonly applyPagesRangeInput = signal<string>('1');
   readonly applyPagesError = signal<string | null>(null);
 
-  // Phase 2 multi-signer state (active only when requestSignatures flag is enabled)
+  // Digital signature (.p12 / .pfx) state
+  readonly certFile = signal<File | null>(null);
+  readonly certPassword = signal<string>('');
+  readonly showCertPassword = signal<boolean>(false);
+  readonly certReason = signal<string>('Digitally signed with PDFTailor');
+  readonly certLocation = signal<string>('');
+
+  // Multi-signer ("Several people") & live tracker state
   readonly signers = signal<SignerDraft[]>([
     { id: 'signer-1', name: 'Signer 1', email: '', orderIndex: 0, color: SIGNER_CHIP_COLORS[0] }
   ]);
   readonly activeSignerId = signal<string>('signer-1');
+  readonly signingOrder = signal<SignRequestOrder>('parallel');
+  readonly requestTitle = signal<string>('');
+  readonly senderEmail = signal<string>('');
+  readonly requestMessage = signal<string>('');
+  readonly expiryDays = signal<number>(SIGN_PDF_LIMITS.defaultExpiryDays);
+  readonly remindersEnabled = signal<boolean>(true);
+  readonly requireSignerOtp = signal<boolean>(false);
+  readonly showSendRequestModal = signal<boolean>(false);
+  readonly sendModalError = signal<string | null>(null);
+  readonly senderOtpSent = signal<boolean>(false);
+  readonly senderOtpCode = signal<string>('');
+  readonly senderOtpVerified = signal<boolean>(false);
+  readonly senderDevOtpHint = signal<string | null>(null);
+  readonly senderOtpBusy = signal<boolean>(false);
+  readonly sentResult = signal<SenderRequestCreateResult | null>(null);
+  readonly sentStatus = signal<SenderRequestStatusView | null>(null);
+  readonly trackerBusy = signal<boolean>(false);
+  readonly trackerNotice = signal<string | null>(null);
+  readonly resendEmailOverrides = signal<Record<string, string>>({});
+  readonly copiedLinkSignerId = signal<string | null>(null);
 
   // Result & processing guards
   readonly exportOutcome = signal<SignExportOutcome | null>(null);
@@ -176,9 +213,42 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   readonly placedSignatureCount = computed(() =>
     this.fields().filter(f => f.type === 'signature').length
   );
-  readonly canSign = computed(() =>
-    this.placedSignatureCount() > 0 && !this.isProcessing()
-  );
+  readonly validSignersReady = computed(() => {
+    const list = this.signers();
+    if (list.length === 0 || list.length > SIGN_PDF_LIMITS.maxSigners) return false;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const seen = new Set<string>();
+    for (const s of list) {
+      const normalized = s.email.trim().toLowerCase();
+      if (!s.name.trim() || !emailRe.test(normalized) || seen.has(normalized)) return false;
+      seen.add(normalized);
+    }
+    return true;
+  });
+  readonly canSign = computed(() => {
+    if (this.isProcessing()) return false;
+    if (this.whoSigns() === 'several_people') {
+      return this.placedSignatureCount() > 0 && this.validSignersReady();
+    }
+    if (this.signType() === 'digital_certificate') {
+      return !!this.certFile();
+    }
+    return this.placedSignatureCount() > 0;
+  });
+  readonly actionDisabledReason = computed<string | null>(() => {
+    if (this.canSign()) return null;
+    if (this.whoSigns() === 'several_people') {
+      if (!this.validSignersReady()) {
+        return 'Enter a unique name and valid email for each recipient';
+      }
+      return 'Place at least one Signature field on the page for a recipient';
+    }
+    if (this.signType() === 'digital_certificate') {
+      return 'Upload a .p12 or .pfx certificate file to sign';
+    }
+    return 'Place your signature on the page first';
+  });
+  readonly resultIsClientSide = computed(() => this.exportOutcome()?.signedMode !== 'server_openssl');
   readonly selectedField = computed<SignFieldElement | null>(() => {
     const id = this.selectedFieldId();
     return id ? (this.fields().find(f => f.id === id) || null) : null;
@@ -208,6 +278,10 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   readonly resultSubtitle = computed(() => {
     const out = this.exportOutcome();
     if (!out) return '';
+    if (out.certificateSubject) {
+      const modeLabel = out.signedMode === 'server_openssl' ? 'with temporary OpenSSL' : 'right in your browser';
+      return `Signed with certificate "${out.certificateSubject}" (Issuer: ${out.certificateIssuer || 'Self-signed'}) ${modeLabel}.`;
+    }
     return `Applied ${out.fieldsApplied} field${out.fieldsApplied === 1 ? '' : 's'} across ${out.pagesSigned.length} page${out.pagesSigned.length === 1 ? '' : 's'} right in your browser.`;
   });
 
@@ -541,17 +615,18 @@ export class SignPdfComponent implements OnInit, OnDestroy {
      ========================================================================= */
 
   onPaletteTileClick(type: SignFieldType): void {
-    if (type === 'signature' && !this.signatureDataUrl()) {
+    const isRemote = this.whoSigns() === 'several_people';
+    if (!isRemote && type === 'signature' && !this.signatureDataUrl()) {
       this.pendingSignatureInsertType = 'signature';
       this.signatureDialogKind.set('signature');
       return;
     }
-    if (type === 'initials' && !this.initialsDataUrl()) {
+    if (!isRemote && type === 'initials' && !this.initialsDataUrl()) {
       this.pendingSignatureInsertType = 'initials';
       this.signatureDialogKind.set('initials');
       return;
     }
-    if (type === 'stamp' && !this.stampDataUrl()) {
+    if (!isRemote && type === 'stamp' && !this.stampDataUrl()) {
       this.pendingSignatureInsertType = 'stamp';
       this.showStampDialog.set(true);
       return;
@@ -566,9 +641,10 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
   onPaletteTileEnter(type: SignFieldType, event: Event): void {
     event.preventDefault();
-    if ((type === 'signature' && !this.signatureDataUrl()) ||
+    const isRemote = this.whoSigns() === 'several_people';
+    if (!isRemote && ((type === 'signature' && !this.signatureDataUrl()) ||
         (type === 'initials' && !this.initialsDataUrl()) ||
-        (type === 'stamp' && !this.stampDataUrl())) {
+        (type === 'stamp' && !this.stampDataUrl()))) {
       this.onPaletteTileClick(type);
       return;
     }
@@ -603,18 +679,19 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     if (!container) return;
     const xPx = event.clientX - container.left;
     const yPx = event.clientY - container.top;
+    const isRemote = this.whoSigns() === 'several_people';
 
-    if (type === 'signature' && !this.signatureDataUrl()) {
+    if (!isRemote && type === 'signature' && !this.signatureDataUrl()) {
       this.pendingSignatureInsertType = 'signature';
       this.signatureDialogKind.set('signature');
       return;
     }
-    if (type === 'initials' && !this.initialsDataUrl()) {
+    if (!isRemote && type === 'initials' && !this.initialsDataUrl()) {
       this.pendingSignatureInsertType = 'initials';
       this.signatureDialogKind.set('initials');
       return;
     }
-    if (type === 'stamp' && !this.stampDataUrl()) {
+    if (!isRemote && type === 'stamp' && !this.stampDataUrl()) {
       this.pendingSignatureInsertType = 'stamp';
       this.showStampDialog.set(true);
       return;
@@ -1222,12 +1299,133 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   }
 
   /* =========================================================================
+     SIGN MODE, CERTIFICATES & MULTI-SIGNER RECIPIENTS
+     ========================================================================= */
+
+  setWhoSigns(mode: SignModeChoice): void {
+    this.whoSigns.set(mode);
+    this.errorMessage.set(null);
+    if (mode === 'several_people') {
+      if (this.signType() === 'digital_certificate') {
+        this.signType.set('simple');
+      }
+      const firstId = this.signers()[0]?.id || 'signer-1';
+      if (!this.signers().some(s => s.id === this.activeSignerId())) {
+        this.activeSignerId.set(firstId);
+      }
+      // Assign any unassigned placed fields to the active recipient
+      const fallbackId = this.activeSignerId();
+      this.fields.update(list => list.map(f => (f.signerId ? f : { ...f, signerId: fallbackId })));
+      this.announce('Multi-signer request mode selected. Assign fields to recipients.');
+    } else {
+      this.announce('Only me mode selected. Signing stays on your device.');
+    }
+  }
+
+  setSignType(type: SignTypeChoice): void {
+    this.signType.set(type);
+    this.errorMessage.set(null);
+    if (type === 'digital_certificate' && this.whoSigns() === 'several_people') {
+      this.whoSigns.set('only_me');
+      this.announce('Switched to Only me for digital certificate signing.');
+    }
+  }
+
+  onCertificateFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0] || null;
+    if (input) input.value = '';
+    if (!file) return;
+    if (!/\.(p12|pfx)$/i.test(file.name)) {
+      this.errorMessage.set('Please select a valid PKCS#12 certificate file (.p12 or .pfx).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.errorMessage.set('Certificate file exceeds 5 MB maximum size.');
+      return;
+    }
+    this.errorMessage.set(null);
+    this.certFile.set(file);
+  }
+
+  clearCertificateFile(): void {
+    this.certFile.set(null);
+    this.certPassword.set('');
+  }
+
+  addRecipient(): void {
+    const cur = this.signers();
+    if (cur.length >= SIGN_PDF_LIMITS.maxSigners) return;
+    const idx = cur.length;
+    const next: SignerDraft = {
+      id: `signer-${Date.now().toString(36)}-${idx + 1}`,
+      name: `Signer ${idx + 1}`,
+      email: '',
+      orderIndex: idx,
+      color: SIGNER_CHIP_COLORS[idx % SIGNER_CHIP_COLORS.length]
+    };
+    this.signers.set([...cur, next]);
+    this.activeSignerId.set(next.id);
+  }
+
+  removeRecipient(id: string): void {
+    const cur = this.signers();
+    if (cur.length <= 1) return;
+    const filtered = cur.filter(s => s.id !== id).map((s, i) => ({ ...s, orderIndex: i }));
+    this.signers.set(filtered);
+    const fallbackId = filtered[0].id;
+    if (this.activeSignerId() === id) {
+      this.activeSignerId.set(fallbackId);
+    }
+    this.fields.update(list => list.map(f => (f.signerId === id ? { ...f, signerId: fallbackId } : f)));
+  }
+
+  updateRecipient(id: string, patch: Partial<Pick<SignerDraft, 'name' | 'email'>>): void {
+    this.signers.update(list => list.map(s => (s.id === id ? { ...s, ...patch } : s)));
+  }
+
+  moveRecipient(id: string, delta: -1 | 1): void {
+    const cur = [...this.signers()];
+    const idx = cur.findIndex(s => s.id === id);
+    const target = idx + delta;
+    if (idx < 0 || target < 0 || target >= cur.length) return;
+    const [moved] = cur.splice(idx, 1);
+    cur.splice(target, 0, moved);
+    this.signers.set(cur.map((s, i) => ({ ...s, orderIndex: i })));
+  }
+
+  getFieldAssigneeName(field: SignFieldElement): string {
+    if (this.whoSigns() !== 'several_people' || !field.signerId) return '';
+    return this.signers().find(s => s.id === field.signerId)?.name || '';
+  }
+
+  getFieldAssigneeColor(field: SignFieldElement): string | null {
+    if (this.whoSigns() !== 'several_people' || !field.signerId) return null;
+    return this.signers().find(s => s.id === field.signerId)?.color || null;
+  }
+
+  getFieldAccentColor(field: SignFieldElement): string {
+    return this.getFieldAssigneeColor(field) || 'var(--pt-teal-700)';
+  }
+
+  /* =========================================================================
      SIGN & EXPORT FLOW (RUN-ID GUARD, CANCEL, WARNINGS)
      ========================================================================= */
 
   async executeSign(): Promise<void> {
     if (!this.canSign() || !this.rawPdfBytes || !this.selectedFile()) return;
     this.errorMessage.set(null);
+
+    if (this.whoSigns() === 'several_people') {
+      this.openSendRequestModal();
+      return;
+    }
+
+    if (this.signType() === 'digital_certificate') {
+      await this.executeCertificateSign();
+      return;
+    }
+
     this.isProcessing.set(true);
     this.stage.set('processing');
 
@@ -1236,14 +1434,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     this.abortController = abortCtrl;
 
     try {
-      const warningsPrefix: string[] = [];
-      if (this.invalidatedExistingSigConfirmed()) {
-        warningsPrefix.push('Original digital signatures were invalidated when re-saving the PDF with new simple signature fields.');
-      }
-      if (this.wasEncryptedOnLoad()) {
-        warningsPrefix.push('Signed output copy is not password-protected because browser export removes original PDF encryption.');
-      }
-
+      const warningsPrefix = this.collectDocumentWarnings();
       const outcome = await this.signExport.exportSignedDocument({
         originalBytes: this.rawPdfBytes,
         originalFilename: this.selectedFile()!.name,
@@ -1269,6 +1460,403 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       this.stage.set('editor');
       this.errorMessage.set(err?.message || 'Signing failed. Your placed fields are preserved.');
     }
+  }
+
+  private async executeCertificateSign(): Promise<void> {
+    const file = this.certFile();
+    if (!file || !this.rawPdfBytes || !this.selectedFile()) {
+      this.errorMessage.set('Select a .p12 or .pfx certificate file first.');
+      return;
+    }
+
+    this.isProcessing.set(true);
+    this.stage.set('processing');
+
+    const myRunId = ++this.runCounter;
+    const abortCtrl = new AbortController();
+    this.abortController = abortCtrl;
+    const warningsPrefix = this.collectDocumentWarnings();
+
+    try {
+      const certBytes = new Uint8Array(await file.arrayBuffer());
+      const outcome = await this.signExport.exportWithBrowserCertificate({
+        originalBytes: this.rawPdfBytes,
+        originalFilename: this.selectedFile()!.name,
+        pageCount: this.pages().length,
+        fields: this.fields(),
+        flattenFormFields: this.flattenFormFields(),
+        certBytes,
+        password: this.certPassword(),
+        reason: this.certReason(),
+        location: this.certLocation(),
+        warningsPrefix
+      });
+
+      if (myRunId !== this.runCounter || abortCtrl.signal.aborted) {
+        URL.revokeObjectURL(outcome.url);
+        return;
+      }
+
+      this.revokeExportUrl();
+      this.exportOutcome.set(outcome);
+      this.isProcessing.set(false);
+      this.stage.set('completed');
+      this.layoutService.showFooter();
+    } catch (err: any) {
+      if (myRunId !== this.runCounter || abortCtrl.signal.aborted) return;
+
+      if (err instanceof UnsupportedPkcs12CipherError) {
+        const consented = await this.uploadConsent.ask({
+          title: 'Consent for Legacy Certificate Signing',
+          actionId: 'sign_pdf_cert_legacy',
+          pageCountDescription: `${this.pages().length}-page PDF + legacy .p12 certificate`,
+          purposeDescription:
+            'Your certificate uses legacy 3DES/RC2 encryption that browser WebCrypto cannot open. PDFTailor can run OpenSSL certificate signing transiently on the server.',
+          retentionDescription:
+            'Your PDF, certificate, and passphrase exist only in memory during signing and are deleted immediately afterward.',
+          confirmText: 'Consent & Sign Certificate',
+          cancelText: 'Cancel'
+        });
+
+        if (!consented) {
+          this.isProcessing.set(false);
+          this.stage.set('editor');
+          this.errorMessage.set('Legacy certificate signing was cancelled. Your placed fields are preserved.');
+          return;
+        }
+
+        try {
+          let bytesForOpenSsl = this.rawPdfBytes!;
+          let fieldsApplied = 0;
+          let pagesSigned: number[] = [];
+          const warnings = [...warningsPrefix];
+
+          if (this.fields().length > 0) {
+            const visual = await this.signExport.exportSignedDocument({
+              originalBytes: this.rawPdfBytes!,
+              originalFilename: this.selectedFile()!.name,
+              pageCount: this.pages().length,
+              fields: this.fields(),
+              flattenFormFields: this.flattenFormFields()
+            });
+            URL.revokeObjectURL(visual.url);
+            bytesForOpenSsl = new Uint8Array(await visual.blob.arrayBuffer());
+            fieldsApplied = visual.fieldsApplied;
+            pagesSigned = visual.pagesSigned;
+            warnings.push(...visual.warnings);
+          }
+
+          const remote = await this.signRequestApi.signWithCertificateOnServer(
+            bytesForOpenSsl,
+            this.selectedFile()!.name,
+            file,
+            this.certPassword(),
+            this.certReason(),
+            this.certLocation(),
+            abortCtrl.signal
+          );
+
+          if (myRunId !== this.runCounter || abortCtrl.signal.aborted) return;
+
+          const outcome = this.signExport.createOutcomeFromBlob(remote.blob, {
+            originalFilename: this.selectedFile()!.name,
+            pageCount: this.pages().length,
+            fieldsApplied,
+            pagesSigned,
+            warnings,
+            certificateSubject: remote.signerCn,
+            certificateIssuer: remote.issuerCn,
+            signedMode: 'server_openssl'
+          });
+
+          this.revokeExportUrl();
+          this.exportOutcome.set(outcome);
+          this.isProcessing.set(false);
+          this.stage.set('completed');
+          this.layoutService.showFooter();
+          return;
+        } catch (srvErr: any) {
+          if (myRunId !== this.runCounter || abortCtrl.signal.aborted) return;
+          this.isProcessing.set(false);
+          this.stage.set('editor');
+          this.errorMessage.set(srvErr?.message || 'Certificate signing failed. Your placed fields are preserved.');
+          return;
+        }
+      }
+
+      this.isProcessing.set(false);
+      this.stage.set('editor');
+      this.errorMessage.set(err?.message || 'Certificate signing failed. Check your password and certificate file.');
+    }
+  }
+
+  private collectDocumentWarnings(): string[] {
+    const warningsPrefix: string[] = [];
+    if (this.invalidatedExistingSigConfirmed()) {
+      warningsPrefix.push('Original digital signatures were invalidated when re-saving the PDF with new signature changes.');
+    }
+    if (this.wasEncryptedOnLoad()) {
+      warningsPrefix.push('Signed output copy is not password-protected because browser export removes original PDF encryption.');
+    }
+    return warningsPrefix;
+  }
+
+  openSendRequestModal(): void {
+    if (!this.requestTitle().trim() && this.selectedFile()) {
+      this.requestTitle.set(this.selectedFile()!.name.replace(/\.pdf$/i, ''));
+    }
+    this.sendModalError.set(null);
+    this.showSendRequestModal.set(true);
+  }
+
+  async sendSenderOtp(): Promise<void> {
+    const email = this.senderEmail().trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.sendModalError.set('Enter a valid sender email before verifying.');
+      return;
+    }
+    this.sendModalError.set(null);
+    this.senderOtpBusy.set(true);
+    try {
+      const res = await this.signRequestApi.startSenderOtp(email);
+      this.senderOtpSent.set(true);
+      this.senderDevOtpHint.set(res._devOtpCode || null);
+    } catch (err: any) {
+      this.sendModalError.set(err?.message || 'Could not send verification code.');
+    } finally {
+      this.senderOtpBusy.set(false);
+    }
+  }
+
+  async confirmSenderOtp(): Promise<void> {
+    const email = this.senderEmail().trim();
+    const code = this.senderOtpCode().trim();
+    if (code.length !== 6) {
+      this.sendModalError.set('Enter the 6-digit verification code.');
+      return;
+    }
+    this.sendModalError.set(null);
+    this.senderOtpBusy.set(true);
+    try {
+      const res = await this.signRequestApi.verifySenderOtp(email, code);
+      this.senderOtpVerified.set(res.verified);
+      this.senderDevOtpHint.set(null);
+    } catch (err: any) {
+      this.sendModalError.set(err?.message || 'Verification failed.');
+    } finally {
+      this.senderOtpBusy.set(false);
+    }
+  }
+
+  async submitSendRequest(): Promise<void> {
+    const senderName = (this.fullName() || 'Sender').trim();
+    const senderEmail = this.senderEmail().trim();
+    const title = (this.requestTitle() || this.selectedFile()?.name || 'Signature Request').trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) {
+      this.sendModalError.set('Enter a valid sender email address.');
+      return;
+    }
+    if (!this.validSignersReady()) {
+      this.sendModalError.set('Every recipient must have a unique name and valid email.');
+      return;
+    }
+    if (!this.rawPdfBytes || !this.selectedFile()) return;
+
+    this.sendModalError.set(null);
+    const consented = await this.uploadConsent.ask({
+      title: 'Consent to Upload & Send Request',
+      actionId: 'sign_pdf_request',
+      pageCountDescription: `${this.pages().length}-page PDF to ${this.signers().length} recipient(s)`,
+      purposeDescription:
+        'Multi-signer requests encrypt your PDF and field assignments on the signing server so each recipient can open their private signing link.',
+      retentionDescription: `Requests expire automatically after ${this.expiryDays()} day(s) and can be cancelled anytime.`,
+      confirmText: 'Encrypt & Send Request',
+      cancelText: 'Cancel'
+    });
+    if (!consented) return;
+
+    this.showSendRequestModal.set(false);
+    this.isProcessing.set(true);
+    this.stage.set('processing');
+
+    const myRunId = ++this.runCounter;
+    const abortCtrl = new AbortController();
+    this.abortController = abortCtrl;
+
+    try {
+      const fallbackSignerId = this.signers()[0].id;
+      const payload: CreateSignRequestInput = {
+        senderName,
+        senderEmail,
+        title,
+        message: this.requestMessage().trim(),
+        order: this.signingOrder(),
+        expiryDays: Math.max(SIGN_PDF_LIMITS.minExpiryDays, Math.min(SIGN_PDF_LIMITS.maxExpiryDays, Number(this.expiryDays()) || SIGN_PDF_LIMITS.defaultExpiryDays)),
+        remindersEnabled: this.remindersEnabled(),
+        requireSignerOtp: this.requireSignerOtp(),
+        signers: this.signers().map((s, idx) => ({
+          ...s,
+          name: s.name.trim(),
+          email: s.email.trim(),
+          orderIndex: idx
+        })),
+        fields: this.fields().map(f => ({
+          ...f,
+          signerId: f.signerId || fallbackSignerId
+        }))
+      };
+
+      const created = await this.signRequestApi.createRequest(
+        this.rawPdfBytes,
+        this.selectedFile()!.name,
+        payload,
+        abortCtrl.signal
+      );
+
+      if (myRunId !== this.runCounter || abortCtrl.signal.aborted) return;
+
+      const statusView = await this.signRequestApi.getRequestStatus(
+        created.requestId,
+        created.senderAccessToken,
+        abortCtrl.signal
+      );
+
+      if (myRunId !== this.runCounter || abortCtrl.signal.aborted) return;
+
+      this.sentResult.set(created);
+      this.sentStatus.set(statusView);
+      this.trackerNotice.set(null);
+      this.isProcessing.set(false);
+      this.stage.set('sent');
+      this.layoutService.showFooter();
+    } catch (err: any) {
+      if (myRunId !== this.runCounter || abortCtrl.signal.aborted) return;
+      this.isProcessing.set(false);
+      this.stage.set('editor');
+      this.errorMessage.set(err?.message || 'Failed to create signature request.');
+    }
+  }
+
+  async refreshSentStatus(): Promise<void> {
+    const res = this.sentResult();
+    if (!res) return;
+    this.trackerBusy.set(true);
+    this.errorMessage.set(null);
+    try {
+      const view = await this.signRequestApi.getRequestStatus(res.requestId, res.senderAccessToken);
+      this.sentStatus.set(view);
+      this.trackerNotice.set('Status refreshed.');
+    } catch (err: any) {
+      this.errorMessage.set(err?.message || 'Could not refresh status.');
+    } finally {
+      this.trackerBusy.set(false);
+    }
+  }
+
+  updateResendEmailOverride(signerId: string, value: string): void {
+    this.resendEmailOverrides.update(m => ({ ...m, [signerId]: value }));
+  }
+
+  async resendInvitation(signerId: string): Promise<void> {
+    const res = this.sentResult();
+    if (!res) return;
+    const override = this.resendEmailOverrides()[signerId]?.trim();
+    this.trackerBusy.set(true);
+    this.errorMessage.set(null);
+    try {
+      const out = await this.signRequestApi.resendSigner(
+        res.requestId,
+        res.senderAccessToken,
+        signerId,
+        override || undefined
+      );
+      if (out.devSigningUrl) {
+        this.sentResult.update(cur =>
+          cur
+            ? {
+                ...cur,
+                devSigningLinks: { ...(cur.devSigningLinks || {}), [signerId]: out.devSigningUrl! }
+              }
+            : cur
+        );
+      }
+      await this.refreshSentStatus();
+      this.trackerNotice.set(`Invitation resent to ${out.email}.`);
+    } catch (err: any) {
+      this.errorMessage.set(err?.message || 'Could not resend invitation.');
+    } finally {
+      this.trackerBusy.set(false);
+    }
+  }
+
+  async cancelSentRequest(): Promise<void> {
+    const res = this.sentResult();
+    if (!res) return;
+    this.trackerBusy.set(true);
+    this.errorMessage.set(null);
+    try {
+      await this.signRequestApi.cancelRequest(res.requestId, res.senderAccessToken);
+      const view = await this.signRequestApi.getRequestStatus(res.requestId, res.senderAccessToken);
+      this.sentStatus.set(view);
+      this.trackerNotice.set('Signature request cancelled.');
+    } catch (err: any) {
+      this.errorMessage.set(err?.message || 'Could not cancel request.');
+    } finally {
+      this.trackerBusy.set(false);
+    }
+  }
+
+  async downloadSentFinalPdf(): Promise<void> {
+    const res = this.sentResult();
+    if (!res) return;
+    this.trackerBusy.set(true);
+    try {
+      const blob = await this.signRequestApi.downloadFinalPdf(res.requestId, res.senderAccessToken);
+      this.triggerBlobDownload(blob, `${(this.sentStatus()?.title || 'signed-document').replace(/[^\w.-]+/g, '_')}-signed.pdf`);
+    } catch (err: any) {
+      this.errorMessage.set(err?.message || 'Could not download final PDF.');
+    } finally {
+      this.trackerBusy.set(false);
+    }
+  }
+
+  async downloadSentCertificatePdf(): Promise<void> {
+    const res = this.sentResult();
+    if (!res) return;
+    this.trackerBusy.set(true);
+    try {
+      const blob = await this.signRequestApi.downloadCertificatePdf(res.requestId, res.senderAccessToken);
+      this.triggerBlobDownload(blob, `${(this.sentStatus()?.title || 'certificate').replace(/[^\w.-]+/g, '_')}-certificate.pdf`);
+    } catch (err: any) {
+      this.errorMessage.set(err?.message || 'Could not download audit certificate.');
+    } finally {
+      this.trackerBusy.set(false);
+    }
+  }
+
+  async copyDevSigningLink(signerId: string, url: string): Promise<void> {
+    const fullUrl = typeof window !== 'undefined' && url.startsWith('/') ? `${window.location.origin}${url}` : url;
+    try {
+      await navigator?.clipboard?.writeText(fullUrl);
+      this.copiedLinkSignerId.set(signerId);
+      setTimeout(() => {
+        if (this.copiedLinkSignerId() === signerId) this.copiedLinkSignerId.set(null);
+      }, 2000);
+    } catch {
+      this.trackerNotice.set(`Signing URL: ${fullUrl}`);
+    }
+  }
+
+  private triggerBlobDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   cancelSigning(): void {
@@ -1299,6 +1887,18 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     this.inspectionSummary.set(null);
     this.wasEncryptedOnLoad.set(false);
     this.invalidatedExistingSigConfirmed.set(false);
+    this.certFile.set(null);
+    this.certPassword.set('');
+    this.showCertPassword.set(false);
+    this.sentResult.set(null);
+    this.sentStatus.set(null);
+    this.showSendRequestModal.set(false);
+    this.senderOtpSent.set(false);
+    this.senderOtpCode.set('');
+    this.senderOtpVerified.set(false);
+    this.senderDevOtpHint.set(null);
+    this.trackerNotice.set(null);
+    this.resendEmailOverrides.set({});
     this.exportOutcome.set(null);
     this.isProcessing.set(false);
     this.errorMessage.set(null);
@@ -1313,7 +1913,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown', ['$event'])
   onDocumentKeyDown(event: KeyboardEvent): void {
     if (this.stage() !== 'editor') return;
-    if (this.signatureDialogKind() || this.showStampDialog() || this.showApplyPagesModal() || this.showPasswordModal() || this.showExistingSigConfirmModal()) {
+    if (this.signatureDialogKind() || this.showStampDialog() || this.showApplyPagesModal() || this.showPasswordModal() || this.showExistingSigConfirmModal() || this.showSendRequestModal()) {
       return;
     }
 
@@ -1344,13 +1944,13 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     if (this.whoSigns() !== 'several_people') return null;
     return {
       senderName: this.fullName() || 'Sender',
-      senderEmail: 'sender@example.com',
-      title: this.selectedFile()?.name || 'Document',
-      message: '',
-      order: 'parallel',
-      expiryDays: SIGN_PDF_LIMITS.defaultExpiryDays,
-      remindersEnabled: true,
-      requireSignerOtp: false,
+      senderEmail: this.senderEmail().trim() || 'sender@example.com',
+      title: this.requestTitle().trim() || this.selectedFile()?.name || 'Document',
+      message: this.requestMessage().trim(),
+      order: this.signingOrder(),
+      expiryDays: this.expiryDays() || SIGN_PDF_LIMITS.defaultExpiryDays,
+      remindersEnabled: this.remindersEnabled(),
+      requireSignerOtp: this.requireSignerOtp(),
       signers: this.signers(),
       fields: this.fields()
     };

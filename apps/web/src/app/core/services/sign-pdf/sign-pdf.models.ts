@@ -10,7 +10,7 @@ import {
 
 export { SIGN_PDF_FEATURES, SIGN_PDF_LIMITS };
 
-export type SignWorkflowStage = 'upload' | 'editor' | 'processing' | 'completed';
+export type SignWorkflowStage = 'upload' | 'editor' | 'processing' | 'completed' | 'sent';
 export type SignModeChoice = 'only_me' | 'several_people';
 export type SignTypeChoice = 'simple' | 'digital_certificate';
 export type SignatureDialogTab = 'draw' | 'type' | 'upload';
@@ -122,6 +122,9 @@ export interface SignExportOutcome {
   pagesSigned: number[];
   warnings: string[];
   originalPageCount: number;
+  certificateSubject?: string;
+  certificateIssuer?: string;
+  signedMode?: 'simple' | 'browser_webcrypto' | 'server_openssl';
 }
 
 export interface AppliedPagesTarget {

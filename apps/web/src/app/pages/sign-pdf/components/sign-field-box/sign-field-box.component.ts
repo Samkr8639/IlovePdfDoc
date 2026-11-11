@@ -35,6 +35,13 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
       (keydown)="onKeyDown($event)">
 
       <!-- Content Render -->
+      @if (assigneeLabel()) {
+        <span
+          class="assignee-pill"
+          [style.background]="assigneeColor() || accentColor()">
+          {{ assigneeLabel() }}
+        </span>
+      }
       <div class="field-visual-inner">
         @if ((field().type === 'signature' || field().type === 'initials' || field().type === 'stamp') && field().imageDataUrl) {
           <img [src]="field().imageDataUrl!" [alt]="field().type" draggable="false" class="field-img-preview" />
@@ -234,6 +241,23 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
     }
     .quick-btn:hover { background: rgba(255, 255, 255, 0.18); }
     .quick-btn.danger:hover { background: var(--pt-coral); }
+    .assignee-pill {
+      position: absolute;
+      bottom: -19px;
+      left: 0;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 1px 6px;
+      border-radius: var(--pt-radius-xs);
+      color: var(--pt-surface-white);
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.4;
+      pointer-events: none;
+      box-shadow: var(--pt-shadow-sm);
+    }
   `]
 })
 export class SignFieldBoxComponent {
@@ -244,6 +268,8 @@ export class SignFieldBoxComponent {
   readonly zoom = input<number>(1.0);
   readonly selected = input<boolean>(false);
   readonly accentColor = input<string>('var(--pt-teal-700)');
+  readonly assigneeLabel = input<string>('');
+  readonly assigneeColor = input<string | null>(null);
 
   readonly selectedField = output<string>();
   readonly dragStart = output<{ event: MouseEvent; field: SignFieldElement }>();

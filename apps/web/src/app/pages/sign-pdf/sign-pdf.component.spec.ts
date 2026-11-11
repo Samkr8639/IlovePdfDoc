@@ -12,6 +12,9 @@ import { PdfInspectionService } from '../../core/services/sign-pdf/pdf-inspectio
 import { SignatureImageService } from '../../core/services/sign-pdf/signature-image.service';
 import { SignatureStorageService } from '../../core/services/sign-pdf/signature-storage.service';
 import { SignExportService } from '../../core/services/sign-pdf/sign-export.service';
+import { SignRequestService } from '../../core/services/sign-pdf/sign-request.service';
+import { UploadConsentService } from '../../core/services/upload-consent.service';
+import { UnsupportedPkcs12CipherError } from '@paperflow/sign-core';
 import {
   PdfInspectionSummary,
   SavedSignatureRecord,
@@ -27,6 +30,8 @@ describe('SignPdfComponent & Dialogs', () => {
   let storageMock: any;
   let imageMock: any;
   let exportMock: any;
+  let signRequestMock: any;
+  let consentMock: any;
   let layoutMock: any;
   let revokeSpy: ReturnType<typeof vi.spyOn>;
 
@@ -114,7 +119,63 @@ describe('SignPdfComponent & Dialogs', () => {
     };
 
     exportMock = {
-      exportSignedDocument: vi.fn().mockResolvedValue(sampleOutcome)
+      exportSignedDocument: vi.fn().mockResolvedValue(sampleOutcome),
+      exportWithBrowserCertificate: vi.fn().mockResolvedValue({
+        ...sampleOutcome,
+        certificateSubject: 'Jane Doe',
+        certificateIssuer: 'PDFTailor Root CA',
+        signedMode: 'browser_webcrypto'
+      }),
+      createOutcomeFromBlob: vi.fn().mockImplementation((_blob: Blob, meta: any) => ({
+        ...sampleOutcome,
+        certificateSubject: meta.certificateSubject,
+        certificateIssuer: meta.certificateIssuer,
+        signedMode: meta.signedMode
+      }))
+    };
+
+    signRequestMock = {
+      getFeatures: vi.fn().mockResolvedValue({ signRequestsEnabled: true }),
+      startSenderOtp: vi.fn().mockResolvedValue({ sent: true, expiresInSeconds: 600, _devOtpCode: '123456' }),
+      verifySenderOtp: vi.fn().mockResolvedValue({ verified: true }),
+      createRequest: vi.fn().mockResolvedValue({
+        requestId: 'req-123',
+        statusUrl: '/sign/requests/req-123',
+        senderAccessToken: 'sender-tok',
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
+        originalSha256: 'abc123def456',
+        signerStatusSummaries: [
+          { id: 'signer-1', name: 'Signer 1', email: 's1@example.com', status: 'pending', orderIndex: 0 }
+        ],
+        devSigningLinks: { 'signer-1': '/sign/tok-1' }
+      }),
+      getRequestStatus: vi.fn().mockResolvedValue({
+        requestId: 'req-123',
+        title: 'contract',
+        status: 'in_progress',
+        order: 'parallel',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
+        originalSha256: 'abc123def456',
+        auditChainValid: true,
+        signers: [
+          { id: 'signer-1', name: 'Signer 1', email: 's1@example.com', color: '#0F766E', orderIndex: 0, status: 'pending' }
+        ],
+        auditLog: []
+      }),
+      resendSigner: vi.fn().mockResolvedValue({ resent: true, email: 's1@example.com', devSigningUrl: '/sign/tok-2' }),
+      cancelRequest: vi.fn().mockResolvedValue({ status: 'cancelled' }),
+      downloadFinalPdf: vi.fn().mockResolvedValue(new Blob([new Uint8Array([0x25, 0x50])], { type: 'application/pdf' })),
+      downloadCertificatePdf: vi.fn().mockResolvedValue(new Blob([new Uint8Array([0x25, 0x50])], { type: 'application/pdf' })),
+      signWithCertificateOnServer: vi.fn().mockResolvedValue({
+        blob: new Blob([new Uint8Array([0x25, 0x50, 0x44, 0x46])], { type: 'application/pdf' }),
+        signerCn: 'Legacy Signer',
+        issuerCn: 'Legacy CA'
+      })
+    };
+
+    consentMock = {
+      ask: vi.fn().mockResolvedValue(true)
     };
 
     layoutMock = {
@@ -135,7 +196,9 @@ describe('SignPdfComponent & Dialogs', () => {
         { provide: PdfInspectionService, useValue: inspectionMock },
         { provide: SignatureImageService, useValue: imageMock },
         { provide: SignatureStorageService, useValue: storageMock },
-        { provide: SignExportService, useValue: exportMock }
+        { provide: SignExportService, useValue: exportMock },
+        { provide: SignRequestService, useValue: signRequestMock },
+        { provide: UploadConsentService, useValue: consentMock }
       ]
     }).compileComponents();
 
@@ -191,16 +254,98 @@ describe('SignPdfComponent & Dialogs', () => {
     expect(signBtn.getAttribute('aria-describedby')).toBeNull();
   });
 
-  it('shows Coming soon and disables Phase 2/3 radio cards while flags are off', async () => {
+  it('enables Phase 2/3 radio cards and reveals certificate and recipient controls', async () => {
     await component.onFilesSelected([makePdfFile()]);
     fixture.detectChanges();
 
     const radios: NodeListOf<HTMLInputElement> = fixture.nativeElement.querySelectorAll('aside input[type="radio"]');
     const severalInput = Array.from(radios).find(r => r.value === 'several_people');
     const certInput = Array.from(radios).find(r => r.value === 'digital_certificate');
-    expect(severalInput?.disabled).toBe(true);
-    expect(certInput?.disabled).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain('Coming soon');
+    expect(severalInput?.disabled).toBe(false);
+    expect(certInput?.disabled).toBe(false);
+    expect(fixture.nativeElement.textContent).not.toContain('Coming soon');
+
+    component.setSignType('digital_certificate');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('PKCS#12 Certificate');
+
+    component.setWhoSigns('several_people');
+    fixture.detectChanges();
+    expect(component.signType()).toBe('simple');
+    expect(fixture.nativeElement.textContent).toContain('RECIPIENTS');
+  });
+
+  it('signs PBES2 .p12 certificate purely in browser and uses consented OpenSSL fallback on legacy 3DES', async () => {
+    await component.onFilesSelected([makePdfFile()]);
+    component.setSignType('digital_certificate');
+
+    const p12File = new File([new Uint8Array([0x30, 0x82])], 'cert.p12', { type: 'application/x-pkcs12' });
+    Object.defineProperty(p12File, 'arrayBuffer', {
+      value: () => Promise.resolve(new Uint8Array([0x30, 0x82]).buffer)
+    });
+    component.certFile.set(p12File);
+    component.certPassword.set('secret');
+    fixture.detectChanges();
+
+    await component.executeSign();
+    fixture.detectChanges();
+
+    expect(exportMock.exportWithBrowserCertificate).toHaveBeenCalled();
+    expect(consentMock.ask).not.toHaveBeenCalled();
+    expect(signRequestMock.signWithCertificateOnServer).not.toHaveBeenCalled();
+    expect(component.stage()).toBe('completed');
+    expect(component.resultIsClientSide()).toBe(true);
+    expect(component.resultSubtitle()).toContain('Jane Doe');
+
+    // Now test legacy 3DES fallback with explicit consent
+    component.backToEditorFromResult();
+    exportMock.exportWithBrowserCertificate.mockRejectedValueOnce(new UnsupportedPkcs12CipherError('3DES not in WebCrypto'));
+    consentMock.ask.mockResolvedValueOnce(false);
+    await component.executeSign();
+    expect(component.stage()).toBe('editor');
+    expect(signRequestMock.signWithCertificateOnServer).not.toHaveBeenCalled();
+
+    exportMock.exportWithBrowserCertificate.mockRejectedValueOnce(new UnsupportedPkcs12CipherError('3DES not in WebCrypto'));
+    consentMock.ask.mockResolvedValueOnce(true);
+    await component.executeSign();
+    expect(signRequestMock.signWithCertificateOnServer).toHaveBeenCalled();
+    expect(component.stage()).toBe('completed');
+    expect(component.resultIsClientSide()).toBe(false);
+  });
+
+  it('creates a multi-signer request after consent and displays live tracker controls', async () => {
+    await component.onFilesSelected([makePdfFile()]);
+    component.setWhoSigns('several_people');
+    component.updateRecipient('signer-1', { name: 'Alice', email: 'alice@example.com' });
+    component.addRecipient();
+    const secondId = component.signers()[1].id;
+    component.updateRecipient(secondId, { name: 'Bob', email: 'bob@example.com' });
+
+    // Recipients don't need sender's pre-drawn signature before placing fields
+    component.onPaletteTileEnter('signature', new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+    expect(component.placedSignatureCount()).toBe(1);
+    expect(component.canSign()).toBe(true);
+
+    // Click primary CTA -> opens Send Request modal
+    await component.executeSign();
+    expect(component.showSendRequestModal()).toBe(true);
+
+    component.senderEmail.set('sender@example.com');
+    await component.submitSendRequest();
+    fixture.detectChanges();
+
+    expect(consentMock.ask).toHaveBeenCalledWith(expect.objectContaining({ actionId: 'sign_pdf_request' }));
+    expect(signRequestMock.createRequest).toHaveBeenCalled();
+    expect(component.stage()).toBe('sent');
+    expect(fixture.nativeElement.textContent).toContain('SIGNATURE REQUEST TRACKER');
+    expect(fixture.nativeElement.textContent).toContain('/sign/tok-1');
+
+    await component.resendInvitation('signer-1');
+    expect(signRequestMock.resendSigner).toHaveBeenCalledWith('req-123', 'sender-tok', 'signer-1', undefined);
+
+    await component.cancelSentRequest();
+    expect(signRequestMock.cancelRequest).toHaveBeenCalledWith('req-123', 'sender-tok');
   });
 
   it('keeps global error banner visible inside the editor state on duplicate upload', async () => {
