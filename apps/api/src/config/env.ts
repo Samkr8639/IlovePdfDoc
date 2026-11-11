@@ -18,8 +18,8 @@ const envSchema = z.object({
   SIGN_REQUESTS_ENABLED: z
     .enum(['true', 'false'])
     .optional()
-    .default('false')
-    .transform((v) => v === 'true'),
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
+  SIGN_STORE_DIR: z.string().optional(),
   SIGN_MASTER_KEY: z.string().optional(),
   SEAL_CERT_PATH: z.string().optional(),
   SEAL_CERT_PASS: z.string().optional(),
@@ -28,10 +28,10 @@ const envSchema = z.object({
 
 export const env = envSchema.parse(process.env);
 
-/** Runtime check respecting dynamic env overrides in tests. */
+/** Runtime check respecting dynamic env overrides; defaults true in non-prod unless disabled, false in production unless enabled. */
 export function isSignRequestsEnabled(): boolean {
   if (typeof process.env.SIGN_REQUESTS_ENABLED === 'string') {
     return process.env.SIGN_REQUESTS_ENABLED === 'true';
   }
-  return env.SIGN_REQUESTS_ENABLED;
+  return (process.env.NODE_ENV || env.NODE_ENV) !== 'production';
 }

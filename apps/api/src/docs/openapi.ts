@@ -846,6 +846,13 @@ export const openApiSpec = {
         parameters: [{ name: 'token', in: 'path', required: true, schema: { type: 'string' } }],
         responses: { '200': { description: 'Signed' }, '409': { description: 'NOT_YOUR_TURN / ALREADY_COMPLETED' } }
       }
+    },
+    '/api/v1/sign/certificate-sign': {
+      post: {
+        tags: ['Sign PDF'],
+        summary: 'Ephemeral zero-retention .p12/.pfx X.509 detached CMS PDF signer (adbe.pkcs7.detached)',
+        responses: { '200': { description: 'Digitally signed PDF stream' }, '400': { description: 'INVALID_CERTIFICATE_OR_PASSWORD' } }
+      }
     }
   },
   components: {

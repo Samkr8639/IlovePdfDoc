@@ -1,8 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import path from 'path';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { ApiErrorResponse, SIGN_ERROR_CODES, SIGN_PDF_LIMITS } from '@paperflow/contracts';
-import { isSignRequestsEnabled } from '../config/env';
+import { env, isSignRequestsEnabled } from '../config/env';
 import { AppError } from '../middleware/errorHandler';
 import { constantTimeEqualHex, generateToken256 } from '../services/sign/crypto';
 import {
@@ -11,14 +12,36 @@ import {
   InMemoryScheduler,
   InMemorySigningRequestRepository
 } from '../services/sign/in-memory';
+import {
+  DiskDocumentStorage,
+  DiskSigningRequestRepository,
+  OutboxEmailService
+} from '../services/sign/disk-store';
 import { SignWorkflowService } from '../services/sign/sign-workflow.service';
+import { signPdfWithPkcs12OpenSsl } from '../services/sign/certificate-sign';
 
-// Default singleton runtime stores (cleanly resettable / replaceable in Jest tests)
+const storeDir = env.SIGN_STORE_DIR || path.resolve(env.TEMP_UPLOAD_DIR, 'sign-store');
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+// InMemory stores keep Jest tests fast & isolated; Disk stores persist multi-signer requests across server restarts.
 export const signRepo = new InMemorySigningRequestRepository();
 export const signStorage = new InMemoryDocumentStorage();
 export const signEmail = new InMemoryEmailService();
 export const signScheduler = new InMemoryScheduler();
-export const signWorkflow = new SignWorkflowService(signRepo, signStorage, signEmail, signScheduler);
+
+const activeRepo = isTestEnv ? signRepo : new DiskSigningRequestRepository(storeDir);
+const activeStorage = isTestEnv ? signStorage : new DiskDocumentStorage(storeDir);
+const activeEmail = isTestEnv ? signEmail : new OutboxEmailService(storeDir);
+
+export const signWorkflow = new SignWorkflowService(activeRepo, activeStorage, activeEmail, signScheduler);
+
+const certUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+    files: 2
+  }
+});
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -125,6 +148,48 @@ function getSenderToken(req: Request): string {
 }
 
 export const signRouter = Router();
+
+/**
+ * Ephemeral zero-retention PKCS#12 (.p12 / .pfx) OpenSSL fallback endpoint for legacy 3DES/RC2 certificates
+ * unsupported natively in browser WebCrypto. Zero key material, passwords, or PDF bytes are stored or logged.
+ */
+signRouter.post(
+  '/certificate-sign',
+  signCreateRateLimiter,
+  csrfProtection,
+  certUpload.fields([
+    { name: 'pdf', maxCount: 1 },
+    { name: 'certificate', maxCount: 1 }
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+      const pdfFile = files?.['pdf']?.[0];
+      const certFile = files?.['certificate']?.[0];
+      if (!pdfFile || !certFile) {
+        throw new AppError(400, 'INVALID_OPTIONS', 'Both PDF document and .p12/.pfx certificate file are required.');
+      }
+      const passphrase = typeof req.body?.password === 'string' ? req.body.password : '';
+      const reason = typeof req.body?.reason === 'string' ? req.body.reason.slice(0, 200) : undefined;
+      const location = typeof req.body?.location === 'string' ? req.body.location.slice(0, 120) : undefined;
+
+      const result = await signPdfWithPkcs12OpenSsl(pdfFile.buffer, certFile.buffer, passphrase, { reason, location });
+      const cleanName = (pdfFile.originalname || 'document.pdf')
+        .replace(/\.pdf$/i, '')
+        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_') || 'document';
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${cleanName}-digitally-signed.pdf"`);
+      res.setHeader('X-Signer-CN', result.signerCommonName.replace(/[\r\n]/g, ' '));
+      res.setHeader('X-Signer-Issuer', result.issuerCommonName.replace(/[\r\n]/g, ' '));
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Cache-Control', 'no-store');
+      res.send(result.signedPdfBytes);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 signRouter.use(requireSignRequestsEnabled);
 

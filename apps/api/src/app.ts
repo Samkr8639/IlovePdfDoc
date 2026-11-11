@@ -46,7 +46,8 @@ export function createApp(): Express {
       origin: env.CORS_ORIGIN,
       credentials: true,
       methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token', 'x-sender-token']
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token', 'x-sender-token'],
+      exposedHeaders: ['X-Signer-CN', 'X-Signer-Issuer', 'Content-Disposition']
     })
   );
 

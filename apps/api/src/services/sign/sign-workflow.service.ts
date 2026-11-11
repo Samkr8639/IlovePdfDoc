@@ -347,7 +347,8 @@ export class SignWorkflowService {
         orderIndex: s.orderIndex,
         status: s.status
       })),
-      ...(options.includeTestLinks ? { _issuedTestLinks: issuedLinks } : {})
+      ...(options.includeTestLinks ? { _issuedTestLinks: issuedLinks } : {}),
+      ...(process.env.NODE_ENV !== 'production' && !process.env.SMTP_HOST ? { devSigningLinks: issuedLinks } : {})
     };
   }
 
@@ -863,7 +864,8 @@ export class SignWorkflowService {
       return {
         resent: true,
         email: signer.email,
-        ...(options.includeTestLink ? { _testSigningUrl: signingUrl } : {})
+        ...(options.includeTestLink ? { _testSigningUrl: signingUrl } : {}),
+        ...(process.env.NODE_ENV !== 'production' && !process.env.SMTP_HOST ? { devSigningUrl: signingUrl } : {})
       };
     });
   }
