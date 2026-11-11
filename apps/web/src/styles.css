@@ -20,6 +20,78 @@
   font-display: optional;
 }
 
+/* Self-hosted OFL fonts for Sign PDF (offline, zero external CDN requests) */
+@font-face {
+  font-family: 'SignCaveat';
+  src: url('/fonts/sign/caveat-latin-600-normal.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignDancingScript';
+  src: url('/fonts/sign/dancing-script-latin-600-normal.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignGreatVibes';
+  src: url('/fonts/sign/great-vibes-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignSacramento';
+  src: url('/fonts/sign/sacramento-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignKalam';
+  src: url('/fonts/sign/kalam-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignKalamDevanagari';
+  src: url('/fonts/sign/kalam-devanagari-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignAlexBrush';
+  src: url('/fonts/sign/alex-brush-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignSatisfy';
+  src: url('/fonts/sign/satisfy-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignPatrickHand';
+  src: url('/fonts/sign/patrick-hand-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignNotoSans';
+  src: url('/fonts/sign/noto-sans-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ==========================================================================
    PDFTAILOR "OCEAN WORKSPACE" DESIGN TOKENS
    ========================================================================== */

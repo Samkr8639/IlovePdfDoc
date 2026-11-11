@@ -82,13 +82,19 @@ export function hexToRgbColor(input?: string): Color {
 export function dataUrlToBytes(dataUrl: string): Uint8Array {
   const comma = dataUrl.indexOf(',');
   const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
-  if (typeof Buffer !== 'undefined') {
-    return new Uint8Array(Buffer.from(b64, 'base64'));
+  const NodeBuffer = (globalThis as Record<string, unknown>)['Buffer'] as
+    | { from(s: string, enc: string): Uint8Array }
+    | undefined;
+  if (typeof atob === 'function') {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
   }
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
+  if (NodeBuffer) {
+    return new Uint8Array(NodeBuffer.from(b64, 'base64'));
+  }
+  throw new Error('Base64 decoder unavailable in runtime.');
 }
 
 export function extractPageBoxMetrics(page: PDFPage, pageIndex: number): PdfPageBoxMetrics {
