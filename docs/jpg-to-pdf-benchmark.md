@@ -50,3 +50,4 @@ Tested on standard desktop hardware (Intel Core i7, 16 GB RAM, Google Chrome 130
 - **Decompression Bomb Guard**: A synthetic $250\text{ megapixel}$ image was rejected within $3\text{ ms}$ of probing without allocating canvas memory.
 - **Polyglot / Embedded Script Guard**: HTML/SVG disguised with JPEG extensions was rejected by binary magic-byte inspection.
 - **14,400 pt Clamping**: Super-high-resolution banner images exceeding 200 physical inches were clamped to maximum PDF dimensions without page rendering errors.
+

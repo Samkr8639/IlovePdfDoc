@@ -312,11 +312,19 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
 
   // Sidebar Option Updates
   setOrientation(orientation: PageOrientationOption): void {
-    if (this.options().pageSize === 'same-as-image') return;
+    // Switching directly to Portrait/Landscape from "Same as image" upgrades page size to A4
+    if (this.options().pageSize === 'same-as-image' && orientation !== 'auto') {
+      this.updateOptions({ pageSize: 'a4', orientation });
+      return;
+    }
     this.updateOptions({ orientation });
   }
 
   setPageSize(pageSize: PageSizeOption): void {
+    if (pageSize === 'same-as-image') {
+      this.updateOptions({ pageSize, orientation: 'auto' });
+      return;
+    }
     this.updateOptions({ pageSize });
   }
 

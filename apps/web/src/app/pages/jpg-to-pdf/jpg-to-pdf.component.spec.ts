@@ -72,6 +72,8 @@ describe('JpgToPdfComponent Unit Tests', () => {
       }),
       computeMiniPreviewStyle: vi.fn().mockReturnValue({
         pageContainer: {
+          width: '96px',
+          height: '136px',
           aspectRatio: '1 / 1.414',
           backgroundColor: '#ffffff'
         },
@@ -302,17 +304,21 @@ describe('JpgToPdfComponent Unit Tests', () => {
   });
 
   it('should update sidebar options properly', () => {
-    // Orientation is ignored when pageSize is 'same-as-image'
+    // Switching directly from same-as-image to Landscape upgrades pageSize to A4
     component.setOrientation('landscape');
+    expect(component.options().pageSize).toBe('a4');
+    expect(component.options().orientation).toBe('landscape');
+
+    // Setting page size back to same-as-image resets orientation to auto
+    component.setPageSize('same-as-image');
+    expect(component.options().pageSize).toBe('same-as-image');
     expect(component.options().orientation).toBe('auto');
 
-    // Change page size to A4
+    // Change page size to A4 and orientation to portrait
     component.setPageSize('a4');
+    component.setOrientation('portrait');
     expect(component.options().pageSize).toBe('a4');
-
-    // Now orientation should update
-    component.setOrientation('landscape');
-    expect(component.options().orientation).toBe('landscape');
+    expect(component.options().orientation).toBe('portrait');
 
     component.setMargin('small');
     expect(component.options().margin).toBe('small');

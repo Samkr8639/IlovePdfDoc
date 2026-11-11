@@ -13,6 +13,8 @@ export const MAX_PDF_PAGE_DIM_PT = 14400; // PDF 1.7 specification limit (200 in
 
 export interface MiniPreviewStyle {
   pageContainer: {
+    width: string;
+    height: string;
     aspectRatio: string;
     backgroundColor: string;
   };
@@ -244,8 +246,16 @@ export class PageLayoutService {
       transform += ' scaleX(-1)';
     }
 
+    const maxPreviewW = 132;
+    const maxPreviewH = 144;
+    const previewScale = Math.min(maxPreviewW / pageWidthPt, maxPreviewH / pageHeightPt);
+    const previewWidthPx = Math.max(24, Math.round(pageWidthPt * previewScale));
+    const previewHeightPx = Math.max(24, Math.round(pageHeightPt * previewScale));
+
     return {
       pageContainer: {
+        width: `${previewWidthPx}px`,
+        height: `${previewHeightPx}px`,
         aspectRatio: `${pageWidthPt} / ${pageHeightPt}`,
         backgroundColor: options.backgroundColor || '#ffffff'
       },

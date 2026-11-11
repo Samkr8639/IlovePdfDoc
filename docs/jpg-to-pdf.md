@@ -81,3 +81,4 @@ Each image card in the workspace dynamically computes its layout based on user s
 - **Filename Sanitization**:
   - File names are sanitized against path traversal (`..`), directory slashes (`/`, `\`), and invalid filesystem characters.
   - Duplicate output file names in ZIP mode are disambiguated with sequential suffixes (e.g. `photo (1).pdf`).
+

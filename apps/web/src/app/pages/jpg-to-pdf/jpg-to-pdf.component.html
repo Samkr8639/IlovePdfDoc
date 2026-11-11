@@ -317,32 +317,40 @@
               </div>
 
               <!-- Live Mini Page Preview (matches layout geometry) -->
-              <div class="preview-page-container" [style.aspectRatio]="preview.pageContainer.aspectRatio" [style.backgroundColor]="preview.pageContainer.backgroundColor">
-                <!-- Margin box outline -->
+              <div class="preview-page-stage">
                 <div
-                  class="preview-margin-box"
-                  [style.top]="preview.marginBox.top"
-                  [style.right]="preview.marginBox.right"
-                  [style.bottom]="preview.marginBox.bottom"
-                  [style.left]="preview.marginBox.left"
-                ></div>
-
-                <!-- Fitted image element -->
-                <div
-                  class="preview-image-wrapper"
-                  [style.left]="preview.imageWrapper.left"
-                  [style.top]="preview.imageWrapper.top"
-                  [style.width]="preview.imageWrapper.width"
-                  [style.height]="preview.imageWrapper.height"
+                  class="preview-page-container"
+                  [style.width]="preview.pageContainer.width"
+                  [style.height]="preview.pageContainer.height"
+                  [style.aspectRatio]="preview.pageContainer.aspectRatio"
+                  [style.backgroundColor]="preview.pageContainer.backgroundColor"
                 >
-                  <img
-                    [src]="item.thumbnailUrl"
-                    [alt]="item.name"
-                    class="preview-img"
-                    [style.objectFit]="preview.imageElement.objectFit"
-                    [style.objectPosition]="preview.imageElement.objectPosition"
-                    [style.transform]="preview.imageElement.transform"
-                  />
+                  <!-- Margin box outline -->
+                  <div
+                    class="preview-margin-box"
+                    [style.top]="preview.marginBox.top"
+                    [style.right]="preview.marginBox.right"
+                    [style.bottom]="preview.marginBox.bottom"
+                    [style.left]="preview.marginBox.left"
+                  ></div>
+
+                  <!-- Fitted image element -->
+                  <div
+                    class="preview-image-wrapper"
+                    [style.left]="preview.imageWrapper.left"
+                    [style.top]="preview.imageWrapper.top"
+                    [style.width]="preview.imageWrapper.width"
+                    [style.height]="preview.imageWrapper.height"
+                  >
+                    <img
+                      [src]="item.thumbnailUrl"
+                      [alt]="item.name"
+                      class="preview-img"
+                      [style.objectFit]="preview.imageElement.objectFit"
+                      [style.objectPosition]="preview.imageElement.objectPosition"
+                      [style.transform]="preview.imageElement.transform"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -484,65 +492,77 @@
         <div class="mobile-panel-backdrop" (click)="closeSidePanel()" aria-hidden="true"></div>
       }
 
-      <!-- RIGHT SIDEBAR (OPTIONS & CONVERT BUTTON) -->
+      <!-- RIGHT SIDEBAR (SIMPLIFIED OPTIONS & CONVERT BUTTON) -->
       <aside class="sidebar-action-panel" [class.panel-open]="isSidePanelOpen()">
         <button type="button" class="sidebar-mobile-close" (click)="closeSidePanel()" aria-label="Close settings panel">
           ✕
         </button>
 
+        <div class="sidebar-header">
+          <h2 class="sidebar-heading">Image to PDF options</h2>
+        </div>
+
         <div class="sidebar-body">
-          <h2 class="sidebar-heading">JPG to PDF</h2>
-
-          <!-- 1. PAGE ORIENTATION -->
+          <!-- 1. PAGE ORIENTATION (Visual Icon Cards) -->
           <div class="option-section">
-            <div class="option-title-row">
-              <span class="option-label">PAGE ORIENTATION</span>
-              @if (options().pageSize === 'same-as-image') {
-                <span class="option-hint">(Forced by "Same as image")</span>
-              }
-            </div>
+            <span class="option-label-clean">Page orientation</span>
 
-            <div class="radio-card-row" [class.disabled-group]="options().pageSize === 'same-as-image'">
+            <div class="visual-option-grid cols-3">
               <button
                 type="button"
-                class="radio-pill-btn"
+                class="visual-option-card"
                 [class.selected]="options().orientation === 'auto'"
                 (click)="setOrientation('auto')"
               >
-                Auto
+                <svg class="visual-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 9V5a1 1 0 0 1 1-1h4"></path>
+                  <path d="M15 4h4a1 1 0 0 1 1 1v4"></path>
+                  <path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
+                  <path d="M9 20H5a1 1 0 0 1-1-1v-4"></path>
+                  <rect x="8" y="8" width="8" height="8" rx="1"></rect>
+                </svg>
+                <span class="visual-card-title">Auto</span>
               </button>
+
               <button
                 type="button"
-                class="radio-pill-btn"
+                class="visual-option-card"
                 [class.selected]="options().orientation === 'portrait'"
                 (click)="setOrientation('portrait')"
               >
-                Portrait
+                <svg class="visual-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="6" y="3" width="12" height="18" rx="2"></rect>
+                </svg>
+                <span class="visual-card-title">Portrait</span>
               </button>
+
               <button
                 type="button"
-                class="radio-pill-btn"
+                class="visual-option-card"
                 [class.selected]="options().orientation === 'landscape'"
                 (click)="setOrientation('landscape')"
               >
-                Landscape
+                <svg class="visual-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="6" width="18" height="12" rx="2"></rect>
+                </svg>
+                <span class="visual-card-title">Landscape</span>
               </button>
             </div>
           </div>
 
           <!-- 2. PAGE SIZE -->
           <div class="option-section">
-            <span class="option-label">PAGE SIZE</span>
+            <span class="option-label-clean">Page size</span>
             <select
               class="pt-select"
               [ngModel]="options().pageSize"
               (ngModelChange)="setPageSize($event)"
             >
-              <option value="same-as-image">Same as image (Fit natural)</option>
+              <option value="same-as-image">Fit (Same page size as image)</option>
               <option value="a4">A4 (210 × 297 mm)</option>
+              <option value="letter">US Letter (8.5 × 11 in)</option>
               <option value="a3">A3 (297 × 420 mm)</option>
               <option value="a5">A5 (148 × 210 mm)</option>
-              <option value="letter">Letter (8.5 × 11 in)</option>
               <option value="legal">Legal (8.5 × 14 in)</option>
               <option value="tabloid">Tabloid (11 × 17 in)</option>
               <option value="custom">Custom size...</option>
@@ -584,48 +604,69 @@
             }
           </div>
 
-          <!-- 3. MARGIN -->
+          <!-- 3. MARGIN (Visual Icon Cards) -->
           <div class="option-section">
-            <span class="option-label">MARGIN</span>
-            <div class="radio-card-row">
+            <div class="option-title-row">
+              <span class="option-label-clean">Margin</span>
               <button
                 type="button"
-                class="radio-pill-btn"
-                [class.selected]="options().margin === 'none'"
-                (click)="setMargin('none')"
-              >
-                No margin
-              </button>
-              <button
-                type="button"
-                class="radio-pill-btn"
-                [class.selected]="options().margin === 'small'"
-                (click)="setMargin('small')"
-              >
-                Small (10mm)
-              </button>
-              <button
-                type="button"
-                class="radio-pill-btn"
-                [class.selected]="options().margin === 'big'"
-                (click)="setMargin('big')"
-              >
-                Big (20mm)
-              </button>
-              <button
-                type="button"
-                class="radio-pill-btn"
-                [class.selected]="options().margin === 'custom'"
+                class="text-link-btn"
+                [class.active]="options().margin === 'custom'"
                 (click)="setMargin('custom')"
               >
                 Custom
               </button>
             </div>
 
+            <div class="visual-option-grid cols-3">
+              <button
+                type="button"
+                class="visual-option-card"
+                [class.selected]="options().margin === 'none'"
+                (click)="setMargin('none')"
+              >
+                <svg class="visual-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span class="visual-card-title">No margin</span>
+              </button>
+
+              <button
+                type="button"
+                class="visual-option-card"
+                [class.selected]="options().margin === 'small'"
+                (click)="setMargin('small')"
+              >
+                <svg class="visual-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-opacity="0.35" stroke-dasharray="2 2"></rect>
+                  <rect x="6" y="6" width="12" height="12" rx="1"></rect>
+                  <circle cx="9.5" cy="9.5" r="1"></circle>
+                  <polyline points="18 14.5 14.5 11.5 7 18"></polyline>
+                </svg>
+                <span class="visual-card-title">Small</span>
+              </button>
+
+              <button
+                type="button"
+                class="visual-option-card"
+                [class.selected]="options().margin === 'big'"
+                (click)="setMargin('big')"
+              >
+                <svg class="visual-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-opacity="0.35" stroke-dasharray="2 2"></rect>
+                  <rect x="7.5" y="7.5" width="9" height="9" rx="1"></rect>
+                  <polyline points="16.5 14 13.5 11.5 8 16.5"></polyline>
+                </svg>
+                <span class="visual-card-title">Big</span>
+              </button>
+            </div>
+
             @if (options().margin === 'custom') {
               <div class="custom-dimensions-grid mt-2">
                 <div class="input-col span-2">
-                  <label class="sub-label">Margin Value</label>
+                  <label class="sub-label">Custom margin</label>
                   <input
                     type="number"
                     class="pt-text-input"
@@ -651,159 +692,20 @@
             }
           </div>
 
-          <!-- 4. IMAGE FIT & ALIGNMENT -->
+          <!-- 4. MERGE CHECKBOX (Core primary toggle) -->
           <div class="option-section">
-            <span class="option-label">IMAGE FIT</span>
-            <select
-              class="pt-select"
-              [ngModel]="options().fit"
-              (ngModelChange)="setFit($event)"
-            >
-              <option value="fit">Fit inside margins (Keep proportions)</option>
-              <option value="fill">Fill page (Crop to fit)</option>
-              <option value="original">Original size (1:1 at image DPI)</option>
-            </select>
-
-            <div class="alignment-row mt-2">
-              <span class="sub-label">Alignment:</span>
-              <div class="radio-pill-group">
-                <button
-                  type="button"
-                  class="pill-sm"
-                  [class.active]="options().alignment === 'center'"
-                  (click)="setAlignment('center')"
-                >
-                  Centre
-                </button>
-                <button
-                  type="button"
-                  class="pill-sm"
-                  [class.active]="options().alignment === 'top'"
-                  (click)="setAlignment('top')"
-                >
-                  Top
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. IMAGE QUALITY -->
-          <div class="option-section">
-            <span class="option-label">IMAGE QUALITY</span>
-            <div class="radio-card-stack">
-              <label class="radio-card" [class.selected]="options().quality === 'original'">
-                <input
-                  type="radio"
-                  name="imageQuality"
-                  value="original"
-                  [checked]="options().quality === 'original'"
-                  (change)="setQuality('original')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">Original (Lossless)</span>
-                  <span class="card-radio-desc">Preserves original pixels without re-compression</span>
-                </div>
-              </label>
-
-              <label class="radio-card" [class.selected]="options().quality === 'optimised'">
-                <input
-                  type="radio"
-                  name="imageQuality"
-                  value="optimised"
-                  [checked]="options().quality === 'optimised'"
-                  (change)="setQuality('optimised')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">Optimised (~85% quality)</span>
-                  <span class="card-radio-desc">Downsampled to ≤ 200 DPI for email and web</span>
-                </div>
-              </label>
-
-              <label class="radio-card" [class.selected]="options().quality === 'small'">
-                <input
-                  type="radio"
-                  name="imageQuality"
-                  value="small"
-                  [checked]="options().quality === 'small'"
-                  (change)="setQuality('small')"
-                />
-                <div class="radio-card-text">
-                  <span class="card-radio-title">Small file (~70% quality)</span>
-                  <span class="card-radio-desc">Downsampled to ≤ 150 DPI for minimal size</span>
-                </div>
-              </label>
-            </div>
-
-            <!-- Size Estimate Banner -->
-            <div class="estimate-callout mt-2">
-              <span class="estimate-text">Estimated PDF size: <strong>{{ estimatedSizeText() }}</strong></span>
-            </div>
-          </div>
-
-          <!-- 6. BACKGROUND COLOUR -->
-          <div class="option-section">
-            <span class="option-label">BACKGROUND COLOUR</span>
-            <div class="color-picker-row">
-              <input
-                type="color"
-                class="pt-color-input"
-                [ngModel]="options().backgroundColor"
-                (ngModelChange)="updateOptions({ backgroundColor: $event })"
-                title="Select background color"
-              />
-              <input
-                type="text"
-                class="pt-text-input color-hex-text"
-                [ngModel]="options().backgroundColor"
-                (ngModelChange)="updateOptions({ backgroundColor: $event })"
-              />
-            </div>
-          </div>
-
-          <!-- 7. CHECKBOX OPTIONS -->
-          <div class="option-section checkboxes-section">
-            <label class="pt-checkbox-label">
+            <label class="pt-checkbox-label primary-checkbox">
               <input
                 type="checkbox"
                 class="pt-checkbox"
                 [ngModel]="options().mergeAll"
                 (ngModelChange)="updateOptions({ mergeAll: $event })"
               />
-              <span>Merge all images into one PDF</span>
-            </label>
-
-            <label class="pt-checkbox-label">
-              <input
-                type="checkbox"
-                class="pt-checkbox"
-                [ngModel]="options().removeExif"
-                (ngModelChange)="updateOptions({ removeExif: $event })"
-              />
-              <span>Remove location & camera data (EXIF)</span>
-            </label>
-
-            <label class="pt-checkbox-label">
-              <input
-                type="checkbox"
-                class="pt-checkbox"
-                [ngModel]="options().addPageNumbers"
-                (ngModelChange)="updateOptions({ addPageNumbers: $event })"
-              />
-              <span>Add page numbers (n / N)</span>
-            </label>
-
-            <label class="pt-checkbox-label">
-              <input
-                type="checkbox"
-                class="pt-checkbox"
-                [ngModel]="options().fixExifRotation"
-                (ngModelChange)="updateOptions({ fixExifRotation: $event })"
-              />
-              <span>Fix photo rotation automatically</span>
+              <span>Merge all images in one PDF file</span>
             </label>
           </div>
 
-          <!-- 8. ADVANCED OPTIONS (COLLAPSED) -->
+          <!-- 5. MORE OPTIONS (Collapsed by default to keep sidebar simple) -->
           <div class="option-section advanced-section">
             <button
               type="button"
@@ -811,13 +713,151 @@
               (click)="showAdvanced.set(!showAdvanced())"
               [attr.aria-expanded]="showAdvanced()"
             >
-              <span>Advanced options</span>
-              <span class="toggle-arrow">{{ showAdvanced() ? '▲' : '▼' }}</span>
+              <div class="advanced-toggle-text">
+                <span>More options</span>
+                <span class="advanced-toggle-hint">Quality, fit, privacy</span>
+              </div>
+              <svg
+                class="toggle-chevron"
+                [class.rotated]="showAdvanced()"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
             </button>
 
             @if (showAdvanced()) {
-              <div class="advanced-content mt-2">
-                <div class="input-wrap mb-2">
+              <div class="advanced-content">
+                <!-- Quality -->
+                <div class="input-wrap">
+                  <label class="sub-label">Image quality</label>
+                  <div class="segmented-row">
+                    <button
+                      type="button"
+                      class="segmented-btn"
+                      [class.active]="options().quality === 'original'"
+                      (click)="setQuality('original')"
+                    >
+                      Original
+                    </button>
+                    <button
+                      type="button"
+                      class="segmented-btn"
+                      [class.active]="options().quality === 'optimised'"
+                      (click)="setQuality('optimised')"
+                    >
+                      Optimised
+                    </button>
+                    <button
+                      type="button"
+                      class="segmented-btn"
+                      [class.active]="options().quality === 'small'"
+                      (click)="setQuality('small')"
+                    >
+                      Small file
+                    </button>
+                  </div>
+                  <span class="estimate-inline-text">Estimated size: <strong>{{ estimatedSizeText() }}</strong></span>
+                </div>
+
+                <!-- Image Fit & Alignment -->
+                <div class="input-wrap">
+                  <label class="sub-label">Image fit</label>
+                  <select
+                    class="pt-select"
+                    [ngModel]="options().fit"
+                    (ngModelChange)="setFit($event)"
+                  >
+                    <option value="fit">Fit inside margins</option>
+                    <option value="fill">Fill page (crop to fit)</option>
+                    <option value="original">Original size (1:1 DPI)</option>
+                  </select>
+
+                  <div class="alignment-row mt-2">
+                    <span class="sub-label">Align:</span>
+                    <div class="radio-pill-group">
+                      <button
+                        type="button"
+                        class="pill-sm"
+                        [class.active]="options().alignment === 'center'"
+                        (click)="setAlignment('center')"
+                      >
+                        Centre
+                      </button>
+                      <button
+                        type="button"
+                        class="pill-sm"
+                        [class.active]="options().alignment === 'top'"
+                        (click)="setAlignment('top')"
+                      >
+                        Top
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Background Colour -->
+                <div class="input-wrap">
+                  <label class="sub-label">Background colour</label>
+                  <div class="color-picker-row">
+                    <input
+                      type="color"
+                      class="pt-color-input"
+                      [ngModel]="options().backgroundColor"
+                      (ngModelChange)="updateOptions({ backgroundColor: $event })"
+                      title="Select background color"
+                    />
+                    <input
+                      type="text"
+                      class="pt-text-input color-hex-text"
+                      [ngModel]="options().backgroundColor"
+                      (ngModelChange)="updateOptions({ backgroundColor: $event })"
+                    />
+                  </div>
+                </div>
+
+                <!-- Privacy & Pagination Checkboxes -->
+                <div class="checkboxes-section">
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      class="pt-checkbox"
+                      [ngModel]="options().removeExif"
+                      (ngModelChange)="updateOptions({ removeExif: $event })"
+                    />
+                    <span>Remove location & camera data (EXIF)</span>
+                  </label>
+
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      class="pt-checkbox"
+                      [ngModel]="options().addPageNumbers"
+                      (ngModelChange)="updateOptions({ addPageNumbers: $event })"
+                    />
+                    <span>Add page numbers (n / N)</span>
+                  </label>
+
+                  <label class="pt-checkbox-label">
+                    <input
+                      type="checkbox"
+                      class="pt-checkbox"
+                      [ngModel]="options().fixExifRotation"
+                      (ngModelChange)="updateOptions({ fixExifRotation: $event })"
+                    />
+                    <span>Fix photo rotation automatically</span>
+                  </label>
+                </div>
+
+                <!-- PDF Metadata -->
+                <div class="input-wrap">
                   <label class="sub-label">PDF Title</label>
                   <input
                     type="text"
@@ -828,7 +868,7 @@
                   />
                 </div>
 
-                <div class="input-wrap mb-2">
+                <div class="input-wrap">
                   <label class="sub-label">PDF Author</label>
                   <input
                     type="text"
@@ -840,7 +880,7 @@
                 </div>
 
                 <div class="input-wrap">
-                  <label class="sub-label">DPI Fallback (for Same as image)</label>
+                  <label class="sub-label">DPI Fallback (Same as image)</label>
                   <select
                     class="pt-select"
                     [ngModel]="options().dpiFallback"
@@ -853,19 +893,6 @@
                 </div>
               </div>
             }
-          </div>
-
-          <!-- AD SLOT IN SIDEBAR -->
-          <div class="sidebar-adsense-slot">
-            <span class="adsense-label">Advertisement</span>
-            <div class="sidebar-ad-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4">
-                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-              </svg>
-              <span>Google AdSense (300 × 250)</span>
-            </div>
           </div>
         </div>
 
