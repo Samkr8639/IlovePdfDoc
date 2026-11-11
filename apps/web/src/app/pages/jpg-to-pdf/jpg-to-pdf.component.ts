@@ -15,6 +15,8 @@ import { SeoService } from '../../core/services/seo.service';
 import { LayoutService } from '../../core/services/layout.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
+import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { MergeResult } from '../../core/services/browser-pdf.service';
 import { ImageProbeService } from '../../core/services/jpg-to-pdf/image-probe.service';
 import { PageLayoutService, MiniPreviewStyle } from '../../core/services/jpg-to-pdf/page-layout.service';
 import { JpgToPdfService } from '../../core/services/jpg-to-pdf/jpg-to-pdf.service';
@@ -44,7 +46,8 @@ const MAX_TOTAL_SIZE_BYTES = 600 * 1024 * 1024; // 600 MB
     FormsModule,
     RouterLink,
     DropzoneComponent,
-    ProcessingStateComponent
+    ProcessingStateComponent,
+    ResultViewComponent
   ],
   templateUrl: './jpg-to-pdf.component.html',
   styleUrl: './jpg-to-pdf.component.css',
@@ -60,6 +63,7 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
 
   private abortController: AbortController | null = null;
   private thumbnailUrls: string[] = [];
+  private resultObjectUrl: string | null = null;
 
   // Workspace lifecycle
   readonly currentState = signal<WorkspaceState>('upload');
@@ -72,6 +76,7 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
   readonly processingProgress = signal<number>(0);
   readonly processingMessage = signal<string>('');
   readonly buildResult = signal<JpgToPdfBuildResult | null>(null);
+  readonly resultViewData = signal<MergeResult | null>(null);
 
   // Mobile sidebar controls
   readonly isSidePanelOpen = signal<boolean>(false);
@@ -135,6 +140,7 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.cancelProcessing();
     this.cleanupThumbnails();
+    this.revokeResultUrl();
     this.layoutService.showFooter();
   }
 
@@ -378,8 +384,22 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
         this.abortController.signal
       );
 
+      this.revokeResultUrl();
+      const url = URL.createObjectURL(result.blob);
+      this.resultObjectUrl = url;
+
       this.buildResult.set(result);
+      this.resultViewData.set({
+        blob: result.blob,
+        url,
+        filename: result.downloadFilename,
+        pageCount: result.pageCount,
+        sizeBytes: result.outputSizeBytes,
+        formattedSize: this.formatBytes(result.outputSizeBytes),
+        previewUrl: result.isZip ? undefined : url
+      });
       this.currentState.set('completed');
+      this.layoutService.showFooter();
     } catch (err: any) {
       if (err?.name === 'AbortError') {
         this.currentState.set('organize');
@@ -419,13 +439,22 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
   resetWorkspace(): void {
     this.cancelProcessing();
     this.cleanupThumbnails();
+    this.revokeResultUrl();
     this.selectedFiles.set([]);
     this.errorMessage.set(null);
     this.warnings.set([]);
     this.buildResult.set(null);
+    this.resultViewData.set(null);
     this.currentState.set('upload');
     this.isSidePanelOpen.set(false);
     this.layoutService.showFooter();
+  }
+
+  private revokeResultUrl(): void {
+    if (this.resultObjectUrl) {
+      URL.revokeObjectURL(this.resultObjectUrl);
+      this.resultObjectUrl = null;
+    }
   }
 
   toggleSidePanel(): void {

@@ -957,37 +957,29 @@
   <!-- ═══════════════════════════════════════════════════════════════ -->
   <!-- 4. COMPLETED RESULT STATE                                      -->
   <!-- ═══════════════════════════════════════════════════════════════ -->
-  @if (currentState() === 'completed' && buildResult()) {
+  @if (currentState() === 'completed' && buildResult() && resultViewData()) {
     <div class="completed-workspace-screen">
       <div class="container result-container">
-        <div class="result-card">
-          <div class="result-icon-badge">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
+        @if (buildResult()!.warnings.length > 0) {
+          <div class="canvas-warnings">
+            @for (w of buildResult()!.warnings; track w.fileName + w.reason) {
+              <div class="canvas-warning-item">⚠ {{ w.fileName }}: {{ w.reason }}</div>
+            }
           </div>
+        }
 
-          <h2 class="result-title">Your PDF is ready!</h2>
-          <p class="result-subtitle">
-            Processed {{ buildResult()!.pageCount }} {{ buildResult()!.isZip ? 'documents' : 'pages' }} in {{ (buildResult()!.durationMs / 1000).toFixed(1) }}s ({{ formatBytes(buildResult()!.outputSizeBytes) }}).
-          </p>
-
-          <div class="result-actions">
-            <button type="button" class="pt-btn-primary download-btn" (click)="downloadResult()">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Download {{ buildResult()!.isZip ? 'ZIP' : 'PDF' }}</span>
-            </button>
-
-            <button type="button" class="pt-btn-secondary" (click)="resetWorkspace()">
-              Convert more images
-            </button>
-          </div>
-        </div>
+        <app-result-view
+          [result]="resultViewData()!"
+          [title]="buildResult()!.isZip ? 'Images Converted to PDFs!' : 'Images Converted to PDF!'"
+          [subtitle]="buildResult()!.isZip
+            ? 'Each image has been converted into an individual PDF and packaged into a ZIP archive directly in your browser memory.'
+            : 'Your images have been compiled into a crisp, high-quality PDF document directly in your browser memory.'"
+          [downloadLabel]="buildResult()!.isZip ? 'Download PDFs (ZIP)' : 'Download PDF'"
+          restartLabel="Convert More Images"
+          [isClientSide]="true"
+          nextActionHint="Choose another operation to perform on your PDF"
+          (reset)="resetWorkspace()"
+        ></app-result-view>
       </div>
     </div>
   }

@@ -964,82 +964,11 @@
 }
 .btn-cancel:hover { background: #fef2f2; border-color: #f87171; }
 
-/* RESULT CARD */
-.result-card {
-  text-align: center;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 48px 40px;
-  max-width: 580px;
+.result-container {
   width: 100%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  max-width: 1020px;
+  margin: 0 auto;
 }
-.result-icon-badge {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-.result-icon-circle {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #ECF7F5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.result-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 10px;
-}
-.result-subtitle {
-  font-size: 15px;
-  color: #475569;
-  margin: 0 0 32px;
-  line-height: 1.5;
-}
-.result-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-}
-.download-btn {
-  width: 100%;
-  max-width: 320px;
-  height: 54px;
-  border-radius: 8px;
-  background: var(--pt-teal-700, #0F766E);
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: 700;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
-  transition: all 0.2s ease;
-}
-.download-btn:hover { background: var(--pt-teal-800, #0B5D57); transform: translateY(-2px); }
-.convert-another-btn {
-  width: 100%;
-  max-width: 320px;
-  padding: 13px;
-  border-radius: 8px;
-  background: #fff;
-  color: #334155;
-  border: 1.5px solid #e2e8f0;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.convert-another-btn:hover { border-color: #94a3b8; background: #f8fafc; }
 
 /* ───────────────────────────────────────────────────────────────────
    ADSENSE COMMON

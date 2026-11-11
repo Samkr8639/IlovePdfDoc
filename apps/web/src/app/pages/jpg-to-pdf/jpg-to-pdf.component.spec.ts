@@ -362,6 +362,16 @@ describe('JpgToPdfComponent Unit Tests', () => {
     expect(component.currentState()).toBe('completed');
     expect(component.isProcessing()).toBe(false);
     expect(component.buildResult()).toBe(mockResult);
+    expect(component.resultViewData()).toEqual({
+      blob: mockResult.blob,
+      url: 'blob:mock-thumbnail-url',
+      filename: 'document.pdf',
+      pageCount: 1,
+      sizeBytes: 125000,
+      formattedSize: '122.1 KB',
+      previewUrl: 'blob:mock-thumbnail-url'
+    });
+    expect(layoutServiceMock.showFooter).toHaveBeenCalled();
   });
 
   it('should handle conversion cancellation gracefully', async () => {
