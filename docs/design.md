@@ -450,9 +450,12 @@ RESULT STATE (<app-result-view>, max-width 980px centered)
   - **Info** (`.sidebar-info-banner`): `padding: 14px 16px`, `#F0F9FF` bg, `1px solid #BAE6FD`, `r: 8–10px`, `#0369A1` text + info SVG.
   - **Success** (`.privacy-callout-banner`): `--pt-teal-50` (`#E6F5F3`) bg, `--pt-teal-700` text, `r: 14px`, `pad: 14px 22px`.
   - **Warning / Low-savings** (`.low-savings-callout`): `#f8fafc` bg, `1px solid #e2e8f0`, `#64748b` text.
-- **File Cards & Thumbnails:**
-  - Document card (`merge-pdf` `.pdf-document-card`): `180×250px` (`r: 8px`), subtle schematic preview graphic, filename (`text-overflow: ellipsis`), `X pages • size`, bottom `.card-reorder-pills` (`< 1 >`), hover-revealed top-right delete/rotate buttons (`opacity: 0 -> 1`, always visible on touch).
-  - Page thumbnail (`pdf-to-jpg`, `split-pdf`): `140–170px` grid card with `aspect-ratio: 3/4` canvas/img preview, top-left selection checkbox, page number label (`Page N`), `--pt-teal-700` selected border.
+- **File Cards, Single-File Header Pill, Grid Toolbar & Thumbnails:**
+  - Single-PDF Canvas Header Bar (`.primary-file-card` in `pdf-to-jpg`): `max-width: 900px` stage (`center-stage-container`, `gap: 24px`), white card `border: 1px solid var(--pt-soft-outline); border-radius: 12px; padding: 14px 18px; gap: 14px`, left `.file-pdf-badge` (`#e05d44`, white `11px w800`), middle `.file-card-name` (`14px w700 --pt-navy`, ellipsis) + `.file-card-meta` (`12px --pt-muted`), right `.file-card-remove` `×` (`color: --pt-ghost`, hover `--pt-coral` on `--pt-coral-subtle`).
+  - Canvas Batch Toolbar (`.thumbnails-toolbar` in `pdf-to-jpg`): `display: flex; justify-content: space-between; align-items: center; padding: 0 4px`, left `.toolbar-label` (`14px`), right `.toolbar-right` (`gap: 12px`) using `.btn-text-action` (`13px w600 --pt-teal-700`) or `.action-pill-btn`.
+  - Document Reorder Card (`merge-pdf` `.pdf-document-card`): `180×250px` (`r: 8px`), schematic preview graphic (`110×145`), filename (`12px`, ellipsis), `X pages`, bottom `.card-reorder-pills` (`< 1 >` `20×20` arrows), top-right `.card-hover-actions` (`24×24px` circular `.card-action-btn`; revealed on `:hover`, `:focus-within`, and `@media (hover: none)`).
+  - Page Thumbnail Grid (`.page-thumbnails-grid` in `pdf-to-jpg`): `grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px`. Each `.page-thumb-card` (`r: 12px`, `pad: 10px`, `#ffffff`) holds `.thumb-img-wrapper` (`aspect-ratio: 1 / 1.414; background: var(--pt-subtle-bg); object-fit: contain`), top-left `16×16` checkbox (`accent-color: var(--pt-teal-700)`), `.selected` ring (`background: var(--pt-teal-50); box-shadow: 0 0 0 2px var(--pt-teal-700)`).
+  - Live Estimate Readout Card (`pdf-to-jpg` sidebar): `background: #f8fafc; border: 1px solid var(--pt-soft-outline); border-radius: 8px; padding: 10px 12px; font-size: 12.5px` key-value rows (`Dimensions:`, `Estimated size:`).
 - **Floating Dock (`merge-pdf`, `pdf-to-jpg`, etc.):** `.floating-tools-dock` `58px` wide vertical white pill (`r: 28px`) at `top: 36px; right: 20px; z-index: 25`. Top item `.dock-square-btn` (`46×46px`, `r: 14px`, `--pt-teal-700`, `+` icon + top-right count badge `.dock-count-badge` `#14213D`/`#0F172A`), followed by Computer upload, Google Drive, Dropbox icon buttons with left-anchored hover tooltips (`.dock-tooltip-label`).
 - **Badges:**
   - `Live` (teal): `--pt-teal-50` bg / `--pt-teal-700` text.
@@ -460,10 +463,12 @@ RESULT STATE (<app-result-view>, max-width 980px centered)
   - `Recommended` (floating card badge on `compress-pdf`): solid `--pt-teal-700`, `#fff`, `11px` pill positioned on top border (`top: -10px; right: 14px`).
   - `AUTO` (`home` Workflows tab): `#FEF3C7` / `#B45309` micro badge.
   - `👑 Premium` (`pdf-to-word` OCR mode) / `★` (`edit-pdf` Edit Text tab): amber highlight badge.
+  - `Archival` (`.feature-tag` on `word-to-pdf` / `excel-to-pdf` PDF/A card): `#eff6ff` bg, `1px solid #bfdbfe`, `#1d4ed8` text, `10px w700`, `padding: 1px 6px`, `border-radius: 4px`.
 - **Tabs & Modals:**
   - Underline tabs (`.ilove-split-tabs` in `split-pdf`): `2` equal tabs, active gets `2px` `--pt-teal-700` bottom border.
   - Segmented sliding pill (`.mode-pill-switcher` in `edit-pdf`): `--pt-navy` active fill `#fff` text inside white rounded-pill container.
-  - Inline tool modals (`pdf-to-jpg` password unlock modal, `home` workflow preview modal): centered card over `rgba(13,22,41,0.55)`–`0.65` backdrop, `r: 16px`, Cancel + Primary Teal button.
+  - Password Unlock Modal (`.password-modal-backdrop` + `.password-modal-card` in `pdf-to-jpg`): Backdrop `rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 100`; Card `max-width: 440px; padding: 32px; border-radius: 20px; gap: 20px`, `52×52px` `--pt-teal-50` lock circle, centered `Sora 20px` title + `13.5px` subtitle, password input + Cancel (`.btn-secondary`) / Unlock (`.btn-primary`) right-aligned footer.
+  - Workflow Preview Modal (`home`): centered dialog (`z-index: 2000`) over `rgba(13,22,41,0.55)`–`0.65` backdrop, Cancel + Primary Teal button.
 
 ```html
 <!-- Minimal snippet: canonical sidebar info + option card + primary CTA -->
