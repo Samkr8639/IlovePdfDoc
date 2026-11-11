@@ -2,8 +2,8 @@
 
 > **Feature Status**:
 > - **Phase 1 ("Only me" — Browser-only simple electronic signature)**: **Live (`SIGN_PDF_FEATURES.signYourself = true`)**
-> - **Phase 2 ("Several people" — Remote signature requests)**: **Code-complete & gated OFF (`SIGN_PDF_FEATURES.requestSignatures = false`, `SIGN_REQUESTS_ENABLED=false`)** pending infrastructure provisioning & legal counsel sign-off
-> - **Phase 3 ("Digital signature (.p12 / .pfx)")**: **Gated OFF (`SIGN_PDF_FEATURES.digitalCertificate = false`)** ("Coming soon")
+> - **Phase 2 ("Several people" — Multi-signer requests & tracking)**: **Live (`SIGN_PDF_FEATURES.requestSignatures = true`; API enabled by default in dev/staging, opt-in `SIGN_REQUESTS_ENABLED=true` in production)**
+> - **Phase 3 ("Digital signature (.p12 / .pfx)")**: **Live (`SIGN_PDF_FEATURES.digitalCertificate = true`; hybrid WebCrypto PBES2 browser signing + consented OpenSSL fallback for legacy 3DES)**
 
 ---
 
@@ -24,9 +24,11 @@
 - **Local IndexedDB Signature Book (`pdftailor-sign-db`)**:
   - Off by default; users opt in via *"Save this signature on this device"*. Supports deleting individual signatures or clearing all. Fails gracefully in private/restricted browser modes without blocking signing.
 
-### Phase 2: Remote Multi-Party Signing (`/api/v1/sign/*` & `/sign/:token`)
-- Completely gated behind `SIGN_REQUESTS_ENABLED=false` (server kill switch returning `503 FEATURE_DISABLED`) and `SIGN_PDF_FEATURES.requestSignatures=false` (frontend `"Coming soon"` card).
-- Designed around clean dependency-injected interfaces in `apps/api/src/services/sign/interfaces.ts` (`SigningRequestRepository`, `DocumentStorage`, `EmailService`, `Scheduler`), backed today by complete **in-memory** implementations (`in-memory.ts`) for Jest + supertest verification.
+### Phase 2: Remote Multi-Party Signing (`/api/v1/sign/*`, `/sign-pdf`, `/sign/:token`)
+- Controlled via `SIGN_PDF_FEATURES.requestSignatures` (frontend) and `isSignRequestsEnabled()` in `apps/api/src/config/env.ts` (enabled in non-production by default; requires explicit `SIGN_REQUESTS_ENABLED=true` in production).
+- Designed around clean dependency-injected interfaces in `apps/api/src/services/sign/interfaces.ts` (`SigningRequestRepository`, `DocumentStorage`, `EmailService`, `Scheduler`).
+- Uses disk-backed persistent storage (`apps/api/src/services/sign/disk-store.ts` -> `DiskSigningRequestRepository`, `DiskDocumentStorage`, `OutboxEmailService` writing under `SIGN_STORE_DIR` / `<TEMP_UPLOAD_DIR>/sign-store`) in runtime and `InMemory*` in `NODE_ENV=test` Jest specs.
+- In `/sign-pdf`, selecting **Several people** unlocks recipient management (up to 10 recipients, sequential/parallel ordering, color-coded assignee badges on fields), a consented **Review & Send** modal (with optional 6-digit sender OTP verification), and a **Signature Request Tracker** (live status refresh, email update/resend, dev signing links when no SMTP server is configured, cancel, final PDF & audit certificate downloads).
 
 ---
 
@@ -104,32 +106,36 @@ Currently `apps/api` contains **no database, object storage, SMTP provider, or p
 
 ---
 
-## 7. Phase 3 Evaluation (`Digital signature (certificate)`)
+## 7. Phase 3 Architecture (`Digital signature (certificate)`)
 
-- **Decision**: Keep `SIGN_PDF_FEATURES.digitalCertificate = false` (`"Coming soon"`).
-- **Rationale**:
-  1. External native signature validation tools (`qpdf`, `pdfsig`) are not present in this build environment to verify PKCS#7 `/ByteRange` + `/Contents` interoperability across Acrobat, macOS Preview, and Poppler.
-  2. Browser-side `.p12`/`.pfx` parsing via CommonJS `node-forge` adds significant legacy bundle weight and requires strict memory handling for private key material and CRL/OCSP timestamping (`RFC 3161`) proxies.
-  3. Planned next step: isolate PKCS#7 / PAdES-B-T builder into a dedicated lazy Web Worker / server HSM module verified against `pdfsig` and Adobe Acrobat Reader before flipping the flag.
+- **Flag**: `SIGN_PDF_FEATURES.digitalCertificate = true`
+- **Zero-Upload Primary Path (`@paperflow/sign-core`: `pkcs12-browser.ts` & `pades.ts`)**:
+  1. Pure TypeScript ASN.1 BER/DER parser + WebCrypto PBES2 (`PBKDF2-SHA1/256/384/512` + `AES-128/192/256-CBC`) extracts the leaf certificate chain and PKCS#8 RSA/ECDSA private key directly in browser memory.
+  2. ISO 32000 PAdES writer (`applyDetachedPdfSignature`) injects `/FT /Sig`, `/Filter /Adobe.PPKLite`, `/SubFilter /adbe.pkcs7.detached`, and computes `/ByteRange` + `/Contents <...>` 16,384-hex placeholder.
+  3. Builds DER-encoded CMS `SignedData` (`RSASSA-PKCS1-v1_5` SHA-256 or ECDSA `P-256`/`P-384` DER) with zero external dependencies and zero server network requests.
+- **Consented Legacy Fallback (`POST /api/v1/sign/certificate-sign` + `apps/api/src/services/sign/certificate-sign.ts`)**:
+  - When a user provides a legacy 3DES/RC2 `.p12`/`.pfx` that WebCrypto cannot decrypt (`UnsupportedPkcs12CipherError`), the UI prompts via `UploadConsentService`. Upon explicit consent, `apps/api` executes LibreSSL `/usr/bin/openssl` inside an isolated `0o700` temp directory immediately scrubbed in `finally {}` and returns the signed PDF alongside `X-Signer-CN` and `X-Signer-Issuer` headers.
+- **Verification**: Both browser WebCrypto and OpenSSL `.p12` PAdES outputs pass `openssl cms -verify -binary` and detect single-byte document tampering.
 
 ---
 
 ## 8. Environment Flags & Testing
 
 ### Environment Variables (`apps/api`)
-- `SIGN_REQUESTS_ENABLED=false` (default; must be `'true'` to unlock `/api/v1/sign/*`)
-- `SIGN_MASTER_KEY` (required 32+ char / 64-hex secret in production when enabled; ephemeral warning fallback in dev/test only)
+- `SIGN_REQUESTS_ENABLED`: Defaults to `true` in non-production environments and `false` in `production` (set `SIGN_REQUESTS_ENABLED=true` explicitly for production multi-signer requests)
+- `SIGN_STORE_DIR`: Optional directory path for persistent disk store (defaults to `<TEMP_UPLOAD_DIR>/sign-store`)
+- `SIGN_MASTER_KEY` (required 32+ char / 64-hex secret in production when enabled; persisted local dev key or ephemeral fallback in dev/test)
 - `APP_PUBLIC_URL=http://localhost:4200`
 - `SIGN_REQUIRE_SENDER_OTP=false` (optional global header/env enforcement)
-- `SEAL_CERT_PATH` / `SEAL_CERT_PASS` (reserved for optional Phase 3 server seal)
+- Swap `Disk*` adapters in `apps/api/src/routes/sign.route.ts` with PostgreSQL + S3/R2 + SMTP env adapters for multi-instance cloud HA.
 
 ### Running Automated Tests
 ```bash
 # 1. Build shared contracts & sign-core engine
 npm run build:contracts
 
-# 2. Backend API Jest + supertest suite (parallel, sequential, crypto, audit chain, PDF sanitization, OTP, GDPR)
-npm --workspace=apps/api run test -- tests/sign.spec.ts
+# 2. Backend API Jest + supertest suite (PAdES/OpenSSL, multi-signer state machine, crypto, disk persistence)
+npm --workspace=apps/api run test
 
 # 3. Frontend Sign PDF Vitest suite (core services, component state/a11y, /sign/:token, routing)
 npx --workspace=apps/web ng test --watch=false \
