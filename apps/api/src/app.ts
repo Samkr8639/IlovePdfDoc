@@ -13,6 +13,8 @@ import { wordToPdfRouter } from './routes/word-to-pdf.route';
 import { excelToPdfRouter } from './routes/excel-to-pdf.route';
 import { powerpointToPdfRouter } from './routes/powerpoint-to-pdf.route';
 import { editPdfOcrRouter } from './routes/edit-pdf-ocr.route';
+import { featuresRouter } from './routes/features.route';
+import { signRouter } from './routes/sign.route';
 import { errorHandler, AppError } from './middleware/errorHandler';
 import { apiRateLimiter, conversionRateLimiter, contactRateLimiter, ocrRateLimiter } from './middleware/rateLimiter';
 import swaggerUi from 'swagger-ui-express';
@@ -42,8 +44,9 @@ export function createApp(): Express {
   app.use(
     cors({
       origin: env.CORS_ORIGIN,
+      credentials: true,
       methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id']
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token', 'x-sender-token']
     })
   );
 
@@ -72,6 +75,8 @@ export function createApp(): Express {
   app.use('/api/v1/excel-to-pdf', conversionRateLimiter, excelToPdfRouter);
   app.use('/api/v1/powerpoint-to-pdf', conversionRateLimiter, powerpointToPdfRouter);
   app.use('/api/v1/edit-pdf/ocr', ocrRateLimiter, editPdfOcrRouter);
+  app.use('/api/v1/features', featuresRouter);
+  app.use('/api/v1/sign', signRouter);
 
   // 404 Route Catch-all
   app.use('*', (req: Request, _res: Response, next) => {
