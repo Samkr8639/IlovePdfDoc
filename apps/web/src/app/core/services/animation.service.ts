@@ -30,8 +30,14 @@ export class AnimationService {
     }
 
     const ctx = gsap.context(() => {
+      const animateIfPresent = (selector: string, vars: gsap.TweenVars) => {
+        if (container.querySelector(selector)) {
+          gsap.from(selector, vars);
+        }
+      };
+
       // Kicker badge fade-in
-      gsap.from('.hero-kicker-badge', {
+      animateIfPresent('.hero-kicker-badge', {
         opacity: 0,
         duration: 0.5,
         ease: 'power2.out',
@@ -39,7 +45,7 @@ export class AnimationService {
       });
 
       // Main headline smooth rise
-      gsap.from('.hero-headline', {
+      animateIfPresent('.hero-headline', {
         opacity: 0,
         duration: 0.6,
         delay: 0.08,
@@ -48,7 +54,7 @@ export class AnimationService {
       });
 
       // Subtitle fade
-      gsap.from('.hero-subhead', {
+      animateIfPresent('.hero-subhead', {
         opacity: 0,
         duration: 0.55,
         delay: 0.15,
@@ -57,7 +63,7 @@ export class AnimationService {
       });
 
       // Trust highlights stagger
-      gsap.from('.trust-chip', {
+      animateIfPresent('.trust-chip', {
         opacity: 0,
         duration: 0.45,
         stagger: 0.04,
@@ -67,7 +73,7 @@ export class AnimationService {
       });
 
       // Quick action tool links
-      gsap.from('.quick-tool-link', {
+      animateIfPresent('.quick-tool-link', {
         opacity: 0,
         duration: 0.45,
         stagger: 0.03,
@@ -77,7 +83,7 @@ export class AnimationService {
       });
 
       // Category filter pills row
-      gsap.from('.cat-pill', {
+      animateIfPresent('.cat-pill', {
         opacity: 0,
         duration: 0.45,
         stagger: 0.03,
@@ -87,7 +93,7 @@ export class AnimationService {
       });
 
       // Floating decorative document cards (absolute positioned, GPU opacity fade)
-      gsap.from('.hero-float-card', {
+      animateIfPresent('.hero-float-card', {
         opacity: 0,
         duration: 0.6,
         delay: 0.2,
@@ -174,6 +180,9 @@ export class AnimationService {
    */
   animateToolCards(container: HTMLElement, selector = '.tool-card-item'): gsap.Context | null {
     if (!this.isBrowser || this.prefersReducedMotion || !container) {
+      return null;
+    }
+    if (!container.querySelector(selector)) {
       return null;
     }
 

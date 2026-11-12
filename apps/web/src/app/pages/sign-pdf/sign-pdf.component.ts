@@ -315,6 +315,10 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   private rawPdfBytes: Uint8Array | null = null;
   private pdfDocProxy: any = null;
   private renderedPagesCache = new Map<number, HTMLCanvasElement>();
+  private activeRenderTasks = new Map<number, any>();
+  private resizeDebounceTimeout: any = null;
+  private rafDragId: number | null = null;
+  private pendingPointerPos: { x: number; y: number } | null = null;
   private runCounter = 0;
   private abortController: AbortController | null = null;
   private pendingSignatureInsertType: SignFieldType | null = null;
@@ -349,8 +353,28 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.resizeDebounceTimeout) {
+      clearTimeout(this.resizeDebounceTimeout);
+      this.resizeDebounceTimeout = null;
+    }
+    if (this.rafDragId !== null) {
+      cancelAnimationFrame(this.rafDragId);
+      this.rafDragId = null;
+    }
+    this.cancelAllRenderTasks();
     this.layoutService.showFooter();
     this.cleanupResources();
+  }
+
+  private cancelAllRenderTasks(): void {
+    for (const [idx, task] of this.activeRenderTasks.entries()) {
+      try {
+        task.cancel();
+      } catch {
+        // ignore cancellation
+      }
+    }
+    this.activeRenderTasks.clear();
   }
 
   canDeactivate(): boolean {
@@ -538,6 +562,11 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     // Destroy far-away canvases to keep memory flat across 50-500 page PDFs
     for (const [idx, oldCanvas] of Array.from(this.renderedPagesCache.entries())) {
       if (idx < minIdx || idx > maxIdx) {
+        const runningTask = this.activeRenderTasks.get(idx);
+        if (runningTask) {
+          try { runningTask.cancel(); } catch { /* ignore */ }
+          this.activeRenderTasks.delete(idx);
+        }
         oldCanvas.width = 0;
         oldCanvas.height = 0;
         this.renderedPagesCache.delete(idx);
@@ -552,23 +581,45 @@ export class SignPdfComponent implements OnInit, OnDestroy {
         : null;
       if (!canvas) continue;
 
-      const pdfPage = await doc.getPage(idx + 1);
-      const display = this.getPageSize(pageMeta);
-      const unitVp = pdfPage.getViewport({ scale: 1.0 });
-      const scale = (display.width / Math.max(1, unitVp.width)) * dpr;
-      const vp = pdfPage.getViewport({ scale });
-
-      canvas.width = Math.floor(vp.width);
-      canvas.height = Math.floor(vp.height);
-      canvas.style.width = `${display.width}px`;
-      canvas.style.height = `${display.height}px`;
-
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        await pdfPage.render({ canvasContext: ctx, viewport: vp }).promise;
-        this.renderedPagesCache.set(idx, canvas);
+      const existingTask = this.activeRenderTasks.get(idx);
+      if (existingTask) {
+        try { existingTask.cancel(); } catch { /* ignore */ }
+        this.activeRenderTasks.delete(idx);
       }
-      if (typeof pdfPage.cleanup === 'function') pdfPage.cleanup();
+
+      try {
+        const pdfPage = await doc.getPage(idx + 1);
+        const display = this.getPageSize(pageMeta);
+        const unitVp = pdfPage.getViewport({ scale: 1.0 });
+        const scale = (display.width / Math.max(1, unitVp.width)) * dpr;
+        const vp = pdfPage.getViewport({ scale });
+
+        canvas.width = Math.floor(vp.width);
+        canvas.height = Math.floor(vp.height);
+        canvas.style.width = `${display.width}px`;
+        canvas.style.height = `${display.height}px`;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const renderTask = pdfPage.render({ canvasContext: ctx, viewport: vp });
+          this.activeRenderTasks.set(idx, renderTask);
+          try {
+            await renderTask.promise;
+            this.renderedPagesCache.set(idx, canvas);
+          } catch (err: any) {
+            if (err?.name !== 'RenderingCancelledException') {
+              // Ignore cancellation
+            }
+          } finally {
+            if (this.activeRenderTasks.get(idx) === renderTask) {
+              this.activeRenderTasks.delete(idx);
+            }
+          }
+        }
+        if (typeof pdfPage.cleanup === 'function') pdfPage.cleanup();
+      } catch {
+        // Page render or load error handled gracefully
+      }
     }
   }
 
@@ -631,16 +682,21 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onWindowResize(): void {
     if (this.stage() !== 'editor' || typeof window === 'undefined') return;
-    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
-    if (!active) return;
-    const widthAt100 = this.transform.getPageDisplaySize(active, 1.0).width;
-    if (window.innerWidth <= 768) {
-      const fit = this.navService.computeFitWidthZoom(widthAt100, window.innerWidth);
-      if (this.zoom() * widthAt100 > window.innerWidth - 20) {
-        this.zoom.set(fit);
-        void this.renderVisibleWindow();
-      }
+    if (this.resizeDebounceTimeout) {
+      clearTimeout(this.resizeDebounceTimeout);
     }
+    this.resizeDebounceTimeout = setTimeout(() => {
+      const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+      if (!active) return;
+      const widthAt100 = this.transform.getPageDisplaySize(active, 1.0).width;
+      if (window.innerWidth <= 768) {
+        const fit = this.navService.computeFitWidthZoom(widthAt100, window.innerWidth);
+        if (this.zoom() * widthAt100 > window.innerWidth - 20) {
+          this.zoom.set(fit);
+          void this.renderVisibleWindow();
+        }
+      }
+    }, 150);
   }
 
   /* =========================================================================
@@ -921,19 +977,24 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('document:mousemove', ['$event'])
   onDocumentMouseMove(event: MouseEvent): void {
-    this.handlePointerMove(event.clientX, event.clientY);
+    if (!this.dragState) return;
+    this.schedulePointerMove(event.clientX, event.clientY);
   }
 
   @HostListener('document:touchmove', ['$event'])
   onDocumentTouchMove(event: TouchEvent): void {
     if (!this.dragState) return;
     const t = event.touches[0];
-    if (t) this.handlePointerMove(t.clientX, t.clientY);
+    if (t) this.schedulePointerMove(t.clientX, t.clientY);
   }
 
   @HostListener('document:mouseup')
   @HostListener('document:touchend')
   onDocumentPointerUp(): void {
+    if (this.rafDragId !== null) {
+      cancelAnimationFrame(this.rafDragId);
+      this.rafDragId = null;
+    }
     if (!this.dragState) return;
     const { origField, field } = this.dragState;
     const current = this.fields().find(f => f.id === field.id);
@@ -958,6 +1019,17 @@ export class SignPdfComponent implements OnInit, OnDestroy {
         undo: () => this.replaceField(snapshotBefore)
       });
     }
+  }
+
+  private schedulePointerMove(clientX: number, clientY: number): void {
+    this.pendingPointerPos = { x: clientX, y: clientY };
+    if (this.rafDragId !== null) return;
+    this.rafDragId = requestAnimationFrame(() => {
+      this.rafDragId = null;
+      if (this.pendingPointerPos && this.dragState) {
+        this.handlePointerMove(this.pendingPointerPos.x, this.pendingPointerPos.y);
+      }
+    });
   }
 
   private handlePointerMove(clientX: number, clientY: number): void {
@@ -2379,6 +2451,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   }
 
   private cleanupPdfDocOnly(): void {
+    this.cancelAllRenderTasks();
     for (const c of this.renderedPagesCache.values()) {
       c.width = 0;
       c.height = 0;

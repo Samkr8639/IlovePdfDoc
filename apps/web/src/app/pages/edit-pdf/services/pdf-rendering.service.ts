@@ -6,7 +6,20 @@ import { CoordinateTransformService } from './coordinate-transform';
   providedIn: 'root'
 })
 export class PdfRenderingService {
+  private activeRenderTasks = new Map<HTMLCanvasElement, any>();
+
   constructor(private transform: CoordinateTransformService) {}
+
+  cancelAll(): void {
+    for (const [canvas, task] of this.activeRenderTasks.entries()) {
+      try {
+        task.cancel();
+      } catch {
+        // ignore cancellation
+      }
+    }
+    this.activeRenderTasks.clear();
+  }
 
   async generateThumbnails(pdfDoc: any): Promise<Map<number, string>> {
     const thumbs = new Map<number, string>();
@@ -39,6 +52,16 @@ export class PdfRenderingService {
     dpr: number,
     zoom: number
   ): Promise<CanvasRenderingContext2D | null> {
+    const existingTask = this.activeRenderTasks.get(canvas);
+    if (existingTask) {
+      try {
+        existingTask.cancel();
+      } catch {
+        // ignore
+      }
+      this.activeRenderTasks.delete(canvas);
+    }
+
     const pdfPage = await pdfDoc.getPage(pageInfo.pageIndex + 1);
     const display = this.transform.getPageDisplaySize(pageInfo, zoom);
     const unscaledViewport = pdfPage.getViewport({ scale: 1.0, rotation: pageInfo.rotation || 0 });
@@ -52,7 +75,20 @@ export class PdfRenderingService {
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+      const renderTask = pdfPage.render({ canvasContext: ctx, viewport });
+      this.activeRenderTasks.set(canvas, renderTask);
+      try {
+        await renderTask.promise;
+      } catch (err: any) {
+        if (err?.name === 'RenderingCancelledException') {
+          return null;
+        }
+        throw err;
+      } finally {
+        if (this.activeRenderTasks.get(canvas) === renderTask) {
+          this.activeRenderTasks.delete(canvas);
+        }
+      }
       return ctx;
     }
     return null;

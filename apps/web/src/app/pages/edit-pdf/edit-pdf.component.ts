@@ -330,6 +330,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.ocrService.cancel();
+    this.pdfRendering.cancelAll();
   }
 
   // --- PDF Loading ---
@@ -529,36 +530,44 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
+  private isScrollTicking = false;
+
   onViewportScroll(): void {
-    if (this.isUserScrollingToPage) return;
+    if (this.isUserScrollingToPage || this.isScrollTicking) return;
+    this.isScrollTicking = true;
 
-    const vp = this.canvasViewportRef?.nativeElement;
-    if (!vp) return;
+    requestAnimationFrame(() => {
+      this.isScrollTicking = false;
+      if (this.isUserScrollingToPage) return;
 
-    const vpRect = vp.getBoundingClientRect();
-    const vpCenterY = vpRect.top + vpRect.height / 2;
+      const vp = this.canvasViewportRef?.nativeElement;
+      if (!vp) return;
 
-    let closestPageIndex = 0;
-    let minDistance = Infinity;
+      const vpRect = vp.getBoundingClientRect();
+      const vpCenterY = vpRect.top + vpRect.height / 2;
 
-    for (let i = 0; i < this.pages().length; i++) {
-      const pageEl = document.getElementById(`pdf-page-${i}`);
-      if (!pageEl) continue;
+      let closestPageIndex = 0;
+      let minDistance = Infinity;
 
-      const pageRect = pageEl.getBoundingClientRect();
-      const pageCenterY = pageRect.top + pageRect.height / 2;
-      const dist = Math.abs(pageCenterY - vpCenterY);
+      for (let i = 0; i < this.pages().length; i++) {
+        const pageEl = document.getElementById(`pdf-page-${i}`);
+        if (!pageEl) continue;
 
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestPageIndex = i;
+        const pageRect = pageEl.getBoundingClientRect();
+        const pageCenterY = pageRect.top + pageRect.height / 2;
+        const dist = Math.abs(pageCenterY - vpCenterY);
+
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestPageIndex = i;
+        }
       }
-    }
 
-    if (closestPageIndex !== this.currentPageIndex()) {
-      this.currentPageIndex.set(closestPageIndex);
-      this.scrollActiveThumbnailIntoView(closestPageIndex);
-    }
+      if (closestPageIndex !== this.currentPageIndex()) {
+        this.currentPageIndex.set(closestPageIndex);
+        this.scrollActiveThumbnailIntoView(closestPageIndex);
+      }
+    });
   }
 
   scrollToPage(index: number): void {
@@ -1256,6 +1265,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:mousemove', ['$event'])
   onWindowMouseMove(event: MouseEvent): void {
+    if (!this.isHighlighting && !this.isDraggingElement && !this.isResizingElement && !this.isRotatingElement) {
+      return;
+    }
     if (this.isHighlighting) {
       this.moveHighlightDrag(event.clientX, event.clientY);
       return;
