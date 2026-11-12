@@ -107,7 +107,11 @@ describe('SignPdfComponent & Dialogs', () => {
       getRememberedSignerName: vi.fn().mockReturnValue(''),
       setRememberedSignerName: vi.fn(),
       forgetSignerName: vi.fn(),
-      isUnavailable: vi.fn().mockReturnValue(false)
+      isUnavailable: vi.fn().mockReturnValue(false),
+      getDefaultStamp: vi.fn().mockResolvedValue(null),
+      listStamps: vi.fn().mockResolvedValue([]),
+      saveStamp: vi.fn().mockResolvedValue(true),
+      deleteStamp: vi.fn().mockResolvedValue(undefined)
     };
 
     imageMock = {
@@ -430,6 +434,124 @@ describe('SignPdfComponent & Dialogs', () => {
     component.resetAll();
     expect(revokeSpy).toHaveBeenCalledWith('blob:signed-output-url');
     expect(component.stage()).toBe('upload');
+  });
+
+  describe('Enhanced Fields & Redesigned Sidebar', () => {
+    const enterEvt = new KeyboardEvent('keydown', { key: 'Enter' });
+
+    beforeEach(async () => {
+      await component.onFilesSelected([makePdfFile()]);
+      fixture.detectChanges();
+    });
+
+    it('places text field, focuses edit mode, and removes on committing empty text', () => {
+      component.onPaletteTileEnter('text', enterEvt);
+      fixture.detectChanges();
+
+      const fields = component.fields();
+      expect(fields.length).toBe(1);
+      const textField = fields[0];
+      expect(textField.type).toBe('text');
+      expect(textField.textConfig).toBeDefined();
+      expect(component.newlyPlacedFieldId()).toBe(textField.id);
+      expect(component.selectedFieldId()).toBe(textField.id);
+
+      // Updating with real text commits
+      component.onFieldTextChanged({ id: textField.id, content: 'Custom text here' });
+      expect(component.fields()[0].textConfig?.content).toBe('Custom text here');
+
+      // Committing empty text removes the field
+      component.onFieldTextChanged({ id: textField.id, content: '' });
+      expect(component.fields().length).toBe(0);
+      expect(component.selectedFieldId()).toBeNull();
+    });
+
+    it('places checkbox with composite label and allows adding stacked options', () => {
+      component.onPaletteTileEnter('checkbox', enterEvt);
+      fixture.detectChanges();
+
+      const fields = component.fields();
+      expect(fields.length).toBe(1);
+      const chk = fields[0];
+      expect(chk.type).toBe('checkbox');
+      expect(chk.checkboxConfig?.labelPosition).toBe('right');
+      expect(component.newlyPlacedFieldId()).toBe(chk.id);
+
+      // Update label text
+      component.onFieldLabelChanged({ id: chk.id, content: 'Accept terms' });
+      expect(component.fields()[0].checkboxConfig?.label?.content).toBe('Accept terms');
+
+      // Add another option stacked below
+      component.onAddCheckboxOption(chk.id);
+      fixture.detectChanges();
+
+      const updated = component.fields();
+      expect(updated.length).toBe(2);
+      expect(updated[1].yPt).toBeLessThan(updated[0].yPt); // Stacked below in unrotated PDF points
+      expect(component.newlyPlacedFieldId()).toBe(updated[1].id);
+    });
+
+    it('tracks field counts and renders badges in optional fields grid', () => {
+      component.onPaletteTileEnter('text', enterEvt);
+      component.onPaletteTileEnter('text', enterEvt);
+      component.onPaletteTileEnter('checkbox', enterEvt);
+      fixture.detectChanges();
+
+      expect(component.getFieldPlacedCount('text')).toBe(2);
+      expect(component.getFieldPlacedCount('checkbox')).toBe(1);
+    });
+
+    it('toggles Details & Options collapsible accordion', () => {
+      expect(component.detailsExpanded()).toBe(true);
+      component.detailsExpanded.set(false);
+      expect(component.detailsExpanded()).toBe(false);
+      component.detailsExpanded.set(true);
+      expect(component.detailsExpanded()).toBe(true);
+    });
+
+    it('updates selected field properties live from Selected Field panel', () => {
+      component.onPaletteTileEnter('text', enterEvt);
+      fixture.detectChanges();
+
+      const field = component.fields()[0];
+      expect(component.selectedField()?.id).toBe(field.id);
+
+      // Modify formatting
+      component.updateSelectedFieldProp({
+        textConfig: {
+          ...field.textConfig!,
+          fontSize: 20,
+          bold: true,
+          color: '#ef4444'
+        }
+      });
+      fixture.detectChanges();
+
+      const updated = component.selectedField();
+      expect(updated?.textConfig?.fontSize).toBe(20);
+      expect(updated?.textConfig?.bold).toBe(true);
+      expect(updated?.textConfig?.color).toBe('#ef4444');
+    });
+
+    it('opens stamp dialog pre-filled with placed stamp source on edit', () => {
+      component.stampDataUrl.set('data:image/png;base64,STAMP');
+      component.stampSource.set({
+        kind: 'text',
+        lines: ['ACME CORP'],
+        shape: 'circle',
+        color: '#0f766e'
+      });
+      component.onPaletteTileEnter('stamp', enterEvt);
+      fixture.detectChanges();
+
+      const stampField = component.fields()[0];
+      expect(stampField.type).toBe('stamp');
+
+      component.openEditStamp(stampField);
+      expect(component.showStampDialog()).toBe(true);
+      expect(component.editingStampField()?.id).toBe(stampField.id);
+      expect(component.editingStampField()?.stampSource).toEqual(stampField.stampSource);
+    });
   });
 });
 

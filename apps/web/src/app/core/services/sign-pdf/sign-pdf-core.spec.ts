@@ -13,7 +13,12 @@ import {
   SIGN_SCRIPT_FONTS,
   SignFieldElement
 } from '@paperflow/contracts';
-import { exportSignedPdf } from '@paperflow/sign-core';
+import {
+  exportSignedPdf,
+  computeTextLayout,
+  repairMojibakeFilename,
+  decodePdfTextString
+} from '@paperflow/sign-core';
 import { SignatureImageService } from './signature-image.service';
 import { SignatureStorageService } from './signature-storage.service';
 import { PdfInspectionService } from './pdf-inspection.service';
@@ -310,6 +315,17 @@ describe('Sign PDF Core Utilities & Services', () => {
       expect(reopenedLib.getAuthor()).toBe('Legal Dept');
 
       const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+      const urlMod = (await import(/* @vite-ignore */ 'node:' + 'url')) as any;
+      const workerCandidates = [
+        pathMod.resolve('node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'),
+        pathMod.resolve('../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs')
+      ];
+      for (const cand of workerCandidates) {
+        if (fsMod.existsSync(cand)) {
+          (pdfjs as any).GlobalWorkerOptions.workerSrc = urlMod.pathToFileURL(cand).href;
+          break;
+        }
+      }
       const pdfDocJs = await (pdfjs as any).getDocument({ data: result.pdfBytes, verbosity: 0, isEvalSupported: false }).promise;
       expect(pdfDocJs.numPages).toBe(2);
 
@@ -329,6 +345,209 @@ describe('Sign PDF Core Utilities & Services', () => {
       expect(Math.abs(screenPos[0] - 122)).toBeLessThanOrEqual(4);
       expect(screenPos[1]).toBeGreaterThanOrEqual(115);
       expect(screenPos[1]).toBeLessThanOrEqual(150);
+    });
+  });
+
+  describe('WYSIWYG Text Layout Engine (computeTextLayout)', () => {
+    it('wraps text cleanly at maxWidth and calculates line metrics', () => {
+      const text = 'This is a long sentence that must wrap onto multiple lines cleanly.';
+      const layout = computeTextLayout({
+        text,
+        fontSize: 14,
+        maxWidth: 150,
+        lineHeightMultiplier: 1.25,
+        align: 'left'
+      });
+
+      expect(layout.lines.length).toBeGreaterThan(1);
+      expect(layout.fontSize).toBe(14);
+      expect(layout.lineHeight).toBe(14 * 1.25);
+      expect(layout.totalHeight).toBe(layout.lines.length * layout.lineHeight);
+      for (const line of layout.lines) {
+        expect(line.xOffset).toBe(0);
+        expect(line.text.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('computes alignment xOffsets for center and right alignments', () => {
+      const text = 'Short line';
+      const centerLayout = computeTextLayout({
+        text,
+        fontSize: 16,
+        maxWidth: 200,
+        align: 'center'
+      });
+      expect(centerLayout.lines[0].xOffset).toBeGreaterThan(0);
+
+      const rightLayout = computeTextLayout({
+        text,
+        fontSize: 16,
+        maxWidth: 200,
+        align: 'right'
+      });
+      expect(rightLayout.lines[0].xOffset).toBeGreaterThan(centerLayout.lines[0].xOffset);
+    });
+
+    it('breaks excessively long continuous words when exceeding maxWidth', () => {
+      const text = 'SupercalifragilisticexpialidociousAndMoreContinuousCharacters';
+      const layout = computeTextLayout({
+        text,
+        fontSize: 16,
+        maxWidth: 100
+      });
+      expect(layout.lines.length).toBeGreaterThan(1);
+    });
+  });
+
+  describe('ISO 32000-1 Text String Decoding & Mojibake Repair', () => {
+    it('repairs mojibake filename with "à" or UTF-8 en dash artifacts', () => {
+      expect(repairMojibakeFilename('Auction Portal à Impulse Decision.pdf'))
+        .toBe('Auction Portal – Impulse Decision.pdf');
+      expect(repairMojibakeFilename('Document â€“ Final.pdf'))
+        .toBe('Document – Final.pdf');
+      expect(repairMojibakeFilename('Regular-File-Name.pdf'))
+        .toBe('Regular-File-Name.pdf');
+    });
+
+    it('decodes UTF-16BE BOM strings correctly', () => {
+      // UTF-16BE BOM: 0xFE, 0xFF followed by 'H' (0x00, 0x48), 'i' (0x00, 0x69)
+      const u16Bytes = new Uint8Array([0xFE, 0xFF, 0x00, 0x48, 0x00, 0x69]);
+      expect(decodePdfTextString(u16Bytes)).toBe('Hi');
+    });
+
+    it('decodes PDFDocEncoding code 0x96 as en dash', () => {
+      // 0x96 in PDFDocEncoding Annex D maps to 0x2013 (en dash)
+      const pdfDocBytes = new Uint8Array([0x41, 0x96, 0x42]); // "A–B"
+      expect(decodePdfTextString(pdfDocBytes)).toBe('A–B');
+    });
+
+    it('decodes UTF-8 BOM strings correctly', () => {
+      const u8Bytes = new Uint8Array([0xEF, 0xBB, 0xBF, 0x4F, 0x4B]);
+      expect(decodePdfTextString(u8Bytes)).toBe('OK');
+    });
+  });
+
+  describe('Enhanced Field Export (Checkbox with styles & Text with underline)', () => {
+    it('exports composite checkbox with cross, dot, and tick marks alongside text fields with underline', async () => {
+      const doc = await PDFDocument.create();
+      doc.addPage([400, 400]);
+      const initialPdf = await doc.save();
+
+      const checkboxField: SignFieldElement = {
+        id: 'chk-1',
+        type: 'checkbox',
+        pageIndex: 0,
+        xPt: 50,
+        yPt: 300,
+        widthPt: 150,
+        heightPt: 20,
+        checkboxConfig: {
+          checked: true,
+          mark: 'cross',
+          boxSize: 14,
+          label: {
+            content: 'I agree to the updated terms and conditions.',
+            fontSize: 10,
+            color: '#1e293b'
+          },
+          labelPosition: 'right'
+        }
+      };
+
+      const dotCheckboxField: SignFieldElement = {
+        id: 'chk-2',
+        type: 'checkbox',
+        pageIndex: 0,
+        xPt: 50,
+        yPt: 260,
+        widthPt: 100,
+        heightPt: 20,
+        checkboxConfig: {
+          checked: true,
+          mark: 'dot',
+          boxSize: 14,
+          label: {
+            content: 'Option B',
+            fontSize: 10,
+            color: '#1e293b'
+          },
+          labelPosition: 'right'
+        }
+      };
+
+      const textField: SignFieldElement = {
+        id: 'txt-1',
+        type: 'text',
+        pageIndex: 0,
+        xPt: 50,
+        yPt: 200,
+        widthPt: 200,
+        heightPt: 40,
+        textConfig: {
+          content: 'Important Notice Headline',
+          fontSize: 14,
+          color: '#0f766e',
+          bold: true,
+          underline: true,
+          align: 'center',
+          opacity: 0.9
+        }
+      };
+
+      const result = await exportSignedPdf(
+        initialPdf,
+        [checkboxField, dotCheckboxField, textField]
+      );
+
+      expect(result.fieldsApplied).toBe(3);
+      expect(result.pdfBytes.byteLength).toBeGreaterThan(0);
+
+      const reopened = await PDFDocument.load(result.pdfBytes);
+      expect(reopened.getPageCount()).toBe(1);
+    });
+  });
+
+  describe('Stamp IndexedDB Storage Service', () => {
+    it('manages stamps in storage or degrades gracefully when IndexedDB is unavailable', async () => {
+      const stampId = 'stamp-' + Date.now();
+      const record = {
+        id: stampId,
+        label: 'Acme Official Stamp',
+        source: {
+          kind: 'text' as const,
+          lines: ['ACME CORP', 'VERIFIED'],
+          shape: 'circle' as const,
+          color: '#0f766e',
+          borderWidth: 2,
+          fontFamily: 'Inter'
+        },
+        imageDataUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        created: Date.now()
+      };
+
+      storageService.setDefaultStampId(stampId);
+      expect(storageService.getDefaultStampId()).toBe(stampId);
+
+      const saved = await storageService.saveStamp(record);
+      if (saved) {
+        const defaultStamp = await storageService.getDefaultStamp();
+        expect(defaultStamp).not.toBeNull();
+        expect(defaultStamp?.label).toBe('Acme Official Stamp');
+
+        const allStamps = await storageService.listStamps();
+        expect(allStamps.some(s => s.id === stampId)).toBe(true);
+
+        await storageService.deleteStamp(stampId);
+        const afterDelete = await storageService.listStamps();
+        expect(afterDelete.some(s => s.id === stampId)).toBe(false);
+      } else {
+        // In environments without IndexedDB (e.g. headless jsdom), degrades gracefully
+        expect(await storageService.listStamps()).toEqual([]);
+        expect(await storageService.getDefaultStamp()).toBeNull();
+      }
+
+      storageService.clearDefaultStampId();
+      expect(storageService.getDefaultStampId()).toBeNull();
     });
   });
 });

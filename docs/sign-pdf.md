@@ -138,11 +138,47 @@ npm run build:contracts
 npm --workspace=apps/api run test
 
 # 3. Frontend Sign PDF Vitest suite (core services, component state/a11y, /sign/:token, routing)
-npx --workspace=apps/web ng test --watch=false \
-  --include=src/app/core/services/sign-pdf/sign-pdf-core.spec.ts \
-  --include=src/app/pages/sign-pdf/sign-pdf.component.spec.ts \
-  --include=src/app/pages/sign-request/sign-request.component.spec.ts \
-  --include=src/app/pages/edit-pdf/services/coordinate-transform.spec.ts \
-  --include=src/app/app.routes.spec.ts
+npm --workspace=apps/web test
 ```
+
+---
+
+## 9. Enhanced Fields, WYSIWYG Engine & Sidebar Redesign
+
+### Field Model Extensions & Backward Compatibility
+- **`SignFieldElement` enhancements**:
+  - `textConfig`: `{ content: string, fontFamily?, fontSize: number, color: string, bold?: boolean, italic?: boolean, underline?: boolean, align: 'left'|'center'|'right', lineHeight: number, opacity: number, autoGrow: boolean, boxWidth?: number }`.
+  - `stampSource`: `{ kind: 'text', lines: string[], shape: 'rect'|'rounded'|'circle', color: string, borderWidth?: number, fontFamily?: string } | { kind: 'image', originalBlobId?, processedBlobId?, originalDataUrl?, processedDataUrl?, removeBackground?: boolean, tolerance?: number }`. Stores source definition for lossless re-editing.
+  - `templateId`: Shared UUID linking placed stamp copies across pages so editing one stamp can update all copies simultaneously.
+  - `checkboxConfig`: `{ checked: boolean, mark: 'tick'|'cross'|'dot', boxSize: number, label?: { content: string, fontFamily?, fontSize?: number, color?: string, bold?: boolean, italic?: boolean }, labelPosition: 'right'|'left', groupId?: string }`.
+- **Normalization Migration**: `normalizeSignFieldElement()` in `@paperflow/contracts` migrates older persisted fields on load so existing saved documents and local storage retain full compatibility without data loss.
+
+### WYSIWYG Multi-Line Text Engine & Character Decoding
+- **Shared Fontkit Layout (`computeTextLayout`)**:
+  - Computes deterministic word wrapping, long-word character splitting, line heights, and alignment horizontal offsets (`left`, `center`, `right`) based on font metrics.
+  - Reused by both canvas DOM rendering and PDF export (`exportSignedPdf`), guaranteeing that line wraps and visual positioning in the exported PDF match canvas preview within 1 pt.
+  - Supports vector underline rendering, font opacity, and subset font embedding.
+- **ISO 32000-1 Decoding & Mojibake Repair**:
+  - `decodePdfTextString`: Decodes UTF-16BE BOM, UTF-8 BOM, strict UTF-8, and PDFDocEncoding Annex D (maps `0x96` to en dash `–`).
+  - `repairMojibakeFilename`: Corrects common double-encoding artifacts (e.g. `Auction Portal à Impulse Decision…` $\to$ `Auction Portal – Impulse Decision…`).
+
+### Company Stamp Re-editing & Templates
+- Placed stamps can be re-edited via double-click, Enter/F2, canvas quick toolbar "Edit", or Selected Field panel.
+- Stamp dialog pre-fills from `stampSource`: text stamps show editable lines/shape/color; image stamps expose background removal tolerance, replace image, and remove image.
+- Scope selector: When multiple copies share a `templateId`, users can choose between *"Update all copies"* (default) or *"Update this stamp only"*.
+- Device storage: IndexedDB `stamps` store (`pdftailor-sign-db` v2) stores custom and default stamps locally with zero cloud upload.
+
+### Composite Checkbox with Label & Stacked Options
+- Placed checkbox forms a composite vector box + editable inline label (`labelPosition: 'right' | 'left'`).
+- Toggled via Space key, canvas click, or Selected Field panel "Checked" switch.
+- Mark styles: `tick` (checkmark), `cross` (X mark), or `dot` (radio-style bullet).
+- "+ Add another option" button on the field and in the sidebar stacks subsequent checkboxes 8 pt below with group alignment.
+
+### Sidebar Redesign
+- **Sticky Header**: Solid background and bottom border; content scrolls cleanly beneath it with zero overlap.
+- **Optional Fields Grid**: Compact 2-column grid (44 px tile height, 8 px gap) with hover/focus drag handles, placed count badges (`×2`), and secondary lines for configured values.
+- **Dedicated Selected Field Card**: Contextual property inspector for typography (bundled fonts, sizes, swatches, B/I/U, alignment, opacity), checkbox options, and stamp copy controls.
+- **Collapsible Details & Options**: Accordion keeping signer metadata compact and uncluttered.
+- **Unclipped Scroll Container**: `min-height: 0; overflow-y: auto; padding-bottom: 48px;` ensuring footer buttons never cover any options on any screen resolution.
+
 
