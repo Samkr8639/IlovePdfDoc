@@ -169,7 +169,7 @@
       <div class="top-toolbar-strip">
         <div class="top-toolbar-inner">
           <div class="toolbar-doc-pill">
-            <span class="doc-name-chip">{{ selectedFile()?.name }}</span>
+            <span class="doc-name-chip">{{ displayFileName() }}</span>
             <span class="doc-pages-chip">{{ pages().length }} {{ pages().length === 1 ? 'page' : 'pages' }}</span>
           </div>
 
@@ -281,6 +281,7 @@
                         [accentColor]="getFieldAccentColor(field)"
                         [assigneeLabel]="getFieldAssigneeName(field)"
                         [assigneeColor]="getFieldAssigneeColor(field)"
+                        [autoFocusEdit]="newlyPlacedFieldId() === field.id"
                         (selectedField)="selectedFieldId.set($event)"
                         (dragStart)="onFieldDragStart($event)"
                         (touchDragStart)="onFieldTouchDragStart($event)"
@@ -291,7 +292,11 @@
                         (bringForward)="bringForward($event)"
                         (sendBackward)="sendBackward($event)"
                         (nudge)="nudgeField($event)"
-                        (toggleCheckbox)="toggleCheckboxField($event)" />
+                        (toggleCheckbox)="toggleCheckboxField($event)"
+                        (editStamp)="openEditStamp($event)"
+                        (textChanged)="onFieldTextChanged($event)"
+                        (labelChanged)="onFieldLabelChanged($event)"
+                        (addOption)="onAddCheckboxOption($event)" />
                     }
                   </div>
                 </div>
@@ -562,13 +567,23 @@
                   draggable="true"
                   [class.armed]="armedToolType() === 'signature'"
                   [attr.aria-pressed]="armedToolType() === 'signature'"
-                  aria-label="Signature required field. Drag onto page or press Enter to place."
+                  aria-label="Signature required field. Drag onto page or click to place."
                   (dragstart)="onPaletteDragStart($event, 'signature')"
                   (click)="onPaletteTileClick('signature')"
                   (keydown.enter)="onPaletteTileEnter('signature', $event)">
                   <span class="drag-grip" aria-hidden="true">⋮⋮</span>
+                  <div class="tile-icon-wrap">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                  </div>
                   <div class="tile-label-col">
-                    <span class="tile-title">Signature</span>
+                    <div class="tile-title-row">
+                      <span class="tile-title">Signature</span>
+                      @if (getFieldPlacedCount('signature') > 0) {
+                        <span class="tile-count-badge">×{{ getFieldPlacedCount('signature') }}</span>
+                      }
+                    </div>
                     @if (whoSigns() === 'several_people') {
                       <span class="tile-placeholder-hint">Click or drag for active recipient</span>
                     } @else if (signatureDataUrl()) {
@@ -584,8 +599,8 @@
                     class="tile-edit-pencil"
                     aria-label="Edit signature"
                     title="Edit signature"
-                    (click)="signatureDialogKind.set('signature')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    (click)="$event.stopPropagation(); signatureDialogKind.set('signature')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M12 20h9" />
                       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                     </svg>
@@ -594,117 +609,441 @@
               </div>
             </div>
 
-            <!-- Section 4: OPTIONAL FIELDS -->
+            <!-- Section 4: OPTIONAL FIELDS (Compact 2-Column Grid) -->
             <div class="sidebar-option-block">
               <span class="section-badge-title">OPTIONAL FIELDS</span>
-              <div class="optional-fields-list">
-                @for (item of paletteItems.slice(1); track item.type) {
-                  <div class="field-tile-row">
-                    <button
-                      type="button"
-                      class="field-tile-main"
-                      draggable="true"
-                      [class.armed]="armedToolType() === item.type"
-                      [attr.aria-pressed]="armedToolType() === item.type"
-                      [attr.aria-label]="item.label + ' field. Drag onto page or press Enter to place.'"
-                      (dragstart)="onPaletteDragStart($event, item.type)"
-                      (click)="onPaletteTileClick(item.type)"
-                      (keydown.enter)="onPaletteTileEnter(item.type, $event)">
-                      <span class="drag-grip" aria-hidden="true">⋮⋮</span>
-                      <div class="tile-label-col">
-                        <span class="tile-title">{{ item.label }}</span>
-                        @if (item.type === 'initials') {
-                          @if (initialsDataUrl()) {
-                            <img [src]="initialsDataUrl()!" alt="Initials preview" class="tile-live-preview small" />
-                          } @else {
-                            <span class="tile-text-chip">{{ formattedInitialsText() || 'SK' }}</span>
-                          }
-                        } @else if (item.type === 'name') {
-                          <span class="tile-text-chip">{{ fullName() || 'Your Name' }}</span>
-                        } @else if (item.type === 'date') {
-                          <span class="tile-text-chip">{{ customDateValue() }}</span>
-                        } @else if (item.type === 'stamp' && stampDataUrl()) {
-                          <img [src]="stampDataUrl()!" alt="Stamp preview" class="tile-live-preview small" />
-                        }
-                      </div>
-                    </button>
-
-                    @if (item.type === 'initials') {
-                      <button type="button" class="tile-edit-pencil" aria-label="Edit initials" title="Edit initials" (click)="signatureDialogKind.set('initials')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                      </button>
-                    } @else if (item.type === 'stamp') {
-                      <button type="button" class="tile-edit-pencil" aria-label="Edit company stamp" title="Configure company stamp" (click)="showStampDialog.set(true)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                      </button>
+              <div class="optional-fields-grid" role="group" aria-label="Optional fields grid">
+                <!-- 1. Initials -->
+                <div class="compact-grid-tile" [class.armed]="armedToolType() === 'initials'">
+                  <button
+                    type="button"
+                    class="compact-tile-btn"
+                    draggable="true"
+                    aria-label="Initials field"
+                    (dragstart)="onPaletteDragStart($event, 'initials')"
+                    (click)="onPaletteTileClick('initials')"
+                    (keydown.enter)="onPaletteTileEnter('initials', $event)">
+                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
+                    <span class="tile-glyph-icon">Init</span>
+                    <div class="compact-tile-text">
+                      <span class="tile-primary-name">Initials</span>
+                      @if (formattedInitialsText() || initialsDataUrl()) {
+                        <span class="tile-secondary-val">{{ formattedInitialsText() || 'S' }}</span>
+                      }
+                    </div>
+                    @if (getFieldPlacedCount('initials') > 0) {
+                      <span class="tile-count-badge">×{{ getFieldPlacedCount('initials') }}</span>
                     }
-                  </div>
-                }
+                  </button>
+                  <button
+                    type="button"
+                    class="compact-tile-action-btn"
+                    aria-label="Edit initials"
+                    title="Edit initials"
+                    (click)="$event.stopPropagation(); signatureDialogKind.set('initials')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- 2. Name -->
+                <div class="compact-grid-tile" [class.armed]="armedToolType() === 'name'">
+                  <button
+                    type="button"
+                    class="compact-tile-btn"
+                    draggable="true"
+                    aria-label="Name field"
+                    (dragstart)="onPaletteDragStart($event, 'name')"
+                    (click)="onPaletteTileClick('name')"
+                    (keydown.enter)="onPaletteTileEnter('name', $event)">
+                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
+                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <div class="compact-tile-text">
+                      <span class="tile-primary-name">Name</span>
+                      @if (fullName()) {
+                        <span class="tile-secondary-val">{{ fullName() }}</span>
+                      }
+                    </div>
+                    @if (getFieldPlacedCount('name') > 0) {
+                      <span class="tile-count-badge">×{{ getFieldPlacedCount('name') }}</span>
+                    }
+                  </button>
+                </div>
+
+                <!-- 3. Date -->
+                <div class="compact-grid-tile" [class.armed]="armedToolType() === 'date'">
+                  <button
+                    type="button"
+                    class="compact-tile-btn"
+                    draggable="true"
+                    aria-label="Date field"
+                    (dragstart)="onPaletteDragStart($event, 'date')"
+                    (click)="onPaletteTileClick('date')"
+                    (keydown.enter)="onPaletteTileEnter('date', $event)">
+                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
+                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <div class="compact-tile-text">
+                      <span class="tile-primary-name">Date</span>
+                      @if (customDateValue()) {
+                        <span class="tile-secondary-val">{{ customDateValue() }}</span>
+                      }
+                    </div>
+                    @if (getFieldPlacedCount('date') > 0) {
+                      <span class="tile-count-badge">×{{ getFieldPlacedCount('date') }}</span>
+                    }
+                  </button>
+                </div>
+
+                <!-- 4. Text -->
+                <div class="compact-grid-tile" [class.armed]="armedToolType() === 'text'">
+                  <button
+                    type="button"
+                    class="compact-tile-btn"
+                    draggable="true"
+                    title="Click to add text, then type"
+                    aria-label="Text field. Click to add text, then type."
+                    (dragstart)="onPaletteDragStart($event, 'text')"
+                    (click)="onPaletteTileClick('text')"
+                    (keydown.enter)="onPaletteTileEnter('text', $event)">
+                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
+                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+                    </svg>
+                    <div class="compact-tile-text">
+                      <span class="tile-primary-name">Text</span>
+                    </div>
+                    @if (getFieldPlacedCount('text') > 0) {
+                      <span class="tile-count-badge">×{{ getFieldPlacedCount('text') }}</span>
+                    }
+                  </button>
+                </div>
+
+                <!-- 5. Company stamp -->
+                <div class="compact-grid-tile" [class.armed]="armedToolType() === 'stamp'">
+                  <button
+                    type="button"
+                    class="compact-tile-btn"
+                    draggable="true"
+                    aria-label="Company stamp field"
+                    (dragstart)="onPaletteDragStart($event, 'stamp')"
+                    (click)="onPaletteTileClick('stamp')"
+                    (keydown.enter)="onPaletteTileEnter('stamp', $event)">
+                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
+                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4.73 13.73L3 17h18l-1.73-3.27z"/><path d="M12 13V2"/>
+                    </svg>
+                    <div class="compact-tile-text">
+                      <span class="tile-primary-name">Company stamp</span>
+                      @if (stampDataUrl()) {
+                        <span class="tile-secondary-val">Configured</span>
+                      }
+                    </div>
+                    @if (getFieldPlacedCount('stamp') > 0) {
+                      <span class="tile-count-badge">×{{ getFieldPlacedCount('stamp') }}</span>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="compact-tile-action-btn"
+                    aria-label="Edit default stamp"
+                    title="Edit default stamp"
+                    (click)="$event.stopPropagation(); openDefaultStampEdit()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- 6. Checkbox -->
+                <div class="compact-grid-tile" [class.armed]="armedToolType() === 'checkbox'">
+                  <button
+                    type="button"
+                    class="compact-tile-btn"
+                    draggable="true"
+                    aria-label="Checkbox field"
+                    (dragstart)="onPaletteDragStart($event, 'checkbox')"
+                    (click)="onPaletteTileClick('checkbox')"
+                    (keydown.enter)="onPaletteTileEnter('checkbox', $event)">
+                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
+                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    <div class="compact-tile-text">
+                      <span class="tile-primary-name">Checkbox</span>
+                    </div>
+                    @if (getFieldPlacedCount('checkbox') > 0) {
+                      <span class="tile-count-badge">×{{ getFieldPlacedCount('checkbox') }}</span>
+                    }
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Signer Profile & Selected Field Properties -->
-            <div class="sidebar-option-block">
-              <span class="section-badge-title">DETAILS &amp; OPTIONS</span>
-
-              <label class="inspector-field">
-                <span>Full name</span>
-                <input
-                  type="text"
-                  class="pt-sidebar-input"
-                  placeholder="Enter full name"
-                  [ngModel]="fullName()"
-                  (ngModelChange)="onFullNameChange($event)" />
-              </label>
-
-              <label class="pt-checkbox-row">
-                <input type="checkbox" [ngModel]="rememberName()" (ngModelChange)="onRememberNameToggle($event)" />
-                <span>Remember name on this device</span>
-              </label>
-
-              <label class="inspector-field">
-                <span>Date format</span>
-                <select class="pt-sidebar-input" [ngModel]="dateFormat()" (ngModelChange)="onDateFormatChange($event)">
-                  @for (opt of dateFormatOptions; track opt.value) {
-                    <option [value]="opt.value">{{ opt.label }}</option>
-                  }
-                </select>
-              </label>
-
-              <label class="pt-checkbox-row">
-                <input type="checkbox" [ngModel]="addSigningDetails()" (ngModelChange)="onAddSigningDetailsToggle($event)" />
-                <span>Add signing details line under signature</span>
-              </label>
-
-              @if (inspectionSummary()?.hasAcroFormFields) {
-                <label class="pt-checkbox-row">
-                  <input type="checkbox" [ngModel]="flattenFormFields()" (ngModelChange)="flattenFormFields.set($event)" />
-                  <span>Flatten form fields ({{ inspectionSummary()?.acroFormFieldCount }} found)</span>
-                </label>
-              }
-
-              @if (selectedField(); as sel) {
-                <div class="selected-inspector-card">
-                  <div class="inspector-head">
-                    <strong>Selected: {{ sel.type }}</strong>
-                    <span>Page {{ sel.pageIndex + 1 }}</span>
+            <!-- Section 5: SELECTED FIELD PANEL (Visible only when field selected) -->
+            @if (selectedField(); as sel) {
+              <div class="sidebar-option-block selected-inspector-block">
+                <div class="inspector-card-header">
+                  <div class="inspector-title-row">
+                    <span class="section-badge-title">SELECTED FIELD</span>
+                    <span class="inspector-type-badge">{{ sel.type }} · Page {{ sel.pageIndex + 1 }}</span>
                   </div>
+                  <div class="inspector-quick-actions">
+                    <button type="button" class="btn-icon-xs" title="Duplicate (Ctrl+D)" (click)="duplicateField(sel.id)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                    <button type="button" class="btn-icon-xs" title="Bring forward" (click)="bringForward(sel.id)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                    </button>
+                    <button type="button" class="btn-icon-xs" title="Send backward" (click)="sendBackward(sel.id)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <button type="button" class="btn-icon-xs danger" title="Delete (Del)" (click)="removeField(sel.id)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                    </button>
+                  </div>
+                </div>
 
-                  @if (whoSigns() === 'several_people') {
-                    <label class="inspector-field">
-                      <span>Assigned recipient</span>
-                      <select
-                        class="pt-sidebar-input"
-                        [ngModel]="sel.signerId || activeSignerId()"
-                        (ngModelChange)="updateSelectedFieldProp({ signerId: $event })">
-                        @for (s of signers(); track s.id) {
-                          <option [value]="s.id">{{ s.name || s.email || s.id }}</option>
+                <!-- Recipient assignment in multi-signer mode -->
+                @if (whoSigns() === 'several_people') {
+                  <label class="inspector-field">
+                    <span>Assigned recipient</span>
+                    <select
+                      class="pt-sidebar-input"
+                      [ngModel]="sel.signerId || activeSignerId()"
+                      (ngModelChange)="updateSelectedFieldProp({ signerId: $event })">
+                      @for (s of signers(); track s.id) {
+                        <option [value]="s.id">{{ s.name || s.email || s.id }}</option>
+                      }
+                    </select>
+                  </label>
+                }
+
+                <!-- Text-specific controls -->
+                @if (sel.type === 'text') {
+                  <div class="inspector-controls-col">
+                    <div class="inspector-inline-2">
+                      <label class="inspector-field">
+                        <span>Font</span>
+                        <select
+                          class="pt-sidebar-input"
+                          [ngModel]="sel.textConfig?.fontFamily || sel.fontId || 'noto-sans'"
+                          (ngModelChange)="updateSelectedTextProp({ fontFamily: $event })">
+                          <option value="noto-sans">Noto Sans</option>
+                          @for (f of scriptFonts; track f.id) {
+                            <option [value]="f.id">{{ f.name }}</option>
+                          }
+                        </select>
+                      </label>
+                      <label class="inspector-field">
+                        <span>Size (pt)</span>
+                        <input
+                          type="number"
+                          min="8"
+                          max="72"
+                          class="pt-sidebar-input"
+                          [ngModel]="sel.textConfig?.fontSize ?? sel.fontSizePt ?? 14"
+                          (ngModelChange)="updateSelectedTextProp({ fontSize: +$event || 14 })" />
+                      </label>
+                    </div>
+
+                    <!-- Format buttons: B, I, U and Alignments L, C, R -->
+                    <div class="format-buttons-row">
+                      <div class="btn-toggle-group">
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.textConfig?.bold"
+                          (click)="updateSelectedTextProp({ bold: !sel.textConfig?.bold })"
+                          title="Bold"><strong>B</strong></button>
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.textConfig?.italic"
+                          (click)="updateSelectedTextProp({ italic: !sel.textConfig?.italic })"
+                          title="Italic"><em>I</em></button>
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.textConfig?.underline"
+                          (click)="updateSelectedTextProp({ underline: !sel.textConfig?.underline })"
+                          title="Underline"><span style="text-decoration: underline;">U</span></button>
+                      </div>
+                      <div class="btn-toggle-group">
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="!sel.textConfig?.align || sel.textConfig?.align === 'left'"
+                          (click)="updateSelectedTextProp({ align: 'left' })"
+                          title="Align Left">L</button>
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.textConfig?.align === 'center'"
+                          (click)="updateSelectedTextProp({ align: 'center' })"
+                          title="Align Center">C</button>
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.textConfig?.align === 'right'"
+                          (click)="updateSelectedTextProp({ align: 'right' })"
+                          title="Align Right">R</button>
+                      </div>
+                    </div>
+
+                    <!-- Color swatches -->
+                    <div class="inspector-color-row">
+                      <span class="sub-label">Color:</span>
+                      <div class="swatches-group">
+                        @for (c of presetTextColors; track c) {
+                          <button
+                            type="button"
+                            class="color-dot-sm"
+                            [class.active]="(sel.textConfig?.color || sel.color) === c"
+                            [style.background-color]="c"
+                            (click)="updateSelectedTextProp({ color: c })">
+                          </button>
                         }
-                      </select>
-                    </label>
-                  }
+                        <input
+                          type="color"
+                          class="color-picker-mini"
+                          [ngModel]="sel.textConfig?.color || sel.color || '#14213D'"
+                          (ngModelChange)="updateSelectedTextProp({ color: $event })" />
+                      </div>
+                    </div>
 
-                  @if (sel.type === 'text' || sel.type === 'name' || sel.type === 'date') {
+                    <!-- Line height & Opacity -->
+                    <div class="inspector-inline-2">
+                      <label class="inspector-field">
+                        <span>Line height</span>
+                        <select
+                          class="pt-sidebar-input"
+                          [ngModel]="sel.textConfig?.lineHeight || 1.25"
+                          (ngModelChange)="updateSelectedTextProp({ lineHeight: +$event })">
+                          <option [value]="1.0">1.0 (Tight)</option>
+                          <option [value]="1.25">1.25 (Normal)</option>
+                          <option [value]="1.5">1.5 (Relaxed)</option>
+                        </select>
+                      </label>
+                      <label class="inspector-field">
+                        <span>Opacity</span>
+                        <input
+                          type="range"
+                          min="0.2"
+                          max="1.0"
+                          step="0.05"
+                          class="opacity-slider"
+                          [ngModel]="sel.textConfig?.opacity ?? 1"
+                          (ngModelChange)="updateSelectedTextProp({ opacity: +$event })" />
+                      </label>
+                    </div>
+                  </div>
+                }
+
+                <!-- Checkbox-specific controls -->
+                @else if (sel.type === 'checkbox') {
+                  <div class="inspector-controls-col">
+                    <div class="checkbox-setting-row">
+                      <span class="sub-label">State:</span>
+                      <label class="pt-checkbox-row">
+                        <input
+                          type="checkbox"
+                          [checked]="sel.checked !== false"
+                          (change)="toggleCheckboxField(sel.id)" />
+                        <span>{{ sel.checked !== false ? 'Checked' : 'Unchecked' }}</span>
+                      </label>
+                    </div>
+
+                    <!-- Mark Style -->
+                    <div class="mark-style-row">
+                      <span class="sub-label">Mark:</span>
+                      <div class="btn-toggle-group">
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="(sel.checkboxConfig?.mark || 'tick') === 'tick'"
+                          (click)="updateSelectedCheckboxProp({ mark: 'tick' })">
+                          ✓ Tick
+                        </button>
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.checkboxConfig?.mark === 'cross'"
+                          (click)="updateSelectedCheckboxProp({ mark: 'cross' })">
+                          ✕ Cross
+                        </button>
+                        <button
+                          type="button"
+                          class="format-btn"
+                          [class.active]="sel.checkboxConfig?.mark === 'dot'"
+                          (click)="updateSelectedCheckboxProp({ mark: 'dot' })">
+                          ● Dot
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Box size & Label position -->
+                    <div class="inspector-inline-2">
+                      <label class="inspector-field">
+                        <span>Box size (pt)</span>
+                        <input
+                          type="number"
+                          min="12"
+                          max="48"
+                          class="pt-sidebar-input"
+                          [ngModel]="sel.checkboxConfig?.boxSize || 18"
+                          (ngModelChange)="updateSelectedCheckboxProp({ boxSize: +$event || 18 })" />
+                      </label>
+                      <label class="inspector-field">
+                        <span>Label position</span>
+                        <select
+                          class="pt-sidebar-input"
+                          [ngModel]="sel.checkboxConfig?.labelPosition || 'right'"
+                          (ngModelChange)="updateSelectedCheckboxProp({ labelPosition: $event })">
+                          <option value="right">Right</option>
+                          <option value="left">Left</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <!-- Label text input -->
+                    <label class="inspector-field">
+                      <span>Label text</span>
+                      <input
+                        type="text"
+                        class="pt-sidebar-input"
+                        placeholder="Add label text…"
+                        [ngModel]="sel.checkboxConfig?.label?.content || ''"
+                        (ngModelChange)="onFieldLabelChanged({ id: sel.id, content: $event })" />
+                    </label>
+
+                    <button type="button" class="btn-outline-xs add-option-btn-panel" (click)="onAddCheckboxOption(sel.id)">
+                      + Add another option below
+                    </button>
+                  </div>
+                }
+
+                <!-- Stamp-specific controls -->
+                @else if (sel.type === 'stamp') {
+                  <div class="inspector-controls-col">
+                    @if (sel.imageDataUrl) {
+                      <div class="stamp-inspector-preview">
+                        <img [src]="sel.imageDataUrl" alt="Selected stamp" />
+                      </div>
+                    }
+                    <button type="button" class="btn-outline-xs" (click)="openEditStamp(sel)">
+                      Edit Stamp Details…
+                    </button>
+                  </div>
+                }
+
+                <!-- Date / Name controls -->
+                @else if (sel.type === 'date' || sel.type === 'name') {
+                  <div class="inspector-controls-col">
                     <label class="inspector-field">
                       <span>Field value</span>
                       <input
@@ -734,20 +1073,74 @@
                         </select>
                       </label>
                     </div>
-                  }
+                  </div>
+                }
 
-                  @if (canApplyToMultiplePages()) {
-                    <div class="multi-page-actions">
-                      <button type="button" class="btn-outline-xs" (click)="applySelectedToAllPages()">Apply to all pages</button>
-                      <button type="button" class="btn-outline-xs" (click)="openApplyToPagesModal()">Apply to pages…</button>
-                    </div>
+                @if (canApplyToMultiplePages()) {
+                  <div class="multi-page-actions">
+                    <button type="button" class="btn-outline-xs" (click)="applySelectedToAllPages()">Apply to all pages</button>
+                    <button type="button" class="btn-outline-xs" (click)="openApplyToPagesModal()">Apply to pages…</button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Section 6: DETAILS & OPTIONS (Collapsible Accordion) -->
+            <div class="sidebar-option-block accordion-block">
+              <button
+                type="button"
+                class="accordion-header-btn"
+                (click)="detailsExpanded.set(!detailsExpanded())"
+                [attr.aria-expanded]="detailsExpanded()">
+                <span class="section-badge-title">DETAILS &amp; OPTIONS</span>
+                <svg class="chevron-icon" [class.rotated]="detailsExpanded()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              @if (detailsExpanded()) {
+                <div class="accordion-content">
+                  <label class="inspector-field">
+                    <span>Full name</span>
+                    <input
+                      type="text"
+                      class="pt-sidebar-input"
+                      placeholder="Enter full name"
+                      [ngModel]="fullName()"
+                      (ngModelChange)="onFullNameChange($event)" />
+                  </label>
+
+                  <label class="pt-checkbox-row">
+                    <input type="checkbox" [ngModel]="rememberName()" (ngModelChange)="onRememberNameToggle($event)" />
+                    <span>Remember name on this device</span>
+                  </label>
+
+                  <label class="inspector-field">
+                    <span>Date format</span>
+                    <select class="pt-sidebar-input" [ngModel]="dateFormat()" (ngModelChange)="onDateFormatChange($event)">
+                      @for (opt of dateFormatOptions; track opt.value) {
+                        <option [value]="opt.value">{{ opt.label }}</option>
+                      }
+                    </select>
+                  </label>
+
+                  <label class="pt-checkbox-row">
+                    <input type="checkbox" [ngModel]="addSigningDetails()" (ngModelChange)="onAddSigningDetailsToggle($event)" />
+                    <span>Add signing details line under signature</span>
+                  </label>
+
+                  @if (inspectionSummary()?.hasAcroFormFields) {
+                    <label class="pt-checkbox-row">
+                      <input type="checkbox" [ngModel]="flattenFormFields()" (ngModelChange)="flattenFormFields.set($event)" />
+                      <span>Flatten form fields ({{ inspectionSummary()?.acroFormFieldCount }} found)</span>
+                    </label>
                   }
                 </div>
               }
             </div>
           </div>
 
-          <!-- 5. Sticky Bottom Sign Button -->
+          <!-- Section 7: Fixed Bottom Sign Button -->
           <div class="sidebar-footer">
             @if (actionDisabledReason(); as hintText) {
               <p id="sign-btn-hint" class="sign-helper-hint">{{ hintText }}</p>
@@ -948,6 +1341,10 @@
 
   @if (showStampDialog()) {
     <app-sign-stamp-dialog
+      [initialStamp]="editingStampField()?.stampSource || stampSource()"
+      [isEditing]="!!editingStampField()"
+      [hasMultipleCopies]="hasStampCopies()"
+      [isDefaultEdit]="isEditingDefaultStamp()"
       (applied)="onStampApplied($event)"
       (cancelled)="showStampDialog.set(false)" />
   }

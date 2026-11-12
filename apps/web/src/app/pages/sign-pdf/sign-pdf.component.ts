@@ -18,12 +18,21 @@ import {
   parsePageRange,
   PdfPageBoxMetrics,
   SIGN_SCRIPT_FONTS,
+  SignCheckboxConfig,
+  SignCheckboxMark,
   SignDateFormat,
   SignFieldElement,
   SignFieldType,
-  SignRequestOrder
+  SignRequestOrder,
+  SignStampSource,
+  SignTextConfig,
+  normalizeSignFieldElement
 } from '@paperflow/contracts';
-import { UnsupportedPkcs12CipherError } from '@paperflow/sign-core';
+import {
+  UnsupportedPkcs12CipherError,
+  decodePdfTextString,
+  repairMojibakeFilename
+} from '@paperflow/sign-core';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
@@ -156,6 +165,13 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   readonly signatureColor = signal<string>('#14213D');
   readonly initialsDataUrl = signal<string | null>(null);
   readonly stampDataUrl = signal<string | null>(null);
+  readonly stampSource = signal<SignStampSource | null>(null);
+  readonly editingStampField = signal<SignFieldElement | null>(null);
+  readonly isEditingDefaultStamp = signal<boolean>(false);
+  readonly newlyPlacedFieldId = signal<string | null>(null);
+  readonly detailsExpanded = signal<boolean>(true);
+  readonly presetTextColors = ['#14213D', '#0F766E', '#E05D44', '#0284C7', '#7C3AED', '#059669'];
+  private activeStampTemplateId: string = `stamp-tmpl-${Date.now()}`;
 
   // Fields on pages + interaction state
   readonly fields = signal<SignFieldElement[]>([]);
@@ -249,6 +265,15 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     return 'Place your signature on the page first';
   });
   readonly resultIsClientSide = computed(() => this.exportOutcome()?.signedMode !== 'server_openssl');
+  readonly displayFileName = computed(() => {
+    const f = this.selectedFile();
+    return f?.name ? repairMojibakeFilename(f.name) : 'document.pdf';
+  });
+  readonly hasStampCopies = computed(() => {
+    const sel = this.editingStampField();
+    if (!sel || !sel.templateId) return false;
+    return this.fields().filter(f => f.templateId === sel.templateId).length > 1;
+  });
   readonly selectedField = computed<SignFieldElement | null>(() => {
     const id = this.selectedFieldId();
     return id ? (this.fields().find(f => f.id === id) || null) : null;
@@ -313,6 +338,13 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       this.rememberName.set(true);
     }
     this.customDateValue.set(formatSigningDate(new Date(), this.dateFormat()));
+
+    this.storageService.getDefaultStamp?.()?.then(st => {
+      if (st) {
+        this.stampDataUrl.set(st.imageDataUrl);
+        this.stampSource.set(st.source);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -750,8 +782,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     const activeDate = this.customDateValue() || formatSigningDate(new Date(), this.dateFormat());
     const nameText = (this.fullName() || 'Signer Name').trim();
 
+    const elId = `sf-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const el: SignFieldElement = {
-      id: `sf-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: elId,
       pageIndex,
       type,
       ...pdfRect,
@@ -766,17 +799,46 @@ export class SignPdfComponent implements OnInit, OnDestroy {
             : type === 'stamp'
               ? (this.stampDataUrl() || undefined)
               : undefined,
+      stampSource: type === 'stamp' ? (this.stampSource() || undefined) : undefined,
+      templateId: type === 'stamp' ? this.activeStampTemplateId : undefined,
       text:
         type === 'name'
           ? nameText
           : type === 'date'
             ? activeDate
             : type === 'text'
-              ? 'Text note'
+              ? ''
               : undefined,
+      textConfig:
+        type === 'text'
+          ? {
+              content: '',
+              fontSize: 14,
+              color: '#14213D',
+              align: 'left',
+              lineHeight: 1.25,
+              opacity: 1,
+              autoGrow: true,
+              boxWidth: pdfRect.widthPt
+            }
+          : undefined,
+      checkboxConfig:
+        type === 'checkbox'
+          ? {
+              checked: true,
+              mark: 'tick',
+              boxSize: 18,
+              label: {
+                content: '',
+                fontSize: 12,
+                color: '#14213D'
+              },
+              labelPosition: 'right'
+            }
+          : undefined,
       fontId: type === 'text' ? 'noto-sans' : undefined,
       fontSizePt: type === 'name' || type === 'date' || type === 'text' ? 14 : undefined,
-      color: this.signatureColor(),
+      color: type === 'checkbox' ? 'var(--pt-teal-700)' : (type === 'text' ? '#14213D' : this.signatureColor()),
       dateFormat: type === 'date' ? this.dateFormat() : undefined,
       checked: type === 'checkbox' ? true : undefined,
       showSigningDetailsLine: type === 'signature' ? this.addSigningDetails() : undefined,
@@ -790,6 +852,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       execute: () => {
         this.fields.update(list => [...list, el]);
         this.selectedFieldId.set(el.id);
+        if (type === 'text' || type === 'checkbox') {
+          this.newlyPlacedFieldId.set(el.id);
+        }
       },
       undo: () => {
         this.fields.update(list => list.filter(f => f.id !== el.id));
@@ -1248,12 +1313,234 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
   onStampApplied(res: StampApplyResult): void {
     this.showStampDialog.set(false);
+    const target = this.editingStampField();
+    const isDefault = this.isEditingDefaultStamp();
+    this.editingStampField.set(null);
+    this.isEditingDefaultStamp.set(false);
+
+    if (isDefault) {
+      this.stampDataUrl.set(res.imageDataUrl);
+      this.stampSource.set(res.source);
+      this.announce('Default company stamp updated.');
+      return;
+    }
+
+    if (target) {
+      const scope = res.scope || 'all';
+      if (scope === 'all' && target.templateId) {
+        const tId = target.templateId;
+        const matching = this.fields().filter(f => f.templateId === tId);
+        const beforeList = [...this.fields()];
+        const afterList = this.fields().map(f => {
+          if (f.templateId === tId) {
+            return {
+              ...f,
+              imageDataUrl: res.imageDataUrl,
+              stampSource: res.source
+            };
+          }
+          return f;
+        });
+        this.history.execute({
+          description: `Update all ${matching.length} stamp copies`,
+          execute: () => this.fields.set(afterList),
+          undo: () => this.fields.set(beforeList)
+        });
+        this.announce(`Updated ${matching.length} stamp copies.`);
+      } else {
+        const before = { ...target };
+        const after: SignFieldElement = {
+          ...target,
+          imageDataUrl: res.imageDataUrl,
+          stampSource: res.source
+        };
+        this.history.execute({
+          description: 'Update company stamp',
+          execute: () => this.replaceField(after),
+          undo: () => this.replaceField(before)
+        });
+        this.announce('Company stamp updated.');
+      }
+      return;
+    }
+
     this.stampDataUrl.set(res.imageDataUrl);
+    this.stampSource.set(res.source);
+    this.activeStampTemplateId = `stamp-tmpl-${Date.now()}`;
     if (this.pendingSignatureInsertType === 'stamp') {
       this.pendingSignatureInsertType = null;
       this.armedToolType.set('stamp');
       this.announce('Company stamp ready. Click a page to place.');
     }
+  }
+
+  openEditStamp(field: SignFieldElement): void {
+    this.editingStampField.set(field);
+    this.isEditingDefaultStamp.set(false);
+    this.showStampDialog.set(true);
+  }
+
+  openDefaultStampEdit(): void {
+    this.editingStampField.set(null);
+    this.isEditingDefaultStamp.set(true);
+    this.showStampDialog.set(true);
+  }
+
+  onFieldTextChanged(payload: { id: string; content: string }): void {
+    const cur = this.fields().find(f => f.id === payload.id);
+    if (!cur) return;
+    if (!payload.content || payload.content.trim() === '') {
+      this.removeField(payload.id);
+      return;
+    }
+    const before = { ...cur };
+    const after: SignFieldElement = {
+      ...cur,
+      text: payload.content,
+      textConfig: {
+        ...(cur.textConfig || {
+          fontSize: cur.fontSizePt || 14,
+          color: cur.color || '#14213D',
+          align: 'left',
+          lineHeight: 1.25,
+          opacity: 1,
+          autoGrow: true,
+          boxWidth: cur.widthPt
+        }),
+        content: payload.content
+      }
+    };
+    this.history.execute({
+      description: 'Edit text',
+      execute: () => this.replaceField(after),
+      undo: () => this.replaceField(before)
+    });
+  }
+
+  onFieldLabelChanged(payload: { id: string; content: string }): void {
+    const cur = this.fields().find(f => f.id === payload.id);
+    if (!cur) return;
+    const before = { ...cur };
+    const after: SignFieldElement = {
+      ...cur,
+      checkboxConfig: {
+        ...(cur.checkboxConfig || {
+          checked: cur.checked !== false,
+          mark: 'tick',
+          boxSize: 18,
+          labelPosition: 'right'
+        }),
+        label: {
+          ...(cur.checkboxConfig?.label || {
+            fontSize: 12,
+            color: '#14213D'
+          }),
+          content: payload.content
+        }
+      }
+    };
+    this.history.execute({
+      description: 'Edit checkbox label',
+      execute: () => this.replaceField(after),
+      undo: () => this.replaceField(before)
+    });
+  }
+
+  onAddCheckboxOption(fieldId: string): void {
+    const cur = this.fields().find(f => f.id === fieldId);
+    if (!cur) return;
+    const pageMeta = this.pages()[cur.pageIndex];
+    if (!pageMeta) return;
+
+    const spacingPt = 8;
+    const nextYPt = cur.yPt - cur.heightPt - spacingPt;
+    const newId = `sf-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+    const newField: SignFieldElement = {
+      ...cur,
+      id: newId,
+      yPt: Math.max(10, nextYPt),
+      zIndex: (cur.zIndex ?? 1) + 1,
+      checkboxConfig: {
+        ...cur.checkboxConfig!,
+        checked: false,
+        label: {
+          ...cur.checkboxConfig?.label,
+          content: ''
+        }
+      }
+    };
+
+    this.history.execute({
+      description: 'Add checkbox option',
+      execute: () => {
+        this.fields.update(list => [...list, newField]);
+        this.selectedFieldId.set(newId);
+        this.newlyPlacedFieldId.set(newId);
+      },
+      undo: () => {
+        this.fields.update(list => list.filter(f => f.id !== newId));
+        if (this.selectedFieldId() === newId) this.selectedFieldId.set(cur.id);
+      }
+    });
+    this.announce('Checkbox option added.');
+  }
+
+  updateSelectedTextProp(patch: Partial<SignTextConfig>): void {
+    const cur = this.selectedField();
+    if (!cur || cur.type !== 'text') return;
+    const currentCfg = cur.textConfig || {
+      content: cur.text || '',
+      fontSize: cur.fontSizePt || 14,
+      color: cur.color || '#14213D',
+      align: 'left',
+      lineHeight: 1.25,
+      opacity: 1,
+      autoGrow: true,
+      boxWidth: cur.widthPt
+    };
+    const nextCfg: SignTextConfig = { ...currentCfg, ...patch };
+    const before = { ...cur };
+    const after: SignFieldElement = {
+      ...cur,
+      textConfig: nextCfg,
+      text: nextCfg.content,
+      fontSizePt: nextCfg.fontSize,
+      color: nextCfg.color,
+      fontId: nextCfg.fontFamily || cur.fontId
+    };
+    this.history.execute({
+      description: 'Format text field',
+      execute: () => this.replaceField(after),
+      undo: () => this.replaceField(before)
+    });
+  }
+
+  updateSelectedCheckboxProp(patch: Partial<SignCheckboxConfig>): void {
+    const cur = this.selectedField();
+    if (!cur || cur.type !== 'checkbox') return;
+    const currentCfg = cur.checkboxConfig || {
+      checked: cur.checked !== false,
+      mark: 'tick',
+      boxSize: 18,
+      labelPosition: 'right'
+    };
+    const nextCfg: SignCheckboxConfig = { ...currentCfg, ...patch };
+    const before = { ...cur };
+    const after: SignFieldElement = {
+      ...cur,
+      checkboxConfig: nextCfg,
+      checked: nextCfg.checked
+    };
+    this.history.execute({
+      description: 'Format checkbox',
+      execute: () => this.replaceField(after),
+      undo: () => this.replaceField(before)
+    });
+  }
+
+  getFieldPlacedCount(type: SignFieldType): number {
+    return this.fields().filter(f => f.type === type).length;
   }
 
   onFullNameChange(name: string): void {
