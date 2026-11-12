@@ -15,7 +15,8 @@ export const LIVE_TOOL_IDS = new Set<string>(CONTRACT_LIVE_TOOL_IDS || [
   'powerpoint-to-pdf',
   'edit-pdf',
   'pdf-to-jpg',
-  'jpg-to-pdf'
+  'jpg-to-pdf',
+  'sign-pdf'
 ]);
 
 @Injectable({
