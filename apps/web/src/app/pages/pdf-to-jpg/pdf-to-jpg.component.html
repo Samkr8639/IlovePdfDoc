@@ -144,6 +144,34 @@
             </div>
           </div>
         </div>
+
+        <!-- FREQUENTLY ASKED QUESTIONS -->
+        <div class="tool-faqs" style="margin-top: 56px; border-top: 1px solid #e2e8f0; padding-top: 48px;">
+          <h3 class="tool-faqs-title" style="font-size: 26px; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 32px;">Frequently Asked Questions</h3>
+          <div class="tool-faqs-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px;">
+              <h4 class="faq-q" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">What is the difference between Convert pages and Extract images?</h4>
+              <p class="faq-a" style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
+                Convert pages renders every PDF page into a complete, high-resolution JPG image preserving all text, layout, and formatting. Extract images extracts only the embedded photos and illustrations in their native resolution.
+              </p>
+            </div>
+            <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px;">
+              <h4 class="faq-q" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Are my PDF files uploaded to any server?</h4>
+              <p class="faq-a" style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
+                No. PDF to JPG runs 100% locally in your browser memory using WebAssembly. Your documents never leave your device.
+              </p>
+            </div>
+            <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px;">
+              <h4 class="faq-q" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Can I customize image resolution and quality?</h4>
+              <p class="faq-a" style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
+                Yes! Choose from 72 DPI (web) up to 1200 DPI (print quality) with customizable JPEG quality presets.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPLORE MORE PDF TOOLS -->
+        <app-explore-more-tools currentTool="pdf-to-jpg" />
       </div>
     </section>
   }

@@ -1,11 +1,12 @@
 import { Component, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DropzoneComponent } from '../../../../shared/components/dropzone/dropzone.component';
+import { ExploreMoreToolsComponent } from '../../../../shared/components/explore-more-tools/explore-more-tools.component';
 
 @Component({
   selector: 'app-edit-pdf-hero',
   standalone: true,
-  imports: [CommonModule, DropzoneComponent],
+  imports: [CommonModule, DropzoneComponent, ExploreMoreToolsComponent],
   styles: [`
     :host {
       display: block;
@@ -190,6 +191,9 @@ import { DropzoneComponent } from '../../../../shared/components/dropzone/dropzo
         </div>
       </div>
     </section>
+
+    <!-- EXPLORE MORE PDF TOOLS -->
+    <app-explore-more-tools currentTool="edit-pdf" />
   `
 })
 export class EditPdfHeroComponent {

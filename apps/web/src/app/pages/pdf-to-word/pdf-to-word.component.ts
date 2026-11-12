@@ -7,6 +7,7 @@ import { SeoService } from '../../core/services/seo.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 
 import { LayoutService } from '../../core/services/layout.service';
 
@@ -18,7 +19,8 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   imports: [
     DropzoneComponent,
     ProcessingStateComponent,
-    ResultViewComponent
+    ResultViewComponent,
+    ExploreMoreToolsComponent
   ],
   templateUrl: './pdf-to-word.component.html',
   styleUrl: './pdf-to-word.component.css'

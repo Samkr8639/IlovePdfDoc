@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import {
   CreateSignRequestInput,
   deriveInitials,
@@ -37,6 +36,7 @@ import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.com
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 import { PdfThumbnailsPanelComponent } from '../edit-pdf/components/pdf-thumbnails-panel/pdf-thumbnails-panel.component';
 import { PdfBottomBarComponent } from '../edit-pdf/components/pdf-bottom-bar/pdf-bottom-bar.component';
 import { CommandHistoryService } from '../edit-pdf/services/command-history';
@@ -95,11 +95,11 @@ interface SmartGuideLine {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent,
     PtAdSlotComponent,
+    ExploreMoreToolsComponent,
     PdfThumbnailsPanelComponent,
     PdfBottomBarComponent,
     SignSignatureDialogComponent,

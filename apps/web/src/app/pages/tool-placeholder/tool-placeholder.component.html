@@ -124,24 +124,7 @@
               </div>
 
               <!-- RELATED POPULAR TOOLS -->
-              <div class="related-tools-box">
-                <h3 class="related-title">Explore more PDF tools</h3>
-                <div class="related-tools-grid">
-                  @for (rel of relatedTools(); track rel.id) {
-                    <a [routerLink]="rel.route" class="related-card">
-                      <div class="related-icon-box" [style.background]="rel.bgColor">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                          <path [attr.d]="rel.iconPath"></path>
-                        </svg>
-                      </div>
-                      <div class="related-info">
-                        <h4>{{ rel.name }}</h4>
-                        <p>{{ rel.desc }}</p>
-                      </div>
-                    </a>
-                  }
-                </div>
-              </div>
+              <app-explore-more-tools [currentTool]="t.id" />
             </div>
           </section>
         }

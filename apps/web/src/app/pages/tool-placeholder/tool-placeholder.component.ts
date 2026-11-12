@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
@@ -9,6 +9,7 @@ import { ToolDefinition } from '@paperflow/contracts';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -22,11 +23,11 @@ export interface CustomSplitRange {
   selector: 'app-tool-placeholder',
   standalone: true,
   imports: [
-    RouterLink,
     FormsModule,
     DropzoneComponent,
     ProcessingStateComponent,
-    ResultViewComponent
+    ResultViewComponent,
+    ExploreMoreToolsComponent
   ],
   templateUrl: './tool-placeholder.component.html',
   styleUrl: './tool-placeholder.component.css'

@@ -12,6 +12,7 @@ import { LayoutService } from '../../core/services/layout.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -21,7 +22,8 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
   imports: [
     DropzoneComponent,
     ProcessingStateComponent,
-    ResultViewComponent
+    ResultViewComponent,
+    ExploreMoreToolsComponent
   ],
   templateUrl: './word-to-pdf.component.html',
   styleUrl: './word-to-pdf.component.css'

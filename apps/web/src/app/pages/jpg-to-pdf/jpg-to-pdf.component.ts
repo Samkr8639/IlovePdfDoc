@@ -9,13 +9,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
 import { LayoutService } from '../../core/services/layout.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 import { MergeResult } from '../../core/services/browser-pdf.service';
 import { ImageProbeService } from '../../core/services/jpg-to-pdf/image-probe.service';
 import { PageLayoutService, MiniPreviewStyle } from '../../core/services/jpg-to-pdf/page-layout.service';
@@ -44,10 +44,10 @@ const MAX_TOTAL_SIZE_BYTES = 600 * 1024 * 1024; // 600 MB
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     DropzoneComponent,
     ProcessingStateComponent,
-    ResultViewComponent
+    ResultViewComponent,
+    ExploreMoreToolsComponent
   ],
   templateUrl: './jpg-to-pdf.component.html',
   styleUrl: './jpg-to-pdf.component.css',

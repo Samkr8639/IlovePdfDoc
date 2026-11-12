@@ -188,38 +188,7 @@
         </div>
 
         <!-- MORE POPULAR TOOLS CROSS-LINKS -->
-        <div class="related-tools-box">
-          <h3 class="related-title">Explore more PDF tools</h3>
-          <div class="related-tools-grid">
-            <a routerLink="/merge-pdf" class="related-card">
-              <div class="related-info">
-                <h4>Merge PDF</h4>
-                <p>Combine multiple PDF files in seconds</p>
-              </div>
-            </a>
-
-            <a routerLink="/pdf-to-jpg" class="related-card">
-              <div class="related-info">
-                <h4>PDF to JPG</h4>
-                <p>Extract images or convert PDF pages to JPG</p>
-              </div>
-            </a>
-
-            <a routerLink="/compress-pdf" class="related-card">
-              <div class="related-info">
-                <h4>Compress PDF</h4>
-                <p>Reduce file size while saving quality</p>
-              </div>
-            </a>
-
-            <a routerLink="/edit-pdf" class="related-card">
-              <div class="related-info">
-                <h4>Edit PDF</h4>
-                <p>Add text, shapes, and annotations</p>
-              </div>
-            </a>
-          </div>
-        </div>
+        <app-explore-more-tools currentTool="jpg-to-pdf" />
       </div>
     </section>
   }
