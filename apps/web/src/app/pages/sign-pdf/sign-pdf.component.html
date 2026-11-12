@@ -397,50 +397,69 @@
               </div>
 
               @if (whoSigns() === 'only_me' && signType() === 'digital_certificate') {
-                <div class="selected-inspector-card cert-config-card">
-                  <div class="inspector-head">
-                    <strong>PKCS#12 Certificate (.p12 / .pfx)</strong>
+                <div class="cert-config-card">
+                  <div class="cert-card-header">
+                    <div class="cert-card-title">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cert-shield-icon" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                      <span>PKCS#12 Certificate</span>
+                    </div>
                     @if (certFile()) {
                       <button type="button" class="btn-inline-clear" (click)="clearCertificateFile()">Remove</button>
                     }
                   </div>
 
-                  <label class="cert-file-picker">
+                  <label class="cert-file-dropzone" [class.has-file]="!!certFile()">
                     <input type="file" accept=".p12,.pfx" (change)="onCertificateFileSelected($event)" />
-                    <span class="cert-file-btn">{{ certFile() ? certFile()!.name : 'Choose .p12 or .pfx certificate…' }}</span>
-                  </label>
-
-                  <label class="inspector-field">
-                    <span>Certificate password</span>
-                    <div class="pw-input-row">
-                      <input
-                        [type]="showCertPassword() ? 'text' : 'password'"
-                        class="pt-sidebar-input"
-                        placeholder="Enter certificate passphrase"
-                        [ngModel]="certPassword()"
-                        (ngModelChange)="certPassword.set($event)" />
-                      <button
-                        type="button"
-                        class="btn-outline-xs pw-toggle-btn"
-                        (click)="showCertPassword.set(!showCertPassword())"
-                        [attr.aria-label]="showCertPassword() ? 'Hide password' : 'Show password'">
-                        {{ showCertPassword() ? 'Hide' : 'Show' }}
-                      </button>
+                    <div class="cert-dropzone-content">
+                      @if (certFile()) {
+                        <div class="cert-file-badge">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="cert-check-icon"><polyline points="20 6 9 17 4 12"/></svg>
+                          <span class="cert-file-name" [title]="certFile()!.name">{{ certFile()!.name }}</span>
+                        </div>
+                        <span class="cert-dropzone-hint">Click to replace certificate</span>
+                      } @else {
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="cert-upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span class="cert-dropzone-label">Choose .p12 or .pfx certificate…</span>
+                        <span class="cert-dropzone-hint">PKCS#12 file for browser signing</span>
+                      }
                     </div>
                   </label>
 
-                  <div class="inspector-inline-equal">
-                    <label class="inspector-field">
+                  <div class="cert-fields-form">
+                    <label class="cert-input-label">
+                      <span>Certificate password</span>
+                      <div class="pw-input-wrap">
+                        <input
+                          [type]="showCertPassword() ? 'text' : 'password'"
+                          class="pt-sidebar-input"
+                          placeholder="Enter certificate passphrase"
+                          [ngModel]="certPassword()"
+                          (ngModelChange)="certPassword.set($event)" />
+                        <button
+                          type="button"
+                          class="pw-toggle-btn"
+                          (click)="showCertPassword.set(!showCertPassword())"
+                          [attr.aria-label]="showCertPassword() ? 'Hide password' : 'Show password'">
+                          {{ showCertPassword() ? 'Hide' : 'Show' }}
+                        </button>
+                      </div>
+                    </label>
+
+                    <label class="cert-input-label">
                       <span>Reason</span>
                       <input
                         type="text"
                         class="pt-sidebar-input"
-                        placeholder="Approved"
+                        placeholder="Digitally signed with certificate"
                         [ngModel]="certReason()"
                         (ngModelChange)="certReason.set($event)" />
                     </label>
-                    <label class="inspector-field">
-                      <span>Location (optional)</span>
+
+                    <label class="cert-input-label">
+                      <span>Location <span class="label-optional">(optional)</span></span>
                       <input
                         type="text"
                         class="pt-sidebar-input"
@@ -450,9 +469,12 @@
                     </label>
                   </div>
 
-                  <p class="plain-legal-notice">
-                    Modern AES certificates sign 100% in your browser. Legacy 3DES certificates ask consent for transient OpenSSL signing.
-                  </p>
+                  <div class="cert-legal-callout">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="callout-icon" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <span>Modern AES certificates sign 100% in your browser. Legacy 3DES ask consent for transient OpenSSL signing.</span>
+                  </div>
                 </div>
               } @else if (whoSigns() === 'several_people') {
                 <p class="plain-legal-notice">
@@ -571,10 +593,10 @@
                   (dragstart)="onPaletteDragStart($event, 'signature')"
                   (click)="onPaletteTileClick('signature')"
                   (keydown.enter)="onPaletteTileEnter('signature', $event)">
-                  <span class="drag-grip" aria-hidden="true">⋮⋮</span>
-                  <div class="tile-icon-wrap">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                  <div class="tile-icon-box signature-hero-box">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m18 2 4 4-14 14H4v-4L18 2z"/>
+                      <path d="m14.5 5.5 4 4"/>
                     </svg>
                   </div>
                   <div class="tile-label-col">
@@ -587,7 +609,9 @@
                     @if (whoSigns() === 'several_people') {
                       <span class="tile-placeholder-hint">Click or drag for active recipient</span>
                     } @else if (signatureDataUrl()) {
-                      <img [src]="signatureDataUrl()!" alt="Current signature preview" class="tile-live-preview" />
+                      <div class="tile-preview-wrap">
+                        <img [src]="signatureDataUrl()!" alt="Current signature preview" class="tile-live-preview" />
+                      </div>
                     } @else {
                       <span class="tile-placeholder-hint">Click to draw, type, or upload</span>
                     }
@@ -596,11 +620,11 @@
                 @if (whoSigns() === 'only_me') {
                   <button
                     type="button"
-                    class="tile-edit-pencil"
+                    class="tile-edit-btn"
                     aria-label="Edit signature"
                     title="Edit signature"
                     (click)="$event.stopPropagation(); signatureDialogKind.set('signature')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 20h9" />
                       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                     </svg>
@@ -617,23 +641,30 @@
                 <div class="compact-grid-tile" [class.armed]="armedToolType() === 'initials'">
                   <button
                     type="button"
-                    class="compact-tile-btn"
+                    class="compact-tile-btn has-action-btn"
                     draggable="true"
                     aria-label="Initials field"
                     (dragstart)="onPaletteDragStart($event, 'initials')"
                     (click)="onPaletteTileClick('initials')"
                     (keydown.enter)="onPaletteTileEnter('initials', $event)">
-                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
-                    <span class="tile-glyph-icon">Init</span>
+                    <div class="tile-icon-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M9 9h2v6H9"/>
+                        <path d="M13 15V9h2a2 2 0 0 1 0 4h-2"/>
+                      </svg>
+                    </div>
                     <div class="compact-tile-text">
-                      <span class="tile-primary-name">Initials</span>
+                      <div class="tile-title-with-badge">
+                        <span class="tile-primary-name">Initials</span>
+                        @if (getFieldPlacedCount('initials') > 0) {
+                          <span class="tile-count-badge">×{{ getFieldPlacedCount('initials') }}</span>
+                        }
+                      </div>
                       @if (formattedInitialsText() || initialsDataUrl()) {
                         <span class="tile-secondary-val">{{ formattedInitialsText() || 'S' }}</span>
                       }
                     </div>
-                    @if (getFieldPlacedCount('initials') > 0) {
-                      <span class="tile-count-badge">×{{ getFieldPlacedCount('initials') }}</span>
-                    }
                   </button>
                   <button
                     type="button"
@@ -641,7 +672,7 @@
                     aria-label="Edit initials"
                     title="Edit initials"
                     (click)="$event.stopPropagation(); signatureDialogKind.set('initials')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                     </svg>
                   </button>
@@ -657,19 +688,22 @@
                     (dragstart)="onPaletteDragStart($event, 'name')"
                     (click)="onPaletteTileClick('name')"
                     (keydown.enter)="onPaletteTileEnter('name', $event)">
-                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
-                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
+                    <div class="tile-icon-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                      </svg>
+                    </div>
                     <div class="compact-tile-text">
-                      <span class="tile-primary-name">Name</span>
+                      <div class="tile-title-with-badge">
+                        <span class="tile-primary-name">Name</span>
+                        @if (getFieldPlacedCount('name') > 0) {
+                          <span class="tile-count-badge">×{{ getFieldPlacedCount('name') }}</span>
+                        }
+                      </div>
                       @if (fullName()) {
                         <span class="tile-secondary-val">{{ fullName() }}</span>
                       }
                     </div>
-                    @if (getFieldPlacedCount('name') > 0) {
-                      <span class="tile-count-badge">×{{ getFieldPlacedCount('name') }}</span>
-                    }
                   </button>
                 </div>
 
@@ -683,19 +717,22 @@
                     (dragstart)="onPaletteDragStart($event, 'date')"
                     (click)="onPaletteTileClick('date')"
                     (keydown.enter)="onPaletteTileEnter('date', $event)">
-                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
-                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
+                    <div class="tile-icon-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                    </div>
                     <div class="compact-tile-text">
-                      <span class="tile-primary-name">Date</span>
+                      <div class="tile-title-with-badge">
+                        <span class="tile-primary-name">Date</span>
+                        @if (getFieldPlacedCount('date') > 0) {
+                          <span class="tile-count-badge">×{{ getFieldPlacedCount('date') }}</span>
+                        }
+                      </div>
                       @if (customDateValue()) {
                         <span class="tile-secondary-val">{{ customDateValue() }}</span>
                       }
                     </div>
-                    @if (getFieldPlacedCount('date') > 0) {
-                      <span class="tile-count-badge">×{{ getFieldPlacedCount('date') }}</span>
-                    }
                   </button>
                 </div>
 
@@ -710,16 +747,19 @@
                     (dragstart)="onPaletteDragStart($event, 'text')"
                     (click)="onPaletteTileClick('text')"
                     (keydown.enter)="onPaletteTileEnter('text', $event)">
-                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
-                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
-                    </svg>
-                    <div class="compact-tile-text">
-                      <span class="tile-primary-name">Text</span>
+                    <div class="tile-icon-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+                      </svg>
                     </div>
-                    @if (getFieldPlacedCount('text') > 0) {
-                      <span class="tile-count-badge">×{{ getFieldPlacedCount('text') }}</span>
-                    }
+                    <div class="compact-tile-text">
+                      <div class="tile-title-with-badge">
+                        <span class="tile-primary-name">Text</span>
+                        @if (getFieldPlacedCount('text') > 0) {
+                          <span class="tile-count-badge">×{{ getFieldPlacedCount('text') }}</span>
+                        }
+                      </div>
+                    </div>
                   </button>
                 </div>
 
@@ -727,25 +767,28 @@
                 <div class="compact-grid-tile" [class.armed]="armedToolType() === 'stamp'">
                   <button
                     type="button"
-                    class="compact-tile-btn"
+                    class="compact-tile-btn has-action-btn"
                     draggable="true"
                     aria-label="Company stamp field"
                     (dragstart)="onPaletteDragStart($event, 'stamp')"
                     (click)="onPaletteTileClick('stamp')"
                     (keydown.enter)="onPaletteTileEnter('stamp', $event)">
-                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
-                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4.73 13.73L3 17h18l-1.73-3.27z"/><path d="M12 13V2"/>
-                    </svg>
+                    <div class="tile-icon-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4.73 13.73L3 17h18l-1.73-3.27z"/><path d="M12 13V2"/>
+                      </svg>
+                    </div>
                     <div class="compact-tile-text">
-                      <span class="tile-primary-name">Company stamp</span>
+                      <div class="tile-title-with-badge">
+                        <span class="tile-primary-name">Company stamp</span>
+                        @if (getFieldPlacedCount('stamp') > 0) {
+                          <span class="tile-count-badge">×{{ getFieldPlacedCount('stamp') }}</span>
+                        }
+                      </div>
                       @if (stampDataUrl()) {
                         <span class="tile-secondary-val">Configured</span>
                       }
                     </div>
-                    @if (getFieldPlacedCount('stamp') > 0) {
-                      <span class="tile-count-badge">×{{ getFieldPlacedCount('stamp') }}</span>
-                    }
                   </button>
                   <button
                     type="button"
@@ -753,7 +796,7 @@
                     aria-label="Edit default stamp"
                     title="Edit default stamp"
                     (click)="$event.stopPropagation(); openDefaultStampEdit()">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                     </svg>
                   </button>
@@ -769,16 +812,19 @@
                     (dragstart)="onPaletteDragStart($event, 'checkbox')"
                     (click)="onPaletteTileClick('checkbox')"
                     (keydown.enter)="onPaletteTileEnter('checkbox', $event)">
-                    <span class="hover-drag-grip" aria-hidden="true">⋮⋮</span>
-                    <svg class="tile-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                    </svg>
-                    <div class="compact-tile-text">
-                      <span class="tile-primary-name">Checkbox</span>
+                    <div class="tile-icon-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                      </svg>
                     </div>
-                    @if (getFieldPlacedCount('checkbox') > 0) {
-                      <span class="tile-count-badge">×{{ getFieldPlacedCount('checkbox') }}</span>
-                    }
+                    <div class="compact-tile-text">
+                      <div class="tile-title-with-badge">
+                        <span class="tile-primary-name">Checkbox</span>
+                        @if (getFieldPlacedCount('checkbox') > 0) {
+                          <span class="tile-count-badge">×{{ getFieldPlacedCount('checkbox') }}</span>
+                        }
+                      </div>
+                    </div>
                   </button>
                 </div>
               </div>
