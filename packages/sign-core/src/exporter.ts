@@ -18,9 +18,11 @@ import {
   SIGN_SCRIPT_FONTS,
   SignFieldElement,
   normalizePageRotation,
+  normalizeSignFieldElement,
   pdfRectToScreenRectCoords,
   screenPointToPdfPointCoords
 } from '@paperflow/contracts';
+import { computeTextLayout } from './text-layout';
 
 const fontkit = (fontkitModule as any).default || fontkitModule;
 
@@ -252,7 +254,8 @@ export async function exportSignedPdf(
   let fieldsApplied = 0;
   let warnedMissingGlyphs = false;
 
-  for (const field of sortedFields) {
+  for (const rawField of sortedFields) {
+    const field = normalizeSignFieldElement(rawField);
     if (field.pageIndex < 0 || field.pageIndex >= pages.length) continue;
     const page = pages[field.pageIndex];
     const pageMeta = extractPageBoxMetrics(page, field.pageIndex);
@@ -348,76 +351,201 @@ export async function exportSignedPdf(
     }
 
     if (field.type === 'checkbox') {
-      const checked = field.checked !== false;
-      const color = hexToRgbColor(field.color || '#0F766E');
-      const placement = computeMediaDrawPlacement(visualX, visualY, visualW, visualH, pageMeta, fieldRot);
-      // Draw crisp border square + vector checkmark when checked
-      page.drawRectangle({
-        x: placement.x,
-        y: placement.y,
-        width: visualW,
-        height: visualH,
-        borderColor: color,
-        borderWidth: Math.max(1, Math.min(2, visualW * 0.08)),
-        color: checked ? rgb(0.902, 0.961, 0.953) : undefined,
-        rotate: placement.rotateDeg ? degrees(placement.rotateDeg) : undefined
-      });
-      if (checked) {
-        const p1 = computeMediaDrawPlacement(visualX + visualW * 0.2, visualY + visualH * 0.52, 1, 1, pageMeta, fieldRot);
-        const p2 = computeMediaDrawPlacement(visualX + visualW * 0.44, visualY + visualH * 0.76, 1, 1, pageMeta, fieldRot);
-        const p3 = computeMediaDrawPlacement(visualX + visualW * 0.82, visualY + visualH * 0.26, 1, 1, pageMeta, fieldRot);
-        const thickness = Math.max(1.5, Math.min(3.5, visualW * 0.14));
-        page.drawLine({ start: { x: p1.x, y: p1.y }, end: { x: p2.x, y: p2.y }, thickness, color });
-        page.drawLine({ start: { x: p2.x, y: p2.y }, end: { x: p3.x, y: p3.y }, thickness, color });
+      const cfg = field.checkboxConfig || {
+        checked: field.checked !== false,
+        mark: 'tick' as const,
+        boxSize: 18,
+        labelPosition: 'right' as const
+      };
+      const checked = cfg.checked !== false;
+      const mark = cfg.mark || 'tick';
+      const labelText = cfg.label?.content?.trim() || '';
+      const boxSize = Math.max(10, Math.min(cfg.boxSize || 18, visualW, visualH));
+      const boxBorderColor = hexToRgbColor(field.color || '#0F766E');
+      const labelColor = hexToRgbColor(cfg.label?.color || '#14213D');
+      const labelFontSize = (cfg.label?.fontSize || 12) / unit;
+
+      let boxX = visualX;
+      let labelX = visualX + boxSize + 6;
+      let labelMaxWidth = Math.max(10, visualW - (boxSize + 6));
+
+      if (cfg.labelPosition === 'left' && labelText) {
+        labelX = visualX;
+        boxX = visualX + visualW - boxSize;
+        labelMaxWidth = Math.max(10, visualW - (boxSize + 6));
       }
+
+      const boxY = visualY + Math.max(0, (visualH - boxSize) / 2);
+      const boxPlacement = computeMediaDrawPlacement(boxX, boxY, boxSize, boxSize, pageMeta, fieldRot);
+
+      // Draw crisp checkbox border square
+      page.drawRectangle({
+        x: boxPlacement.x,
+        y: boxPlacement.y,
+        width: boxSize,
+        height: boxSize,
+        borderColor: boxBorderColor,
+        borderWidth: Math.max(1, Math.min(2, boxSize * 0.08)),
+        color: checked ? rgb(0.902, 0.961, 0.953) : undefined,
+        rotate: boxPlacement.rotateDeg ? degrees(boxPlacement.rotateDeg) : undefined
+      });
+
+      if (checked) {
+        if (mark === 'tick') {
+          const p1 = computeMediaDrawPlacement(boxX + boxSize * 0.2, boxY + boxSize * 0.52, 1, 1, pageMeta, fieldRot);
+          const p2 = computeMediaDrawPlacement(boxX + boxSize * 0.44, boxY + boxSize * 0.76, 1, 1, pageMeta, fieldRot);
+          const p3 = computeMediaDrawPlacement(boxX + boxSize * 0.82, boxY + boxSize * 0.26, 1, 1, pageMeta, fieldRot);
+          const thickness = Math.max(1.5, Math.min(3.5, boxSize * 0.14));
+          page.drawLine({ start: { x: p1.x, y: p1.y }, end: { x: p2.x, y: p2.y }, thickness, color: boxBorderColor });
+          page.drawLine({ start: { x: p2.x, y: p2.y }, end: { x: p3.x, y: p3.y }, thickness, color: boxBorderColor });
+        } else if (mark === 'cross') {
+          const p1 = computeMediaDrawPlacement(boxX + boxSize * 0.25, boxY + boxSize * 0.25, 1, 1, pageMeta, fieldRot);
+          const p2 = computeMediaDrawPlacement(boxX + boxSize * 0.75, boxY + boxSize * 0.75, 1, 1, pageMeta, fieldRot);
+          const p3 = computeMediaDrawPlacement(boxX + boxSize * 0.75, boxY + boxSize * 0.25, 1, 1, pageMeta, fieldRot);
+          const p4 = computeMediaDrawPlacement(boxX + boxSize * 0.25, boxY + boxSize * 0.75, 1, 1, pageMeta, fieldRot);
+          const thickness = Math.max(1.5, Math.min(3.5, boxSize * 0.14));
+          page.drawLine({ start: { x: p1.x, y: p1.y }, end: { x: p2.x, y: p2.y }, thickness, color: boxBorderColor });
+          page.drawLine({ start: { x: p3.x, y: p3.y }, end: { x: p4.x, y: p4.y }, thickness, color: boxBorderColor });
+        } else if (mark === 'dot') {
+          const dotSize = boxSize * 0.45;
+          const dotOffset = (boxSize - dotSize) / 2;
+          const dotPlace = computeMediaDrawPlacement(boxX + dotOffset, boxY + dotOffset, dotSize, dotSize, pageMeta, fieldRot);
+          page.drawRectangle({
+            x: dotPlace.x,
+            y: dotPlace.y,
+            width: dotSize,
+            height: dotSize,
+            color: boxBorderColor,
+            rotate: dotPlace.rotateDeg ? degrees(dotPlace.rotateDeg) : undefined
+          });
+        }
+      }
+
+      // Render composite label text if provided
+      if (labelText) {
+        const { font } = await pickBestFont(labelText, cfg.label?.fontFamily);
+        const layout = computeTextLayout({
+          text: labelText,
+          fontSize: labelFontSize,
+          maxWidth: labelMaxWidth,
+          align: 'left'
+        });
+
+        for (const line of layout.lines) {
+          const lineY = boxY + (boxSize - labelFontSize) / 2 + line.yOffset;
+          const linePlace = computeMediaDrawPlacement(
+            labelX + line.xOffset,
+            lineY,
+            Math.max(line.width, 1),
+            labelFontSize * 1.15,
+            pageMeta,
+            fieldRot
+          );
+          try {
+            page.drawText(line.text, {
+              x: linePlace.x,
+              y: linePlace.y + labelFontSize * 0.2,
+              size: labelFontSize,
+              font,
+              color: labelColor,
+              rotate: linePlace.rotateDeg ? degrees(linePlace.rotateDeg) : undefined
+            });
+          } catch {
+            // fallback
+          }
+        }
+      }
+
       pagesSignedSet.add(field.pageIndex);
       fieldsApplied++;
       continue;
     }
 
     // Text-based fields: name, date, text, or text fallback for signature/initials
-    const content = (field.text || '').trim();
+    const textCfg = field.textConfig;
+    const content = (textCfg?.content ?? field.text ?? '').trim();
     if (!content) continue;
-    const fontSizePt = (field.fontSizePt ?? Math.max(10, Math.min(28, visualH * 0.6))) / unit;
-    const color = hexToRgbColor(field.color || '#14213D');
-    const lines = content.split(/\r?\n/);
 
-    const { font, usedFallback } = await pickBestFont(content, field.fontId || (field.type === 'signature' || field.type === 'initials' ? 'caveat' : undefined));
-    if (usedFallback && field.fontId && !warnedMissingGlyphs) {
+    const fontSizePt = ((textCfg?.fontSize ?? field.fontSizePt) ?? Math.max(10, Math.min(28, visualH * 0.6))) / unit;
+    const color = hexToRgbColor(textCfg?.color || field.color || '#14213D');
+    const align = textCfg?.align || 'left';
+    const lineHeightMult = textCfg?.lineHeight || 1.25;
+    const underline = !!textCfg?.underline;
+    const opacity = typeof textCfg?.opacity === 'number' ? Math.max(0, Math.min(1, textCfg.opacity)) : 1;
+
+    const { font, usedFallback } = await pickBestFont(
+      content,
+      textCfg?.fontFamily || field.fontId || (field.type === 'signature' || field.type === 'initials' ? 'caveat' : undefined)
+    );
+    if (usedFallback && (textCfg?.fontFamily || field.fontId) && !warnedMissingGlyphs) {
       warnings.push('Some text characters were rendered using a bundled Noto Unicode fallback font because the selected script font did not include those glyphs.');
       warnedMissingGlyphs = true;
     }
 
+    // Shared WYSIWYG layout (word wrapping, alignment, lines)
+    const layout = computeTextLayout({
+      text: content,
+      fontSize: fontSizePt,
+      maxWidth: visualW,
+      lineHeightMultiplier: lineHeightMult,
+      align
+    });
+
     let drewText = false;
     try {
       font.encodeText(content);
-      const lineHeight = fontSizePt * 1.25;
-      for (let li = 0; li < lines.length; li++) {
-        const lineText = lines[li];
-        if (!lineText) continue;
-        const lineVisualY = visualY + fontSizePt * 0.15 + li * lineHeight;
+      for (const line of layout.lines) {
+        if (!line.text) continue;
+        const lineVisualY = visualY + fontSizePt * 0.15 + line.yOffset;
         const linePlacement = computeMediaDrawPlacement(
-          visualX + 2 / unit,
+          visualX + line.xOffset,
           lineVisualY,
-          visualW,
+          Math.max(line.width, 1),
           fontSizePt * 1.15,
           pageMeta,
           fieldRot
         );
-        page.drawText(lineText, {
+        page.drawText(line.text, {
           x: linePlacement.x,
           y: linePlacement.y + fontSizePt * 0.2,
           size: fontSizePt,
           font,
           color,
+          opacity: opacity < 1 ? opacity : undefined,
           rotate: linePlacement.rotateDeg ? degrees(linePlacement.rotateDeg) : undefined
         });
+
+        if (underline) {
+          const underPlacement = computeMediaDrawPlacement(
+            visualX + line.xOffset,
+            lineVisualY + fontSizePt * 1.05,
+            Math.max(line.width, 1),
+            1,
+            pageMeta,
+            fieldRot
+          );
+          const pEnd = computeMediaDrawPlacement(
+            visualX + line.xOffset + line.width,
+            lineVisualY + fontSizePt * 1.05,
+            1,
+            1,
+            pageMeta,
+            fieldRot
+          );
+          page.drawLine({
+            start: { x: underPlacement.x, y: underPlacement.y },
+            end: { x: pEnd.x, y: pEnd.y },
+            thickness: Math.max(0.6, fontSizePt * 0.06),
+            color,
+            opacity: opacity < 1 ? opacity : undefined
+          });
+        }
       }
       drewText = true;
     } catch {
       // Fallback for characters (e.g. color emoji) unsupported even by Noto
       if (options.rasterizeTextFallback) {
-        const pngBytes = await options.rasterizeTextFallback(content, fontSizePt * unit, parseSignColorToHex(field.color));
+        const pngBytes = await options.rasterizeTextFallback(content, fontSizePt * unit, parseSignColorToHex(textCfg?.color || field.color));
         if (pngBytes) {
           const embedded = await pdfDoc.embedPng(pngBytes);
           const placement = computeMediaDrawPlacement(visualX, visualY, visualW, visualH, pageMeta, fieldRot);

@@ -133,7 +133,61 @@ export const SIGN_FALLBACK_FONT_FILES = {
   notoArabic: 'noto-sans-arabic-arabic-400-normal.woff'
 } as const;
 
-export type SignStampShape = 'rectangle' | 'rounded' | 'circle';
+export type SignStampShape = 'rectangle' | 'rounded' | 'circle' | 'rect';
+
+export type SignCheckboxMark = 'tick' | 'cross' | 'dot';
+
+export interface SignTextConfig {
+  content: string;
+  fontFamily?: string;
+  fontSize?: number;
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  align?: 'left' | 'center' | 'right';
+  lineHeight?: number;
+  opacity?: number;
+  autoGrow?: boolean;
+  boxWidth?: number;
+}
+
+export type SignStampSource =
+  | {
+      kind: 'text';
+      lines: string[];
+      shape: 'rect' | 'rounded' | 'circle' | 'rectangle';
+      color: string;
+      borderWidth?: number;
+      fontFamily?: string;
+    }
+  | {
+      kind: 'image';
+      originalBlobId?: string;
+      processedBlobId?: string;
+      originalDataUrl?: string;
+      processedDataUrl?: string;
+      removeBackground?: boolean;
+      tolerance?: number;
+    };
+
+export interface SignCheckboxLabel {
+  content: string;
+  fontFamily?: string;
+  fontSize?: number;
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+}
+
+export interface SignCheckboxConfig {
+  checked: boolean;
+  mark: SignCheckboxMark;
+  boxSize: number;
+  label?: SignCheckboxLabel;
+  labelPosition: 'right' | 'left';
+  groupId?: string;
+}
 
 export interface SignFieldElement {
   id: string;
@@ -163,6 +217,78 @@ export interface SignFieldElement {
   /** Optional caption rendered beneath a signature field ("Signed by <name> · <date>"). */
   showSigningDetailsLine?: boolean;
   signingDetailsText?: string;
+  /** Enhanced text field settings (content, font, wrap width, formatting). */
+  textConfig?: SignTextConfig;
+  /** Enhanced company stamp source definition (text lines/shape or image + settings) for re-editing. */
+  stampSource?: SignStampSource;
+  /** Shared template identifier linking copies of the same stamp across pages. */
+  templateId?: string;
+  /** Enhanced composite checkbox settings (checked, mark style, box size, label). */
+  checkboxConfig?: SignCheckboxConfig;
+}
+
+/**
+ * Normalizes legacy persisted sign fields into the enhanced backward-compatible model.
+ */
+export function normalizeSignFieldElement(field: SignFieldElement): SignFieldElement {
+  const normalized: SignFieldElement = { ...field };
+
+  if (normalized.type === 'text') {
+    if (!normalized.textConfig) {
+      normalized.textConfig = {
+        content: normalized.text || '',
+        fontSize: normalized.fontSizePt || 14,
+        color: normalized.color || '#14213D',
+        align: 'left',
+        lineHeight: 1.25,
+        opacity: 1,
+        autoGrow: true,
+        boxWidth: normalized.widthPt
+      };
+    } else if (normalized.text && !normalized.textConfig.content) {
+      normalized.textConfig.content = normalized.text;
+    }
+    normalized.text = normalized.textConfig.content;
+  }
+
+  if (normalized.type === 'stamp') {
+    if (!normalized.stampSource) {
+      if (normalized.imageDataUrl) {
+        normalized.stampSource = {
+          kind: 'image',
+          processedDataUrl: normalized.imageDataUrl
+        };
+      } else {
+        const lines = ['APPROVED'];
+        if (normalized.stampLine2) lines.push(normalized.stampLine2);
+        normalized.stampSource = {
+          kind: 'text',
+          lines,
+          shape: (normalized.stampShape as any) || 'rounded',
+          color: normalized.color || '#0F766E'
+        };
+      }
+    }
+  }
+
+  if (normalized.type === 'checkbox') {
+    if (!normalized.checkboxConfig) {
+      normalized.checkboxConfig = {
+        checked: normalized.checked !== false,
+        mark: 'tick',
+        boxSize: Math.round(Math.min(normalized.widthPt, normalized.heightPt) || 18),
+        label: {
+          content: '',
+          fontSize: 12,
+          color: normalized.color || '#14213D'
+        },
+        labelPosition: 'right'
+      };
+    }
+    normalized.checked = normalized.checkboxConfig.checked;
+  }
+
+  return normalized;
 }
 
 export interface PdfPageBoxMetrics {
@@ -525,10 +651,14 @@ export const SignFieldPlacementSchema = z.object({
   color: z.string().max(32).optional(),
   dateFormat: z.enum(['dd/mm/yyyy', 'mm/dd/yyyy', 'd MMM yyyy', 'yyyy-mm-dd', 'd MMMM yyyy']).optional(),
   checked: z.boolean().optional(),
-  stampShape: z.enum(['rectangle', 'rounded', 'circle']).optional(),
+  stampShape: z.enum(['rectangle', 'rounded', 'circle', 'rect']).optional(),
   stampLine2: z.string().max(200).optional(),
   showSigningDetailsLine: z.boolean().optional(),
-  signingDetailsText: z.string().max(200).optional()
+  signingDetailsText: z.string().max(200).optional(),
+  textConfig: z.any().optional(),
+  stampSource: z.any().optional(),
+  templateId: z.string().optional(),
+  checkboxConfig: z.any().optional()
 });
 
 export const CreateSignRequestSchema = z.object({
