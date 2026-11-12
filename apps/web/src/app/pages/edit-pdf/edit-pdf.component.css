@@ -2937,14 +2937,7 @@
   }
 
   .toolbar-doc-pill {
-    gap: 4px;
-    min-width: 0;
-    flex: 0 1 auto;
-  }
-
-  .doc-name-chip {
-    max-width: 130px;
-    font-size: 13px;
+    display: none !important;
   }
 
   .doc-pages-chip,
@@ -3016,11 +3009,6 @@
 }
 
 @media (max-width: 480px) {
-  .doc-name-chip {
-    max-width: 90px;
-    font-size: 12px;
-  }
-
   .mode-pill-tab span {
     display: none !important;
   }

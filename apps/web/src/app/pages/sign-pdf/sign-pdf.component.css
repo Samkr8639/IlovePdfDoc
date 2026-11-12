@@ -2212,15 +2212,12 @@
   :host ::ng-deep .sign-editor-shell .left-thumbnails-panel {
     display: none;
   }
+  .toolbar-doc-pill,
   .armed-hint-badge,
   .doc-pages-chip,
   .page-corner-badge,
   .toolbar-divider {
     display: none !important;
-  }
-  .doc-name-chip {
-    max-width: 140px;
-    font-size: 13px;
   }
   .mobile-gear-btn {
     display: flex;
@@ -2334,10 +2331,6 @@
 }
 
 @media (max-width: 480px) {
-  .doc-name-chip {
-    max-width: 110px;
-    font-size: 12px;
-  }
   .history-btn span {
     display: none !important;
   }
