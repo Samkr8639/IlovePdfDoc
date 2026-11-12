@@ -818,12 +818,88 @@
   background: var(--pt-teal-50);
 }
 
-.field-tile-row.required-tile {
-  border-color: var(--pt-teal-100);
+/* Section header with status badge */
+.section-title-with-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
-.field-tile-row.required-tile:hover {
-  border-color: var(--pt-teal-700);
+.req-status-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--pt-radius-pill);
+  letter-spacing: 0.03em;
+}
+
+.req-status-pill.missing {
+  background: #FFF1EE;
+  color: #C2410C;
+  border: 1px solid rgba(224, 93, 68, 0.4);
+}
+
+.req-status-pill.satisfied {
+  background: var(--pt-teal-50);
+  color: var(--pt-teal-800);
+  border: 1px solid var(--pt-teal-200);
+}
+
+/* 1. BEFORE PLACING: Missing Required Field (Prominent warm accent so user clearly sees it is required) */
+.field-tile-row.required-tile.is-missing {
+  border: 1.5px dashed #E05D44;
+  background: #FFFBF9;
+}
+
+.field-tile-row.required-tile.is-missing:hover {
+  border-color: #C2410C;
+  background: #FFF5F2;
+}
+
+.field-tile-row.required-tile.is-missing .signature-hero-box {
+  background: #FFE8E2;
+  color: #C2410C;
+}
+
+.tile-count-badge.missing-badge {
+  background: #FFF1EE;
+  color: #C2410C;
+  border: 1px solid rgba(224, 93, 68, 0.4);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--pt-radius-pill);
+}
+
+.req-action-hint {
+  color: #C2410C;
+  font-weight: 600;
+}
+
+/* 2. AFTER PLACING: Satisfied Required Field (Calm, confident teal success state) */
+.field-tile-row.required-tile.is-satisfied {
+  border: 1.5px solid var(--pt-teal-700);
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.field-tile-row.required-tile.is-satisfied:hover {
+  border-color: var(--pt-teal-800);
+  background: var(--pt-teal-50);
+}
+
+.field-tile-row.required-tile.is-satisfied .signature-hero-box {
+  background: var(--pt-teal-700);
+  color: var(--pt-surface-white);
+}
+
+.tile-count-badge.satisfied-badge {
+  background: var(--pt-teal-700);
+  color: var(--pt-surface-white);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--pt-radius-pill);
 }
 
 .field-tile-main {
@@ -1256,6 +1332,27 @@
 
 .accordion-header-btn:hover {
   background: var(--pt-hover-bg);
+}
+
+.accordion-title-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.accordion-sub-hint {
+  font-size: 11px;
+  color: var(--pt-muted);
+  font-weight: 500;
+}
+
+.accordion-intro-note {
+  font-size: 11.5px;
+  color: var(--pt-muted);
+  line-height: 1.45;
+  margin: 0 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--pt-soft-outline);
 }
 
 .chevron-icon {

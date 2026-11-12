@@ -584,8 +584,19 @@
 
             <!-- Section 3: REQUIRED FIELDS -->
             <div class="sidebar-option-block">
-              <span class="section-badge-title">REQUIRED FIELDS</span>
-              <div class="field-tile-row required-tile">
+              <div class="section-title-with-badge">
+                <span class="section-badge-title">REQUIRED FIELD</span>
+                @if (getFieldPlacedCount('signature') > 0) {
+                  <span class="req-status-pill satisfied">✓ Satisfied</span>
+                } @else {
+                  <span class="req-status-pill missing">Action Required</span>
+                }
+              </div>
+
+              <div
+                class="field-tile-row required-tile"
+                [class.is-satisfied]="getFieldPlacedCount('signature') > 0"
+                [class.is-missing]="getFieldPlacedCount('signature') === 0">
                 <button
                   type="button"
                   class="field-tile-main"
@@ -597,16 +608,24 @@
                   (click)="onPaletteTileClick('signature')"
                   (keydown.enter)="onPaletteTileEnter('signature', $event)">
                   <div class="tile-icon-box signature-hero-box">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="m18 2 4 4-14 14H4v-4L18 2z"/>
-                      <path d="m14.5 5.5 4 4"/>
-                    </svg>
+                    @if (getFieldPlacedCount('signature') > 0) {
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    } @else {
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m18 2 4 4-14 14H4v-4L18 2z"/>
+                        <path d="m14.5 5.5 4 4"/>
+                      </svg>
+                    }
                   </div>
                   <div class="tile-label-col">
                     <div class="tile-title-row">
                       <span class="tile-title">Signature</span>
                       @if (getFieldPlacedCount('signature') > 0) {
-                        <span class="tile-count-badge">×{{ getFieldPlacedCount('signature') }}</span>
+                        <span class="tile-count-badge satisfied-badge">✓ Placed (×{{ getFieldPlacedCount('signature') }})</span>
+                      } @else {
+                        <span class="tile-count-badge missing-badge">Required</span>
                       }
                     </div>
                     @if (whoSigns() === 'several_people') {
@@ -616,7 +635,7 @@
                         <img [src]="signatureDataUrl()!" alt="Current signature preview" class="tile-live-preview" />
                       </div>
                     } @else {
-                      <span class="tile-placeholder-hint">Click to draw, type, or upload</span>
+                      <span class="tile-placeholder-hint req-action-hint">Click or drag to place on PDF</span>
                     }
                   </div>
                 </button>
@@ -624,8 +643,8 @@
                   <button
                     type="button"
                     class="tile-edit-btn"
-                    aria-label="Edit signature"
-                    title="Edit signature"
+                    aria-label="Edit default signature"
+                    title="Edit default signature"
                     (click)="$event.stopPropagation(); signatureDialogKind.set('signature')">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 20h9" />
@@ -1274,14 +1293,17 @@
               </div>
             }
 
-            <!-- Section 6: DETAILS & OPTIONS (Collapsible Accordion) -->
+            <!-- Section 6: SIGNER & DOCUMENT DETAILS (Collapsible Accordion) -->
             <div class="sidebar-option-block accordion-block">
               <button
                 type="button"
                 class="accordion-header-btn"
                 (click)="detailsExpanded.set(!detailsExpanded())"
                 [attr.aria-expanded]="detailsExpanded()">
-                <span class="section-badge-title">DETAILS &amp; OPTIONS</span>
+                <div class="accordion-title-col">
+                  <span class="section-badge-title">SIGNER &amp; DOCUMENT DETAILS</span>
+                  <span class="accordion-sub-hint">Signer full name, date format &amp; caption line</span>
+                </div>
                 <svg class="chevron-icon" [class.rotated]="detailsExpanded()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
@@ -1289,6 +1311,10 @@
 
               @if (detailsExpanded()) {
                 <div class="accordion-content">
+                  <p class="accordion-intro-note">
+                    Sets the default signer name for fields and certificates, the date format on date fields, and the optional caption line under signatures.
+                  </p>
+
                   <label class="inspector-field">
                     <span>Full name</span>
                     <input
@@ -1305,7 +1331,7 @@
                   </label>
 
                   <label class="inspector-field">
-                    <span>Date format</span>
+                    <span>Default date format</span>
                     <select class="pt-sidebar-input" [ngModel]="dateFormat()" (ngModelChange)="onDateFormatChange($event)">
                       @for (opt of dateFormatOptions; track opt.value) {
                         <option [value]="opt.value">{{ opt.label }}</option>
