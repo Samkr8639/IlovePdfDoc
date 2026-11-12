@@ -552,6 +552,97 @@ describe('SignPdfComponent & Dialogs', () => {
       expect(component.editingStampField()?.id).toBe(stampField.id);
       expect(component.editingStampField()?.stampSource).toEqual(stampField.stampSource);
     });
+
+    it('allows updating placed signature field directly via openEditSignature and onSignatureApplied', () => {
+      component.signatureDataUrl.set('data:image/png;base64,ORIGINAL_SIG');
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      const sigField = component.fields()[0];
+      expect(sigField.type).toBe('signature');
+      expect(sigField.imageDataUrl).toBe('data:image/png;base64,ORIGINAL_SIG');
+
+      // User initiates edit on placed signature
+      component.openEditSignature(sigField);
+      expect(component.signatureDialogKind()).toBe('signature');
+      expect(component.editingSignatureField()?.id).toBe(sigField.id);
+
+      // User applies new signature from dialog
+      component.onSignatureApplied({
+        imageDataUrl: 'data:image/png;base64,UPDATED_SIG',
+        color: '#0F766E',
+        mode: 'type',
+        text: 'Updated Signature'
+      });
+      fixture.detectChanges();
+
+      expect(component.signatureDialogKind()).toBeNull();
+      expect(component.editingSignatureField()).toBeNull();
+      const updated = component.fields().find(f => f.id === sigField.id);
+      expect(updated?.imageDataUrl).toBe('data:image/png;base64,UPDATED_SIG');
+      expect(updated?.color).toBe('#0F766E');
+      expect(updated?.text).toBe('Updated Signature');
+
+      // Undo restores original signature
+      component.history.undo();
+      const restored = component.fields().find(f => f.id === sigField.id);
+      expect(restored?.imageDataUrl).toBe('data:image/png;base64,ORIGINAL_SIG');
+    });
+
+    it('allows updating placed date field via updateSelectedDateFormat and setSelectedDateToToday', () => {
+      component.onPaletteTileEnter('date', enterEvt);
+      fixture.detectChanges();
+
+      const dateField = component.fields()[0];
+      expect(dateField.type).toBe('date');
+      component.selectedFieldId.set(dateField.id);
+
+      // Update date format of placed field
+      component.updateSelectedDateFormat('yyyy-mm-dd');
+      fixture.detectChanges();
+
+      let current = component.fields().find(f => f.id === dateField.id);
+      expect(current?.dateFormat).toBe('yyyy-mm-dd');
+      expect(current?.text).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+      // Set to today
+      component.setSelectedDateToToday(current!);
+      fixture.detectChanges();
+
+      current = component.fields().find(f => f.id === dateField.id);
+      expect(current?.text).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+      // Undo restores previous date
+      component.history.undo();
+      component.history.undo();
+      const undone = component.fields().find(f => f.id === dateField.id);
+      expect(undone?.dateFormat).toBe(dateField.dateFormat);
+    });
+
+    it('toggles signing details line under a placed signature field', () => {
+      component.signatureDataUrl.set('data:image/png;base64,SIG');
+      component.fullName.set('Alice Wonder');
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      const sigField = component.fields()[0];
+      const mockEvent = { target: { checked: true } } as unknown as Event;
+      component.toggleFieldSigningDetails(sigField, mockEvent);
+      fixture.detectChanges();
+
+      const withDetails = component.fields().find(f => f.id === sigField.id);
+      expect(withDetails?.showSigningDetailsLine).toBe(true);
+      expect(withDetails?.signingDetailsText).toContain('Signed by Alice Wonder');
+
+      // Toggle off
+      const mockOff = { target: { checked: false } } as unknown as Event;
+      component.toggleFieldSigningDetails(sigField, mockOff);
+      fixture.detectChanges();
+
+      const withoutDetails = component.fields().find(f => f.id === sigField.id);
+      expect(withoutDetails?.showSigningDetailsLine).toBe(false);
+      expect(withoutDetails?.signingDetailsText).toBeUndefined();
+    });
   });
 });
 

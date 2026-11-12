@@ -167,6 +167,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   readonly stampDataUrl = signal<string | null>(null);
   readonly stampSource = signal<SignStampSource | null>(null);
   readonly editingStampField = signal<SignFieldElement | null>(null);
+  readonly editingSignatureField = signal<SignFieldElement | null>(null);
   readonly isEditingDefaultStamp = signal<boolean>(false);
   readonly newlyPlacedFieldId = signal<string | null>(null);
   readonly detailsExpanded = signal<boolean>(true);
@@ -1286,9 +1287,42 @@ export class SignPdfComponent implements OnInit, OnDestroy {
      DIALOG CALLBACKS & GLOBAL PREFERENCES
      ========================================================================= */
 
+  openEditSignature(field: SignFieldElement): void {
+    this.editingSignatureField.set(field);
+    this.signatureDialogKind.set(field.type === 'initials' ? 'initials' : 'signature');
+  }
+
+  closeSignatureDialog(): void {
+    this.signatureDialogKind.set(null);
+    this.editingSignatureField.set(null);
+  }
+
   onSignatureApplied(res: SignatureApplyResult): void {
     const kind = this.signatureDialogKind() || 'signature';
+    const target = this.editingSignatureField();
     this.signatureDialogKind.set(null);
+    this.editingSignatureField.set(null);
+
+    if (target) {
+      const before = { ...target };
+      const after: SignFieldElement = {
+        ...target,
+        imageDataUrl: res.imageDataUrl,
+        color: res.color,
+        ...(res.text ? { text: res.text } : {})
+      };
+      this.history.execute({
+        description: `Update ${target.type}`,
+        execute: () => {
+          this.fields.update(list => list.map(f => (f.id === target.id ? after : f)));
+        },
+        undo: () => {
+          this.fields.update(list => list.map(f => (f.id === target.id ? before : f)));
+        }
+      });
+      this.announce(`Updated ${target.type}.`);
+      return;
+    }
 
     if (kind === 'signature') {
       this.signatureDataUrl.set(res.imageDataUrl);
@@ -1557,6 +1591,87 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     } else {
       this.storageService.forgetSignerName();
     }
+  }
+
+  onCanvasEditDate(field: SignFieldElement): void {
+    this.selectedFieldId.set(field.id);
+    this.announce(`Selected date field on page ${field.pageIndex + 1}. Customize in the sidebar.`);
+  }
+
+  openDateSettings(): void {
+    this.detailsExpanded.set(true);
+    const cur = this.selectedField();
+    if (!cur || cur.type !== 'date') {
+      const firstDateField = this.fields().find(f => f.type === 'date');
+      if (firstDateField) {
+        this.selectedFieldId.set(firstDateField.id);
+      }
+    }
+    this.announce('Date settings opened.');
+  }
+
+  updateSelectedDateFormat(fmt: SignDateFormat): void {
+    const sel = this.selectedField();
+    if (!sel || sel.type !== 'date') return;
+    const formatted = formatSigningDate(new Date(), fmt);
+    const before = { ...sel };
+    const after: SignFieldElement = {
+      ...sel,
+      dateFormat: fmt,
+      text: formatted
+    };
+    this.history.execute({
+      description: 'Update date format',
+      execute: () => {
+        this.fields.update(list => list.map(f => (f.id === sel.id ? after : f)));
+      },
+      undo: () => {
+        this.fields.update(list => list.map(f => (f.id === sel.id ? before : f)));
+      }
+    });
+    this.announce(`Updated date format to ${fmt}.`);
+  }
+
+  setSelectedDateToToday(sel: SignFieldElement): void {
+    const fmt = sel.dateFormat || this.dateFormat();
+    const formatted = formatSigningDate(new Date(), fmt);
+    const before = { ...sel };
+    const after: SignFieldElement = {
+      ...sel,
+      text: formatted
+    };
+    this.history.execute({
+      description: 'Set date to today',
+      execute: () => {
+        this.fields.update(list => list.map(f => (f.id === sel.id ? after : f)));
+      },
+      undo: () => {
+        this.fields.update(list => list.map(f => (f.id === sel.id ? before : f)));
+      }
+    });
+    this.announce(`Set date to today (${formatted}).`);
+  }
+
+  toggleFieldSigningDetails(sel: SignFieldElement, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const checked = input.checked;
+    const who = (this.fullName() || 'Signer').trim();
+    const when = this.customDateValue() || formatSigningDate(new Date(), this.dateFormat());
+    const before = { ...sel };
+    const after: SignFieldElement = {
+      ...sel,
+      showSigningDetailsLine: checked,
+      signingDetailsText: checked ? `Signed by ${who} · ${when}` : undefined
+    };
+    this.history.execute({
+      description: 'Toggle signing details',
+      execute: () => {
+        this.fields.update(list => list.map(f => (f.id === sel.id ? after : f)));
+      },
+      undo: () => {
+        this.fields.update(list => list.map(f => (f.id === sel.id ? before : f)));
+      }
+    });
   }
 
   onDateFormatChange(fmt: SignDateFormat): void {

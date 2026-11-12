@@ -294,6 +294,9 @@
                         (nudge)="nudgeField($event)"
                         (toggleCheckbox)="toggleCheckboxField($event)"
                         (editStamp)="openEditStamp($event)"
+                        (editSignature)="openEditSignature($event)"
+                        (editInitials)="openEditSignature($event)"
+                        (editDate)="onCanvasEditDate($event)"
                         (textChanged)="onFieldTextChanged($event)"
                         (labelChanged)="onFieldLabelChanged($event)"
                         (addOption)="onAddCheckboxOption($event)" />
@@ -711,7 +714,7 @@
                 <div class="compact-grid-tile" [class.armed]="armedToolType() === 'date'">
                   <button
                     type="button"
-                    class="compact-tile-btn"
+                    class="compact-tile-btn has-action-btn"
                     draggable="true"
                     aria-label="Date field"
                     (dragstart)="onPaletteDragStart($event, 'date')"
@@ -733,6 +736,16 @@
                         <span class="tile-secondary-val">{{ customDateValue() }}</span>
                       }
                     </div>
+                  </button>
+                  <button
+                    type="button"
+                    class="compact-tile-action-btn"
+                    aria-label="Edit default date"
+                    title="Edit default date"
+                    (click)="$event.stopPropagation(); openDateSettings()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
                   </button>
                 </div>
 
@@ -1087,8 +1100,119 @@
                   </div>
                 }
 
-                <!-- Date / Name controls -->
-                @else if (sel.type === 'date' || sel.type === 'name') {
+                <!-- Signature-specific controls -->
+                @else if (sel.type === 'signature') {
+                  <div class="inspector-controls-col">
+                    @if (sel.imageDataUrl) {
+                      <div class="stamp-inspector-preview">
+                        <img [src]="sel.imageDataUrl" alt="Selected signature" />
+                      </div>
+                    }
+                    <button type="button" class="btn-outline-xs" (click)="openEditSignature(sel)">
+                      Change Signature…
+                    </button>
+                    <label class="pt-checkbox-row" style="margin-top: 4px;">
+                      <input
+                        type="checkbox"
+                        [checked]="sel.showSigningDetailsLine"
+                        (change)="toggleFieldSigningDetails(sel, $event)" />
+                      <span>Add signing details line</span>
+                    </label>
+                  </div>
+                }
+
+                <!-- Initials-specific controls -->
+                @else if (sel.type === 'initials') {
+                  <div class="inspector-controls-col">
+                    @if (sel.imageDataUrl) {
+                      <div class="stamp-inspector-preview">
+                        <img [src]="sel.imageDataUrl" alt="Selected initials" />
+                      </div>
+                    }
+                    <button type="button" class="btn-outline-xs" (click)="openEditSignature(sel)">
+                      Change Initials…
+                    </button>
+                  </div>
+                }
+
+                <!-- Date-specific controls -->
+                @else if (sel.type === 'date') {
+                  <div class="inspector-controls-col">
+                    <label class="inspector-field">
+                      <span>Date format</span>
+                      <select
+                        class="pt-sidebar-input"
+                        [ngModel]="sel.dateFormat || dateFormat()"
+                        (ngModelChange)="updateSelectedDateFormat($event)">
+                        @for (opt of dateFormatOptions; track opt.value) {
+                          <option [value]="opt.value">{{ opt.label }}</option>
+                        }
+                      </select>
+                    </label>
+
+                    <div class="inspector-field">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span>Date value</span>
+                        <button
+                          type="button"
+                          class="quick-text-btn"
+                          (click)="setSelectedDateToToday(sel)">
+                          Set to today
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        class="pt-sidebar-input"
+                        [ngModel]="sel.text || ''"
+                        (ngModelChange)="updateSelectedFieldProp({ text: $event })" />
+                    </div>
+
+                    <div class="inspector-inline-2">
+                      <label class="inspector-field">
+                        <span>Size (pt)</span>
+                        <input
+                          type="number"
+                          min="8"
+                          max="72"
+                          class="pt-sidebar-input"
+                          [ngModel]="sel.fontSizePt ?? 14"
+                          (ngModelChange)="updateSelectedFieldProp({ fontSizePt: +$event || 14 })" />
+                      </label>
+                      <label class="inspector-field">
+                        <span>Font</span>
+                        <select class="pt-sidebar-input" [ngModel]="sel.fontId || 'noto-sans'" (ngModelChange)="updateSelectedFieldProp({ fontId: $event })">
+                          <option value="noto-sans">Noto Sans</option>
+                          @for (f of scriptFonts; track f.id) {
+                            <option [value]="f.id">{{ f.name }}</option>
+                          }
+                        </select>
+                      </label>
+                    </div>
+
+                    <div class="inspector-field">
+                      <span>Color</span>
+                      <div class="color-palette-row">
+                        @for (c of presetTextColors; track c) {
+                          <button
+                            type="button"
+                            class="color-dot-sm"
+                            [class.active]="(sel.color || '#14213D') === c"
+                            [style.background-color]="c"
+                            (click)="updateSelectedFieldProp({ color: c })">
+                          </button>
+                        }
+                        <input
+                          type="color"
+                          class="color-picker-mini"
+                          [ngModel]="sel.color || '#14213D'"
+                          (ngModelChange)="updateSelectedFieldProp({ color: $event })" />
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Name controls -->
+                @else if (sel.type === 'name') {
                   <div class="inspector-controls-col">
                     <label class="inspector-field">
                       <span>Field value</span>
@@ -1118,6 +1242,25 @@
                           }
                         </select>
                       </label>
+                    </div>
+                    <div class="inspector-field">
+                      <span>Color</span>
+                      <div class="color-palette-row">
+                        @for (c of presetTextColors; track c) {
+                          <button
+                            type="button"
+                            class="color-dot-sm"
+                            [class.active]="(sel.color || '#14213D') === c"
+                            [style.background-color]="c"
+                            (click)="updateSelectedFieldProp({ color: c })">
+                          </button>
+                        }
+                        <input
+                          type="color"
+                          class="color-picker-mini"
+                          [ngModel]="sel.color || '#14213D'"
+                          (ngModelChange)="updateSelectedFieldProp({ color: $event })" />
+                      </div>
                     </div>
                   </div>
                 }
@@ -1380,9 +1523,9 @@
   @if (signatureDialogKind(); as kind) {
     <app-sign-signature-dialog
       [kind]="kind"
-      [initialName]="fullName()"
+      [initialName]="editingSignatureField()?.text || fullName()"
       (applied)="onSignatureApplied($event)"
-      (cancelled)="signatureDialogKind.set(null)" />
+      (cancelled)="closeSignatureDialog()" />
   }
 
   @if (showStampDialog()) {

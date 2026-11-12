@@ -236,8 +236,41 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
         </button>
 
         <div class="field-quick-toolbar" (mousedown)="$event.stopPropagation()">
-          <!-- Edit button for stamp or text -->
-          @if (field().type === 'stamp') {
+          <!-- Edit button for signature, initials, date, stamp, or text -->
+          @if (field().type === 'signature') {
+            <button
+              type="button"
+              class="quick-btn"
+              title="Change signature"
+              aria-label="Change signature"
+              (click)="editSignature.emit(field()); $event.stopPropagation()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+          } @else if (field().type === 'initials') {
+            <button
+              type="button"
+              class="quick-btn"
+              title="Change initials"
+              aria-label="Change initials"
+              (click)="editInitials.emit(field()); $event.stopPropagation()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+          } @else if (field().type === 'date') {
+            <button
+              type="button"
+              class="quick-btn"
+              title="Edit date"
+              aria-label="Edit date"
+              (click)="editDate.emit(field()); $event.stopPropagation()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+          } @else if (field().type === 'stamp') {
             <button
               type="button"
               class="quick-btn"
@@ -525,6 +558,9 @@ export class SignFieldBoxComponent {
   readonly nudge = output<{ id: string; dxPx: number; dyPx: number }>();
   readonly toggleCheckbox = output<string>();
   readonly editStamp = output<SignFieldElement>();
+  readonly editSignature = output<SignFieldElement>();
+  readonly editInitials = output<SignFieldElement>();
+  readonly editDate = output<SignFieldElement>();
   readonly textChanged = output<{ id: string; content: string }>();
   readonly labelChanged = output<{ id: string; content: string }>();
   readonly addOption = output<string>();
@@ -634,7 +670,13 @@ export class SignFieldBoxComponent {
 
   onDoubleClick(ev: MouseEvent): void {
     ev.stopPropagation();
-    if (this.field().type === 'stamp') {
+    if (this.field().type === 'signature') {
+      this.editSignature.emit(this.field());
+    } else if (this.field().type === 'initials') {
+      this.editInitials.emit(this.field());
+    } else if (this.field().type === 'date') {
+      this.editDate.emit(this.field());
+    } else if (this.field().type === 'stamp') {
       this.editStamp.emit(this.field());
     } else if (this.field().type === 'text') {
       this.startTextEdit();
@@ -725,7 +767,13 @@ export class SignFieldBoxComponent {
       case 'Enter':
       case 'F2':
         event.preventDefault();
-        if (this.field().type === 'stamp') {
+        if (this.field().type === 'signature') {
+          this.editSignature.emit(this.field());
+        } else if (this.field().type === 'initials') {
+          this.editInitials.emit(this.field());
+        } else if (this.field().type === 'date') {
+          this.editDate.emit(this.field());
+        } else if (this.field().type === 'stamp') {
           this.editStamp.emit(this.field());
         } else if (this.field().type === 'text') {
           this.startTextEdit();
