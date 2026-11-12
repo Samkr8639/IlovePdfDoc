@@ -7,6 +7,39 @@ import { Component, input, output } from '@angular/core';
     <div class="top-toolbar-strip">
       <div class="top-toolbar-inner">
 
+        <!-- Document Info Pill -->
+        <div class="toolbar-doc-pill">
+          <span class="doc-name-chip" [title]="fileName()">{{ fileName() }}</span>
+          <span class="doc-pages-chip">{{ pageCount() }} {{ pageCount() === 1 ? 'page' : 'pages' }}</span>
+        </div>
+
+        <div class="toolbar-divider" aria-hidden="true"></div>
+
+        <!-- History: Undo / Redo -->
+        <div class="history-capsule">
+          <button type="button" class="history-btn" [disabled]="!canUndo()" (click)="undo.emit()"
+            title="Undo (Ctrl+Z / Cmd+Z)" aria-label="Undo">
+            <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+            </svg>
+            <span>Undo</span>
+          </button>
+
+          <button type="button" class="history-btn" [disabled]="!canRedo()" (click)="redo.emit()"
+            title="Redo (Ctrl+Y / Cmd+Y / Ctrl+Shift+Z)" aria-label="Redo">
+            <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            <span>Redo</span>
+          </button>
+        </div>
+
+        <div class="toolbar-divider" aria-hidden="true"></div>
+
         <!-- Mode Toggle (Annotate / Edit Text) — sliding-pill style -->
         <div class="workspace-mode-capsule" role="tablist" aria-label="Editor modes"
           [class.is-transitioning]="isExtractingPageText()">
@@ -49,37 +82,18 @@ import { Component, input, output } from '@angular/core';
           </button>
         </div>
 
-        <!-- Divider between mode toggle and undo/redo -->
-        <div class="toolbar-section-divider" aria-hidden="true"></div>
-
-        <!-- History: Undo / Redo -->
-        <div class="history-capsule">
-          <button type="button" class="history-btn" [disabled]="!canUndo()" (click)="undo.emit()"
-            title="Undo (Ctrl+Z / Cmd+Z)" aria-label="Undo">
-            <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="1 4 1 10 7 10" />
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-            </svg>
-            <span>Undo</span>
-          </button>
-
-          <button type="button" class="history-btn" [disabled]="!canRedo()" (click)="redo.emit()"
-            title="Redo (Ctrl+Y / Cmd+Y / Ctrl+Shift+Z)" aria-label="Redo">
-            <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            <span>Redo</span>
-          </button>
-        </div>
+        <!-- Change file on the far right -->
+        <button type="button" class="btn-replace-doc" (click)="changeFile.emit()" title="Change PDF document">
+          Change file
+        </button>
 
       </div>
     </div>
   `
 })
 export class EditPdfTopNavComponent {
+  readonly fileName = input<string>('document.pdf');
+  readonly pageCount = input<number>(1);
   readonly editorMode = input.required<'annotate' | 'edit'>();
   readonly isExtractingPageText = input<boolean>(false);
   readonly canUndo = input<boolean>(false);
@@ -88,5 +102,6 @@ export class EditPdfTopNavComponent {
   readonly modeChange = output<'annotate' | 'edit'>();
   readonly undo = output<void>();
   readonly redo = output<void>();
+  readonly changeFile = output<void>();
 }
 

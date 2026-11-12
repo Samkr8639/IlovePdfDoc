@@ -1065,4 +1065,28 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.elements().length).toBe(1);
     document.body.removeChild(input);
   });
+
+  it('repairs mojibake file names in displayFileName', () => {
+    component.currentFileName.set('Auction Portal \u00e0 Impulse Decision.pdf');
+    expect(component.displayFileName()).toBe('Auction Portal \u2013 Impulse Decision.pdf');
+  });
+
+  it('prompts and resets document state when changeFile is called', () => {
+    component.viewMode.set('editor');
+    component.pages.set([{ pageIndex: 0, widthPt: 600, heightPt: 800, rotation: 0 }]);
+    component.elements.set([]);
+    component.addShapeElement(10, 10, 0);
+    expect(component.elements().length).toBe(1);
+
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    component.changeFile();
+    expect(component.viewMode()).toBe('editor');
+    expect(component.elements().length).toBe(1);
+
+    confirmSpy.mockReturnValue(true);
+    component.changeFile();
+    expect(component.viewMode()).toBe('upload');
+    expect(component.elements().length).toBe(0);
+    expect(component.pages().length).toBe(0);
+  });
 });

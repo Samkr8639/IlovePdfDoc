@@ -24,6 +24,7 @@ import {
   EditPdfOcrResult,
   EditPdfOcrLine
 } from '@paperflow/contracts';
+import { repairMojibakeFilename } from '@paperflow/sign-core';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { UploadConsentService } from '../../core/services/upload-consent.service';
@@ -162,6 +163,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly viewMode = signal<EditorViewMode>('upload');
   readonly currentPdfBytes = signal<Uint8Array | null>(null);
   readonly currentFileName = signal<string>('document.pdf');
+  readonly displayFileName = computed(() => repairMojibakeFilename(this.currentFileName()));
   readonly pages = signal<PageDimensions[]>([]);
   readonly currentPageIndex = signal<number>(0);
   readonly zoom = signal<number>(0.85);
@@ -1222,7 +1224,22 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-    canDeactivate(): boolean {
+  changeFile(): void {
+    if (this.elements().length > 0 && this.viewMode() === 'editor') {
+      const ok = window.confirm('You have unsaved edits in your document. Are you sure you want to change file?');
+      if (!ok) return;
+    }
+    this.elements.set([]);
+    this.history.clear();
+    this.selectedElementId.set(null);
+    this.currentPdfBytes.set(null);
+    this.currentFileName.set('document.pdf');
+    this.pages.set([]);
+    this.viewMode.set('upload');
+    this.layoutService.showFooter();
+  }
+
+  canDeactivate(): boolean {
     if (this.elements().length > 0 && this.viewMode() === 'editor') {
       return window.confirm('You have unsaved edits in your document. Are you sure you want to leave?');
     }

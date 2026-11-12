@@ -63,13 +63,16 @@
   <div class="editor-workspace">
     <!-- TOP CONTROL & MODE BAR — sticky bar anchored in the normal document flow, never overlaps PDF canvas -->
     <app-edit-pdf-top-nav
+      [fileName]="displayFileName()"
+      [pageCount]="pages().length"
       [editorMode]="editorMode()"
       [isExtractingPageText]="isExtractingPageText()"
       [canUndo]="history.canUndo()"
       [canRedo]="history.canRedo()"
       (modeChange)="setEditorMode($event)"
       (undo)="history.undo()"
-      (redo)="history.redo()" />
+      (redo)="history.redo()"
+      (changeFile)="changeFile()" />
 
     <!-- MAIN WORKSPACE ROW -->
     <div class="workspace-main">
