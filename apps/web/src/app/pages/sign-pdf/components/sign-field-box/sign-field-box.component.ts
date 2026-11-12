@@ -1,5 +1,15 @@
-import { Component, computed, input, output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  effect,
+  input,
+  output,
+  signal
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   PdfPageBoxMetrics,
   SIGN_SCRIPT_FONTS,
@@ -12,12 +22,13 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 @Component({
   selector: 'app-sign-field-box',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div
       class="sign-field-object"
       [class.is-selected]="selected()"
       [class.is-locked-type]="isAspectLocked()"
+      [class.is-editing]="isEditingText() || isEditingLabel()"
       [style.left.px]="screenRect().x"
       [style.top.px]="screenRect().y"
       [style.width.px]="screenRect().width"
@@ -29,12 +40,13 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
       role="button"
       [attr.aria-label]="ariaFieldLabel()"
       [attr.aria-pressed]="selected()"
-      (mousedown)="dragStart.emit({ event: $event, field: field() })"
+      (mousedown)="onMouseDown($event)"
       (touchstart)="touchDragStart.emit({ event: $event, field: field() })"
       (click)="$event.stopPropagation(); selectedField.emit(field().id)"
+      (dblclick)="onDoubleClick($event)"
       (keydown)="onKeyDown($event)">
 
-      <!-- Content Render -->
+      <!-- Assignee Chip (for Multi-recipient) -->
       @if (assigneeLabel()) {
         <span
           class="assignee-pill"
@@ -42,25 +54,134 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
           {{ assigneeLabel() }}
         </span>
       }
+
       <div class="field-visual-inner">
+        <!-- 1. Signature / Initials / Stamp Images -->
         @if ((field().type === 'signature' || field().type === 'initials' || field().type === 'stamp') && field().imageDataUrl) {
           <img [src]="field().imageDataUrl!" [alt]="field().type" draggable="false" class="field-img-preview" />
-        } @else if (field().type === 'checkbox') {
-          <button
-            type="button"
-            class="checkbox-visual-box"
-            [class.checked]="field().checked !== false"
-            [style.border-color]="field().color || 'var(--pt-teal-700)'"
-            (click)="$event.stopPropagation(); toggleCheckbox.emit(field().id)"
-            (mousedown)="$event.stopPropagation()"
-            [attr.aria-label]="'Toggle checkbox'">
-            @if (field().checked !== false) {
-              <svg width="75%" height="75%" viewBox="0 0 24 24" fill="none" [attr.stroke]="field().color || 'var(--pt-teal-700)'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+        }
+
+        <!-- 2. Composite Checkbox (Box + Label) -->
+        @else if (field().type === 'checkbox') {
+          <div
+            class="composite-checkbox-row"
+            [class.label-left]="field().checkboxConfig?.labelPosition === 'left'">
+
+            @if (field().checkboxConfig?.labelPosition === 'left') {
+              <div class="checkbox-label-cell" (dblclick)="startLabelEdit($event)">
+                @if (isEditingLabel()) {
+                  <input
+                    #labelInputRef
+                    type="text"
+                    class="inline-label-input"
+                    [ngModel]="labelDraft()"
+                    (ngModelChange)="labelDraft.set($event)"
+                    (keydown)="onLabelKeyDown($event)"
+                    (blur)="commitLabelDraft()"
+                    placeholder="Add label…" />
+                } @else {
+                  <span
+                    class="checkbox-label-text"
+                    [class.empty-hint]="!field().checkboxConfig?.label?.content"
+                    [style.font-size.px]="(field().checkboxConfig?.label?.fontSize || 12) * zoom()"
+                    [style.color]="field().checkboxConfig?.label?.color || 'var(--pt-navy)'">
+                    {{ field().checkboxConfig?.label?.content || (selected() ? 'Add label…' : '') }}
+                  </span>
+                }
+              </div>
             }
-          </button>
-        } @else {
+
+            <button
+              type="button"
+              class="checkbox-visual-box"
+              [class.checked]="field().checked !== false"
+              [style.width.px]="checkboxBoxSizePx()"
+              [style.height.px]="checkboxBoxSizePx()"
+              [style.border-color]="field().color || 'var(--pt-teal-700)'"
+              [style.color]="field().color || 'var(--pt-teal-700)'"
+              (click)="$event.stopPropagation(); toggleCheckbox.emit(field().id)"
+              (mousedown)="$event.stopPropagation()"
+              [attr.aria-label]="checkboxAriaText()">
+              @if (field().checked !== false) {
+                @if (checkboxMark() === 'tick') {
+                  <svg width="70%" height="70%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                } @else if (checkboxMark() === 'cross') {
+                  <svg width="70%" height="70%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                } @else if (checkboxMark() === 'dot') {
+                  <div class="checkbox-dot" [style.background]="field().color || 'var(--pt-teal-700)'"></div>
+                }
+              }
+            </button>
+
+            @if (field().checkboxConfig?.labelPosition !== 'left') {
+              <div class="checkbox-label-cell" (dblclick)="startLabelEdit($event)">
+                @if (isEditingLabel()) {
+                  <input
+                    #labelInputRef
+                    type="text"
+                    class="inline-label-input"
+                    [ngModel]="labelDraft()"
+                    (ngModelChange)="labelDraft.set($event)"
+                    (keydown)="onLabelKeyDown($event)"
+                    (blur)="commitLabelDraft()"
+                    placeholder="Add label…" />
+                } @else {
+                  <span
+                    class="checkbox-label-text"
+                    [class.empty-hint]="!field().checkboxConfig?.label?.content"
+                    [style.font-size.px]="(field().checkboxConfig?.label?.fontSize || 12) * zoom()"
+                    [style.color]="field().checkboxConfig?.label?.color || 'var(--pt-navy)'">
+                    {{ field().checkboxConfig?.label?.content || (selected() ? 'Add label…' : '') }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- 3. Real Editable Text Field -->
+        @else if (field().type === 'text') {
+          @if (isEditingText()) {
+            <textarea
+              #textInputRef
+              class="inline-text-textarea"
+              [style.font-family]="resolvedFontCss()"
+              [style.font-size.px]="textFontSizePx()"
+              [style.color]="textStyle().color"
+              [style.font-weight]="textStyle().fontWeight"
+              [style.font-style]="textStyle().fontStyle"
+              [style.text-decoration]="textStyle().textDecoration"
+              [style.text-align]="textStyle().textAlign"
+              [style.line-height]="textStyle().lineHeight"
+              [ngModel]="textDraft()"
+              (ngModelChange)="textDraft.set($event)"
+              (keydown)="onTextKeyDown($event)"
+              (blur)="commitTextDraft()"
+              placeholder="Type text…"></textarea>
+          } @else {
+            <div
+              class="field-text-preview"
+              [style.font-family]="resolvedFontCss()"
+              [style.font-size.px]="textFontSizePx()"
+              [style.color]="textStyle().color"
+              [style.font-weight]="textStyle().fontWeight"
+              [style.font-style]="textStyle().fontStyle"
+              [style.text-decoration]="textStyle().textDecoration"
+              [style.text-align]="textStyle().textAlign"
+              [style.line-height]="textStyle().lineHeight"
+              [style.opacity]="textStyle().opacity">
+              {{ fieldTextContent() || 'Click to add text, then type' }}
+            </div>
+          }
+        }
+
+        <!-- 4. Other Text Fields (Name / Date) -->
+        @else {
           <span
             class="field-text-preview"
             [style.font-family]="resolvedFontCss()"
@@ -71,10 +192,24 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
         }
       </div>
 
+      <!-- Signing Details Caption (Under Signature) -->
       @if (field().type === 'signature' && field().showSigningDetailsLine && field().signingDetailsText) {
         <div class="signing-details-caption" [style.font-size.px]="Math.max(7, 8 * zoom())">
           {{ field().signingDetailsText }}
         </div>
+      }
+
+      <!-- Quick Action / Add Option Handle for Checkbox -->
+      @if (selected() && field().type === 'checkbox') {
+        <button
+          type="button"
+          class="add-option-handle"
+          title="Add another checkbox below"
+          aria-label="Add another option"
+          (click)="$event.stopPropagation(); addOption.emit(field().id)"
+          (mousedown)="$event.stopPropagation()">
+          + Add option
+        </button>
       }
 
       <!-- Selected Chrome: 8 Resize Handles, Rotate, Quick Actions -->
@@ -101,6 +236,31 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
         </button>
 
         <div class="field-quick-toolbar" (mousedown)="$event.stopPropagation()">
+          <!-- Edit button for stamp or text -->
+          @if (field().type === 'stamp') {
+            <button
+              type="button"
+              class="quick-btn"
+              title="Edit stamp"
+              aria-label="Edit company stamp"
+              (click)="editStamp.emit(field()); $event.stopPropagation()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+          } @else if (field().type === 'text') {
+            <button
+              type="button"
+              class="quick-btn"
+              title="Edit text"
+              aria-label="Edit text"
+              (click)="startTextEdit(); $event.stopPropagation()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+          }
+
           <button type="button" class="quick-btn" title="Duplicate (Ctrl+D)" aria-label="Duplicate field" (click)="duplicate.emit(field().id); $event.stopPropagation()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
@@ -136,6 +296,11 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
       box-shadow: 0 0 0 2px var(--pt-teal-700);
       background: rgba(230, 245, 243, 0.4);
     }
+    .sign-field-object.is-editing {
+      border-style: solid;
+      background: var(--pt-surface-white);
+      cursor: default;
+    }
     .field-visual-inner {
       width: 100%;
       height: 100%;
@@ -153,15 +318,39 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
     }
     .field-text-preview {
       white-space: pre-wrap;
-      line-height: 1.2;
       width: 100%;
-      text-align: left;
       overflow: hidden;
-      pointer-events: none;
+      word-break: break-word;
+      user-select: none;
     }
-    .checkbox-visual-box {
+    .inline-text-textarea {
       width: 100%;
       height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      resize: none;
+      padding: 0;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    /* Composite Checkbox */
+    .composite-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      height: 100%;
+      padding: 1px;
+    }
+    .composite-checkbox-row.label-left {
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+    }
+    .checkbox-visual-box {
       border: 2px solid var(--pt-teal-700);
       border-radius: var(--pt-radius-xs);
       background: var(--pt-surface-white);
@@ -170,8 +359,60 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
       justify-content: center;
       padding: 0;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .checkbox-visual-box.checked { background: var(--pt-teal-50); }
+    .checkbox-dot {
+      width: 50%;
+      height: 50%;
+      border-radius: var(--pt-radius-pill);
+    }
+    .checkbox-label-cell {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-label-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.25;
+      cursor: text;
+    }
+    .checkbox-label-text.empty-hint {
+      color: var(--pt-muted);
+      font-style: italic;
+    }
+    .inline-label-input {
+      width: 100%;
+      border: none;
+      outline: 1px solid var(--pt-teal-700);
+      border-radius: 2px;
+      padding: 2px 4px;
+      font-size: 12px;
+      background: var(--pt-surface-white);
+      color: var(--pt-navy);
+      box-sizing: border-box;
+    }
+    .add-option-handle {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--pt-teal-700);
+      background: var(--pt-surface-white);
+      border: 1px solid var(--pt-teal-700);
+      border-radius: var(--pt-radius-pill);
+      padding: 2px 8px;
+      cursor: pointer;
+      box-shadow: var(--pt-shadow-sm);
+      white-space: nowrap;
+      z-index: 25;
+    }
+    .add-option-handle:hover {
+      background: var(--pt-teal-50);
+    }
     .signing-details-caption {
       position: absolute;
       left: 0;
@@ -270,6 +511,7 @@ export class SignFieldBoxComponent {
   readonly accentColor = input<string>('var(--pt-teal-700)');
   readonly assigneeLabel = input<string>('');
   readonly assigneeColor = input<string | null>(null);
+  readonly autoFocusEdit = input<boolean>(false);
 
   readonly selectedField = output<string>();
   readonly dragStart = output<{ event: MouseEvent; field: SignFieldElement }>();
@@ -282,6 +524,32 @@ export class SignFieldBoxComponent {
   readonly sendBackward = output<string>();
   readonly nudge = output<{ id: string; dxPx: number; dyPx: number }>();
   readonly toggleCheckbox = output<string>();
+  readonly editStamp = output<SignFieldElement>();
+  readonly textChanged = output<{ id: string; content: string }>();
+  readonly labelChanged = output<{ id: string; content: string }>();
+  readonly addOption = output<string>();
+
+  @ViewChild('textInputRef') textInputRef?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('labelInputRef') labelInputRef?: ElementRef<HTMLInputElement>;
+
+  readonly isEditingText = signal<boolean>(false);
+  readonly textDraft = signal<string>('');
+  readonly isEditingLabel = signal<boolean>(false);
+  readonly labelDraft = signal<string>('');
+
+  constructor() {
+    effect(() => {
+      if (this.autoFocusEdit()) {
+        setTimeout(() => {
+          if (this.field().type === 'text') {
+            this.startTextEdit();
+          } else if (this.field().type === 'checkbox') {
+            this.startLabelEdit();
+          }
+        }, 30);
+      }
+    });
+  }
 
   readonly isAspectLocked = computed(() => {
     const t = this.field().type;
@@ -303,9 +571,47 @@ export class SignFieldBoxComponent {
   );
 
   readonly resolvedFontCss = computed(() => {
-    const fid = this.field().fontId;
+    const textCfg = this.field().textConfig;
+    const fid = textCfg?.fontFamily || this.field().fontId;
     const found = SIGN_SCRIPT_FONTS.find(f => f.id === fid);
     return found ? found.cssFamily : "'SignNotoSans', var(--pt-font-body)";
+  });
+
+  readonly textFontSizePx = computed(() => {
+    const cfg = this.field().textConfig;
+    return ((cfg?.fontSize ?? this.field().fontSizePt) ?? 14) * this.zoom();
+  });
+
+  readonly textStyle = computed(() => {
+    const cfg = this.field().textConfig;
+    return {
+      color: cfg?.color || this.field().color || 'var(--pt-navy)',
+      fontWeight: cfg?.bold ? '700' : '400',
+      fontStyle: cfg?.italic ? 'italic' : 'normal',
+      textDecoration: cfg?.underline ? 'underline' : 'none',
+      textAlign: cfg?.align || 'left',
+      lineHeight: cfg?.lineHeight || 1.25,
+      opacity: typeof cfg?.opacity === 'number' ? cfg.opacity : 1
+    };
+  });
+
+  readonly fieldTextContent = computed(() => {
+    return this.field().textConfig?.content ?? this.field().text ?? '';
+  });
+
+  readonly checkboxBoxSizePx = computed(() => {
+    const boxPt = this.field().checkboxConfig?.boxSize || 18;
+    return Math.max(12, boxPt * this.zoom());
+  });
+
+  readonly checkboxMark = computed(() => {
+    return this.field().checkboxConfig?.mark || 'tick';
+  });
+
+  readonly checkboxAriaText = computed(() => {
+    const checked = this.field().checked !== false;
+    const label = this.field().checkboxConfig?.label?.content || '';
+    return `Checkbox ${label ? label + ' ' : ''}${checked ? 'checked' : 'unchecked'}`;
   });
 
   readonly placeholderText = computed(() => {
@@ -321,6 +627,90 @@ export class SignFieldBoxComponent {
     `${this.field().type} field on page ${this.field().pageIndex + 1}`
   );
 
+  onMouseDown(ev: MouseEvent): void {
+    if (this.isEditingText() || this.isEditingLabel()) return;
+    this.dragStart.emit({ event: ev, field: this.field() });
+  }
+
+  onDoubleClick(ev: MouseEvent): void {
+    ev.stopPropagation();
+    if (this.field().type === 'stamp') {
+      this.editStamp.emit(this.field());
+    } else if (this.field().type === 'text') {
+      this.startTextEdit();
+    } else if (this.field().type === 'checkbox') {
+      this.toggleCheckbox.emit(this.field().id);
+    }
+  }
+
+  startTextEdit(): void {
+    this.textDraft.set(this.fieldTextContent());
+    this.isEditingText.set(true);
+    setTimeout(() => {
+      const el = this.textInputRef?.nativeElement;
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }, 20);
+  }
+
+  commitTextDraft(): void {
+    if (!this.isEditingText()) return;
+    this.isEditingText.set(false);
+    const content = this.textDraft().trim();
+    if (!content) {
+      this.removed.emit(this.field().id);
+    } else if (content !== this.fieldTextContent()) {
+      this.textChanged.emit({ id: this.field().id, content });
+    }
+  }
+
+  onTextKeyDown(ev: KeyboardEvent): void {
+    ev.stopPropagation();
+    if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
+      ev.preventDefault();
+      this.commitTextDraft();
+    } else if (ev.key === 'Escape') {
+      ev.preventDefault();
+      this.isEditingText.set(false);
+    }
+  }
+
+  startLabelEdit(ev?: MouseEvent): void {
+    if (ev) ev.stopPropagation();
+    this.labelDraft.set(this.field().checkboxConfig?.label?.content || '');
+    this.isEditingLabel.set(true);
+    setTimeout(() => {
+      const el = this.labelInputRef?.nativeElement;
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }, 20);
+  }
+
+  commitLabelDraft(): void {
+    if (!this.isEditingLabel()) return;
+    this.isEditingLabel.set(false);
+    const content = this.labelDraft().trim();
+    const cur = this.field().checkboxConfig?.label?.content || '';
+    if (content !== cur) {
+      this.labelChanged.emit({ id: this.field().id, content });
+    }
+  }
+
+  onLabelKeyDown(ev: KeyboardEvent): void {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      this.commitLabelDraft();
+    } else if (ev.key === 'Escape') {
+      ev.preventDefault();
+      this.isEditingLabel.set(false);
+    }
+  }
+
   onResize(corner: ResizeCorner, event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
@@ -328,8 +718,27 @@ export class SignFieldBoxComponent {
   }
 
   onKeyDown(event: KeyboardEvent): void {
+    if (this.isEditingText() || this.isEditingLabel()) return;
+
     const step = event.shiftKey ? 10 : 2;
     switch (event.key) {
+      case 'Enter':
+      case 'F2':
+        event.preventDefault();
+        if (this.field().type === 'stamp') {
+          this.editStamp.emit(this.field());
+        } else if (this.field().type === 'text') {
+          this.startTextEdit();
+        } else if (this.field().type === 'checkbox') {
+          this.startLabelEdit();
+        }
+        break;
+      case ' ':
+        if (this.field().type === 'checkbox') {
+          event.preventDefault();
+          this.toggleCheckbox.emit(this.field().id);
+        }
+        break;
       case 'ArrowLeft':
         event.preventDefault();
         this.nudge.emit({ id: this.field().id, dxPx: -step, dyPx: 0 });
@@ -361,4 +770,3 @@ export class SignFieldBoxComponent {
     }
   }
 }
-
