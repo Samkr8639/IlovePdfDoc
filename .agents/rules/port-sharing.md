@@ -18,3 +18,4 @@ Whenever the user asks to share a port, create a public tunnel (e.g. via Cloudfl
 3. **Relative URL Enforcement**:
    - Never hardcode `http://localhost:4000` or external staging/mock domains in client-side code or environment configs.
    - All client-side API requests must use the relative path `apiBaseUrl: '/api/v1'`.
+
