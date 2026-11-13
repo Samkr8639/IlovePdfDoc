@@ -25,7 +25,8 @@
     "build:web": "npm --workspace=apps/web run build",
     "build:web:dev": "npm --workspace=apps/web run build:dev",
     "build:web:staging": "npm --workspace=apps/web run build:staging",
-    "build:web:prod": "npm --workspace=apps/web run build:prod"
+    "build:web:prod": "npm --workspace=apps/web run build:prod",
+    "serve:prod": "node scripts/serve-prod.mjs"
   },
   "keywords": [
     "pdf",

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { PDFDocument, PDFName } from 'pdf-lib';
-import JSZip from 'jszip';
+import type { PDFDocument, PDFName } from 'pdf-lib';
+import type JSZip from 'jszip';
 import { PdfDocumentAnalysis, PdfPageAnalysis } from '@paperflow/contracts';
 import { SplitRangeParser, PageRange } from '../utils/split-range-parser';
 import { environment } from '../../../environments/environment';
@@ -82,6 +82,14 @@ export interface CompressPdfResult extends MergeResult {
   providedIn: 'root'
 })
 export class BrowserPdfService {
+  private async getPdfLib() {
+    return await import('pdf-lib');
+  }
+
+  private async getJSZip(): Promise<typeof import('jszip')> {
+    const mod = await import('jszip');
+    return (mod as any).default || mod;
+  }
 
   formatBytes(bytes: number, decimals = 1): string {
     if (bytes === 0) return '0 B';
@@ -129,6 +137,7 @@ export class BrowserPdfService {
       }
 
       // Load document to count pages
+      const { PDFDocument } = await this.getPdfLib();
       const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const pageCount = pdfDoc.getPageCount();
 
@@ -154,6 +163,7 @@ export class BrowserPdfService {
   async analyzePdf(file: File): Promise<PdfDocumentAnalysis> {
     try {
       const buffer = await file.arrayBuffer();
+      const { PDFDocument, PDFName } = await this.getPdfLib();
       const doc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const totalPages = doc.getPageCount();
 
@@ -219,6 +229,7 @@ export class BrowserPdfService {
     }
 
     onProgress?.(5, 'Initializing PDF engine in browser...');
+    const { PDFDocument } = await this.getPdfLib();
     const mergedDoc = await PDFDocument.create();
     let totalPages = 0;
 
@@ -272,6 +283,7 @@ export class BrowserPdfService {
   ): Promise<SplitPdfResult> {
     onProgress?.(10, 'Loading PDF document into memory...');
     const arrayBuffer = await file.arrayBuffer();
+    const { PDFDocument } = await this.getPdfLib();
     const sourceDoc = await PDFDocument.load(arrayBuffer);
     const totalPages = sourceDoc.getPageCount();
 
@@ -357,7 +369,8 @@ export class BrowserPdfService {
 
     // 3. Scenario B: Multiple output PDFs packaged into a ZIP archive
     onProgress?.(40, `Generating ${targetChunks.length} separate PDF files...`);
-    const zip = new JSZip();
+    const JSZipClass = await this.getJSZip();
+    const zip = new JSZipClass();
     const outputFiles: SplitPdfOutputFile[] = [];
 
     for (let i = 0; i < targetChunks.length; i++) {
@@ -533,6 +546,7 @@ export class BrowserPdfService {
         throw new Error(`Only valid PDF files are supported. '${file.name}' is not a valid PDF.`);
       }
 
+      const { PDFDocument } = await this.getPdfLib();
       let pdfDoc: PDFDocument;
       try {
         pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: false });
@@ -654,7 +668,8 @@ export class BrowserPdfService {
 
     // Multiple files packaged into a ZIP archive
     onProgress?.(90, 'Packaging all compressed documents into ZIP archive...');
-    const zip = new JSZip();
+    const JSZipClass = await this.getJSZip();
+    const zip = new JSZipClass();
     for (const item of items) {
       zip.file(item.filename, item.blob);
     }
