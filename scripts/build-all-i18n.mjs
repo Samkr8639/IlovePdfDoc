@@ -59,7 +59,33 @@ const TRANSLATIONS = {
       PART: "Parte",
       EXCLUDED: "Excluida",
       ERROR_SINGLE_FILE_ONLY: "Dividir PDF acepta un archivo a la vez. Por favor sube un solo documento.",
-      ERROR_INVALID_RANGES: "Por favor corrige los rangos de páginas no válidos antes de dividir."
+      ERROR_INVALID_RANGES: "Por favor corrige los rangos de páginas no válidos antes de dividir.",
+      SECTION_DISTRIBUTION_TITLE: "Distribución visual de páginas",
+      SECTION_DISTRIBUTION_DESC: "Las etiquetas de colores indican a qué archivo dividido pertenece cada página.",
+      SECTION_CONFIG_TITLE: "Configuración de división",
+      MODES_LABEL: "Modos de división",
+      DEFINED_RANGES: "Rangos definidos",
+      RANGE_LABEL: "Rango",
+      RANGES_LABEL: "Rangos",
+      PAGE_LABEL: "página",
+      PAGES_LABEL: "páginas",
+      REMOVE_RANGE: "Eliminar rango",
+      FIXED_HINT_PREFIX: "Cada",
+      FIXED_HINT_SUFFIX: "se guardará en un PDF independiente.",
+      EXTRACT_ALL_HINT: "Todas las páginas se extraerán como archivos PDF individuales y se empaquetarán en un archivo ZIP.",
+      PROCESSING_TITLE: "Dividiendo PDF...",
+      PREPARING_MSG: "Preparando documento para dividir...",
+      ERR_CHUNK_SIZE_MIN: "Las páginas por bloque deben ser al menos 1.",
+      ERR_CHUNK_SIZE_MAX: "Las páginas por bloque no pueden superar el total de páginas.",
+      ERR_NO_RANGES: "Añada al menos un rango de páginas.",
+      ERR_INVALID_NUMBER: "Los números de página deben ser números enteros.",
+      ERR_START_MIN: "La página de inicio debe ser al menos 1.",
+      ERR_END_MIN: "La página final debe ser al menos 1.",
+      ERR_START_EXCEEDS: "La página de inicio supera el total de páginas.",
+      ERR_END_EXCEEDS: "La página final supera el total de páginas.",
+      ERR_START_GREATER: "La página de inicio no puede ser mayor que la página final.",
+      ERR_OVERLAP: "se superpone con un rango anterior.",
+      ERR_FIX_RANGES: "Corrija los errores de rango antes de dividir."
     }
   },
   hi: {
@@ -88,7 +114,33 @@ const TRANSLATIONS = {
       PART: "भाग",
       EXCLUDED: "छोड़ा गया",
       ERROR_SINGLE_FILE_ONLY: "PDF विभाजित करें एक बार में केवल एक PDF स्वीकार करता है।",
-      ERROR_INVALID_RANGES: "विभाजित करने से पहले कृपया अमान्य पेज रेंज ठीक करें।"
+      ERROR_INVALID_RANGES: "विभाजित करने से पहले कृपया अमान्य पेज रेंज ठीक करें।",
+      SECTION_DISTRIBUTION_TITLE: "पेज वितरण का दृश्य प्रदर्शन",
+      SECTION_DISTRIBUTION_DESC: "रंग-कोडित बैज दर्शाते हैं कि प्रत्येक पृष्ठ किस अलग फाइल का हिस्सा है।",
+      SECTION_CONFIG_TITLE: "विभाजन कॉन्फ़िगरेशन",
+      MODES_LABEL: "विभाजन मोड",
+      DEFINED_RANGES: "निर्धारित रेंज",
+      RANGE_LABEL: "रेंज",
+      RANGES_LABEL: "रेंज",
+      PAGE_LABEL: "पेज",
+      PAGES_LABEL: "पेज",
+      REMOVE_RANGE: "रेंज हटाएं",
+      FIXED_HINT_PREFIX: "प्रत्येक",
+      FIXED_HINT_SUFFIX: "को एक स्वतंत्र PDF में सहेजा जाएगा।",
+      EXTRACT_ALL_HINT: "सभी पृष्ठों को अलग-अलग PDF दस्तावेज़ों के रूप में निकाला जाएगा और ZIP संग्रह में पैक किया जाएगा।",
+      PROCESSING_TITLE: "PDF विभाजित हो रहा है...",
+      PREPARING_MSG: "दस्तावेज़ को विभाजित करने के लिए तैयार किया जा रहा है...",
+      ERR_CHUNK_SIZE_MIN: "प्रति भाग पेज कम से कम 1 होना चाहिए।",
+      ERR_CHUNK_SIZE_MAX: "प्रति भाग पेज कुल पृष्ठों से अधिक नहीं हो सकता।",
+      ERR_NO_RANGES: "कृपया कम से कम एक पेज रेंज जोड़ें।",
+      ERR_INVALID_NUMBER: "पेज संख्या पूर्णांक होनी चाहिए।",
+      ERR_START_MIN: "आरंभिक पेज कम से कम 1 होना चाहिए।",
+      ERR_END_MIN: "अंतिम पेज कम से कम 1 होना चाहिए।",
+      ERR_START_EXCEEDS: "आरंभिक पेज कुल पृष्ठों से अधिक है।",
+      ERR_END_EXCEEDS: "अंतिम पेज कुल पृष्ठों से अधिक है।",
+      ERR_START_GREATER: "आरंभिक पेज अंतिम पेज से बड़ा नहीं हो सकता।",
+      ERR_OVERLAP: "पिछली रेंज के साथ ओवरलैप करता है।",
+      ERR_FIX_RANGES: "विभाजित करने से पहले कृपया रेंज की त्रुटियां ठीक करें।"
     }
   },
   fr: {
@@ -393,19 +445,33 @@ const TRANSLATIONS = {
   }
 };
 
-// Generates fallback dictionary cloned from enFull but preserving existing localized keys where available
-function generateLanguageDict(langCode) {
-  if (TRANSLATIONS[langCode]) {
-    return TRANSLATIONS[langCode];
+function deepMerge(target, source) {
+  for (const key of Object.keys(source)) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      if (!target[key] || typeof target[key] !== 'object') {
+        target[key] = {};
+      }
+      deepMerge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
   }
-  // Deep clone enFull as robust base fallback so every single key is guaranteed present
-  return JSON.parse(JSON.stringify(enFull));
+  return target;
 }
 
 for (const lang of LANGUAGES) {
   const filePath = path.join(I18N_DIR, `${lang}.json`);
-  const data = generateLanguageDict(lang);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+  let existing = {};
+  if (fs.existsSync(filePath)) {
+    try {
+      existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    } catch {}
+  }
+  const merged = deepMerge(JSON.parse(JSON.stringify(enFull)), existing);
+  if (TRANSLATIONS[lang]) {
+    deepMerge(merged, TRANSLATIONS[lang]);
+  }
+  fs.writeFileSync(filePath, JSON.stringify(merged, null, 2) + '\n', 'utf-8');
 }
 
 // Clean up pending directory
@@ -418,3 +484,4 @@ if (fs.existsSync(pendingDir) && fs.readdirSync(pendingDir).length === 0) {
 }
 
 console.log(`Successfully generated and synchronized ${LANGUAGES.length} language files.`);
+

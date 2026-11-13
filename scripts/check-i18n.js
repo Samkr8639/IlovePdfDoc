@@ -1,9 +1,5 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fs = require('node:fs');
+const path = require('node:path');
 
 const I18N_DIR = path.resolve(__dirname, '../apps/web/public/i18n');
 
@@ -76,3 +72,4 @@ if (hasError) {
   console.log('\nAll 26 languages verified successfully. Localization consistency: 100%.');
   process.exit(0);
 }
+
