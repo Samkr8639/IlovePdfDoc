@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   environment: 'development',
-  apiBaseUrl: 'http://localhost:4000/api/v1',
+  apiBaseUrl: '/api/v1',
   appName: 'PaperFlow (Dev)',
   enableAnalytics: false,
   ocrEnabled: true,

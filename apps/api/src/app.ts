@@ -43,7 +43,13 @@ export function createApp(): Express {
   );
   app.use(
     cors({
-      origin: env.CORS_ORIGIN,
+      origin:
+        env.NODE_ENV === 'production'
+          ? env.CORS_ORIGIN
+          : (origin, callback) => {
+              // In development/staging, permit requests from localhost, local LAN IPs, or forwarded dev tunnels
+              callback(null, true);
+            },
       credentials: true,
       methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token', 'x-sender-token'],
