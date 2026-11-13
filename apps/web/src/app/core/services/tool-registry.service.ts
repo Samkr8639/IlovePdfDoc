@@ -56,6 +56,11 @@ export class ToolRegistryService {
       return;
     }
 
+    // Do not attempt insecure HTTP requests from HTTPS contexts (prevents mixed content errors)
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && environment.apiBaseUrl.startsWith('http://')) {
+      return;
+    }
+
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -68,9 +73,8 @@ export class ToolRegistryService {
         }
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.warn('Backend API tools fetch failed, using fallback registry:', err);
-        this.error.set('Could not fetch tools from API, using cached registry.');
+      error: () => {
+        // Fallback silently to bundled TOOL_REGISTRY without noisy console errors
         this.isLoading.set(false);
       }
     });

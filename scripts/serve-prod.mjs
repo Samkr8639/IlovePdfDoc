@@ -85,6 +85,7 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', contentType);
   res.setHeader('Cache-Control', cacheControl);
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Robots-Tag', 'index, follow');
 
   // Compress text assets
   const shouldCompress = /text|javascript|json|xml|svg/i.test(contentType);

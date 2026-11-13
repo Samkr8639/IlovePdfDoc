@@ -14,6 +14,7 @@ export class SeoService {
 
     this.metaService.updateTag({ name: 'description', content: seo.description });
     this.metaService.updateTag({ name: 'keywords', content: seo.keywords.join(', ') });
+    this.metaService.updateTag({ name: 'robots', content: 'index, follow' });
 
     // OpenGraph
     this.metaService.updateTag({ property: 'og:title', content: seo.title });
