@@ -405,35 +405,65 @@
 }
 
 /* ==========================================================================
-   FLOATING CAPSULE BAR FOR CATEGORY FILTER (ROUNDED BORDER BAR)
+   PREMIUM CATEGORY FILTER BAR & RESPONSIVE CHIP RAIL
    ========================================================================== */
 .hero-filter-bar-wrapper {
+  position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin: 0 auto 12px;
+  justify-content: center;
   width: 100%;
+  max-width: 1240px;
+  margin: 0 auto 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.hero-filter-scroll-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  padding: 6px 4px;
+  box-sizing: border-box;
+}
+
+.hero-filter-scroll-track::-webkit-scrollbar {
+  display: none;
 }
 
 .hero-filter-nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  flex-wrap: wrap;
-  padding: 6px;
-  background: #FFFFFF;
+  gap: 5px;
+  flex-wrap: nowrap;
+  padding: 5px 6px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--pt-soft-outline, #E2E8F0);
   border-radius: var(--pt-radius-full, 9999px);
-  box-shadow: 0 4px 20px -2px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(16, 24, 40, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(16, 24, 40, 0.07), 0 1px 3px rgba(16, 24, 40, 0.03);
   max-width: 100%;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .cat-pill {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 18px;
+  height: 38px;
+  padding: 0 16px;
   border-radius: var(--pt-radius-full, 9999px);
   background: transparent;
   border: 1px solid transparent;
@@ -442,6 +472,8 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -456,6 +488,7 @@
   border-color: var(--pt-teal-700, #0F766E);
   color: #FFFFFF;
   box-shadow: 0 2px 10px rgba(15, 118, 110, 0.28);
+  transform: translateY(0);
 }
 
 .cat-pill.active svg {
@@ -478,7 +511,53 @@
   color: #FFFFFF;
 }
 
-/* RESPONSIVE BREAKPOINTS FOR HERO */
+/* NAVIGATION CHEVRON BUTTONS (< and >) */
+.filter-scroll-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid var(--pt-soft-outline, #E2E8F0);
+  color: #1E293B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.14);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.filter-scroll-arrow.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.filter-scroll-arrow.arrow-left {
+  left: 2px;
+}
+
+.filter-scroll-arrow.arrow-right {
+  right: 2px;
+}
+
+.filter-scroll-arrow:hover {
+  background: #F8FAFC;
+  color: var(--pt-teal-700, #0F766E);
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+}
+
+.filter-scroll-arrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+/* RESPONSIVE BREAKPOINTS FOR HERO PARALLAX CARDS */
 @media (max-width: 1380px) {
   .hero-float-card.card-left {
     left: 4px;
@@ -493,6 +572,146 @@
 @media (max-width: 1200px) {
   .hero-float-card {
     display: none;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE CATEGORY DOCK: TABLET & MEDIUM VIEWPORTS (641px - 1140px)
+   Smooth Horizontal Rail of Independent Floating Pills with Chevrons & Fade
+   ========================================================================== */
+@media (max-width: 1140px) and (min-width: 641px) {
+  .hero-filter-bar-wrapper {
+    max-width: 100%;
+    padding: 0 12px;
+  }
+
+  .hero-filter-scroll-track {
+    justify-content: flex-start;
+    padding: 6px 38px;
+    mask-image: linear-gradient(to right, transparent 0%, black 36px, black calc(100% - 36px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 36px, black calc(100% - 36px), transparent 100%);
+  }
+
+  .hero-filter-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2px 0;
+    width: max-content;
+    max-width: none;
+  }
+
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--pt-radius-full, 9999px);
+    background: #FFFFFF;
+    border: 1px solid var(--pt-soft-outline, #E2E8F0);
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cat-pill:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: var(--pt-teal-700, #0F766E);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(16, 24, 40, 0.08);
+  }
+
+  .cat-pill.active {
+    background: var(--pt-teal-700, #0F766E);
+    border-color: var(--pt-teal-700, #0F766E);
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(15, 118, 110, 0.32);
+    transform: translateY(0);
+  }
+
+  .cat-pill.active svg {
+    color: #FFFFFF;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE CATEGORY DOCK: MOBILE VIEWPORTS (<= 640px)
+   Native Swipeable Touch Rail with Clean Floating Pills & Edge Mask
+   ========================================================================== */
+@media (max-width: 640px) {
+  .hero-filter-bar-wrapper {
+    margin: 0 auto 16px;
+    padding: 0;
+  }
+
+  .filter-scroll-arrow {
+    display: none; /* Mobile utilizes native touch drag gestures */
+  }
+
+  .hero-filter-scroll-track {
+    justify-content: flex-start;
+    padding: 6px 16px;
+    mask-image: linear-gradient(to right, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%);
+  }
+
+  .hero-filter-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2px 0;
+    max-width: none;
+    width: max-content;
+  }
+
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--pt-radius-full, 9999px);
+    background: #FFFFFF;
+    border: 1px solid var(--pt-soft-outline, #E2E8F0);
+    color: #334155;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cat-pill:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+  }
+
+  .cat-pill.active {
+    background: var(--pt-teal-700, #0F766E);
+    border-color: var(--pt-teal-700, #0F766E);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(15, 118, 110, 0.28);
+  }
+
+  .cat-pill.active svg {
+    color: #FFFFFF;
   }
 }
 
@@ -536,62 +755,6 @@
   .hero-quick-row {
     flex-direction: column;
     gap: 8px;
-  }
-  .hero-filter-bar-wrapper {
-    width: 100%;
-    margin: 0 auto 16px;
-    padding: 6px 16px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    display: flex;
-    justify-content: flex-start;
-  }
-  .hero-filter-bar-wrapper::-webkit-scrollbar {
-    display: none;
-  }
-  .hero-filter-nav {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: nowrap;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 2px 0;
-    max-width: none;
-    width: max-content;
-  }
-  .cat-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    padding: 8px 16px;
-    border-radius: 9999px;
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    color: #334155;
-    font-size: 12.5px;
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .cat-pill:hover {
-    background: #F8FAFC;
-    border-color: #CBD5E1;
-  }
-  .cat-pill.active {
-    background: var(--pt-teal-700, #0F766E);
-    border-color: var(--pt-teal-700, #0F766E);
-    color: #FFFFFF;
-    box-shadow: 0 2px 8px rgba(15, 118, 110, 0.28);
-  }
-  .cat-pill.active svg {
-    color: #FFFFFF;
   }
 }
 

@@ -30,6 +30,7 @@ import { LayoutService } from '../../core/services/layout.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
+import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 
 export type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -55,7 +56,8 @@ export interface SelectedPdfFile {
     RouterLink,
     DropzoneComponent,
     ProcessingStateComponent,
-    ExploreMoreToolsComponent
+    ExploreMoreToolsComponent,
+    PtAdSlotComponent
   ],
   templateUrl: './pdf-to-jpg.component.html',
   styleUrl: './pdf-to-jpg.component.css',

@@ -4,7 +4,7 @@
     <section class="unified-hero-section">
       <div class="container hero-content">
         <h1 class="tool-h1">Merge PDF files</h1>
-        <p class="tool-lead">
+        <p class="hero-subtitle">
           Combine PDFs in the order you want with the easiest PDF merger available.
         </p>
 
@@ -34,162 +34,131 @@
       </div>
     </section>
 
-    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <!-- ADSENSE / ADVERTISEMENT (Temporarily commented until AdSense approval)
     <section class="adsense-section">
       <div class="container">
-        <div class="adsense-wrapper" aria-label="Advertisement">
-          <span class="adsense-label">Advertisement</span>
-          <div class="adsense-slot adsense-leaderboard">
-            <div class="adsense-placeholder-content">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.5">
-                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-              </svg>
-              <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
-            </div>
-          </div>
-        </div>
+        <app-pt-ad-slot slotType="leaderboard"></app-pt-ad-slot>
       </div>
     </section>
+    -->
 
-    <!-- FEATURES & VALUE PROPOSITION -->
+    <!-- FEATURES SECTION -->
     <section class="features-section">
       <div class="container">
-        <div class="section-heading">
-          <h2 class="section-title">The easiest & safest way to merge PDF documents</h2>
-          <p class="section-subtitle">Engineered for privacy, speed, and precision.</p>
+        <div class="features-header">
+          <h2 class="features-title">The easiest & safest way to merge PDF documents</h2>
+          <p class="features-subtitle">Engineered for privacy, speed, and precision.</p>
         </div>
 
         <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon-badge">
-              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
-                <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white"/>
-                <circle cx="24" cy="23" r="2.5" fill="#1E3A8A"/>
+          <div class="feature-item-card">
+            <div class="feature-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
             </div>
-            <h3 class="feature-title">100% In-Browser Privacy</h3>
-            <p class="feature-desc">
-              Your PDF documents never touch a third-party server. Everything is merged directly inside your browser memory using WebAssembly.
-            </p>
+            <h3>100% In-Browser Privacy</h3>
+            <p>Your PDF documents never touch a third-party server. Everything is merged directly inside your browser memory using WebAssembly.</p>
           </div>
 
-          <div class="feature-card">
-            <div class="feature-icon-badge">
-              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
-                <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <div class="feature-item-card">
+            <div class="feature-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
-            <h3 class="feature-title">Lossless Quality</h3>
-            <p class="feature-desc">
-              Original vector graphics, fonts, margins, high-res images, and hyperlinks remain intact with zero degradation.
-            </p>
+            <h3>Lossless Quality</h3>
+            <p>Original vector graphics, fonts, margins, high-res images, and hyperlinks remain intact with zero degradation.</p>
           </div>
 
-          <div class="feature-card">
-            <div class="feature-icon-badge">
-              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
-                <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <div class="feature-item-card">
+            <div class="feature-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
               </svg>
             </div>
-            <h3 class="feature-title">Interactive Sequence Order</h3>
-            <p class="feature-desc">
-              Effortlessly reorder documents before merging. Drag and drop cards to arrange them in the exact order you need.
-            </p>
+            <h3>Interactive Sequence Order</h3>
+            <p>Effortlessly reorder documents before merging. Drag and drop cards to arrange them in the exact order you need.</p>
           </div>
 
-          <div class="feature-card">
-            <div class="feature-icon-badge">
-              <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
-                <path d="M16 24c0-3.3 2.7-6 6-6 2.3 0 4.2 1.3 5.2 3.1.9-1.8 2.8-3.1 5.1-3.1 3.3 0 6 2.7 6 6s-2.7 6-6 6c-2.3 0-4.2-1.3-5.1-3.1-.9 1.8-2.9 3.1-5.2 3.1-3.3 0-6-2.7-6-6z" stroke="white" stroke-width="2.5" fill="none"/>
+          <div class="feature-item-card">
+            <div class="feature-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m4.93 4.93 4.24 4.24"></path>
+                <path d="m14.83 9.17 4.24-4.24"></path>
+                <path d="m14.83 14.83 4.24 4.24"></path>
+                <path d="m9.17 14.83-4.24 4.24"></path>
               </svg>
             </div>
-            <h3 class="feature-title">Free & Unlimited</h3>
-            <p class="feature-desc">
-              Combine as many files as you need with no subscriptions, watermark additions, or hidden paywalls.
-            </p>
+            <h3>Free & Unlimited</h3>
+            <p>Combine as many files as you need with no subscriptions, watermark additions, or hidden paywalls.</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 3-STEP GUIDE SECTION -->
-    <section class="seo-guide-section">
+    <section class="steps-section">
       <div class="container">
-        <div class="guide-header">
-          <h2 class="guide-title">How to merge PDF files online</h2>
-          <p class="guide-lead">Three effortless steps to combine your documents with precision.</p>
+        <div class="steps-header">
+          <h2 class="steps-title">How to merge PDF files online</h2>
+          <p class="steps-subtitle">Three quick steps with complete local control.</p>
         </div>
 
         <div class="steps-grid">
-          <div class="step-card">
+          <div class="step-guide-card">
             <div class="step-num">01</div>
-            <h3 class="step-title">Select documents</h3>
-            <p class="step-desc">
-              Click "Select PDF files", drag and drop your files into the uploader, or open documents from Google Drive or Dropbox.
-            </p>
+            <h3>Select documents</h3>
+            <p>Click "Select PDF files", drag and drop your files into the uploader, or open documents from Google Drive or Dropbox.</p>
           </div>
 
-          <div class="step-card">
+          <div class="step-guide-card">
             <div class="step-num">02</div>
-            <h3 class="step-title">Arrange sequence</h3>
-            <p class="step-desc">
-              Drag and drop files to set the exact order or use the quick arrow buttons. Add more files anytime.
-            </p>
+            <h3>Arrange sequence</h3>
+            <p>Drag and drop files to set the exact order or use the quick arrow buttons. Add more files anytime.</p>
           </div>
 
-          <div class="step-card">
+          <div class="step-guide-card">
             <div class="step-num">03</div>
-            <h3 class="step-title">Merge & download</h3>
-            <p class="step-desc">
-              Click "Merge PDF". The browser combines all documents instantly with in-browser preview and instant download.
-            </p>
+            <h3>Merge & download</h3>
+            <p>Click "Merge PDF". The browser combines all documents instantly with in-browser preview and instant download.</p>
           </div>
         </div>
-
-        <!-- FAQ SECTION FOR MERGE PDF -->
-        <div class="tool-faqs">
-          <h3 class="tool-faqs-title">Frequently Asked Questions</h3>
-          <div class="tool-faqs-list">
-            <div class="faq-card">
-              <h4 class="faq-q">Are my files uploaded to your servers when merging?</h4>
-              <p class="faq-a">
-                No. PDFTailor operates with 100% in-browser WebAssembly. Your documents remain strictly inside your device's memory and are never transmitted across any network.
-              </p>
-            </div>
-
-            <div class="faq-card">
-              <h4 class="faq-q">Can I merge PDF files with different page orientations?</h4>
-              <p class="faq-a">
-                Yes! PDFTailor automatically detects and preserves portrait and landscape orientations, margins, embedded fonts, and page dimensions across all files.
-              </p>
-            </div>
-
-            <div class="faq-card">
-              <h4 class="faq-q">How many files can I merge at once?</h4>
-              <p class="faq-a">
-                You can combine multiple PDF documents in a single operation. Because processing happens locally on your computer, performance is fast and unrestricted.
-              </p>
-            </div>
-
-            <div class="faq-card">
-              <h4 class="faq-q">Can I open files directly from Google Drive or Dropbox?</h4>
-              <p class="faq-a">
-                Yes, simply click the Google Drive or Dropbox shortcut buttons next to the Select Files button to open your cloud storage in one click.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- MORE POPULAR TOOLS CROSS-LINKS -->
-        <app-explore-more-tools currentTool="merge-pdf" />
       </div>
     </section>
+
+    <!-- FAQ SECTION -->
+    <section class="faq-section">
+      <div class="container container-narrow">
+        <h2 class="faq-section-title">Frequently Asked Questions</h2>
+        <div class="faq-list">
+          <div class="faq-card-item">
+            <h4>Are my files uploaded to your servers when merging?</h4>
+            <p>No. PDFTailor operates with 100% in-browser WebAssembly. Your documents remain strictly inside your device's memory and are never transmitted across any network.</p>
+          </div>
+
+          <div class="faq-card-item">
+            <h4>Can I merge PDF files with different page orientations?</h4>
+            <p>Yes! PDFTailor automatically detects and preserves portrait and landscape orientations, margins, embedded fonts, and page dimensions across all files.</p>
+          </div>
+
+          <div class="faq-card-item">
+            <h4>How many files can I merge at once?</h4>
+            <p>You can combine multiple PDF documents in a single operation. Because processing happens locally on your computer, performance is fast and unrestricted.</p>
+          </div>
+
+          <div class="faq-card-item">
+            <h4>Can I open files directly from Google Drive or Dropbox?</h4>
+            <p>Yes, simply click the Google Drive or Dropbox shortcut buttons next to the Select Files button to open your cloud storage in one click.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORE MORE TOOLS -->
+    <app-explore-more-tools currentTool="merge-pdf" />
   }
 
   <!-- ORGANIZE STATE: EXACT LAYOUT FROM USER SCREENSHOT (CANVAS + RIGHT SIDEBAR) -->
@@ -426,7 +395,7 @@
             </button>
           </div>
 
-          <!-- Dedicated Sidebar AdSense Slot -->
+          <!-- Dedicated Sidebar AdSense Slot (Temporarily commented until AdSense approval)
           <div class="sidebar-adsense-slot">
             <span class="adsense-label">Advertisement</span>
             <div class="sidebar-ad-box">
@@ -438,6 +407,7 @@
               <span>Google AdSense (300 × 250)</span>
             </div>
           </div>
+          -->
         </div>
 
         <!-- Giant Red Merge PDF Button Sticky Bottom -->

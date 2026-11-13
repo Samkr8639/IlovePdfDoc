@@ -20,6 +20,7 @@ describe('WebMcpService', () => {
 
     toolRegistry = TestBed.inject(ToolRegistryService);
     service = TestBed.inject(WebMcpService);
+    service.initWebMcp();
   });
 
   it('should be created and initialize tools', () => {

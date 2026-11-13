@@ -35,7 +35,7 @@ import { ExploreMoreToolsComponent } from '../../../../shared/components/explore
       </div>
     </section>
 
-    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
+    <!-- TOP ADSENSE ADVERTISEMENT SLOT (Temporarily commented until AdSense approval)
     <section class="adsense-section">
       <div class="container">
         <div class="adsense-wrapper" aria-label="Advertisement">
@@ -54,6 +54,7 @@ import { ExploreMoreToolsComponent } from '../../../../shared/components/explore
         </div>
       </div>
     </section>
+    -->
 
     <!-- FEATURES & VALUE PROPOSITION -->
     <section class="features-section">

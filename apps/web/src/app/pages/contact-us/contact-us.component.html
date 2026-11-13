@@ -100,24 +100,24 @@
             <div class="step-content">
               <div class="form-row-grid">
                 <div class="form-field">
-                  <label for="userName" class="field-label">Your name*</label>
+                  <label for="userName" class="field-label">Your name<span class="required-asterisk" aria-hidden="true">*</span></label>
                   <input
                     id="userName"
                     type="text"
                     class="text-input"
-                    placeholder="e.g. Sameer Kumar"
+                    placeholder="e.g. John Doe"
                     [(ngModel)]="formData.name"
                     name="userName"
                     required
                   />
                 </div>
                 <div class="form-field">
-                  <label for="userEmail" class="field-label">Your email*</label>
+                  <label for="userEmail" class="field-label">Your email<span class="required-asterisk" aria-hidden="true">*</span></label>
                   <input
                     id="userEmail"
                     type="email"
                     class="text-input"
-                    placeholder="e.g. sam@zealousys.com"
+                    placeholder="e.g. john@example.com"
                     [(ngModel)]="formData.email"
                     name="userEmail"
                     required
@@ -126,7 +126,7 @@
               </div>
 
               <div class="form-field">
-                <label for="generalSubject" class="field-label">General Subject*</label>
+                <label for="generalSubject" class="field-label">General Subject<span class="required-asterisk" aria-hidden="true">*</span></label>
                 <div class="select-wrapper">
                   <select
                     id="generalSubject"
@@ -167,7 +167,7 @@
           @if (currentStep() === 2) {
             <div class="step-content">
               <div class="form-group-block">
-                <label class="group-label">Individual User or Company*</label>
+                <label class="group-label">Individual User or Company<span class="required-asterisk" aria-hidden="true">*</span></label>
                 <div class="radio-options-row">
                   <label class="radio-option-card" [class.selected]="formData.userType === 'individual'">
                     <input
@@ -193,7 +193,7 @@
               </div>
 
               <div class="form-group-block">
-                <label class="group-label">Product interest*</label>
+                <label class="group-label">Product interest<span class="required-asterisk" aria-hidden="true">*</span></label>
                 <div class="checkbox-options-list">
                   @for (interest of productInterestOptions; track interest) {
                     <label class="checkbox-option-card" [class.checked]="formData.productInterests[interest]">
@@ -231,7 +231,7 @@
             <div class="step-content">
               <div class="form-field">
                 <div class="field-header-row">
-                  <label for="contactMessage" class="field-label">Message*</label>
+                  <label for="contactMessage" class="field-label">Message<span class="required-asterisk" aria-hidden="true">*</span></label>
                   <span class="char-counter" [class.counter-valid]="formData.message.trim().length >= 10">
                     {{ formData.message.trim().length }} / 1000 characters
                   </span>

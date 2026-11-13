@@ -215,7 +215,7 @@ interface StrokePath {
                   type="text"
                   class="pt-text-input"
                   [maxlength]="kind() === 'initials' ? 12 : 80"
-                  [placeholder]="kind() === 'initials' ? 'e.g. SK' : 'Enter your full name'"
+                  [placeholder]="kind() === 'initials' ? 'e.g. JD' : 'Enter your full name'"
                   [ngModel]="typedValue()"
                   (ngModelChange)="onTypedValueChange($event)" />
               </div>

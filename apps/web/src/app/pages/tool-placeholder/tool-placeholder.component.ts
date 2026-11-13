@@ -10,6 +10,7 @@ import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.com
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
+import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -27,7 +28,8 @@ export interface CustomSplitRange {
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent,
-    ExploreMoreToolsComponent
+    ExploreMoreToolsComponent,
+    PtAdSlotComponent
   ],
   templateUrl: './tool-placeholder.component.html',
   styleUrl: './tool-placeholder.component.css'
@@ -60,6 +62,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
   splitRangeMode = signal<'custom' | 'fixed'>('custom'); // Only Custom and Fixed (NO Smart!)
   splitPageRanges = signal<string>(''); // Bound to input with placeholder "example: 1,5-8"
   splitFixedCount = signal<number>(1);
+  mergeExtractedPages = signal<boolean>(false); // Checkbox: Merge extracted pages into one PDF file.
 
   // Custom split ranges for Range -> Custom mode
   customRanges = signal<CustomSplitRange[]>([
@@ -365,6 +368,12 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
       }
     }
     return Math.max(1, count);
+  });
+
+  calculatedFixedCount = computed<number>(() => {
+    const pages = this.selectedFiles()[0]?.pageCount || 1;
+    const fixed = Math.max(1, this.splitFixedCount() || 1);
+    return Math.ceil(pages / fixed);
   });
 
   // Features list
@@ -760,8 +769,9 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         const isPagesTab = this.splitMainTab() === 'pages';
         const isCustomRange = !isPagesTab && this.splitRangeMode() === 'custom';
         const isFixedRange = !isPagesTab && this.splitRangeMode() === 'fixed';
+        const mergeOutput = isPagesTab ? this.mergeExtractedPages() : false;
 
-        let options: any = {};
+        let options: any = { mergeOutput };
 
         if (isPagesTab) {
           if (this.splitExtractMode() === 'extract_all') {

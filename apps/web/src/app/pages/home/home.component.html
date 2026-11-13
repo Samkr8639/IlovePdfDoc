@@ -162,98 +162,124 @@
 
 
 
-        <!-- REDESIGNED CATEGORY FILTER BAR WITH ROUNDED BORDER -->
+        <!-- PREMIUM CATEGORY FILTER BAR -->
         <div class="hero-filter-bar-wrapper">
-          <nav class="hero-filter-nav" role="tablist" aria-label="Tool Categories">
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'all'"
-              [attr.aria-selected]="selectedTab() === 'all'" role="tab" (click)="onSelectCategory('all')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              <span>{{ 'FILTERS.ALL' | translate }}</span>
-            </button>
-            <button type="button" class="cat-pill pill-workflows" [class.active]="selectedTab() === 'workflows'"
-              [attr.aria-selected]="selectedTab() === 'workflows'" role="tab" (click)="onSelectCategory('workflows')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              <span>{{ 'FILTERS.WORKFLOWS' | translate }}</span>
-              <span class="pill-badge-sparkle">Auto</span>
-            </button>
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'organize'"
-              [attr.aria-selected]="selectedTab() === 'organize'" role="tab" (click)="onSelectCategory('organize')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                <polyline points="2 17 12 22 22 17"></polyline>
-                <polyline points="2 12 12 17 22 12"></polyline>
-              </svg>
-              <span>{{ 'FILTERS.ORGANIZE' | translate }}</span>
-            </button>
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'optimize'"
-              [attr.aria-selected]="selectedTab() === 'optimize'" role="tab" (click)="onSelectCategory('optimize')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-              </svg>
-              <span>{{ 'FILTERS.OPTIMIZE' | translate }}</span>
-            </button>
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'convert'"
-              [attr.aria-selected]="selectedTab() === 'convert'" role="tab" (click)="onSelectCategory('convert')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <polyline points="16 3 21 3 21 8"></polyline>
-                <line x1="4" y1="20" x2="21" y2="3"></line>
-                <polyline points="21 16 21 21 16 21"></polyline>
-                <line x1="15" y1="15" x2="21" y2="21"></line>
-                <line x1="4" y1="4" x2="9" y2="9"></line>
-              </svg>
-              <span>{{ 'FILTERS.CONVERT' | translate }}</span>
-            </button>
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'edit'"
-              [attr.aria-selected]="selectedTab() === 'edit'" role="tab" (click)="onSelectCategory('edit')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-              <span>{{ 'FILTERS.EDIT' | translate }}</span>
-            </button>
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'security'"
-              [attr.aria-selected]="selectedTab() === 'security'" role="tab" (click)="onSelectCategory('security')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <span>{{ 'FILTERS.SECURITY' | translate }}</span>
-            </button>
-            <button type="button" class="cat-pill" [class.active]="selectedTab() === 'intelligence'"
-              [attr.aria-selected]="selectedTab() === 'intelligence'" role="tab"
-              (click)="onSelectCategory('intelligence')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                aria-hidden="true">
-                <path
-                  d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.58 3.25 3.93L11 12H9v2h2v2H9v2h2v2h2v-2h2v-2h-2v-2h2v-2h-2l-.25-2.07A4.002 4.002 0 0 0 16 6a4 4 0 0 0-4-4z">
-                </path>
-              </svg>
-              <span>{{ 'FILTERS.INTELLIGENCE' | translate }}</span>
-            </button>
-          </nav>
+          <!-- Left Navigation Arrow (Auto-shows when scrollable on tablet/desktop) -->
+          <button type="button" class="filter-scroll-arrow arrow-left"
+            [class.visible]="canScrollLeft()"
+            (click)="scrollFilter('left')"
+            aria-label="Scroll categories left">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+
+          <!-- Smooth Scroll Track with Apple-grade Edge Fade Masks -->
+          <div class="hero-filter-scroll-track" #filterScrollTrack
+            (scroll)="checkFilterScroll()"
+            (wheel)="onFilterWheel($event)">
+            <nav class="hero-filter-nav" role="tablist" aria-label="Tool Categories">
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'all'"
+                [attr.aria-selected]="selectedTab() === 'all'" role="tab" (click)="onSelectCategory('all', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>{{ 'FILTERS.ALL' | translate }}</span>
+              </button>
+              <button type="button" class="cat-pill pill-workflows" [class.active]="selectedTab() === 'workflows'"
+                [attr.aria-selected]="selectedTab() === 'workflows'" role="tab" (click)="onSelectCategory('workflows', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>{{ 'FILTERS.WORKFLOWS' | translate }}</span>
+                <span class="pill-badge-sparkle">Auto</span>
+              </button>
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'organize'"
+                [attr.aria-selected]="selectedTab() === 'organize'" role="tab" (click)="onSelectCategory('organize', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                <span>{{ 'FILTERS.ORGANIZE' | translate }}</span>
+              </button>
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'optimize'"
+                [attr.aria-selected]="selectedTab() === 'optimize'" role="tab" (click)="onSelectCategory('optimize', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                </svg>
+                <span>{{ 'FILTERS.OPTIMIZE' | translate }}</span>
+              </button>
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'convert'"
+                [attr.aria-selected]="selectedTab() === 'convert'" role="tab" (click)="onSelectCategory('convert', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <polyline points="16 3 21 3 21 8"></polyline>
+                  <line x1="4" y1="20" x2="21" y2="3"></line>
+                  <polyline points="21 16 21 21 16 21"></polyline>
+                  <line x1="15" y1="15" x2="21" y2="21"></line>
+                  <line x1="4" y1="4" x2="9" y2="9"></line>
+                </svg>
+                <span>{{ 'FILTERS.CONVERT' | translate }}</span>
+              </button>
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'edit'"
+                [attr.aria-selected]="selectedTab() === 'edit'" role="tab" (click)="onSelectCategory('edit', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span>{{ 'FILTERS.EDIT' | translate }}</span>
+              </button>
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'security'"
+                [attr.aria-selected]="selectedTab() === 'security'" role="tab" (click)="onSelectCategory('security', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>{{ 'FILTERS.SECURITY' | translate }}</span>
+              </button>
+              <button type="button" class="cat-pill" [class.active]="selectedTab() === 'intelligence'"
+                [attr.aria-selected]="selectedTab() === 'intelligence'" role="tab"
+                (click)="onSelectCategory('intelligence', $event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  aria-hidden="true">
+                  <path
+                    d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.58 3.25 3.93L11 12H9v2h2v2H9v2h2v2h2v-2h2v-2h-2v-2h2v-2h-2l-.25-2.07A4.002 4.002 0 0 0 16 6a4 4 0 0 0-4-4z">
+                  </path>
+                </svg>
+                <span>{{ 'FILTERS.INTELLIGENCE' | translate }}</span>
+              </button>
+            </nav>
+          </div>
+
+          <!-- Right Navigation Arrow (Auto-shows when scrollable on tablet/desktop) -->
+          <button type="button" class="filter-scroll-arrow arrow-right"
+            [class.visible]="canScrollRight()"
+            (click)="scrollFilter('right')"
+            aria-label="Scroll categories right">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- ZERO-CLS ADVERTISEMENT BANNER -->
+    <!-- ZERO-CLS ADVERTISEMENT BANNER (Temporarily commented until AdSense approval)
     <div class="container">
       <app-pt-ad-slot slotType="leaderboard"></app-pt-ad-slot>
     </div>
+    -->
 
     <!-- 2. 4-COLUMN RESPONSIVE TOOLS GRID -->
     <main class="container tools-grid-container" aria-label="PDF Tools Grid">

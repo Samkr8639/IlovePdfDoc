@@ -8,6 +8,13 @@
   width: 100%;
 }
 
+.contact-page,
+.contact-page *,
+.contact-page *::before,
+.contact-page *::after {
+  box-sizing: border-box;
+}
+
 .contact-page {
   background: linear-gradient(180deg, var(--pt-subtle-bg) 0%, var(--pt-surface-white) 100%);
   min-height: calc(100vh - var(--header-height, 68px));
@@ -226,6 +233,7 @@ a.channel-val:hover {
   gap: 8px;
   margin-bottom: 20px;
   min-width: 0;
+  width: 100%;
 }
 
 .field-header-row {
@@ -233,12 +241,19 @@ a.channel-val:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
 }
 
 .field-label {
   font-size: 13.5px;
   font-weight: 700;
   color: var(--pt-navy);
+}
+
+.required-asterisk {
+  color: var(--pt-cat-security, #dc2626);
+  margin-left: 2px;
+  font-weight: 700;
 }
 
 .char-counter {
@@ -254,7 +269,9 @@ a.channel-val:hover {
 .text-input,
 .select-input,
 .textarea-input {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   border: 1.5px solid var(--pt-outline);
   border-radius: var(--pt-radius-sm);
@@ -265,6 +282,14 @@ a.channel-val:hover {
   font-family: var(--pt-font-body);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
+}
+
+.textarea-input {
+  resize: vertical;
+  min-height: 140px;
+  max-height: 240px;
+  overflow-y: auto;
+  line-height: 1.6;
 }
 
 .text-input::placeholder,

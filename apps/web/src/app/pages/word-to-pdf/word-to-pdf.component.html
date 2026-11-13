@@ -20,10 +20,9 @@
        =================================================================== -->
   @if (currentState() === 'upload') {
   <section class="unified-hero-section">
-    <div class="container hero-content">
-
+    <div class="container hero-container">
       <h1 class="tool-h1">Word to PDF Converter</h1>
-      <p class="tool-lead">
+      <p class="hero-subtitle">
         Convert Microsoft Word documents (.docx, .doc, .odt, .rtf) to high-fidelity PDF documents with preserved fonts,
         images, tables, and layouts.
       </p>
@@ -38,40 +37,29 @@
     </div>
   </section>
 
-  <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
-  <section class="adsense-section">
+  <!-- ADSENSE / ADVERTISEMENT (Temporarily commented until AdSense approval)
+  <section class="adsense-section" aria-label="Advertisement">
     <div class="container">
-      <div class="adsense-card">
-        <span class="ad-label">ADVERTISEMENT</span>
-        <div class="ad-placeholder-content">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            opacity="0.4" aria-hidden="true">
-            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-            <line x1="8" y1="21" x2="16" y2="21"></line>
-            <line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-          <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
-        </div>
-      </div>
+      <app-pt-ad-slot slotType="leaderboard">
+        <span>Google AdSense Slot • Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+      </app-pt-ad-slot>
     </div>
   </section>
+  -->
 
-  <!-- EDITORIAL / SEO CONTENT SECTION -->
-  <section class="editorial-features-section">
+  <!-- FEATURES SECTION (4-COLUMN CANONICAL GRID) -->
+  <section class="features-section">
     <div class="container">
-      <div class="section-title-wrap">
-        <h2 class="editorial-heading">The easiest & most accurate way to convert Word to PDF</h2>
-        <p class="editorial-subheading">
-          Engineered for high fidelity, privacy, and speed. Turn Word documents into universally readable PDFs in
-          seconds.
-        </p>
-      </div>
+      <h2 class="section-heading">The easiest & most accurate way to convert Word to PDF</h2>
+      <p class="section-subheading">
+        Engineered for high fidelity, privacy, and speed. Turn Word documents into universally readable PDFs in seconds.
+      </p>
 
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon-box blue-box">
+        <article class="feature-item-card">
+          <div class="feature-icon-box" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              aria-hidden="true">
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               <polyline points="14 2 14 8 20 8"></polyline>
               <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -80,54 +68,67 @@
           </div>
           <h3>Pixel-Accurate Layouts</h3>
           <p>Retains your original margins, fonts, tables, page breaks, and embedded images exactly as designed.</p>
-        </div>
+        </article>
 
-        <div class="feature-card">
-          <div class="feature-icon-box teal-box">
+        <article class="feature-item-card">
+          <div class="feature-icon-box" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              aria-hidden="true">
+              stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
           </div>
           <h3>10-Minute Volatile Storage</h3>
-          <p>Your document is sent over an encrypted TLS connection, converted securely, and permanently deleted after
-            10 minutes.</p>
-        </div>
+          <p>Your document is sent over an encrypted TLS connection, converted securely, and permanently deleted after 10 minutes.</p>
+        </article>
 
-        <div class="feature-card">
-          <div class="feature-icon-box purple-box">
+        <article class="feature-item-card">
+          <div class="feature-icon-box" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              aria-hidden="true">
+              stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="2" y1="12" x2="22" y2="12"></line>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
             </svg>
           </div>
-          <h3>Universal Document Support</h3>
+          <h3>Universal Format Support</h3>
           <p>Compatible with DOCX, legacy DOC, OpenDocument Text (ODT), and Rich Text Format (RTF) files.</p>
-        </div>
+        </article>
+
+        <article class="feature-item-card">
+          <div class="feature-icon-box" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19l7-7 3 3-7 7-3-3z" />
+              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+            </svg>
+          </div>
+          <h3>Archival PDF/A Standard</h3>
+          <p>Supports standard vector PDF and ISO PDF/A standards with embedded font compliance for long-term document archiving.</p>
+        </article>
       </div>
     </div>
   </section>
 
   <!-- 3-STEP HOW TO USE GUIDE -->
-  <section class="how-to-section">
+  <section class="steps-section">
     <div class="container">
-      <h2 class="section-heading-centered">How to convert Word to PDF online</h2>
+      <h2 class="section-heading">How to convert Word to PDF online</h2>
+      <p class="section-subheading">Three quick steps with complete local control.</p>
+
       <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-badge">1</span>
+        <div class="step-guide-card">
+          <span class="step-num">01</span>
           <h3>Select Word document</h3>
           <p>Upload one or more DOCX, DOC, ODT, or RTF files from your computer or cloud storage.</p>
         </div>
-        <div class="step-card">
-          <span class="step-badge">2</span>
+        <div class="step-guide-card">
+          <span class="step-num">02</span>
           <h3>Choose output options</h3>
           <p>Select standard PDF or archival PDF/A, adjust image compression, and toggle bookmarks or hyperlinks.</p>
         </div>
-        <div class="step-card">
-          <span class="step-badge">3</span>
+        <div class="step-guide-card">
+          <span class="step-num">03</span>
           <h3>Download your PDF</h3>
           <p>Click Convert to PDF and instantly download your clean, universally readable PDF document.</p>
         </div>
@@ -136,26 +137,26 @@
   </section>
 
   <!-- FAQ SECTION -->
-  <section class="tool-faqs" style="max-width: 1200px; margin: 48px auto 0; padding: 0 24px;">
-    <h3 class="tool-faqs-title" style="font-size: 26px; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 32px;">Frequently Asked Questions</h3>
-    <div class="tool-faqs-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-      <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px;">
-        <h4 class="faq-q" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Will my Word layout, fonts, and tables be preserved?</h4>
-        <p class="faq-a" style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
-          Yes! Word to PDF converts fonts, styles, tables, headings, and images accurately with identical page geometry.
-        </p>
-      </div>
-      <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px;">
-        <h4 class="faq-q" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Which Word document formats are supported?</h4>
-        <p class="faq-a" style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
-          We support standard DOCX, legacy DOC, OpenDocument Text (ODT), and Rich Text Format (RTF) files.
-        </p>
-      </div>
-      <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px;">
-        <h4 class="faq-q" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Are my documents secure and private?</h4>
-        <p class="faq-a" style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
-          All files are transmitted over encrypted TLS, converted in an isolated memory environment, and automatically purged after download.
-        </p>
+  <section class="faq-section">
+    <div class="container container-narrow">
+      <h2 class="section-heading">Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <div class="faq-card-item">
+          <h4>Will my Word layout, fonts, and tables be preserved?</h4>
+          <p>Yes! Word to PDF converts fonts, styles, tables, headings, and images accurately with identical page geometry.</p>
+        </div>
+        <div class="faq-card-item">
+          <h4>Which Word document formats are supported?</h4>
+          <p>We support standard DOCX, legacy DOC, OpenDocument Text (ODT), and Rich Text Format (RTF) files.</p>
+        </div>
+        <div class="faq-card-item">
+          <h4>Are my documents secure and private?</h4>
+          <p>All files are transmitted over encrypted TLS, converted in an isolated memory environment, and automatically purged after download.</p>
+        </div>
+        <div class="faq-card-item">
+          <h4>Can I convert multiple Word documents into a single PDF?</h4>
+          <p>Yes, upload multiple Word files and enable the merge option in the workspace sidebar to combine them into one document.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -352,7 +353,7 @@
           </div>
         </div>
 
-        <!-- Dedicated Sidebar AdSense Slot -->
+        <!-- Dedicated Sidebar AdSense Slot (Temporarily commented until AdSense approval)
         <div class="sidebar-adsense-slot" aria-label="Advertisement">
           <span class="adsense-label">Advertisement</span>
           <div class="sidebar-ad-box">
@@ -365,6 +366,7 @@
             <span>Google AdSense (300 × 250)</span>
           </div>
         </div>
+        -->
       </div>
 
       <!-- ACTION FOOTER: PRIMARY CONVERT BUTTON -->

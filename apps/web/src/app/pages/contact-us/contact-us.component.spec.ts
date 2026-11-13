@@ -45,8 +45,8 @@ describe('ContactUsComponent', () => {
   it('should validate Step 1 before allowing progression to Step 2', () => {
     expect(component.isStep1Valid()).toBe(false);
 
-    component.formData.name = 'Sameer Kumar';
-    component.formData.email = 'sam@zealousys.com';
+    component.formData.name = 'John Doe';
+    component.formData.email = 'john@example.com';
     component.formData.subject = 'Sales';
     expect(component.isStep1Valid()).toBe(true);
 
@@ -55,8 +55,8 @@ describe('ContactUsComponent', () => {
   });
 
   it('should advance to Step 3 and Step 4 when message requirement is met', () => {
-    component.formData.name = 'Sameer Kumar';
-    component.formData.email = 'sam@zealousys.com';
+    component.formData.name = 'John Doe';
+    component.formData.email = 'john@example.com';
     component.formData.subject = 'Sales';
     component.goToStep(2);
 
@@ -87,8 +87,8 @@ describe('ContactUsComponent', () => {
 
     vi.spyOn(contactService, 'submitInquiry').mockReturnValue(of(mockResponse));
 
-    component.formData.name = 'Sameer Kumar';
-    component.formData.email = 'sam@zealousys.com';
+    component.formData.name = 'John Doe';
+    component.formData.email = 'john@example.com';
     component.formData.subject = 'Sales';
     component.formData.message = 'Valid message that exceeds ten characters.';
 

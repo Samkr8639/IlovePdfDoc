@@ -86,25 +86,27 @@ describe('BrowserPdfService', () => {
   });
 
   describe('splitPdf', () => {
-    it('should split PDF with a single range into a single PDF document', async () => {
+    it('should split PDF by custom ranges and merge into a single PDF when mergeOutput=true', async () => {
       const file = await createTestPdf(6, 'annual_report.pdf');
       const res = await service.splitPdf(file, {
         mode: 'custom_ranges',
         ranges: [
-          { from: 1, to: 2 }
-        ]
+          { from: 1, to: 2 },
+          { from: 5, to: 6 }
+        ],
+        mergeOutput: true
       });
 
       expect(res.isZip).toBe(false);
       expect(res.outputFilesCount).toBe(1);
-      expect(res.pageCount).toBe(2);
-      expect(res.filename).toBe('annual_report_split_1-2.pdf');
+      expect(res.pageCount).toBe(4);
+      expect(res.filename).toBe('annual_report_split.pdf');
 
       const verified = await PDFDocument.load(await res.blob.arrayBuffer());
-      expect(verified.getPageCount()).toBe(2);
+      expect(verified.getPageCount()).toBe(4);
     });
 
-    it('should split PDF by custom ranges into multiple PDFs in a ZIP archive', async () => {
+    it('should split PDF by custom ranges into multiple PDFs in a ZIP archive when mergeOutput=false', async () => {
       const file = await createTestPdf(6, 'contracts.pdf');
       const res = await service.splitPdf(file, {
         mode: 'custom_ranges',
@@ -112,7 +114,8 @@ describe('BrowserPdfService', () => {
           { from: 1, to: 2 },
           { from: 3, to: 4 },
           { from: 5, to: 6 }
-        ]
+        ],
+        mergeOutput: false
       });
 
       expect(res.isZip).toBe(true);
@@ -128,7 +131,8 @@ describe('BrowserPdfService', () => {
       const file = await createTestPdf(7, 'handbook.pdf');
       const res = await service.splitPdf(file, {
         mode: 'fixed_ranges',
-        fixedPageCount: 3
+        fixedPageCount: 3,
+        mergeOutput: false
       });
 
       expect(res.isZip).toBe(true);
@@ -141,7 +145,8 @@ describe('BrowserPdfService', () => {
     it('should extract all pages individually into a ZIP archive', async () => {
       const file = await createTestPdf(3, 'invoices.pdf');
       const res = await service.splitPdf(file, {
-        mode: 'extract_all'
+        mode: 'extract_all',
+        mergeOutput: false
       });
 
       expect(res.isZip).toBe(true);
@@ -151,19 +156,19 @@ describe('BrowserPdfService', () => {
       expect(res.outputFiles[2].filename).toBe('invoices_page_3.pdf');
     });
 
-    it('should extract a single page into a single PDF document', async () => {
+    it('should extract pages matching a page expression', async () => {
       const file = await createTestPdf(8, 'magazine.pdf');
       const res = await service.splitPdf(file, {
         mode: 'extract_pages',
-        pageExpression: '2'
+        pageExpression: '2, 5-6',
+        mergeOutput: true
       });
 
       expect(res.isZip).toBe(false);
-      expect(res.pageCount).toBe(1);
-      expect(res.filename).toBe('magazine_page_2.pdf');
+      expect(res.pageCount).toBe(3);
 
       const verified = await PDFDocument.load(await res.blob.arrayBuffer());
-      expect(verified.getPageCount()).toBe(1);
+      expect(verified.getPageCount()).toBe(3);
     });
   });
 

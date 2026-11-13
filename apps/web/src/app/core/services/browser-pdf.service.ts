@@ -32,6 +32,7 @@ export interface SplitPdfOptions {
   ranges?: PageRange[];
   pageExpression?: string;
   fixedPageCount?: number;
+  mergeOutput?: boolean;
 }
 
 export interface SplitPdfOutputFile {
@@ -320,30 +321,30 @@ export class BrowserPdfService {
     }
 
     const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_\-]/g, '_');
-    const isSingleChunk = targetChunks.length === 1;
+    const mergeOutput = !!options.mergeOutput || targetChunks.length === 1;
 
-    // 2. Scenario A: Single chunk output (1 PDF document)
-    if (isSingleChunk) {
-      onProgress?.(45, 'Creating split PDF document...');
-      const chunkDoc = await PDFDocument.create();
-      const chunk = targetChunks[0];
-      const start = Math.max(1, Math.min(chunk.from, totalPages));
-      const end = Math.max(start, Math.min(chunk.to, totalPages));
+    // 2. Scenario A: Single merged output PDF
+    if (mergeOutput) {
+      onProgress?.(45, 'Creating consolidated PDF document...');
+      const mergedDoc = await PDFDocument.create();
+
       const indicesToCopy: number[] = [];
-      for (let p = start; p <= end; p++) {
-        indicesToCopy.push(p - 1);
+      for (const chunk of targetChunks) {
+        const start = Math.max(1, Math.min(chunk.from, totalPages));
+        const end = Math.max(start, Math.min(chunk.to, totalPages));
+        for (let p = start; p <= end; p++) {
+          indicesToCopy.push(p - 1);
+        }
       }
 
-      onProgress?.(65, `Extracting ${indicesToCopy.length} pages...`);
-      const copiedPages = await chunkDoc.copyPages(sourceDoc, indicesToCopy);
-      copiedPages.forEach(p => chunkDoc.addPage(p));
+      onProgress?.(65, `Copying ${indicesToCopy.length} pages...`);
+      const copiedPages = await mergedDoc.copyPages(sourceDoc, indicesToCopy);
+      copiedPages.forEach(p => mergedDoc.addPage(p));
 
       onProgress?.(85, 'Finalizing PDF output...');
-      const bytes = await chunkDoc.save();
+      const bytes = await mergedDoc.save();
       const pdfBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
-      const filename = start === end
-        ? `${baseName}_page_${start}.pdf`
-        : `${baseName}_split_${start}-${end}.pdf`;
+      const filename = `${baseName}_split.pdf`;
       const blob = new File([pdfBuffer], filename, { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
 
@@ -459,7 +460,8 @@ export class BrowserPdfService {
       onProgress?.(30, `Optimizing raster streams and document layout (${level})...`);
       const response = await fetch(`${baseUrl}/compress`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: AbortSignal.timeout(3000)
       });
 
       if (response.ok) {
@@ -569,6 +571,16 @@ export class BrowserPdfService {
 
       totalPagesCount += pagesInDoc;
 
+      // 1. Optimize embedded raster images (photos, scans, screenshots) in the browser
+      let imagesOptimized = 0;
+      try {
+        imagesOptimized = await this.optimizePdfImagesInBrowser(pdfDoc, level, (msg) => {
+          onProgress?.(startPct + 10, msg);
+        });
+      } catch (e) {
+        console.warn('Image optimization skipped or unsupported:', e);
+      }
+
       let compressedBytes: Uint8Array;
       if (level === 'extreme') {
         // Extreme: strip metadata, enable object streams, compress stream dictionaries
@@ -582,8 +594,18 @@ export class BrowserPdfService {
           useObjectStreams: true,
           objectsPerTick: 50
         });
+      } else if (level === 'recommended') {
+        pdfDoc.setTitle('');
+        pdfDoc.setAuthor('');
+        pdfDoc.setSubject('');
+        pdfDoc.setKeywords([]);
+        pdfDoc.setProducer('');
+        pdfDoc.setCreator('');
+        compressedBytes = await pdfDoc.save({
+          useObjectStreams: true
+        });
       } else {
-        // Recommended / Less: standard object stream packing
+        // Less: standard object stream packing
         compressedBytes = await pdfDoc.save({
           useObjectStreams: true
         });
@@ -594,10 +616,14 @@ export class BrowserPdfService {
 
       // Safety rule: never return a file larger than the original
       let savingsReason = 'Optimization applied to document streams.';
-      if (compBytes >= origBytes) {
+      if (imagesOptimized > 0) {
+        savingsReason = `Successfully compressed ${imagesOptimized} embedded image${imagesOptimized > 1 ? 's' : ''} and optimized document streams.`;
+      } else if (compBytes < origBytes) {
+        savingsReason = 'Optimized document structure, fonts, and object streams.';
+      } else {
         compressedBytes = new Uint8Array(arrayBuffer);
         compBytes = origBytes;
-        savingsReason = 'This PDF is mostly text and already well optimised.';
+        savingsReason = 'This document already has optimal stream compression.';
       }
 
       const spaceSaved = Math.max(0, origBytes - compBytes);
@@ -705,5 +731,238 @@ export class BrowserPdfService {
       items,
       savingsReason: items[0]?.savingsReason
     };
+  }
+
+  /**
+   * Optimizes embedded raster images (JPEG/PNG/Flate) directly within the client-side PDF document.
+   * Recompresses images based on the user's selected compression level.
+   */
+  private async optimizePdfImagesInBrowser(
+    pdfDoc: PDFDocument,
+    level: 'extreme' | 'recommended' | 'less',
+    onProgress?: (message: string) => void
+  ): Promise<number> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 0;
+    }
+
+    const { PDFName, PDFNumber, PDFRawStream, PDFStream, PDFDict } = await this.getPdfLib();
+
+    const profile = {
+      extreme: { maxDim: 1200, quality: 0.50, minSavings: 0.03 },
+      recommended: { maxDim: 1600, quality: 0.70, minSavings: 0.04 },
+      less: { maxDim: 2048, quality: 0.85, minSavings: 0.05 }
+    }[level];
+
+    const indirectObjects = pdfDoc.context.enumerateIndirectObjects();
+    const imageObjects: Array<{ ref: any; obj: any; dict: any }> = [];
+
+    for (const [ref, obj] of indirectObjects) {
+      if (obj instanceof PDFRawStream || obj instanceof PDFStream) {
+        const dict = (obj as any).dict;
+        if (dict instanceof PDFDict) {
+          const subtype = dict.get(PDFName.of('Subtype'))?.toString();
+          if (subtype === '/Image') {
+            imageObjects.push({ ref, obj, dict });
+          }
+        }
+      }
+    }
+
+    if (imageObjects.length === 0) {
+      return 0;
+    }
+
+    let optimizedCount = 0;
+
+    for (let i = 0; i < imageObjects.length; i++) {
+      const { obj, dict } = imageObjects[i];
+      const contents = (obj as any).contents as Uint8Array;
+      if (!contents || contents.length < 2048) continue; // Skip tiny glyphs/icons < 2KB
+
+      const w = (dict.get(PDFName.of('Width')) as any)?.asNumber?.();
+      const h = (dict.get(PDFName.of('Height')) as any)?.asNumber?.();
+      const filter = dict.get(PDFName.of('Filter'))?.toString() || '';
+
+      onProgress?.(`Optimizing embedded image ${i + 1} of ${imageObjects.length}...`);
+
+      // 1. DCTDecode (JPEG Image Streams)
+      if (filter.includes('DCTDecode')) {
+        try {
+          const blob = new Blob([contents as any], { type: 'image/jpeg' });
+          let bitmap: ImageBitmap | HTMLImageElement | null = null;
+
+          if (typeof createImageBitmap === 'function') {
+            bitmap = await createImageBitmap(blob);
+          } else {
+            bitmap = await new Promise<HTMLImageElement>((resolve, reject) => {
+              const img = new Image();
+              const u = URL.createObjectURL(blob);
+              img.onload = () => { URL.revokeObjectURL(u); resolve(img); };
+              img.onerror = () => { URL.revokeObjectURL(u); reject(); };
+              img.src = u;
+            });
+          }
+
+          if (bitmap) {
+            const curW = bitmap.width || w || 800;
+            const curH = bitmap.height || h || 600;
+            let targetW = curW;
+            let targetH = curH;
+
+            if (targetW > profile.maxDim || targetH > profile.maxDim) {
+              const scale = Math.min(profile.maxDim / targetW, profile.maxDim / targetH);
+              targetW = Math.max(16, Math.round(targetW * scale));
+              targetH = Math.max(16, Math.round(targetH * scale));
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(bitmap as any, 0, 0, targetW, targetH);
+              if (typeof (bitmap as any).close === 'function') {
+                (bitmap as any).close();
+              }
+
+              const compressedBlob = await new Promise<Blob | null>((resolve) =>
+                canvas.toBlob(resolve, 'image/jpeg', profile.quality)
+              );
+
+              if (compressedBlob) {
+                const newBytes = new Uint8Array(await compressedBlob.arrayBuffer());
+                if (newBytes.length <= contents.length * (1 - profile.minSavings)) {
+                  (obj as any).contents = newBytes;
+                  dict.set(PDFName.of('Width'), PDFNumber.of(targetW));
+                  dict.set(PDFName.of('Height'), PDFNumber.of(targetH));
+                  dict.set(PDFName.of('Length'), PDFNumber.of(newBytes.length));
+                  dict.set(PDFName.of('Filter'), PDFName.of('DCTDecode'));
+                  dict.set(PDFName.of('ColorSpace'), PDFName.of('DeviceRGB'));
+                  dict.set(PDFName.of('BitsPerComponent'), PDFNumber.of(8));
+                  dict.delete(PDFName.of('DecodeParms'));
+                  optimizedCount++;
+                }
+              }
+            }
+          }
+        } catch {
+          // Gracefully continue with original image
+        }
+        continue;
+      }
+
+      // 2. FlateDecode (PNG / Deflated Raw Pixels)
+      if (filter.includes('FlateDecode') && w && h && w > 0 && h > 0) {
+        try {
+          const { unzlibSync, inflateSync } = await import('fflate');
+          let rawPixels: Uint8Array | null = null;
+          try {
+            rawPixels = unzlibSync(contents);
+          } catch {
+            try {
+              rawPixels = inflateSync(contents);
+            } catch {
+              rawPixels = null;
+            }
+          }
+
+          if (rawPixels) {
+            let canvas: HTMLCanvasElement | null = null;
+            if (rawPixels.length === w * h * 3) {
+              canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(w, h);
+                const d = imgData.data;
+                for (let p = 0, q = 0; p < rawPixels.length; p += 3, q += 4) {
+                  d[q] = rawPixels[p];
+                  d[q + 1] = rawPixels[p + 1];
+                  d[q + 2] = rawPixels[p + 2];
+                  d[q + 3] = 255;
+                }
+                ctx.putImageData(imgData, 0, 0);
+              }
+            } else if (rawPixels.length === w * h * 4) {
+              canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(w, h);
+                imgData.data.set(rawPixels);
+                ctx.putImageData(imgData, 0, 0);
+              }
+            } else if (rawPixels.length === w * h) {
+              canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(w, h);
+                const d = imgData.data;
+                for (let p = 0, q = 0; p < rawPixels.length; p++, q += 4) {
+                  const val = rawPixels[p];
+                  d[q] = val;
+                  d[q + 1] = val;
+                  d[q + 2] = val;
+                  d[q + 3] = 255;
+                }
+                ctx.putImageData(imgData, 0, 0);
+              }
+            }
+
+            if (canvas) {
+              let finalCanvas = canvas;
+              let targetW = w;
+              let targetH = h;
+
+              if (targetW > profile.maxDim || targetH > profile.maxDim) {
+                const scale = Math.min(profile.maxDim / targetW, profile.maxDim / targetH);
+                targetW = Math.max(16, Math.round(targetW * scale));
+                targetH = Math.max(16, Math.round(targetH * scale));
+                const scCanvas = document.createElement('canvas');
+                scCanvas.width = targetW;
+                scCanvas.height = targetH;
+                const scCtx = scCanvas.getContext('2d');
+                if (scCtx) {
+                  scCtx.imageSmoothingEnabled = true;
+                  scCtx.imageSmoothingQuality = 'high';
+                  scCtx.drawImage(canvas, 0, 0, targetW, targetH);
+                  finalCanvas = scCanvas;
+                }
+              }
+
+              const compressedBlob = await new Promise<Blob | null>((resolve) =>
+                finalCanvas.toBlob(resolve, 'image/jpeg', profile.quality)
+              );
+
+              if (compressedBlob) {
+                const newBytes = new Uint8Array(await compressedBlob.arrayBuffer());
+                if (newBytes.length <= contents.length * (1 - profile.minSavings)) {
+                  (obj as any).contents = newBytes;
+                  dict.set(PDFName.of('Width'), PDFNumber.of(targetW));
+                  dict.set(PDFName.of('Height'), PDFNumber.of(targetH));
+                  dict.set(PDFName.of('Length'), PDFNumber.of(newBytes.length));
+                  dict.set(PDFName.of('Filter'), PDFName.of('DCTDecode'));
+                  dict.set(PDFName.of('ColorSpace'), PDFName.of('DeviceRGB'));
+                  dict.set(PDFName.of('BitsPerComponent'), PDFNumber.of(8));
+                  dict.delete(PDFName.of('DecodeParms'));
+                  optimizedCount++;
+                }
+              }
+            }
+          }
+        } catch {
+          // Gracefully continue
+        }
+      }
+    }
+
+    return optimizedCount;
   }
 }

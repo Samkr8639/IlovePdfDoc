@@ -14,7 +14,6 @@
     "build:staging": "npm run build:contracts && npm run manifests:ai && npm run build:api && npm run build:web:staging",
     "build:prod": "npm run build:contracts && npm run manifests:ai && npm run build:api && npm run build:web:prod",
     "test": "npm run test --workspaces --if-present",
-    "i18n:check": "node scripts/check-i18n.js",
     "dev:api": "npm --workspace=apps/api run dev",
     "dev:api:staging": "npm --workspace=apps/api run dev:staging",
     "dev:api:prod": "npm --workspace=apps/api run dev:prod",

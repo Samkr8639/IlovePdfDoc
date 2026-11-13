@@ -13,7 +13,7 @@ export const routes: Routes = [
   },
   {
     path: 'split-pdf',
-    loadComponent: () => import('./pages/split-pdf/split-pdf.component').then(m => m.SplitPdfComponent),
+    loadComponent: () => import('./pages/tool-placeholder/tool-placeholder.component').then(m => m.ToolPlaceholderComponent),
     title: 'Split PDF Online - Separate PDF Pages | PDFTailor'
   },
   {
