@@ -32,6 +32,7 @@
 2. **Read before coding:** Every human engineer or AI agent must read this document completely before building or modifying any page, component, or stylesheet in `apps/web`.
 3. **Strict fidelity:** Reproduce the canonical layouts, CSS custom properties (`--pt-*`), typography (`Sora` + `Inter`), radii, shadows, stroke icons, and shared components exactly. Never invent new visual systems, color schemes, button styles, or page shells.
 4. **No hard-coded values outside tokens:** Never hard-code hex colors, font families, border radii, or shadows that have `--pt-*` tokens defined in [`apps/web/src/styles.css`](../apps/web/src/styles.css). Never re-introduce legacy brand names (`PaperFlow`, `PDF flow`).
+   - *Documented Exception:* The pre-bootstrap critical CSS in `apps/web/src/index.html` (`#pt-pre-loader-styles`) defines inline hex colors matching tokens (`#FFFFFF`, `#14213D`, `#0F766E`, `#14B8A6`, `#E6F5F3`, `#4B5563`). This enables instant rendering before external stylesheets download. A unit test in `apps/web/src/app/core/services/pre-bootstrap-loader.spec.ts` ensures these inline values never drift from tokens.
 5. **Stop and ask:** If a new tool or feature genuinely needs a UI pattern not documented here, **do not build or invent it**. Stop, add a **"Proposed additions"** section to the PR description (what is needed, why existing patterns cannot satisfy it, and a short ASCII/text mock), and wait for explicit approval.
 
 ---
@@ -226,6 +227,17 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 8. **Breadcrumbs & SEO:**
    - Tool pages and static pages do **not** render breadcrumb links above hero headings; navigation stays inside `<app-header>` and `<app-footer>`.
    - Every tool component calls `this.seo.setSeoData(tool.seo)` in `ngOnInit()` (via `SeoService`), setting `<title>`, `description`, `keywords`, OpenGraph, Twitter Card, and `<link rel="canonical">`.
+9. **Pre-Bootstrap Critical Loader (`#pt-app-preloader`):**
+   - Embedded directly in `apps/web/src/index.html` inside `<app-root>`.
+   - Pure CSS (< 2 KB inline `#pt-pre-loader-styles`), SVG logo, indeterminate gradient loading bar (`#0F766E` -> `#14B8A6`), accessible `aria-live="polite"` text.
+   - Synchronous language detection reads `localStorage.getItem('user_language')` to display localized loading text immediately in the user's selected language.
+   - 15-second safety timeout displays an error banner with a "Reload Application" button if chunk download or bootstrap fails.
+   - Supports `prefers-reduced-motion` with static bar and zero animation.
+10. **Route Navigation Progress Bar (`<app-route-progress-bar>`):**
+   - Fixed at `top: 0; left: 0; right: 0; height: 3px; z-index: 10001; pointer-events: none`.
+   - Listens to router events (`NavigationStart`, `NavigationEnd`, `NavigationCancel`, `NavigationError`).
+   - Uses a 150ms debounce to prevent any flicker during instant in-memory client-side route transitions.
+   - Fades out smoothly upon navigation completion.
 
 ---
 
@@ -412,6 +424,25 @@ RESULT STATE (<app-result-view>, max-width 980px centered)
 
 ---
 
+### 4.6 Split PDF Workspace Pattern
+
+- **Canonical reference:** [`apps/web/src/app/pages/split-pdf/`](../apps/web/src/app/pages/split-pdf/)
+- **Visual Structure:**
+  - **Left Area (Visual Page Distribution Preview):**
+    - Grid of color-coded page thumbnail cards (`.page-preview-card`).
+    - Assigned pages carry chunk-specific palette tags (`.chunk-teal`, `.chunk-amber`, `.chunk-blue`, `.chunk-purple`, `.chunk-coral`, `.chunk-emerald`).
+    - Excluded pages display muted `--pt-soft-outline` styling with "Excluded" badge.
+  - **Right Sidebar (Split Configuration — 380px desktop / stacked mobile):**
+    - Mode selector cards (`.mode-card`):
+      1. **Custom Ranges:** Multiple editable from/to range cards (`.range-row-card`) with real-time error banners (overlapping, reversed, out-of-bounds) and `+ Add Another Range` dashed pill button.
+      2. **Fixed Chunks:** Stepper control (`−` / `+`) configuring equal page chunks with dynamic explanation copy.
+      3. **Extract All Pages:** One-click mode extracting every page as an individual document.
+    - **Live Result Summary Card (`.live-summary-card`):**
+      - Displays dynamic file count badge, delivery format indicator (single PDF download vs. ZIP archive), and visual chunk pill badges.
+    - **No Redundant Merge Option:** The Split PDF tool strictly outputs separate files (single PDF for single range; ZIP archive for multiple files). Merging is strictly reserved for the dedicated Merge PDF tool.
+
+---
+
 ## 5. Component Catalogue
 
 ### 5.1 Shared Components (`apps/web/src/app/shared/components/`)
@@ -595,6 +626,14 @@ Tested at `1440×900`, `1024×768`, and `390×844` in headless Chrome:
 - **SEO Pattern:**
   - Title (`packages/contracts/src/tools.ts` / `app.routes.ts`): `<Tool Name> Online Free - <Benefit/Action> | PDFTailor` (never `| PDF flow`).
   - Meta Description: 140–160 chars explaining core conversion, key options, and privacy model (browser-only vs ephemeral encrypted processing).
+- **Internationalization (i18n) Rules & Adding Translation Keys:**
+  - **No hard-coded strings:** All user-facing text, error messages, button labels, badges, aria-labels, and dialog copy must be externalized to translation files using the `translate` pipe (`{{ 'KEY' | translate }}`) or `TranslationService.instant('KEY')`.
+  - **Key Naming Convention:** Use structured uppercase dot-notation: `<SECTION>.<SUBSECTION_OR_NAME>` (e.g. `NAV.MERGE_PDF`, `SPLIT_PDF.MODE_CUSTOM`, `SPLIT_PDF.ERR_START_MIN`).
+  - **How to Add a Key:**
+    1. Define the canonical English key in `apps/web/public/i18n/en.json` and sync it in `apps/web/src/app/core/i18n/default-en.ts`.
+    2. Add translations across all 26 supported languages (`apps/web/public/i18n/*.json`) via `scripts/build-all-i18n.mjs`.
+    3. Run `npm run i18n:check` to ensure 100% key parity across all 26 language files.
+    4. Never concatenate translated text fragments in code; use interpolation parameters (e.g. `{{ 'KEY' | translate: { count: total } }}`).
 
 ---
 

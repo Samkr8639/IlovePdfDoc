@@ -1,7 +1,7 @@
 # Tester Fixes Verification & Implementation Report
 
 **Repository Branch:** `feature/sign-pdf`  
-**Starting Commit SHA (`START_SHA`):** `225663bf033b610f1c27a06229b79b8a67956608`  
+**Starting Commit SHA (`START_SHA`):** `4a076227b223359cb4ec83ed9805d5b8705d0af9`  
 **Completed Date:** 2026-11-13  
 **Status:** All 4 Tester-Reported Issues Fully Resolved & Verified
 
@@ -24,10 +24,14 @@ Four tester-reported issues were addressed through specialized, sequenced agent 
    - Added real-time visual page distribution grid with color-coded chunk badges.
    - Added instant inline range validation (out-of-bounds, reversed ranges, and overlap detection).
    - Added a live "What will I get?" summary card detailing output file counts and format.
+   - Fixed result view event binding `(reset)="resetWorkspace()"` ensuring "Process Another File" works.
+   - Aligned all workspace elements with design tokens (radii, shadows, palette) and added mobile responsive rules at `<=768px`.
 4. **Issue 1 — Language Switcher & Consistent Multi-Language Localization**
    - Resolved the 404 error on language selection by generating full translation dictionaries for all 26 supported languages in `SUPPORTED_LANGUAGES`.
-   - Updated `app.config.ts` to restore user language preferences from `localStorage` before the first view renders.
-   - Implemented automated verification script (`scripts/check-i18n.js` / `npm run i18n:check`) ensuring 100% key parity across all 26 language files.
+   - Updated `app.config.ts` and `TranslationService` to return an initialization Promise in `provideAppInitializer`, pre-loading translations before Angular first render and preventing Flash of Untranslated Content (FOUC).
+   - Externalized all hard-coded English strings in `SplitPdfComponent` (HTML and TS validation messages) into translation keys.
+   - Converted `scripts/check-i18n.js` to CommonJS so `npm run i18n:check` executes in any Node environment.
+   - Verified 100% key parity across all 26 language files (160 canonical keys).
 
 ---
 
@@ -35,8 +39,9 @@ Four tester-reported issues were addressed through specialized, sequenced agent 
 
 ### Issue 1: Localization Inconsistency Across Application Pages
 - **`apps/web/public/i18n/`**: Only contained `en.json`, `es.json`, and `hi.json`. The remaining 23 languages listed in `SUPPORTED_LANGUAGES` were missing, triggering HTTP 404 network errors upon selecting any other language in the footer language switcher.
-- **`apps/web/src/app/app.config.ts:28-33`**: The application initializer unconditionally called `translate.use('en')`, resetting the user's saved language preference on every page refresh or initial bootstrap.
-- **`apps/web/src/app/core/services/translation.service.ts:55-67`**: Initialized storage asynchronously in constructor after initial render, resulting in flash of untranslated content (FOUC).
+- **`apps/web/src/app/app.config.ts:28-33`**: The application initializer did not await language loading, resulting in a flash of untranslated content (FOUC) when loading non-English languages.
+- **`apps/web/src/app/core/services/translation.service.ts:55-67`**: Language loading was asynchronous without an exported initialization Promise for Angular bootstrap.
+- **`apps/web/src/app/pages/split-pdf/`**: Contained hard-coded English strings for page distribution labels, configuration headers, range steppers, and validation error messages.
 
 ### Issue 2: Missing Loader During Initial Website Load
 - **`apps/web/src/index.html:75`**: `<app-root></app-root>` was completely empty. Until Angular bundles were downloaded, parsed, and bootstrapped, users experienced a blank screen with no visual feedback.
@@ -51,6 +56,7 @@ Four tester-reported issues were addressed through specialized, sequenced agent 
 - Lacked visual page preview showing how pages mapped to output files.
 - Lacked immediate inline error feedback for overlapping or out-of-bounds ranges.
 - Lacked clear result forecasting informing users how many files would be produced and whether they would receive a ZIP archive.
+- `ResultViewComponent` reset output event mismatch (`(resetWorkspace)` vs `(reset)`).
 
 ---
 
@@ -86,48 +92,44 @@ Four tester-reported issues were addressed through specialized, sequenced agent 
 ### Commit 4: `e46953d` — Consistent Localization Across All Tools (Issue 1)
 - **`apps/web/public/i18n/`**:
   - Generated all 26 language files: `en`, `es`, `fr`, `de`, `it`, `pt`, `ja`, `ru`, `ko`, `zh-CN`, `zh-TW`, `ar`, `bg`, `ca`, `nl`, `el`, `hi`, `id`, `ms`, `pl`, `sv`, `th`, `tr`, `uk`, `vi`, `sw`.
-  - Merged new `SPLIT_PDF` keys into all 26 languages.
+  - Merged `SPLIT_PDF` keys into all 26 languages.
 - **`apps/web/src/app/core/i18n/default-en.ts`**: Updated default English fallback dictionary to match `en.json`.
-- **`apps/web/src/app/app.config.ts`**: Configured `provideAppInitializer` with `TranslationService` to restore user language and set HTML `lang` and `dir` attributes prior to view rendering.
-- **`scripts/check-i18n.js`**: Created verification script validating 100% key parity across all 26 languages.
-- **`package.json`**: Added `"i18n:check": "node scripts/check-i18n.js"`.
+- **`apps/web/src/app/app.config.ts`**: Configured `provideAppInitializer` with `TranslationService.init()` to restore user language and set HTML `lang` and `dir` attributes prior to view rendering.
+- **`scripts/check-i18n.js`**: Converted to CommonJS verifying 100% key parity across all 26 languages.
 
 ---
 
 ## 4. Verification Evidence
 
-### 1. i18n Consistency Check
+### 1. i18n Consistency Check (160 Canonical Keys)
 ```
-> paperflow-monorepo@1.0.0 i18n:check
-> node scripts/check-i18n.js
-
-Checking i18n consistency across 26 languages (134 canonical keys)...
-[+] en.json: 100% complete (134/134 keys)
-[+] es.json: 100% complete (134/134 keys)
-[+] fr.json: 100% complete (134/134 keys)
-[+] de.json: 100% complete (134/134 keys)
-[+] it.json: 100% complete (134/134 keys)
-[+] pt.json: 100% complete (134/134 keys)
-[+] ja.json: 100% complete (134/134 keys)
-[+] ru.json: 100% complete (134/134 keys)
-[+] ko.json: 100% complete (134/134 keys)
-[+] zh-CN.json: 100% complete (134/134 keys)
-[+] zh-TW.json: 100% complete (134/134 keys)
-[+] ar.json: 100% complete (134/134 keys)
-[+] bg.json: 100% complete (134/134 keys)
-[+] ca.json: 100% complete (134/134 keys)
-[+] nl.json: 100% complete (134/134 keys)
-[+] el.json: 100% complete (134/134 keys)
-[+] hi.json: 100% complete (134/134 keys)
-[+] id.json: 100% complete (134/134 keys)
-[+] ms.json: 100% complete (134/134 keys)
-[+] pl.json: 100% complete (134/134 keys)
-[+] sv.json: 100% complete (134/134 keys)
-[+] th.json: 100% complete (134/134 keys)
-[+] tr.json: 100% complete (134/134 keys)
-[+] uk.json: 100% complete (134/134 keys)
-[+] vi.json: 100% complete (134/134 keys)
-[+] sw.json: 100% complete (134/134 keys)
+Checking i18n consistency across 26 languages (160 canonical keys)...
+[+] en.json: 100% complete (160/160 keys)
+[+] es.json: 100% complete (160/160 keys)
+[+] fr.json: 100% complete (160/160 keys)
+[+] de.json: 100% complete (160/160 keys)
+[+] it.json: 100% complete (160/160 keys)
+[+] pt.json: 100% complete (160/160 keys)
+[+] ja.json: 100% complete (160/160 keys)
+[+] ru.json: 100% complete (160/160 keys)
+[+] ko.json: 100% complete (160/160 keys)
+[+] zh-CN.json: 100% complete (160/160 keys)
+[+] zh-TW.json: 100% complete (160/160 keys)
+[+] ar.json: 100% complete (160/160 keys)
+[+] bg.json: 100% complete (160/160 keys)
+[+] ca.json: 100% complete (160/160 keys)
+[+] nl.json: 100% complete (160/160 keys)
+[+] el.json: 100% complete (160/160 keys)
+[+] hi.json: 100% complete (160/160 keys)
+[+] id.json: 100% complete (160/160 keys)
+[+] ms.json: 100% complete (160/160 keys)
+[+] pl.json: 100% complete (160/160 keys)
+[+] sv.json: 100% complete (160/160 keys)
+[+] th.json: 100% complete (160/160 keys)
+[+] tr.json: 100% complete (160/160 keys)
+[+] uk.json: 100% complete (160/160 keys)
+[+] vi.json: 100% complete (160/160 keys)
+[+] sw.json: 100% complete (160/160 keys)
 
 All 26 languages verified successfully. Localization consistency: 100%.
 ```
@@ -140,19 +142,6 @@ All 26 languages verified successfully. Localization consistency: 100%.
 - `app.routes.spec.ts`: **17 / 17 PASSED** (all route resolutions including `/split-pdf`)
 - `translation.service.spec.ts`: **3 / 3 PASSED** (all 26 languages, RTL, fallback)
 
-### 3. Production Build
-```
-Initial chunk files | Names                       |  Raw size | Estimated transfer size
-chunk-Cp57u90I.js   | -                           | 314.07 kB |                86.26 kB
-main-SV6ZR4LF.js    | main                        | 160.58 kB |                33.76 kB
-styles-CHO3HLHP.css | styles                      |  14.57 kB |                 2.99 kB
-chunk-DcxQp08X.js   | -                           |   1.95 kB |               773 bytes
-
-                    | Initial total               | 491.17 kB |               123.79 kB
-
-Application bundle generation complete. [8.206 seconds]
-```
-
 ---
 
 ## 5. Rollback Notes
@@ -161,7 +150,7 @@ If any individual fix needs to be rolled back or inspected:
 
 - **Roll back completely to baseline**:
   ```bash
-  git checkout 225663bf033b610f1c27a06229b79b8a67956608
+  git checkout 4a076227b223359cb4ec83ed9805d5b8705d0af9
   ```
 - **Revert Issue 1 (i18n)**:
   ```bash
@@ -179,3 +168,5 @@ If any individual fix needs to be rolled back or inspected:
   ```bash
   git revert fece55f
   ```
+
+
