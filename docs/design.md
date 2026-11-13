@@ -740,3 +740,48 @@ All 33 screenshots captured on running `ng serve` (`http://localhost:4200`) usin
 - **Generated from Commit:** `0d14632` (`dev` branch)
 - **Generated on:** `2026-11-11`
 - **Last verified:** `2026-11-11` against running Chrome (`1440×900`, `1024×768`, `390×844`) and committed `docs/design-assets/*`.
+
+---
+
+## 15. Loader, Split PDF & i18n Specifications
+
+### 15.1 Pre-Bootstrap Skeleton Loader & Route Progress Bar
+
+To eliminate initial blank screens and provide smooth feedback during async route transitions:
+1. **Critical Pre-Bootstrap Loader (`index.html`)**:
+   - Inlined critical CSS `<style id="pt-pre-loader-styles">` (< 2 KB unminified) placed in `<head>`.
+   - Uses canonical Ocean Workspace tokens directly: `#FFFFFF`, `#14213D`, `#0F766E`, `#14B8A6`, `#E6F5F3`, `#4B5563`.
+   - Hosted inside `<app-root>` with `#pt-app-preloader`: displays SVG brand logo (`/pdftailor-logo.svg`), indeterminate gradient loading bar, localized loading text, and `<noscript>` fallback.
+   - Synchronous language detection reads `localStorage.getItem('user_language')` to set loading text in the user's selected language immediately.
+   - 15-second safety fallback: if Angular bootstrap fails or hangs, reveals a friendly timeout message with a "Reload Application" button.
+   - Automatically cleared when Angular replaces `<app-root>` innerHTML on bootstrap.
+2. **Route Progress Bar (`RouteProgressBarComponent`)**:
+   - Fixed at viewport top (`position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10001`).
+   - Uses `--pt-teal-700` to `--pt-teal-600` gradient with subtle glow.
+   - 150ms debounce threshold avoids visual flicker on instant in-memory client navigation.
+   - Full accessibility with `role="progressbar"`, `aria-label="Page loading progress"`, and `prefers-reduced-motion` compliance.
+
+### 15.2 Dedicated Split PDF Architecture & UI Patterns
+
+Split PDF operates as an independent dedicated tool component (`SplitPdfComponent` at `/split-pdf`):
+1. **Separation from Merge**: Redundant "Merge PDF" checkboxes and consolidation options are removed. Split strictly outputs either a single split PDF file (when 1 range is selected) or a ZIP archive containing all split files (when multiple ranges are extracted).
+2. **Three Clear Split Modes**:
+   - **Custom Ranges**: Define discrete page ranges (`from` - `to`) with dynamic "+ Add Range" row management.
+   - **Fixed Chunks**: Split document into equal partitions of N pages with stepper controls.
+   - **Extract All Pages**: One-click extraction of every individual page into a separate PDF.
+3. **Live Visual Preview & Range Validation**:
+   - Visual Page Distribution grid with color-coded tags (`Part 1`, `Part 2`, etc.) showing chunk assignments directly on page cards.
+   - Immediate inline validation for reversed ranges (`from > to`), out-of-bounds pages (`> totalPages`), and overlapping ranges.
+   - Live Summary Card answers "What will I get?": displays exact count of output PDF files and delivery format (ZIP archive vs Single PDF).
+
+### 15.3 Multi-Language Localization System (26 Languages)
+
+1. **Full Language Coverage**:
+   - All 26 languages defined in `SUPPORTED_LANGUAGES` have canonical, fully populated JSON dictionaries in `apps/web/public/i18n/<lang>.json`.
+   - Supported languages: `en`, `es`, `fr`, `de`, `it`, `pt`, `ja`, `ru`, `ko`, `zh-CN`, `zh-TW`, `ar`, `bg`, `ca`, `nl`, `el`, `hi`, `id`, `ms`, `pl`, `sv`, `th`, `tr`, `uk`, `vi`, `sw`.
+   - Automatic RTL document direction support for Arabic (`ar`).
+2. **Storage Initialization**:
+   - Initialized via `provideAppInitializer()` in `app.config.ts` using `TranslationService`, ensuring user language from `localStorage` is loaded before first view render.
+3. **Automated Verification (`scripts/check-i18n.js`)**:
+   - CI check via `npm run i18n:check` recursively compares every language file against canonical `en.json` leaf keys, failing on missing or mismatched keys.
+
