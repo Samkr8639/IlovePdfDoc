@@ -174,8 +174,8 @@
     "semantic_hash": "9fe3c853ca8d3cf62ab6fbcccc8bf93a"
   },
   "apps/api/src/services/compress/types.ts": {
-    "mtime": 1794569148.0943096,
-    "seen": 1794569655.2383432,
+    "mtime": 1794571563.369564,
+    "seen": 1794574365.2049484,
     "ast_hash": "e9c15ffc2fb113280d88e41a3528d2d8",
     "semantic_hash": ""
   },
@@ -546,20 +546,20 @@
     "semantic_hash": ""
   },
   "apps/web/package.json": {
-    "mtime": 1794567650.8592837,
-    "seen": 1794569655.2384295,
+    "mtime": 1794571563.48325,
+    "seen": 1794574365.2050405,
     "ast_hash": "144ee27042a53ba84bb0d470d2942a4a",
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794569613.1411757,
-    "seen": 1794569655.2384324,
+    "mtime": 1794573274.6665184,
+    "seen": 1794574365.2050433,
     "ast_hash": "3bfecf4e6c9b957bf19dc088355675ac",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794569613.1411757,
-    "seen": 1794569655.2384353,
+    "mtime": 1794573274.6676216,
+    "seen": 1794574365.205046,
     "ast_hash": "3bfecf4e6c9b957bf19dc088355675ac",
     "semantic_hash": ""
   },
@@ -642,15 +642,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/browser-pdf.service.spec.ts": {
-    "mtime": 1794569457.6889048,
-    "seen": 1794569655.238475,
+    "mtime": 1794571563.6243567,
+    "seen": 1794574365.205091,
     "ast_hash": "561fe82947a5b10ad23e3ec01c502d92",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/browser-pdf.service.ts": {
-    "mtime": 1794569385.4330091,
-    "seen": 1794569655.238476,
-    "ast_hash": "4f92819fedd5bc59e0b25e690fa7a7da",
+    "mtime": 1794573158.1215048,
+    "seen": 1794574365.2050922,
+    "ast_hash": "80e6b7dcd7cf97e5a44008151c1b29ac",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/consent.service.ts": {
@@ -672,20 +672,20 @@
     "semantic_hash": "d65f7468fb45b13e7bf0b9868c085d18"
   },
   "apps/web/src/app/core/services/excel-to-pdf.service.ts": {
-    "mtime": 1793870002.0094578,
-    "seen": 1794460514.2576387,
-    "ast_hash": "ce1b39992b1e974178df82015170fee8",
-    "semantic_hash": "ce1b39992b1e974178df82015170fee8"
+    "mtime": 1794573126.407376,
+    "seen": 1794574365.2050972,
+    "ast_hash": "5731bcd4000649b2419c272338bb5042",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/services/jpg-to-pdf/image-probe.service.spec.ts": {
-    "mtime": 1794567770.0820127,
-    "seen": 1794569655.2384822,
+    "mtime": 1794571563.80192,
+    "seen": 1794574365.2050984,
     "ast_hash": "3b1ad7211384dd1a87e43832a8a887b1",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/jpg-to-pdf/image-probe.service.ts": {
-    "mtime": 1794567725.3570774,
-    "seen": 1794569655.2384832,
+    "mtime": 1794571563.9040132,
+    "seen": 1794574365.2050996,
     "ast_hash": "fc36a1c0ed7f65da1bee60a01cbbba89",
     "semantic_hash": ""
   },
@@ -708,15 +708,15 @@
     "semantic_hash": "bae75a58758a8a8ec92bc43d00449ce8"
   },
   "apps/web/src/app/core/services/jpg-to-pdf/jpg-to-pdf.service.spec.ts": {
-    "mtime": 1794567952.3517745,
-    "seen": 1794569655.238488,
+    "mtime": 1794571563.9862213,
+    "seen": 1794574365.2051048,
     "ast_hash": "91a3517ddf168e1a4c87dcd7ee9a9050",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/jpg-to-pdf/jpg-to-pdf.service.ts": {
-    "mtime": 1794568076.321204,
-    "seen": 1794569655.2384892,
-    "ast_hash": "2e4d67ecbb9c018838e3bb255695c388",
+    "mtime": 1794571564.0755188,
+    "seen": 1794574365.205106,
+    "ast_hash": "844cc51b03d5ed3205ecf2dfb760f304",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/jpg-to-pdf/page-layout.service.spec.ts": {
@@ -738,10 +738,10 @@
     "semantic_hash": "0c1b83962747e6dabcc3d344cf1948e3"
   },
   "apps/web/src/app/core/services/pdf-to-excel.service.ts": {
-    "mtime": 1793273383.1904788,
-    "seen": 1794460514.2584004,
-    "ast_hash": "3023bca1e85fb1ff0668bafb8f696784",
-    "semantic_hash": "3023bca1e85fb1ff0668bafb8f696784"
+    "mtime": 1794573135.4902623,
+    "seen": 1794574365.2051108,
+    "ast_hash": "48fb483a0b899729325eb559a645d792",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/services/pdf-to-jpg/canvas-limits.spec.ts": {
     "mtime": 1793964221.0702112,
@@ -822,22 +822,22 @@
     "semantic_hash": "bcc1bf88d8e6a4c40577cd982109b054"
   },
   "apps/web/src/app/core/services/pdf-to-powerpoint.service.ts": {
-    "mtime": 1793110535.454874,
-    "seen": 1794460514.2593477,
-    "ast_hash": "06fc8d8a166ac02d158fc4e6ad473dd0",
-    "semantic_hash": "06fc8d8a166ac02d158fc4e6ad473dd0"
+    "mtime": 1794573139.8831663,
+    "seen": 1794574365.2051287,
+    "ast_hash": "4e44252af66dc9736bd40ca559787a01",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/services/pdf-to-word.service.ts": {
-    "mtime": 1793110535.454874,
-    "seen": 1794460514.2594154,
-    "ast_hash": "8f62c136fd53bc73e830a75f3d4d97f6",
-    "semantic_hash": "8f62c136fd53bc73e830a75f3d4d97f6"
+    "mtime": 1794573130.8825026,
+    "seen": 1794574365.2051296,
+    "ast_hash": "f9e8715fee0f0514e6c1478516016834",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/services/powerpoint-to-pdf.service.ts": {
-    "mtime": 1793954781.6386409,
-    "seen": 1794460514.2594817,
-    "ast_hash": "c6cba836e61d32bd0d37d958491be3e6",
-    "semantic_hash": "c6cba836e61d32bd0d37d958491be3e6"
+    "mtime": 1794573153.8646572,
+    "seen": 1794574365.2051308,
+    "ast_hash": "ea4e1b9e39ec4233b9a6807e13530230",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/services/seo.service.ts": {
     "mtime": 1794565499.1001482,
@@ -906,10 +906,10 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/word-to-pdf.service.ts": {
-    "mtime": 1793350617.5610778,
-    "seen": 1794460514.2602756,
-    "ast_hash": "eb47a4d233ac619d49ee7444c1707573",
-    "semantic_hash": "eb47a4d233ac619d49ee7444c1707573"
+    "mtime": 1794573122.357738,
+    "seen": 1794574365.205154,
+    "ast_hash": "19800ce09572ff686f5fe7ee7e7d7645",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/utils/split-range-parser.spec.ts": {
     "mtime": 1793110535.4559283,
@@ -1164,10 +1164,10 @@
     "semantic_hash": "e8be2b6e21c0b68f1b83ef83c1e75b51"
   },
   "apps/web/src/app/pages/edit-pdf/services/ocr.service.ts": {
-    "mtime": 1793854985.4249136,
-    "seen": 1794460514.2632277,
-    "ast_hash": "17c8c7f63b0d91964d76227fabbd1bcb",
-    "semantic_hash": "17c8c7f63b0d91964d76227fabbd1bcb"
+    "mtime": 1794573166.8682263,
+    "seen": 1794574365.2052076,
+    "ast_hash": "ef36055db94bba162e2679326f0b4026",
+    "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/services/pdf-export.service.spec.ts": {
     "mtime": 1793854985.4249136,
@@ -1266,14 +1266,14 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/jpg-to-pdf/jpg-to-pdf.component.spec.ts": {
-    "mtime": 1794567786.7991102,
-    "seen": 1794569655.2386034,
+    "mtime": 1794571564.7530904,
+    "seen": 1794574365.2052293,
     "ast_hash": "7f6d3bc0dc8f8dd67c5ac6a9c1fbbbf1",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/jpg-to-pdf/jpg-to-pdf.component.ts": {
-    "mtime": 1794568986.029797,
-    "seen": 1794569655.2386045,
+    "mtime": 1794571564.8286064,
+    "seen": 1794574365.2052302,
     "ast_hash": "26dbc4e99b08235e15f69c9760053378",
     "semantic_hash": ""
   },
@@ -1374,14 +1374,14 @@
     "semantic_hash": "d6afb37e4b7d14de41a7402a1d83fc42"
   },
   "apps/web/src/app/pages/tool-placeholder/tool-placeholder.component.spec.ts": {
-    "mtime": 1794569356.9671,
-    "seen": 1794569655.2386317,
+    "mtime": 1794571564.9922962,
+    "seen": 1794574365.2052605,
     "ast_hash": "a87c42146259144cc5b56d3b11245cad",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/tool-placeholder/tool-placeholder.component.ts": {
-    "mtime": 1794569408.9097965,
-    "seen": 1794569655.238633,
+    "mtime": 1794571565.0864344,
+    "seen": 1794574365.2052615,
     "ast_hash": "b016cb68f3af612e46dfb6cd44ce7358",
     "semantic_hash": ""
   },
@@ -1506,16 +1506,16 @@
     "semantic_hash": "a6196adfa7e529d1f981bf5e943c6509"
   },
   "apps/web/src/environments/environment.prod.ts": {
-    "mtime": 1793110535.478077,
-    "seen": 1794460514.267081,
-    "ast_hash": "218c385db1d36b807720eb9b5737c4d5",
-    "semantic_hash": "218c385db1d36b807720eb9b5737c4d5"
+    "mtime": 1794573108.7974508,
+    "seen": 1794574365.2052891,
+    "ast_hash": "a861c316dffed8ac6655398ee2097fda",
+    "semantic_hash": ""
   },
   "apps/web/src/environments/environment.staging.ts": {
-    "mtime": 1793110535.478077,
-    "seen": 1794460514.2671463,
-    "ast_hash": "365d2b0ca9f3396f60c02961b73e5794",
-    "semantic_hash": "365d2b0ca9f3396f60c02961b73e5794"
+    "mtime": 1794573113.990192,
+    "seen": 1794574365.2052906,
+    "ast_hash": "3d174a9339b73adbbce37b4b03ca4516",
+    "semantic_hash": ""
   },
   "apps/web/src/environments/environment.ts": {
     "mtime": 1794566455.30695,
@@ -1550,8 +1550,8 @@
     "ast_empty": true
   },
   "package.json": {
-    "mtime": 1794567672.061561,
-    "seen": 1794569655.238672,
+    "mtime": 1794571565.1625762,
+    "seen": 1794574365.2053006,
     "ast_hash": "dd907ae8c49ddd7baae614b9bbb07267",
     "semantic_hash": ""
   },
@@ -1616,8 +1616,8 @@
     "semantic_hash": "b6e29e00e9e4613c68e8aa15a22b4e29"
   },
   "packages/contracts/src/tools.ts": {
-    "mtime": 1794567686.67654,
-    "seen": 1794569655.2386878,
+    "mtime": 1794571565.2125654,
+    "seen": 1794574365.2053156,
     "ast_hash": "a8dc807c7e4403ab22b8b266fa51446a",
     "semantic_hash": ""
   },
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794569613.1406627,
-    "seen": 1794569655.2387152,
+    "mtime": 1794573274.666011,
+    "seen": 1794574365.2053444,
     "ast_hash": "f1161ccbd2f301701aed620826199b97",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794569613.1399012,
-    "seen": 1794569655.2387164,
+    "mtime": 1794573274.666011,
+    "seen": 1794574365.2053456,
     "ast_hash": "e1e7368b0f8076c86d1e15877703d48a",
     "semantic_hash": ""
   },
@@ -1742,8 +1742,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/jpg-to-pdf/jpg-to-pdf.component.html": {
-    "mtime": 1794567932.6483574,
-    "seen": 1794569655.2387283,
+    "mtime": 1794571564.6504216,
+    "seen": 1794574365.2053587,
     "ast_hash": "a66995ac246dc9a8292fce8ed1e4bcc8",
     "semantic_hash": ""
   },
@@ -1772,8 +1772,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/pdf-to-word/pdf-to-word.component.html": {
-    "mtime": 1794566724.6905258,
-    "seen": 1794569655.2387335,
+    "mtime": 1794571562.0960317,
+    "seen": 1794574365.205365,
     "ast_hash": "ab3a342c5de9d4abd8925f35190072b0",
     "semantic_hash": ""
   },
@@ -1808,8 +1808,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/tool-placeholder/tool-placeholder.component.html": {
-    "mtime": 1794569318.6697135,
-    "seen": 1794569655.238742,
+    "mtime": 1794571564.9315436,
+    "seen": 1794574365.2053745,
     "ast_hash": "ae82fe28253d9bfc023eb3f54cd734c1",
     "semantic_hash": ""
   },
@@ -1862,9 +1862,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/index.html": {
-    "mtime": 1794566455.4704401,
-    "seen": 1794569655.2387524,
-    "ast_hash": "58a3e2ce934aae17e78a0ab07ec71d57",
+    "mtime": 1794573186.4433384,
+    "seen": 1794574365.2053857,
+    "ast_hash": "a01589d1bc6ab975e8f0ca0ae3a7a497",
     "semantic_hash": ""
   },
   "docs/AGENT-OWNERSHIP.md": {
@@ -1940,8 +1940,8 @@
     "semantic_hash": ""
   },
   "docs/design.md": {
-    "mtime": 1794569544.5389519,
-    "seen": 1794569655.2387671,
+    "mtime": 1794571563.207955,
+    "seen": 1794574365.2054014,
     "ast_hash": "8c98ff832b143a6fb1b017693f3605bf",
     "semantic_hash": ""
   },
@@ -2156,9 +2156,9 @@
     "semantic_hash": ""
   },
   "apps/web/proxy.conf.json": {
-    "mtime": 1794566349.0347793,
-    "seen": 1794569655.2384307,
-    "ast_hash": "47e208493ebfeebc078f3d42426a8e69",
+    "mtime": 1794572457.2618332,
+    "seen": 1794574365.205042,
+    "ast_hash": "63162dc7b64ecb78363b3cfcfc1f65ca",
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ard.json": {
@@ -2330,9 +2330,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/sign-pdf/sign-request.service.ts": {
-    "mtime": 1794565499.10123,
-    "seen": 1794569655.238521,
-    "ast_hash": "ca8eaca35b94b11ba9676772c3c8f33b",
+    "mtime": 1794573162.294375,
+    "seen": 1794574365.2051408,
+    "ast_hash": "9110c6395bb0ec156f0b072bb27d009a",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/sign-pdf/signature-image.service.ts": {
@@ -2468,21 +2468,21 @@
     "semantic_hash": ""
   },
   "proxy.conf.json": {
-    "mtime": 1794567647.2342484,
-    "seen": 1794569655.2387025,
-    "ast_hash": "355f2cb770e31986fdcc0921527dad85",
+    "mtime": 1794572457.303022,
+    "seen": 1794574365.2053316,
+    "ast_hash": "3ebe05399ab12edb3dc9ac74ae9d54ef",
     "semantic_hash": ""
   },
   "scripts/dev.mjs": {
-    "mtime": 1794567667.6760998,
-    "seen": 1794569655.2387037,
-    "ast_hash": "a5ba076f31b1aafc3ffd7e7e4a34f8ad",
+    "mtime": 1794571539.351568,
+    "seen": 1794574365.2053325,
+    "ast_hash": "4d9d7802a6e2d5f9f123f2aad3c82cc4",
     "semantic_hash": ""
   },
   "scripts/serve-prod.mjs": {
-    "mtime": 1794567661.0933452,
-    "seen": 1794569655.2387066,
-    "ast_hash": "f1efbae8405f4a96c20df123f4064d22",
+    "mtime": 1794572457.3691282,
+    "seen": 1794574365.205336,
+    "ast_hash": "088af9d5eb9c9e50ab6d60f5de34db00",
     "semantic_hash": ""
   },
   "apps/web/public/fonts/sign/LICENSE-OFL.txt": {
