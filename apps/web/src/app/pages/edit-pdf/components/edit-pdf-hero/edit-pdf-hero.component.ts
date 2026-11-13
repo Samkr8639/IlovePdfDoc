@@ -68,9 +68,9 @@ import { ExploreMoreToolsComponent } from '../../../../shared/components/explore
           <div class="feature-card">
             <div class="feature-icon-badge">
               <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#1E3A8A" />
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
                 <path d="M24 11l11 4v7c0 8-5 13-11 16-6-3-11-8-11-16v-7l11-4z" fill="white" />
-                <circle cx="24" cy="23" r="2.5" fill="#1E3A8A" />
+                <circle cx="24" cy="23" r="2.5" fill="#0F766E" />
               </svg>
             </div>
             <h3 class="feature-title">100% In-Browser Privacy</h3>
@@ -83,7 +83,7 @@ import { ExploreMoreToolsComponent } from '../../../../shared/components/explore
           <div class="feature-card">
             <div class="feature-icon-badge">
               <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#10B981" />
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
                 <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
@@ -98,7 +98,7 @@ import { ExploreMoreToolsComponent } from '../../../../shared/components/explore
           <div class="feature-card">
             <div class="feature-icon-badge">
               <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="10" fill="#2563EB" />
+                <rect x="4" y="4" width="40" height="40" rx="10" fill="#0F766E" />
                 <path d="M18 16l6-6 6 6M24 10v28M30 32l-6 6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>

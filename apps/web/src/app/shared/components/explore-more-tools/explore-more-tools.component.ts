@@ -35,7 +35,7 @@ const RELATED_MAP: Record<string, string[]> = {
           @for (tool of relatedTools(); track tool.id) {
             <a [routerLink]="tool.route" class="explore-card">
               <div class="card-top">
-                <div class="icon-tile" [attr.data-tool]="tool.id">
+                <div class="icon-tile">
                   @switch (tool.id) {
                     @case ('edit-pdf') {
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -245,43 +245,15 @@ const RELATED_MAP: Record<string, string[]> = {
       width: 44px;
       height: 44px;
       border-radius: var(--pt-radius-md, 10px);
-      background: var(--pt-teal-50, #ecf7f5);
-      color: var(--pt-teal-700, #0f766e);
-      transition: transform 0.2s ease;
+      background: var(--pt-teal-50, #ECF7F5);
+      color: var(--pt-teal-700, #0F766E);
+      transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
     }
 
     .explore-card:hover .icon-tile {
+      background: var(--pt-teal-100, #CCEBE6);
+      color: var(--pt-teal-800, #0B5D57);
       transform: scale(1.06);
-    }
-
-    .icon-tile[data-tool="edit-pdf"],
-    .icon-tile[data-tool="sign-pdf"] {
-      background: #ecfdf5;
-      color: #059669;
-    }
-
-    .icon-tile[data-tool="word-to-pdf"],
-    .icon-tile[data-tool="pdf-to-word"] {
-      background: #eff6ff;
-      color: #2563eb;
-    }
-
-    .icon-tile[data-tool="excel-to-pdf"],
-    .icon-tile[data-tool="pdf-to-excel"] {
-      background: #f0fdf4;
-      color: #16a34a;
-    }
-
-    .icon-tile[data-tool="powerpoint-to-pdf"],
-    .icon-tile[data-tool="pdf-to-powerpoint"] {
-      background: #fff7ed;
-      color: #ea580c;
-    }
-
-    .icon-tile[data-tool="jpg-to-pdf"],
-    .icon-tile[data-tool="pdf-to-jpg"] {
-      background: #faf5ff;
-      color: #9333ea;
     }
 
     .tool-tag {

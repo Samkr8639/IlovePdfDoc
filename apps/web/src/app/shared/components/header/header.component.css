@@ -608,28 +608,18 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #E6F4F1;
+  background: var(--pt-teal-50, #ECF7F5);
   color: var(--pt-teal-700, #0F766E);
 }
 
-.item-tile.tile-convert {
-  background: #EEF2F6;
-  color: #14213D;
-}
-
-.item-tile.tile-organize {
-  background: #E6F4F1;
-  color: #0F766E;
-}
-
-.item-tile.tile-optimize {
-  background: #FEF3C7;
-  color: #D97706;
-}
-
-.item-tile.tile-security {
-  background: #FEE2E2;
-  color: #DC2626;
+.item-tile.tile-convert,
+.item-tile.tile-organize,
+.item-tile.tile-optimize,
+.item-tile.tile-security,
+.item-tile.tile-edit,
+.item-tile.tile-intelligence {
+  background: var(--pt-teal-50, #ECF7F5);
+  color: var(--pt-teal-700, #0F766E);
 }
 
 .item-info {
