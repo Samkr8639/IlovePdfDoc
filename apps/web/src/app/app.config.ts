@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAppInitializer(() => {
       const translationService = inject(TranslationService);
-      // TranslationService initializes from user storage and configures translate and html lang/dir
+      return translationService.init();
     })
   ]
 };

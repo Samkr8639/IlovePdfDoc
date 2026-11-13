@@ -58,6 +58,42 @@ export class TranslationService {
     this.initFromStorage();
   }
 
+  init(): Promise<void> {
+    if (typeof window === 'undefined') return Promise.resolve();
+
+    const savedLangCode = localStorage.getItem('user_language') || 'en';
+    const matched = this.languages.find(l => l.code.toLowerCase() === savedLangCode.toLowerCase()) || this.languages[0];
+
+    this.currentLanguage.set(matched);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = matched.code;
+      document.documentElement.dir = matched.dir === 'rtl' ? 'rtl' : 'ltr';
+    }
+
+    if (matched.code === 'en') {
+      this.translate.use('en');
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve) => {
+      const sub = this.translate.use(matched.code).subscribe({
+        next: () => {
+          sub.unsubscribe();
+          resolve();
+        },
+        error: () => {
+          sub.unsubscribe();
+          this.translate.use('en');
+          resolve();
+        }
+      });
+      setTimeout(() => {
+        sub.unsubscribe();
+        resolve();
+      }, 2000);
+    });
+  }
+
   private initFromStorage(): void {
     if (typeof window === 'undefined') return;
 
