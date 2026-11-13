@@ -1,0 +1,368 @@
+<div class="split-page-wrapper">
+  <!-- 1. UPLOAD STATE -->
+  @if (currentState() === 'upload') {
+    <div class="split-upload-hero">
+      <div class="hero-content">
+        <h1 class="split-title">{{ 'SPLIT_PDF.TITLE' | translate }}</h1>
+        <p class="split-subtitle">{{ 'SPLIT_PDF.SUBTITLE' | translate }}</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-banner" role="alert">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <div class="dropzone-container">
+        <app-dropzone
+          [multiple]="false"
+          acceptedTypes=".pdf,application/pdf"
+          (filesSelected)="onFilesAdded($event)">
+        </app-dropzone>
+      </div>
+    </div>
+  }
+
+  <!-- 2. ORGANIZE & CONFIGURE STATE -->
+  @if (currentState() === 'organize' && selectedFile()) {
+    <div class="split-workspace-container">
+      <!-- Top File Summary Bar -->
+      <div class="workspace-top-bar">
+        <div class="file-meta-group">
+          <div class="file-icon-badge">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="file-info-text">
+            <span class="file-name" [title]="selectedFile()!.name">{{ selectedFile()!.name }}</span>
+            <span class="file-details">
+              {{ selectedFile()!.pageCount }} pages &bull; {{ selectedFile()!.formattedSize }}
+            </span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-change-file" (click)="changeFile()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <polyline points="23 20 23 14 17 14"></polyline>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+          </svg>
+          <span>{{ 'SPLIT_PDF.CHANGE_FILE' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Main Workspace: Split Columns -->
+      <div class="split-workspace-grid">
+        <!-- Left: Visual Page Grid Preview -->
+        <section class="visual-preview-section" aria-label="Document Page Visual Preview">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Visual Page Distribution</h2>
+              <p class="section-desc">Color-coded badges indicate which split file each page belongs to.</p>
+            </div>
+          </div>
+
+          <div class="pages-preview-grid">
+            @for (page of pageAssignments(); track page.pageNum) {
+              <div
+                class="page-preview-card"
+                [class.assigned]="page.assigned"
+                [class.excluded]="!page.assigned"
+                [ngClass]="page.colorClass || ''">
+                <div class="page-part-tag" [class.tag-excluded]="!page.assigned">
+                  {{ page.label }}
+                </div>
+                <div class="page-body">
+                  <div class="page-sheet-mockup">
+                    <span class="page-sheet-num">{{ page.pageNum }}</span>
+                  </div>
+                </div>
+                <div class="page-footer-label">
+                  Page {{ page.pageNum }}
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Right: Split Configuration Controls -->
+        <aside class="controls-sidebar" aria-label="Split Configuration">
+          <div class="sidebar-card">
+            <h2 class="sidebar-title">Split Configuration</h2>
+
+            <!-- Mode Selector Cards -->
+            <div class="mode-selector-list" role="radiogroup" aria-label="Split Modes">
+              <!-- Mode 1: Custom Ranges -->
+              <label
+                class="mode-card"
+                [class.selected]="splitMode() === 'custom'"
+                (click)="setSplitMode('custom')">
+                <div class="mode-radio-dot">
+                  <span class="dot-inner"></span>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-title">{{ 'SPLIT_PDF.MODE_CUSTOM' | translate }}</span>
+                  <span class="mode-desc">{{ 'SPLIT_PDF.MODE_CUSTOM_DESC' | translate }}</span>
+                </div>
+              </label>
+
+              <!-- Mode 2: Fixed Chunks -->
+              <label
+                class="mode-card"
+                [class.selected]="splitMode() === 'fixed'"
+                (click)="setSplitMode('fixed')">
+                <div class="mode-radio-dot">
+                  <span class="dot-inner"></span>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-title">{{ 'SPLIT_PDF.MODE_FIXED' | translate }}</span>
+                  <span class="mode-desc">{{ 'SPLIT_PDF.MODE_FIXED_DESC' | translate }}</span>
+                </div>
+              </label>
+
+              <!-- Mode 3: Extract All Pages -->
+              <label
+                class="mode-card"
+                [class.selected]="splitMode() === 'extract_all'"
+                (click)="setSplitMode('extract_all')">
+                <div class="mode-radio-dot">
+                  <span class="dot-inner"></span>
+                </div>
+                <div class="mode-info">
+                  <span class="mode-title">{{ 'SPLIT_PDF.MODE_EXTRACT_ALL' | translate }}</span>
+                  <span class="mode-desc">{{ 'SPLIT_PDF.MODE_EXTRACT_ALL_DESC' | translate }}</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Dynamic Settings based on Mode -->
+            <div class="mode-settings-panel">
+              <!-- Mode: Custom Ranges -->
+              @if (splitMode() === 'custom') {
+                <div class="custom-ranges-container">
+                  <div class="ranges-header">
+                    <span class="ranges-subhead">Defined Ranges</span>
+                    <span class="ranges-badge">{{ customRanges().length }} Range{{ customRanges().length > 1 ? 's' : '' }}</span>
+                  </div>
+
+                  <div class="ranges-list">
+                    @for (range of customRanges(); track range.id; let idx = $index) {
+                      <div class="range-row-card" [class.has-error]="validation().errors[range.id]">
+                        <div class="range-row-main">
+                          <span class="range-index-badge">Part {{ idx + 1 }}</span>
+                          <div class="range-inputs-group">
+                            <label class="range-input-label">
+                              <span>From</span>
+                              <input
+                                type="number"
+                                min="1"
+                                [max]="totalPages()"
+                                class="range-num-input"
+                                [value]="range.from"
+                                (input)="updateCustomRange(range.id, 'from', $any($event.target).value)"
+                              />
+                            </label>
+                            <span class="range-sep">&ndash;</span>
+                            <label class="range-input-label">
+                              <span>To</span>
+                              <input
+                                type="number"
+                                min="1"
+                                [max]="totalPages()"
+                                class="range-num-input"
+                                [value]="range.to"
+                                (input)="updateCustomRange(range.id, 'to', $any($event.target).value)"
+                              />
+                            </label>
+                          </div>
+
+                          @if (customRanges().length > 1) {
+                            <button
+                              type="button"
+                              class="btn-remove-range"
+                              title="Remove range"
+                              (click)="removeCustomRange(range.id)">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                              </svg>
+                            </button>
+                          }
+                        </div>
+
+                        @if (validation().errors[range.id]) {
+                          <div class="range-error-msg">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <line x1="12" y1="8" x2="12" y2="12"></line>
+                              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <span>{{ validation().errors[range.id] }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <button type="button" class="btn-add-range" (click)="addCustomRange()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>{{ 'SPLIT_PDF.ADD_RANGE' | translate }}</span>
+                  </button>
+                </div>
+              }
+
+              <!-- Mode: Fixed Chunks -->
+              @if (splitMode() === 'fixed') {
+                <div class="fixed-chunks-container">
+                  <label class="stepper-label">{{ 'SPLIT_PDF.CHUNK_SIZE_LABEL' | translate }}</label>
+                  <div class="stepper-controls">
+                    <button
+                      type="button"
+                      class="stepper-btn"
+                      [disabled]="fixedChunkSize() <= 1"
+                      (click)="changeFixedChunkSize(-1)">
+                      &minus;
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      [max]="totalPages()"
+                      class="stepper-input"
+                      [ngModel]="fixedChunkSize()"
+                      (ngModelChange)="fixedChunkSize.set($event)"
+                    />
+                    <button
+                      type="button"
+                      class="stepper-btn"
+                      [disabled]="fixedChunkSize() >= totalPages()"
+                      (click)="changeFixedChunkSize(1)">
+                      +
+                    </button>
+                  </div>
+                  <p class="stepper-hint">
+                    Every {{ fixedChunkSize() }} page{{ fixedChunkSize() > 1 ? 's' : '' }} will be saved into an independent PDF.
+                  </p>
+                </div>
+              }
+
+              <!-- Mode: Extract All Pages -->
+              @if (splitMode() === 'extract_all') {
+                <div class="extract-all-container">
+                  <div class="info-callout">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F766E" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <p>All {{ totalPages() }} pages will be extracted as individual PDF documents and packaged into a convenient ZIP archive.</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Live Result Preview Summary Card -->
+            <div class="live-summary-card">
+              <div class="summary-head">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F766E" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span class="summary-head-text">{{ 'SPLIT_PDF.SUMMARY_TITLE' | translate }}</span>
+              </div>
+
+              <div class="summary-stat-row">
+                <span class="summary-stat-num">{{ outputFilesCount() }}</span>
+                <div class="summary-stat-desc">
+                  <span class="summary-stat-main">
+                    @if (outputFilesCount() === 1) {
+                      {{ 'SPLIT_PDF.SUMMARY_SINGLE_FILE' | translate }}
+                    } @else {
+                      {{ outputFilesCount() }} {{ 'SPLIT_PDF.SUMMARY_FILES_COUNT' | translate }}
+                    }
+                  </span>
+                  <span class="summary-stat-sub">
+                    @if (isZipOutput()) {
+                      {{ 'SPLIT_PDF.SUMMARY_DELIVERY_ZIP' | translate }}
+                    } @else {
+                      {{ 'SPLIT_PDF.SUMMARY_DELIVERY_SINGLE' | translate }}
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <!-- Compact Parts List -->
+              <div class="summary-chunks-list">
+                @for (chunk of activeChunks(); track $index) {
+                  <span class="summary-chunk-pill">
+                    Part {{ $index + 1 }}: Pages {{ chunk.from }}&ndash;{{ chunk.to }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            @if (validation().globalError) {
+              <div class="error-banner-sidebar" role="alert">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>{{ validation().globalError }}</span>
+              </div>
+            }
+
+            <!-- Primary Action Button -->
+            <button
+              type="button"
+              class="btn-split-primary"
+              [disabled]="!validation().isValid || isProcessing()"
+              (click)="executeSplit()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="6" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+              </svg>
+              <span>{{ 'SPLIT_PDF.BTN_SPLIT' | translate }}</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  }
+
+  <!-- 3. PROCESSING STATE -->
+  @if (currentState() === 'processing') {
+    <div class="split-processing-container">
+      <app-processing-state
+        title="Splitting PDF..."
+        [percent]="processingProgress()"
+        [message]="processingMessage()">
+      </app-processing-state>
+    </div>
+  }
+
+  <!-- 4. COMPLETED STATE -->
+  @if (currentState() === 'completed' && splitResult()) {
+    <div class="split-completed-container">
+      <app-result-view
+        [result]="splitResult()!"
+        (resetWorkspace)="resetWorkspace()">
+      </app-result-view>
+      <app-explore-more-tools currentTool="split-pdf"></app-explore-more-tools>
+    </div>
+  }
+</div>
