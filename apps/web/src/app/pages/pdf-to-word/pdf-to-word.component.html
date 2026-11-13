@@ -1,4 +1,19 @@
 <div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
+  <!-- GLOBAL ERROR TOASTER (Visible across all states) -->
+  @if (errorMessage()) {
+    <div class="global-error-container" role="alert">
+      <div class="error-banner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ errorMessage() }}</span>
+        <button type="button" class="error-close" (click)="errorMessage.set(null)" aria-label="Dismiss error">✕</button>
+      </div>
+    </div>
+  }
+
   <!-- ===================================================================
        1. UPLOAD STATE: HERO & DROPZONE
        =================================================================== -->
@@ -9,18 +24,6 @@
         <p class="hero-subtitle">
           Convert PDF documents into editable Word files while preserving as much of the original formatting as possible.
         </p>
-
-        @if (errorMessage()) {
-          <div class="error-banner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>{{ errorMessage() }}</span>
-            <button type="button" class="error-close" (click)="errorMessage.set(null)">✕</button>
-          </div>
-        }
 
         <!-- UPLOADER COMPONENT -->
         <div class="hero-dropzone-wrap">
