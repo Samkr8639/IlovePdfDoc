@@ -128,7 +128,7 @@ export class WordToPdfService {
 
     onProgress?.(55, 'Converting documents with high-fidelity formatting...');
 
-    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const baseUrl = environment.apiBaseUrl || '/api/v1';
     const response = await fetch(`${baseUrl}/word-to-pdf/convert`, {
       method: 'POST',
       body: formData,

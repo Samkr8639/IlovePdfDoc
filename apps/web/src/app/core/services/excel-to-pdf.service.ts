@@ -141,7 +141,7 @@ export class ExcelToPdfService {
 
     onProgress?.(50, 'Converting tables, applying page scaling & pagination...');
 
-    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const baseUrl = environment.apiBaseUrl || '/api/v1';
     const response = await fetch(`${baseUrl}/excel-to-pdf/convert`, {
       method: 'POST',
       body: formData,

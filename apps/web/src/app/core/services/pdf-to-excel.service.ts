@@ -102,7 +102,7 @@ export class PdfToExcelService {
         : 'Detecting ruled & borderless tables, inferring cell types...'
     );
 
-    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const baseUrl = environment.apiBaseUrl || '/api/v1';
     const response = await fetch(`${baseUrl}/pdf-to-excel/convert`, {
       method: 'POST',
       body: formData,

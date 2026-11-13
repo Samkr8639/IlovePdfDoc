@@ -91,7 +91,7 @@ export class PdfToWordService {
 
     onProgress?.(50, options.mode === 'ocr' ? 'Running OCR text recognition...' : 'Extracting layout, fonts & vector structures...');
 
-    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const baseUrl = environment.apiBaseUrl || '/api/v1';
     const response = await fetch(`${baseUrl}/pdf-to-word/convert`, {
       method: 'POST',
       body: formData

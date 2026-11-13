@@ -131,7 +131,7 @@ export class PowerPointToPdfService {
 
     onProgress?.(35, 'Converting presentation slides in secure sandbox...');
 
-    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const baseUrl = environment.apiBaseUrl || '/api/v1';
     const apiUrl = `${baseUrl}/powerpoint-to-pdf/convert`;
     const response = await fetch(apiUrl, {
       method: 'POST',

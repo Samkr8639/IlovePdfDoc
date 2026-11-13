@@ -460,7 +460,7 @@ export class BrowserPdfService {
 
     // 1. Attempt high-efficiency backend API compression first
     try {
-      const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+      const baseUrl = environment.apiBaseUrl || '/api/v1';
       const formData = new FormData();
       for (const f of fileList) {
         formData.append('files', f);

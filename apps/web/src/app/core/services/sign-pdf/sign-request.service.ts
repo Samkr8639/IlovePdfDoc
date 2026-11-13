@@ -88,7 +88,7 @@ export interface CompletedFieldSubmission {
   providedIn: 'root'
 })
 export class SignRequestService {
-  private readonly baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+  private readonly baseUrl = environment.apiBaseUrl || '/api/v1';
   private csrfToken: string | null = null;
 
   async getFeatures(signal?: AbortSignal): Promise<ApiFeaturesData> {

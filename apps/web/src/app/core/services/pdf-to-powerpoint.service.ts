@@ -92,7 +92,7 @@ export class PdfToPowerPointService {
         : 'Extracting layouts, vectors, fonts & positioning slide elements...'
     );
 
-    const baseUrl = environment.apiBaseUrl || 'http://localhost:4000/api/v1';
+    const baseUrl = environment.apiBaseUrl || '/api/v1';
     const response = await fetch(`${baseUrl}/pdf-to-powerpoint/convert`, {
       method: 'POST',
       body: formData,

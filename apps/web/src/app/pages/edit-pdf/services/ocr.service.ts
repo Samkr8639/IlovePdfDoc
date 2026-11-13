@@ -30,7 +30,7 @@ export class OcrService {
   private activeJobId: string | null = null;
 
   private getBaseUrl(): string {
-    const rawBase = (environment.apiBaseUrl || 'http://localhost:4000/api/v1').replace(/\/+$/, '');
+    const rawBase = (environment.apiBaseUrl || '/api/v1').replace(/\/+$/, '');
     return rawBase.endsWith('/api/v1') ? rawBase : `${rawBase}/api/v1`;
   }
 
