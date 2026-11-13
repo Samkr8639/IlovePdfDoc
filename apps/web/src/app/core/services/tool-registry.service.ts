@@ -61,6 +61,11 @@ export class ToolRegistryService {
       return;
     }
 
+    // In production, the bundled offline TOOL_REGISTRY is complete; avoid network churn
+    if (environment.production && this.tools().length > 0) {
+      return;
+    }
+
     this.isLoading.set(true);
     this.error.set(null);
 
