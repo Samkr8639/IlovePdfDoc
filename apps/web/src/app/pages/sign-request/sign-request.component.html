@@ -1,0 +1,201 @@
+<div class="sign-request-shell">
+  @if (errorMessage()) {
+    <div class="sr-error-banner" role="alert" aria-live="assertive">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" class="sr-banner-close" (click)="errorMessage.set(null)" aria-label="Dismiss error">×</button>
+    </div>
+  }
+
+  @if (routeState() === 'loading') {
+    <div class="sr-state-card">
+      <div class="sr-spinner" aria-hidden="true"></div>
+      <h1>Opening document…</h1>
+      <p>Verifying your private signing invitation.</p>
+    </div>
+  }
+
+  @else if (routeState() === 'disabled') {
+    <div class="sr-state-card">
+      <span class="sr-badge">Coming soon</span>
+      <h1>Remote Signature Requests Are Offline</h1>
+      <p>Multi-signer invitation links are not enabled on this server yet. You can still sign any PDF locally in your browser.</p>
+      <a routerLink="/sign-pdf" class="sr-btn-primary">Sign a PDF Yourself</a>
+    </div>
+  }
+
+  @else if (routeState() === 'waiting_turn' && session(); as sess) {
+    <div class="sr-state-card">
+      <h1>Waiting for {{ sess.waitingOn || 'previous signer' }}</h1>
+      <p>{{ sess.senderName }} set sequential signing order for <strong>{{ sess.title }}</strong>. We will notify you as soon as it is your turn.</p>
+    </div>
+  }
+
+  @else if (routeState() === 'completed') {
+    <div class="sr-state-card">
+      <h1>Signature Recorded</h1>
+      <p>{{ completionMessage() }}</p>
+      @if (completionSha256()) {
+        <p class="sr-hash-note">Final SHA-256: <code>{{ completionSha256() }}</code></p>
+      }
+      <a routerLink="/" class="sr-btn-secondary">Return Home</a>
+    </div>
+  }
+
+  @else if (routeState() === 'declined') {
+    <div class="sr-state-card">
+      <h1>Document Declined</h1>
+      <p>You declined to sign this document. The sender has been notified and the request is now closed.</p>
+      <a routerLink="/" class="sr-btn-secondary">Return Home</a>
+    </div>
+  }
+
+  @else if (routeState() === 'error') {
+    <div class="sr-state-card">
+      <h1>Signing Link Unavailable</h1>
+      <p>{{ errorMessage() || 'This signing link is invalid, expired, or cancelled.' }}</p>
+      <a routerLink="/sign-pdf" class="sr-btn-primary">Go to Sign PDF</a>
+    </div>
+  }
+
+  @else if (routeState() === 'ready' && session(); as sess) {
+    <header class="sr-topbar">
+      <div class="sr-topbar-info">
+        <h1 class="sr-doc-title">{{ sess.title }}</h1>
+        <p class="sr-doc-meta">Sent by {{ sess.senderName }} · Signing as {{ sess.signer.email }}</p>
+      </div>
+      <div class="sr-progress-pill" aria-live="polite">
+        {{ completedFieldCount() }} of {{ totalFieldCount() }} fields done
+      </div>
+    </header>
+
+    <div class="sr-workspace">
+      <main class="sr-viewer-col" aria-label="Document pages">
+        <div class="sr-pages-inner">
+          @for (page of sess.pagesMeta; track page.pageIndex) {
+            <div
+              class="sr-page-frame"
+              [style.width.px]="getPageSize(page).width"
+              [style.height.px]="getPageSize(page).height">
+              <canvas [id]="'signer-page-canvas-' + page.pageIndex" class="sr-page-canvas"></canvas>
+
+              @for (field of fieldsOnPage(page.pageIndex); track field.id) {
+                @let rect = getFieldScreenRect(field, page);
+                <button
+                  type="button"
+                  class="sr-field-hotspot"
+                  [class.filled]="isFieldFilled(field)"
+                  [class.active]="activeFieldId() === field.id"
+                  [style.left.px]="rect.x"
+                  [style.top.px]="rect.y"
+                  [style.width.px]="rect.width"
+                  [style.height.px]="rect.height"
+                  (click)="activateField(field)">
+                  @if (field.imageDataUrl) {
+                    <img [src]="field.imageDataUrl" [alt]="field.type + ' value'" class="sr-field-img" />
+                  } @else if (field.type === 'checkbox') {
+                    <span>{{ field.checked ? '✓' : '☐' }}</span>
+                  } @else if (field.text) {
+                    <span>{{ field.text }}</span>
+                  } @else {
+                    <span>Click to {{ field.type }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </main>
+
+      <aside class="sr-action-panel" aria-label="Field checklist and finish">
+        <h2 class="sr-panel-heading">Your Fields</h2>
+        <p class="sr-panel-note">Accessible list &amp; quick fill controls:</p>
+
+        <ul class="sr-checklist">
+          @for (field of fields(); track field.id) {
+            <li class="sr-check-item" [class.done]="isFieldFilled(field)">
+              <div class="sr-check-row">
+                <strong>{{ field.type | titlecase }} (Page {{ field.pageIndex + 1 }})</strong>
+                <span class="sr-status-tag">{{ isFieldFilled(field) ? 'Done' : (field.required ? 'Required' : 'Optional') }}</span>
+              </div>
+
+              @if (field.type === 'signature' || field.type === 'initials' || field.type === 'stamp') {
+                <button type="button" class="sr-btn-sm" (click)="activateField(field)">
+                  {{ field.imageDataUrl ? 'Change ' + field.type : 'Add ' + field.type }}
+                </button>
+              } @else if (field.type === 'checkbox') {
+                <label class="sr-inline-check">
+                  <input type="checkbox" [ngModel]="!!field.checked" (ngModelChange)="updateField(field.id, { checked: $event })" />
+                  <span>Checked</span>
+                </label>
+              } @else {
+                <input
+                  type="text"
+                  class="sr-text-input"
+                  [ngModel]="field.text || ''"
+                  (ngModelChange)="updateField(field.id, { text: $event })"
+                  [attr.aria-label]="field.type + ' text value'" />
+              }
+            </li>
+          }
+        </ul>
+
+        <div class="sr-consent-box">
+          <label class="sr-consent-label">
+            <input type="checkbox" [ngModel]="consentGiven()" (ngModelChange)="consentGiven.set($event)" />
+            <span>
+              I agree to sign electronically under the
+              <a routerLink="/terms-and-conditions" target="_blank">Terms &amp; Conditions</a>
+              and acknowledge the
+              <a routerLink="/privacy-policy" target="_blank">Privacy Policy</a>.
+            </span>
+          </label>
+        </div>
+
+        <div class="sr-cta-stack">
+          <button
+            type="button"
+            class="sr-btn-primary"
+            [disabled]="!canFinish()"
+            (click)="finishSigning()">
+            {{ isSubmitting() ? 'Submitting…' : 'Finish Signing' }}
+          </button>
+          <button
+            type="button"
+            class="sr-btn-ghost"
+            [disabled]="isSubmitting()"
+            (click)="showDeclineModal.set(true)">
+            Decline to sign
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+
+  @if (showSignatureDialogForFieldId()) {
+    <app-sign-signature-dialog
+      [kind]="'signature'"
+      [initialName]="session()?.signer?.name || ''"
+      (applied)="onDialogApplied($event)"
+      (cancelled)="showSignatureDialogForFieldId.set(null)" />
+  }
+
+  @if (showDeclineModal()) {
+    <div class="sr-modal-backdrop" role="presentation">
+      <div class="sr-modal-card" role="dialog" aria-modal="true" aria-labelledby="decline-title">
+        <h2 id="decline-title">Decline Signature Request</h2>
+        <p>Optional reason shared with {{ session()?.senderName }}:</p>
+        <textarea
+          rows="3"
+          class="sr-text-input"
+          [ngModel]="declineReason()"
+          (ngModelChange)="declineReason.set($event)"
+          placeholder="Enter reason (optional)"></textarea>
+        <div class="sr-modal-actions">
+          <button type="button" class="sr-btn-secondary" (click)="showDeclineModal.set(false)">Cancel</button>
+          <button type="button" class="sr-btn-primary" (click)="confirmDecline()">Confirm Decline</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

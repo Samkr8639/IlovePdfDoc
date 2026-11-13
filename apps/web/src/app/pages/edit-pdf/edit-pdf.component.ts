@@ -24,6 +24,7 @@ import {
   EditPdfOcrResult,
   EditPdfOcrLine
 } from '@paperflow/contracts';
+import { repairMojibakeFilename } from '@paperflow/sign-core';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { UploadConsentService } from '../../core/services/upload-consent.service';
@@ -162,6 +163,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   readonly viewMode = signal<EditorViewMode>('upload');
   readonly currentPdfBytes = signal<Uint8Array | null>(null);
   readonly currentFileName = signal<string>('document.pdf');
+  readonly displayFileName = computed(() => repairMojibakeFilename(this.currentFileName()));
   readonly pages = signal<PageDimensions[]>([]);
   readonly currentPageIndex = signal<number>(0);
   readonly zoom = signal<number>(0.85);
@@ -328,6 +330,7 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.ocrService.cancel();
+    this.pdfRendering.cancelAll();
   }
 
   // --- PDF Loading ---
@@ -371,6 +374,12 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     this.currentFileName.set(fileName);
     this.pages.set(pageList);
     this.currentPageIndex.set(0);
+    const firstPg = pageList[0];
+    if (firstPg) {
+      this.zoom.set(
+        this.viewportNav.computeFitWidthZoom(this.transform.getPageDisplaySize(firstPg, 1.0).width)
+      );
+    }
     this.elements.set([]);
     this.history.clear();
     this.viewMode.set('editor');
@@ -521,36 +530,44 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
+  private isScrollTicking = false;
+
   onViewportScroll(): void {
-    if (this.isUserScrollingToPage) return;
+    if (this.isUserScrollingToPage || this.isScrollTicking) return;
+    this.isScrollTicking = true;
 
-    const vp = this.canvasViewportRef?.nativeElement;
-    if (!vp) return;
+    requestAnimationFrame(() => {
+      this.isScrollTicking = false;
+      if (this.isUserScrollingToPage) return;
 
-    const vpRect = vp.getBoundingClientRect();
-    const vpCenterY = vpRect.top + vpRect.height / 2;
+      const vp = this.canvasViewportRef?.nativeElement;
+      if (!vp) return;
 
-    let closestPageIndex = 0;
-    let minDistance = Infinity;
+      const vpRect = vp.getBoundingClientRect();
+      const vpCenterY = vpRect.top + vpRect.height / 2;
 
-    for (let i = 0; i < this.pages().length; i++) {
-      const pageEl = document.getElementById(`pdf-page-${i}`);
-      if (!pageEl) continue;
+      let closestPageIndex = 0;
+      let minDistance = Infinity;
 
-      const pageRect = pageEl.getBoundingClientRect();
-      const pageCenterY = pageRect.top + pageRect.height / 2;
-      const dist = Math.abs(pageCenterY - vpCenterY);
+      for (let i = 0; i < this.pages().length; i++) {
+        const pageEl = document.getElementById(`pdf-page-${i}`);
+        if (!pageEl) continue;
 
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestPageIndex = i;
+        const pageRect = pageEl.getBoundingClientRect();
+        const pageCenterY = pageRect.top + pageRect.height / 2;
+        const dist = Math.abs(pageCenterY - vpCenterY);
+
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestPageIndex = i;
+        }
       }
-    }
 
-    if (closestPageIndex !== this.currentPageIndex()) {
-      this.currentPageIndex.set(closestPageIndex);
-      this.scrollActiveThumbnailIntoView(closestPageIndex);
-    }
+      if (closestPageIndex !== this.currentPageIndex()) {
+        this.currentPageIndex.set(closestPageIndex);
+        this.scrollActiveThumbnailIntoView(closestPageIndex);
+      }
+    });
   }
 
   scrollToPage(index: number): void {
@@ -776,8 +793,25 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   resetZoom(): void {
-    this.zoom.set(this.viewportNav.resetZoom());
+    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+    const widthAt100 = active ? this.transform.getPageDisplaySize(active, 1.0).width : undefined;
+    this.zoom.set(this.viewportNav.resetZoom(widthAt100));
     setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.viewMode() !== 'editor' || typeof window === 'undefined') return;
+    const active = this.pages()[this.currentPageIndex()] || this.pages()[0];
+    if (!active) return;
+    const widthAt100 = this.transform.getPageDisplaySize(active, 1.0).width;
+    if (window.innerWidth <= 768) {
+      const fit = this.viewportNav.computeFitWidthZoom(widthAt100, window.innerWidth);
+      if (this.zoom() * widthAt100 > window.innerWidth - 20) {
+        this.zoom.set(fit);
+        setTimeout(() => this.renderCurrentPageToCanvas(), 20);
+      }
+    }
   }
 
   rotatePage(pageIndex: number): void {
@@ -1199,7 +1233,22 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-    canDeactivate(): boolean {
+  changeFile(): void {
+    if (this.elements().length > 0 && this.viewMode() === 'editor') {
+      const ok = window.confirm('You have unsaved edits in your document. Are you sure you want to change file?');
+      if (!ok) return;
+    }
+    this.elements.set([]);
+    this.history.clear();
+    this.selectedElementId.set(null);
+    this.currentPdfBytes.set(null);
+    this.currentFileName.set('document.pdf');
+    this.pages.set([]);
+    this.viewMode.set('upload');
+    this.layoutService.showFooter();
+  }
+
+  canDeactivate(): boolean {
     if (this.elements().length > 0 && this.viewMode() === 'editor') {
       return window.confirm('You have unsaved edits in your document. Are you sure you want to leave?');
     }
@@ -1216,6 +1265,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
 
   @HostListener('window:mousemove', ['$event'])
   onWindowMouseMove(event: MouseEvent): void {
+    if (!this.isHighlighting && !this.isDraggingElement && !this.isResizingElement && !this.isRotatingElement) {
+      return;
+    }
     if (this.isHighlighting) {
       this.moveHighlightDrag(event.clientX, event.clientY);
       return;

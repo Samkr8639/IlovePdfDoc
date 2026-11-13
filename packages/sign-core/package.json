@@ -1,0 +1,20 @@
+{
+  "name": "@paperflow/sign-core",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@paperflow/contracts": "*",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1",
+    "regenerator-runtime": "^0.14.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
+

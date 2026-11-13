@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
@@ -9,6 +9,8 @@ import { ToolDefinition } from '@paperflow/contracts';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
+import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -22,11 +24,12 @@ export interface CustomSplitRange {
   selector: 'app-tool-placeholder',
   standalone: true,
   imports: [
-    RouterLink,
     FormsModule,
     DropzoneComponent,
     ProcessingStateComponent,
-    ResultViewComponent
+    ResultViewComponent,
+    ExploreMoreToolsComponent,
+    PtAdSlotComponent
   ],
   templateUrl: './tool-placeholder.component.html',
   styleUrl: './tool-placeholder.component.css'
@@ -367,6 +370,12 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
     return Math.max(1, count);
   });
 
+  calculatedFixedCount = computed<number>(() => {
+    const pages = this.selectedFiles()[0]?.pageCount || 1;
+    const fixed = Math.max(1, this.splitFixedCount() || 1);
+    return Math.ceil(pages / fixed);
+  });
+
   // Features list
   featuresList = computed(() => {
     const t = this.tool();
@@ -382,22 +391,22 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         {
           title: '100% In-Browser Privacy',
           description: 'Your sensitive contracts and financial PDFs never leave your device. All compression runs client-side.',
-          bgColor: '#eff6ff',
-          iconColor: '#2563eb',
+          bgColor: '#ecfdf5',
+          iconColor: '#059669',
           iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'
         },
         {
           title: 'Preserved Visual Clarity',
           description: 'Text sharpness, hyperlinks, bookmarks, and structural layout remain crisp and clear.',
-          bgColor: '#f5f3ff',
-          iconColor: '#7c3aed',
+          bgColor: '#ecfdf5',
+          iconColor: '#059669',
           iconPath: 'M5 13l4 4L19 7'
         },
         {
           title: 'Unlimited & Free',
           description: 'Compress as many documents as you need without watermarks, subscriptions, or file size limits.',
-          bgColor: '#fef2f2',
-          iconColor: '#dc2626',
+          bgColor: '#ecfdf5',
+          iconColor: '#059669',
           iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
         }
       ];
@@ -408,15 +417,15 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         {
           title: 'Precise Page Extraction',
           description: 'Specify single page numbers, custom ranges (e.g. 1-4, 7), or split every single page into separate files.',
-          bgColor: '#fef2f2',
-          iconColor: '#dc2626',
+          bgColor: '#ecfdf5',
+          iconColor: '#059669',
           iconPath: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'
         },
         {
           title: '100% In-Browser Privacy',
           description: 'Zero data transfer across the internet. Operates strictly in device memory using WebAssembly.',
-          bgColor: '#eff6ff',
-          iconColor: '#2563eb',
+          bgColor: '#ecfdf5',
+          iconColor: '#059669',
           iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'
         },
         {
@@ -429,8 +438,8 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         {
           title: 'Instant Single Click Download',
           description: 'Get your split documents immediately with zero queue or cloud rendering delays.',
-          bgColor: '#f5f3ff',
-          iconColor: '#7c3aed',
+          bgColor: '#ecfdf5',
+          iconColor: '#059669',
           iconPath: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
         }
       ];
@@ -441,8 +450,8 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
       {
         title: '100% In-Browser Privacy',
         description: 'Your documents never touch a third-party server. Everything executes locally with zero data transfer.',
-        bgColor: '#eff6ff',
-        iconColor: '#2563eb',
+        bgColor: '#ecfdf5',
+        iconColor: '#059669',
         iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'
       },
       {
@@ -455,15 +464,15 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
       {
         title: 'High-Performance Engine',
         description: 'Powered by modern WebAssembly and native web streams for instantaneous document processing.',
-        bgColor: '#f5f3ff',
-        iconColor: '#7c3aed',
+        bgColor: '#ecfdf5',
+        iconColor: '#059669',
         iconPath: 'M13 10V3L4 14h7v7l9-11h-7z'
       },
       {
         title: 'Free & Unlimited',
         description: 'Enjoy limitless file operations with zero hidden fees, watermark stamps, or account barriers.',
-        bgColor: '#fef2f2',
-        iconColor: '#dc2626',
+        bgColor: '#ecfdf5',
+        iconColor: '#059669',
         iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
       }
     ];
@@ -760,7 +769,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         const isPagesTab = this.splitMainTab() === 'pages';
         const isCustomRange = !isPagesTab && this.splitRangeMode() === 'custom';
         const isFixedRange = !isPagesTab && this.splitRangeMode() === 'fixed';
-        const mergeOutput = this.mergeExtractedPages();
+        const mergeOutput = isPagesTab ? this.mergeExtractedPages() : false;
 
         let options: any = { mergeOutput };
 

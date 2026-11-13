@@ -7,50 +7,13 @@ import { Component, input, output } from '@angular/core';
     <div class="top-toolbar-strip">
       <div class="top-toolbar-inner">
 
-        <!-- Mode Toggle (Annotate / Edit Text) — sliding-pill style -->
-        <div class="workspace-mode-capsule" role="tablist" aria-label="Editor modes"
-          [class.is-transitioning]="isExtractingPageText()">
-          <!-- Sliding background indicator: moves left (annotate) or right (edit) -->
-          <div class="mode-slider-thumb" [class.at-edit]="editorMode() === 'edit'"
-            [class.is-loading]="isExtractingPageText()" aria-hidden="true"></div>
-
-          <button type="button" class="mode-pill-tab" [class.active]="editorMode() === 'annotate'"
-            [disabled]="isExtractingPageText()" (click)="modeChange.emit('annotate')" role="tab"
-            [attr.aria-selected]="editorMode() === 'annotate'">
-            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-            </svg>
-            <span>Annotate</span>
-          </button>
-
-          <button type="button" class="mode-pill-tab edit-mode-tab" [class.active]="editorMode() === 'edit'"
-            [disabled]="isExtractingPageText()" (click)="modeChange.emit('edit')" role="tab"
-            [attr.aria-selected]="editorMode() === 'edit'" title="Edit existing document text in-place">
-            @if (isExtractingPageText()) {
-            <svg class="mode-spinner-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-              <path
-                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-            } @else {
-            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="4 7 4 4 20 4 20 7" />
-              <line x1="9" y1="20" x2="15" y2="20" />
-              <line x1="12" y1="4" x2="12" y2="20" />
-            </svg>
-            }
-            <span>Edit Text</span>
-            @if (!isExtractingPageText()) {
-            <span class="mode-pill-star" aria-hidden="true">★</span>
-            }
-          </button>
+        <!-- Document Info Pill -->
+        <div class="toolbar-doc-pill">
+          <span class="doc-name-chip" [title]="fileName()">{{ fileName() }}</span>
+          <span class="doc-pages-chip">{{ pageCount() }} {{ pageCount() === 1 ? 'page' : 'pages' }}</span>
         </div>
 
-        <!-- Divider between mode toggle and undo/redo -->
-        <div class="toolbar-section-divider" aria-hidden="true"></div>
+        <div class="toolbar-divider" aria-hidden="true"></div>
 
         <!-- History: Undo / Redo -->
         <div class="history-capsule">
@@ -75,11 +38,62 @@ import { Component, input, output } from '@angular/core';
           </button>
         </div>
 
+        <div class="toolbar-divider" aria-hidden="true"></div>
+
+        <!-- Mode Toggle (Annotate / Edit Text) — sliding-pill style -->
+        <div class="workspace-mode-capsule" role="tablist" aria-label="Editor modes"
+          [class.is-transitioning]="isExtractingPageText()">
+          <!-- Sliding background indicator: moves left (annotate) or right (edit) -->
+          <div class="mode-slider-thumb" [class.at-edit]="editorMode() === 'edit'"
+            [class.is-loading]="isExtractingPageText()" aria-hidden="true"></div>
+
+          <button type="button" class="mode-pill-tab" [class.active]="editorMode() === 'annotate'"
+            [disabled]="isExtractingPageText()" (click)="modeChange.emit('annotate')" role="tab"
+            [attr.aria-selected]="editorMode() === 'annotate'" title="Annotate" aria-label="Annotate">
+            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+            <span>Annotate</span>
+          </button>
+
+          <button type="button" class="mode-pill-tab edit-mode-tab" [class.active]="editorMode() === 'edit'"
+            [disabled]="isExtractingPageText()" (click)="modeChange.emit('edit')" role="tab"
+            [attr.aria-selected]="editorMode() === 'edit'" title="Edit Text" aria-label="Edit Text">
+            @if (isExtractingPageText()) {
+            <svg class="mode-spinner-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <path
+                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+            } @else {
+            <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 7 4 4 20 4 20 7" />
+              <line x1="9" y1="20" x2="15" y2="20" />
+              <line x1="12" y1="4" x2="12" y2="20" />
+            </svg>
+            }
+            <span>Edit Text</span>
+            @if (!isExtractingPageText()) {
+            <span class="mode-pill-star" aria-hidden="true">★</span>
+            }
+          </button>
+        </div>
+
+        <!-- Change file on the far right -->
+        <button type="button" class="btn-replace-doc" (click)="changeFile.emit()" title="Change PDF document">
+          Change file
+        </button>
+
       </div>
     </div>
   `
 })
 export class EditPdfTopNavComponent {
+  readonly fileName = input<string>('document.pdf');
+  readonly pageCount = input<number>(1);
   readonly editorMode = input.required<'annotate' | 'edit'>();
   readonly isExtractingPageText = input<boolean>(false);
   readonly canUndo = input<boolean>(false);
@@ -88,5 +102,6 @@ export class EditPdfTopNavComponent {
   readonly modeChange = output<'annotate' | 'edit'>();
   readonly undo = output<void>();
   readonly redo = output<void>();
+  readonly changeFile = output<void>();
 }
 

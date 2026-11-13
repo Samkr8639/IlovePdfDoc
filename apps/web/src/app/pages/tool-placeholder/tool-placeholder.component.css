@@ -10,82 +10,6 @@
       overflow-x: hidden;
     }
 
-    .tool-page .container {
-      width: 100%;
-      max-width: 1720px;
-      margin: 0 auto;
-      padding: 0 48px;
-    }
-
-    @media (max-width: 1024px) {
-      .tool-page .container {
-        padding: 0 24px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .tool-page .container {
-        padding: 0 16px;
-      }
-    }
-
-    /* UPLOAD HERO SECTION */
-    .unified-hero-section {
-      padding: 52px 0 32px;
-      text-align: center;
-      background: #f4f5f8;
-    }
-    .hero-content {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .hero-trust-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      border-radius: 9999px;
-      background: #E6F4F1;
-      border: 1px solid rgba(15, 118, 110, 0.22);
-      color: #0F766E;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.06);
-    }
-    .trust-badge-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #0F766E;
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
-    }
-    .tool-h1 {
-      font-size: clamp(34px, 4.2vw, 50px);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: #0f172a;
-      margin: 0 0 12px;
-      line-height: 1.15;
-    }
-    .tool-lead {
-      font-size: 17.5px;
-      color: #475569;
-      line-height: 1.55;
-      margin: 0 auto 36px;
-      max-width: 720px;
-    }
-    .hero-dropzone-wrap {
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
     /* ERROR BANNER */
     .error-banner {
       width: 100%;
@@ -109,254 +33,6 @@
       color: #b91c1c;
       cursor: pointer;
       font-size: 16px;
-    }
-
-    /* ADSENSE SLOT */
-    .adsense-section {
-      padding: 16px 0 36px;
-      background: #f4f5f8;
-    }
-    .adsense-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-    .adsense-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #94a3b8;
-      font-weight: 600;
-    }
-    .adsense-slot {
-      width: 100%;
-      max-width: 728px;
-      height: 90px;
-      background: #ffffff;
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .adsense-placeholder-content {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #94a3b8;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    /* FEATURES GRID */
-    .features-section {
-      padding: 64px 0;
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .section-heading {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .section-title {
-      font-size: clamp(26px, 3.2vw, 34px);
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -0.02em;
-      margin: 0 0 10px;
-    }
-    .section-subtitle {
-      font-size: 16px;
-      color: #475569;
-      margin: 0;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 28px;
-    }
-    .feature-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 32px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      transition: all 0.25s ease;
-    }
-    .feature-card:hover {
-      background: #ffffff;
-      border-color: #cbd5e1;
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.06);
-    }
-    .feature-icon-badge {
-      width: 52px;
-      height: 52px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .feature-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 0 0 8px;
-    }
-    .feature-desc {
-      font-size: 14.5px;
-      color: #475569;
-      line-height: 1.55;
-      margin: 0;
-    }
-
-    /* 3-STEP GUIDE */
-    .seo-guide-section {
-      padding: 64px 0;
-      background: #f4f5f8;
-    }
-    .guide-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .guide-title {
-      font-size: clamp(26px, 3.2vw, 34px);
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -0.02em;
-      margin: 0 0 10px;
-    }
-    .guide-lead {
-      font-size: 16px;
-      color: #475569;
-      margin: 0;
-    }
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-bottom: 64px;
-    }
-    .step-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 32px 24px;
-      position: relative;
-    }
-    .step-num {
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--pt-teal-700, #0F766E);
-      opacity: 0.9;
-      margin-bottom: 14px;
-      font-family: var(--pt-font-heading);
-    }
-    .step-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 0 0 8px;
-    }
-    .step-desc {
-      font-size: 14.5px;
-      color: #475569;
-      line-height: 1.55;
-      margin: 0;
-    }
-
-    /* TOOL FAQS */
-    .tool-faqs {
-      margin-bottom: 64px;
-    }
-    .tool-faqs-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: #0f172a;
-      text-align: center;
-      margin: 0 0 28px;
-    }
-    .tool-faqs-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
-      gap: 16px;
-    }
-    .faq-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 24px;
-    }
-    .faq-q {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 0 0 8px;
-    }
-    .faq-a {
-      font-size: 14.5px;
-      color: #475569;
-      line-height: 1.55;
-      margin: 0;
-    }
-
-    /* RELATED TOOLS */
-    .related-tools-box {
-      border-top: 1px solid #e2e8f0;
-      padding-top: 48px;
-    }
-    .related-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #0f172a;
-      text-align: center;
-      margin: 0 0 28px;
-    }
-    .related-tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-    .related-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .related-card:hover {
-      border-color: var(--pt-teal-100, #CCEBE6);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px -2px rgba(15, 118, 110, 0.1);
-    }
-    .related-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .related-info h4 {
-      font-size: 15px;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 0 0 3px;
-    }
-    .related-info p {
-      font-size: 12.5px;
-      color: #475569;
-      margin: 0;
     }
 
     /* ORGANIZE / CONFIGURE WORKSPACE */
@@ -1388,13 +1064,6 @@
     /* ===================================================================
        RESPONSIVE LAYOUT & MOBILE DRAWER
        =================================================================== */
-    @media (max-width: 1024px) {
-      .steps-grid,
-      .tool-faqs-list {
-        grid-template-columns: 1fr;
-      }
-    }
-
     /* ===================================================================
        MOBILE GEAR ICON BUTTON
        =================================================================== */
@@ -1501,8 +1170,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        position: absolute;
-        top: 16px;
+        position: fixed;
+        top: auto;
+        bottom: 84px;
         right: 16px;
         width: 46px;
         height: 46px;
@@ -1557,7 +1227,11 @@
       .sidebar-action-panel {
         width: 85vw;
         max-width: 360px;
+        height: auto;
         height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
+        max-height: calc(100vh - 60px);
+        max-height: calc(100dvh - 60px);
         position: fixed;
         top: 60px;
         right: 0;
@@ -1572,6 +1246,9 @@
         flex-direction: column;
         justify-content: space-between;
         overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
       .sidebar-action-panel.panel-open {
         transform: translateX(0);
@@ -1608,6 +1285,7 @@
         display: flex;
         flex-direction: column;
         gap: 18px;
+        flex: 1 1 auto;
       }
 
       .sidebar-heading,
@@ -1620,7 +1298,9 @@
         position: sticky;
         bottom: 0;
         background: #ffffff;
-        padding: 16px 18px 24px;
+        padding: 16px 18px max(20px, env(safe-area-inset-bottom));
+        flex-shrink: 0;
+        border-top: 1px solid #e2e8f0;
       }
     }
 

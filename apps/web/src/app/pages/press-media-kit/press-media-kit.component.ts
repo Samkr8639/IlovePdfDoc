@@ -98,9 +98,9 @@ export class PressMediaKitComponent implements OnInit {
     {
       name: 'Amber Highlight',
       role: 'Status badges, live indicators, and special highlights',
-      hex: '#D98E04',
-      rgb: 'rgb(217, 142, 4)',
-      cmyk: 'C:0 M:35 Y:98 K:15',
+      hex: '#D97706',
+      rgb: 'rgb(217, 119, 6)',
+      cmyk: 'C:0 M:45 Y:97 K:15',
       isDarkText: false
     }
   ];

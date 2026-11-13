@@ -235,6 +235,24 @@
         "to",
         "pdf"
       ]
+    },
+    {
+      "identifier": "urn:air:pdftailor:tools:sign-pdf",
+      "displayName": "Sign PDF",
+      "type": "application/mcp-server-card+json",
+      "description": "Sign yourself or request electronic signatures from others.",
+      "url": "https://pdftailor.com/sign-pdf",
+      "representativeQueries": [
+        "sign pdf online",
+        "how to sign pdf",
+        "free sign pdf tool"
+      ],
+      "tags": [
+        "pdf",
+        "security",
+        "sign",
+        "pdf"
+      ]
     }
   ]
 }

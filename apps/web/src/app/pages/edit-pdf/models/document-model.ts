@@ -15,6 +15,9 @@ export interface PageDimensions {
   widthPt: number;
   heightPt: number;
   rotation: number; // 0, 90, 180, 270
+  cropBoxXPt?: number;
+  cropBoxYPt?: number;
+  userUnit?: number;
 }
 
 export type ElementType =

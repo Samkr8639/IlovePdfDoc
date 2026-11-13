@@ -454,21 +454,73 @@
    Sits in the normal flow above the workspace row. Never overlaps the PDF
    canvas or side panels. Centered pill controls sit naturally at the top.     */
 .top-toolbar-strip {
-  flex-shrink: 0;
+  height: 52px;
+  background: var(--pt-surface-white);
+  border-bottom: 1px solid var(--pt-soft-outline);
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--pt-soft-outline);
-  background: var(--pt-surface-white);
   z-index: 20;
-  min-height: 52px;
+  flex-shrink: 0;
 }
 
 .top-toolbar-inner {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 12px;
+  width: 100%;
+}
+
+.toolbar-doc-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.doc-name-chip {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--pt-navy);
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-pages-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--pt-radius-pill);
+  background: var(--pt-subtle-bg-alt);
+  color: var(--pt-muted);
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--pt-soft-outline);
+  flex-shrink: 0;
+}
+
+.btn-replace-doc {
+  margin-left: auto;
+  border: 1px solid var(--pt-outline);
+  background: var(--pt-surface-white);
+  color: var(--pt-navy);
+  border-radius: var(--pt-radius-sm);
+  padding: 5px 12px;
+  font-family: var(--pt-font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-replace-doc:hover {
+  border-color: var(--pt-teal-700);
+  color: var(--pt-teal-700);
 }
 
 /* Thin vertical divider between mode toggle and undo/redo */
@@ -1445,6 +1497,8 @@
   gap: 0.25rem;
   font-size: 0.8125rem;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .page-number-input {
@@ -1461,6 +1515,8 @@
 
 .page-total {
   opacity: 0.75;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .bar-divider {
@@ -1513,6 +1569,8 @@
   margin: 0;
 }
 
+.mobile-gear-btn,
+.mobile-panel-backdrop,
 .mobile-close-btn {
   display: none;
   background: transparent;
@@ -2656,25 +2714,90 @@
     display: none;
   }
 
+  .mobile-gear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: auto;
+    bottom: 84px;
+    right: 16px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pt-soft-outline);
+    background: var(--pt-surface-white);
+    color: var(--pt-teal-700);
+    box-shadow: var(--pt-shadow-md);
+    z-index: 65;
+    cursor: pointer;
+  }
+
+  .mobile-panel-backdrop {
+    display: block;
+    position: fixed;
+    inset: 60px 0 0 0;
+    background: rgba(13, 22, 41, 0.45);
+    z-index: 68;
+  }
+
   .right-properties-sidebar {
     position: fixed;
     right: 0;
-    top: var(--header-height-mobile, 56px);
+    top: 60px;
     bottom: 0;
-    width: 100%;
-    max-width: 340px;
+    height: auto;
+    height: calc(100vh - 60px);
+    height: calc(100dvh - 60px);
+    max-height: calc(100vh - 60px);
+    max-height: calc(100dvh - 60px);
+    width: 88vw;
+    max-width: 360px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     transform: translateX(100%);
-    transition: transform 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: var(--pt-shadow-float);
-    z-index: 50;
+    z-index: 70;
   }
 
   .right-properties-sidebar.mobile-open {
     transform: translateX(0);
   }
 
+  .sidebar-header {
+    flex-shrink: 0;
+  }
+
+  .properties-section {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .sidebar-footer-area {
+    flex-shrink: 0;
+    padding: 12px 16px max(14px, env(safe-area-inset-bottom));
+  }
+
   .mobile-close-btn {
     display: block;
+  }
+
+  .canvas-viewport {
+    padding: 16px 12px 100px;
+  }
+
+  .bottom-floating-bar {
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    gap: 4px;
+    bottom: 14px;
   }
 }
 
@@ -2727,7 +2850,8 @@
   align-items: center;
   gap: 24px;
   margin: 0 auto;
-  min-width: min-content;
+  width: max-content;
+  min-width: 100%;
 }
 
 .paper-canvas-container {
@@ -2795,4 +2919,106 @@
 .canvas-elements-overlay.no-select-tool .canvas-element {
   pointer-events: none !important;
   cursor: default !important;
+}
+
+/* ===================================================================
+   EDIT PDF MOBILE RESPONSIVE RULES (≤ 768px and ≤ 480px)
+   =================================================================== */
+@media (max-width: 768px) {
+  /* Top Navigation Toolbar */
+  .top-toolbar-strip {
+    height: 48px;
+    padding: 0 10px;
+  }
+
+  .top-toolbar-inner {
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .toolbar-doc-pill {
+    display: none !important;
+  }
+
+  .doc-pages-chip,
+  .toolbar-divider,
+  .mode-pill-star {
+    display: none !important;
+  }
+
+  .history-capsule {
+    padding: 2px;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .history-btn {
+    padding: 5px 7px;
+  }
+
+  .history-btn span {
+    display: none !important;
+  }
+
+  .workspace-mode-capsule {
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .mode-pill-tab {
+    padding: 4px 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .btn-replace-doc {
+    margin-left: 0;
+    padding: 4px 8px;
+    font-size: 11.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Center Canvas Viewport */
+  .canvas-viewport {
+    padding: 14px 8px 100px 8px !important;
+  }
+
+  .pages-vertical-stack {
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .paper-canvas-container {
+    max-width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Hide intrusive Page 1 corner badge on mobile */
+  .page-corner-indicator {
+    display: none !important;
+  }
+
+  .bottom-floating-bar {
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    gap: 4px;
+    bottom: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-pill-tab span {
+    display: none !important;
+  }
+
+  .mode-pill-tab {
+    padding: 5px 8px;
+  }
+
+  .btn-replace-doc {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
 }

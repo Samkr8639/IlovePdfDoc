@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { PDFDocument, PDFName } from 'pdf-lib';
-import JSZip from 'jszip';
+import type { PDFDocument, PDFName } from 'pdf-lib';
+import type JSZip from 'jszip';
 import { PdfDocumentAnalysis, PdfPageAnalysis } from '@paperflow/contracts';
 import { SplitRangeParser, PageRange } from '../utils/split-range-parser';
 import { environment } from '../../../environments/environment';
@@ -82,6 +82,14 @@ export interface CompressPdfResult extends MergeResult {
   providedIn: 'root'
 })
 export class BrowserPdfService {
+  private async getPdfLib() {
+    return await import('pdf-lib');
+  }
+
+  private async getJSZip(): Promise<typeof import('jszip')> {
+    const mod = await import('jszip');
+    return (mod as any).default || mod;
+  }
 
   formatBytes(bytes: number, decimals = 1): string {
     if (bytes === 0) return '0 B';
@@ -129,6 +137,7 @@ export class BrowserPdfService {
       }
 
       // Load document to count pages
+      const { PDFDocument } = await this.getPdfLib();
       const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const pageCount = pdfDoc.getPageCount();
 
@@ -154,6 +163,7 @@ export class BrowserPdfService {
   async analyzePdf(file: File): Promise<PdfDocumentAnalysis> {
     try {
       const buffer = await file.arrayBuffer();
+      const { PDFDocument, PDFName } = await this.getPdfLib();
       const doc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const totalPages = doc.getPageCount();
 
@@ -219,6 +229,7 @@ export class BrowserPdfService {
     }
 
     onProgress?.(5, 'Initializing PDF engine in browser...');
+    const { PDFDocument } = await this.getPdfLib();
     const mergedDoc = await PDFDocument.create();
     let totalPages = 0;
 
@@ -272,6 +283,7 @@ export class BrowserPdfService {
   ): Promise<SplitPdfResult> {
     onProgress?.(10, 'Loading PDF document into memory...');
     const arrayBuffer = await file.arrayBuffer();
+    const { PDFDocument } = await this.getPdfLib();
     const sourceDoc = await PDFDocument.load(arrayBuffer);
     const totalPages = sourceDoc.getPageCount();
 
@@ -357,7 +369,8 @@ export class BrowserPdfService {
 
     // 3. Scenario B: Multiple output PDFs packaged into a ZIP archive
     onProgress?.(40, `Generating ${targetChunks.length} separate PDF files...`);
-    const zip = new JSZip();
+    const JSZipClass = await this.getJSZip();
+    const zip = new JSZipClass();
     const outputFiles: SplitPdfOutputFile[] = [];
 
     for (let i = 0; i < targetChunks.length; i++) {
@@ -447,7 +460,8 @@ export class BrowserPdfService {
       onProgress?.(30, `Optimizing raster streams and document layout (${level})...`);
       const response = await fetch(`${baseUrl}/compress`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: AbortSignal.timeout(3000)
       });
 
       if (response.ok) {
@@ -533,6 +547,7 @@ export class BrowserPdfService {
         throw new Error(`Only valid PDF files are supported. '${file.name}' is not a valid PDF.`);
       }
 
+      const { PDFDocument } = await this.getPdfLib();
       let pdfDoc: PDFDocument;
       try {
         pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: false });
@@ -556,6 +571,16 @@ export class BrowserPdfService {
 
       totalPagesCount += pagesInDoc;
 
+      // 1. Optimize embedded raster images (photos, scans, screenshots) in the browser
+      let imagesOptimized = 0;
+      try {
+        imagesOptimized = await this.optimizePdfImagesInBrowser(pdfDoc, level, (msg) => {
+          onProgress?.(startPct + 10, msg);
+        });
+      } catch (e) {
+        console.warn('Image optimization skipped or unsupported:', e);
+      }
+
       let compressedBytes: Uint8Array;
       if (level === 'extreme') {
         // Extreme: strip metadata, enable object streams, compress stream dictionaries
@@ -569,8 +594,18 @@ export class BrowserPdfService {
           useObjectStreams: true,
           objectsPerTick: 50
         });
+      } else if (level === 'recommended') {
+        pdfDoc.setTitle('');
+        pdfDoc.setAuthor('');
+        pdfDoc.setSubject('');
+        pdfDoc.setKeywords([]);
+        pdfDoc.setProducer('');
+        pdfDoc.setCreator('');
+        compressedBytes = await pdfDoc.save({
+          useObjectStreams: true
+        });
       } else {
-        // Recommended / Less: standard object stream packing
+        // Less: standard object stream packing
         compressedBytes = await pdfDoc.save({
           useObjectStreams: true
         });
@@ -581,10 +616,14 @@ export class BrowserPdfService {
 
       // Safety rule: never return a file larger than the original
       let savingsReason = 'Optimization applied to document streams.';
-      if (compBytes >= origBytes) {
+      if (imagesOptimized > 0) {
+        savingsReason = `Successfully compressed ${imagesOptimized} embedded image${imagesOptimized > 1 ? 's' : ''} and optimized document streams.`;
+      } else if (compBytes < origBytes) {
+        savingsReason = 'Optimized document structure, fonts, and object streams.';
+      } else {
         compressedBytes = new Uint8Array(arrayBuffer);
         compBytes = origBytes;
-        savingsReason = 'This PDF is mostly text and already well optimised.';
+        savingsReason = 'This document already has optimal stream compression.';
       }
 
       const spaceSaved = Math.max(0, origBytes - compBytes);
@@ -654,7 +693,8 @@ export class BrowserPdfService {
 
     // Multiple files packaged into a ZIP archive
     onProgress?.(90, 'Packaging all compressed documents into ZIP archive...');
-    const zip = new JSZip();
+    const JSZipClass = await this.getJSZip();
+    const zip = new JSZipClass();
     for (const item of items) {
       zip.file(item.filename, item.blob);
     }
@@ -691,5 +731,238 @@ export class BrowserPdfService {
       items,
       savingsReason: items[0]?.savingsReason
     };
+  }
+
+  /**
+   * Optimizes embedded raster images (JPEG/PNG/Flate) directly within the client-side PDF document.
+   * Recompresses images based on the user's selected compression level.
+   */
+  private async optimizePdfImagesInBrowser(
+    pdfDoc: PDFDocument,
+    level: 'extreme' | 'recommended' | 'less',
+    onProgress?: (message: string) => void
+  ): Promise<number> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 0;
+    }
+
+    const { PDFName, PDFNumber, PDFRawStream, PDFStream, PDFDict } = await this.getPdfLib();
+
+    const profile = {
+      extreme: { maxDim: 1200, quality: 0.50, minSavings: 0.03 },
+      recommended: { maxDim: 1600, quality: 0.70, minSavings: 0.04 },
+      less: { maxDim: 2048, quality: 0.85, minSavings: 0.05 }
+    }[level];
+
+    const indirectObjects = pdfDoc.context.enumerateIndirectObjects();
+    const imageObjects: Array<{ ref: any; obj: any; dict: any }> = [];
+
+    for (const [ref, obj] of indirectObjects) {
+      if (obj instanceof PDFRawStream || obj instanceof PDFStream) {
+        const dict = (obj as any).dict;
+        if (dict instanceof PDFDict) {
+          const subtype = dict.get(PDFName.of('Subtype'))?.toString();
+          if (subtype === '/Image') {
+            imageObjects.push({ ref, obj, dict });
+          }
+        }
+      }
+    }
+
+    if (imageObjects.length === 0) {
+      return 0;
+    }
+
+    let optimizedCount = 0;
+
+    for (let i = 0; i < imageObjects.length; i++) {
+      const { obj, dict } = imageObjects[i];
+      const contents = (obj as any).contents as Uint8Array;
+      if (!contents || contents.length < 2048) continue; // Skip tiny glyphs/icons < 2KB
+
+      const w = (dict.get(PDFName.of('Width')) as any)?.asNumber?.();
+      const h = (dict.get(PDFName.of('Height')) as any)?.asNumber?.();
+      const filter = dict.get(PDFName.of('Filter'))?.toString() || '';
+
+      onProgress?.(`Optimizing embedded image ${i + 1} of ${imageObjects.length}...`);
+
+      // 1. DCTDecode (JPEG Image Streams)
+      if (filter.includes('DCTDecode')) {
+        try {
+          const blob = new Blob([contents as any], { type: 'image/jpeg' });
+          let bitmap: ImageBitmap | HTMLImageElement | null = null;
+
+          if (typeof createImageBitmap === 'function') {
+            bitmap = await createImageBitmap(blob);
+          } else {
+            bitmap = await new Promise<HTMLImageElement>((resolve, reject) => {
+              const img = new Image();
+              const u = URL.createObjectURL(blob);
+              img.onload = () => { URL.revokeObjectURL(u); resolve(img); };
+              img.onerror = () => { URL.revokeObjectURL(u); reject(); };
+              img.src = u;
+            });
+          }
+
+          if (bitmap) {
+            const curW = bitmap.width || w || 800;
+            const curH = bitmap.height || h || 600;
+            let targetW = curW;
+            let targetH = curH;
+
+            if (targetW > profile.maxDim || targetH > profile.maxDim) {
+              const scale = Math.min(profile.maxDim / targetW, profile.maxDim / targetH);
+              targetW = Math.max(16, Math.round(targetW * scale));
+              targetH = Math.max(16, Math.round(targetH * scale));
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(bitmap as any, 0, 0, targetW, targetH);
+              if (typeof (bitmap as any).close === 'function') {
+                (bitmap as any).close();
+              }
+
+              const compressedBlob = await new Promise<Blob | null>((resolve) =>
+                canvas.toBlob(resolve, 'image/jpeg', profile.quality)
+              );
+
+              if (compressedBlob) {
+                const newBytes = new Uint8Array(await compressedBlob.arrayBuffer());
+                if (newBytes.length <= contents.length * (1 - profile.minSavings)) {
+                  (obj as any).contents = newBytes;
+                  dict.set(PDFName.of('Width'), PDFNumber.of(targetW));
+                  dict.set(PDFName.of('Height'), PDFNumber.of(targetH));
+                  dict.set(PDFName.of('Length'), PDFNumber.of(newBytes.length));
+                  dict.set(PDFName.of('Filter'), PDFName.of('DCTDecode'));
+                  dict.set(PDFName.of('ColorSpace'), PDFName.of('DeviceRGB'));
+                  dict.set(PDFName.of('BitsPerComponent'), PDFNumber.of(8));
+                  dict.delete(PDFName.of('DecodeParms'));
+                  optimizedCount++;
+                }
+              }
+            }
+          }
+        } catch {
+          // Gracefully continue with original image
+        }
+        continue;
+      }
+
+      // 2. FlateDecode (PNG / Deflated Raw Pixels)
+      if (filter.includes('FlateDecode') && w && h && w > 0 && h > 0) {
+        try {
+          const { unzlibSync, inflateSync } = await import('fflate');
+          let rawPixels: Uint8Array | null = null;
+          try {
+            rawPixels = unzlibSync(contents);
+          } catch {
+            try {
+              rawPixels = inflateSync(contents);
+            } catch {
+              rawPixels = null;
+            }
+          }
+
+          if (rawPixels) {
+            let canvas: HTMLCanvasElement | null = null;
+            if (rawPixels.length === w * h * 3) {
+              canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(w, h);
+                const d = imgData.data;
+                for (let p = 0, q = 0; p < rawPixels.length; p += 3, q += 4) {
+                  d[q] = rawPixels[p];
+                  d[q + 1] = rawPixels[p + 1];
+                  d[q + 2] = rawPixels[p + 2];
+                  d[q + 3] = 255;
+                }
+                ctx.putImageData(imgData, 0, 0);
+              }
+            } else if (rawPixels.length === w * h * 4) {
+              canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(w, h);
+                imgData.data.set(rawPixels);
+                ctx.putImageData(imgData, 0, 0);
+              }
+            } else if (rawPixels.length === w * h) {
+              canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(w, h);
+                const d = imgData.data;
+                for (let p = 0, q = 0; p < rawPixels.length; p++, q += 4) {
+                  const val = rawPixels[p];
+                  d[q] = val;
+                  d[q + 1] = val;
+                  d[q + 2] = val;
+                  d[q + 3] = 255;
+                }
+                ctx.putImageData(imgData, 0, 0);
+              }
+            }
+
+            if (canvas) {
+              let finalCanvas = canvas;
+              let targetW = w;
+              let targetH = h;
+
+              if (targetW > profile.maxDim || targetH > profile.maxDim) {
+                const scale = Math.min(profile.maxDim / targetW, profile.maxDim / targetH);
+                targetW = Math.max(16, Math.round(targetW * scale));
+                targetH = Math.max(16, Math.round(targetH * scale));
+                const scCanvas = document.createElement('canvas');
+                scCanvas.width = targetW;
+                scCanvas.height = targetH;
+                const scCtx = scCanvas.getContext('2d');
+                if (scCtx) {
+                  scCtx.imageSmoothingEnabled = true;
+                  scCtx.imageSmoothingQuality = 'high';
+                  scCtx.drawImage(canvas, 0, 0, targetW, targetH);
+                  finalCanvas = scCanvas;
+                }
+              }
+
+              const compressedBlob = await new Promise<Blob | null>((resolve) =>
+                finalCanvas.toBlob(resolve, 'image/jpeg', profile.quality)
+              );
+
+              if (compressedBlob) {
+                const newBytes = new Uint8Array(await compressedBlob.arrayBuffer());
+                if (newBytes.length <= contents.length * (1 - profile.minSavings)) {
+                  (obj as any).contents = newBytes;
+                  dict.set(PDFName.of('Width'), PDFNumber.of(targetW));
+                  dict.set(PDFName.of('Height'), PDFNumber.of(targetH));
+                  dict.set(PDFName.of('Length'), PDFNumber.of(newBytes.length));
+                  dict.set(PDFName.of('Filter'), PDFName.of('DCTDecode'));
+                  dict.set(PDFName.of('ColorSpace'), PDFName.of('DeviceRGB'));
+                  dict.set(PDFName.of('BitsPerComponent'), PDFNumber.of(8));
+                  dict.delete(PDFName.of('DecodeParms'));
+                  optimizedCount++;
+                }
+              }
+            }
+          }
+        } catch {
+          // Gracefully continue
+        }
+      }
+    }
+
+    return optimizedCount;
   }
 }

@@ -14,7 +14,24 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   CORS_ORIGIN: z.string().default('http://localhost:4200'),
   API_VERSION: z.string().default('1.0.0'),
-  TEMP_UPLOAD_DIR: z.string().default('./tmp/uploads')
+  TEMP_UPLOAD_DIR: z.string().default('./tmp/uploads'),
+  SIGN_REQUESTS_ENABLED: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
+  SIGN_STORE_DIR: z.string().optional(),
+  SIGN_MASTER_KEY: z.string().optional(),
+  SEAL_CERT_PATH: z.string().optional(),
+  SEAL_CERT_PASS: z.string().optional(),
+  APP_PUBLIC_URL: z.string().default('http://localhost:4200')
 });
 
 export const env = envSchema.parse(process.env);
+
+/** Runtime check respecting dynamic env overrides; defaults true in non-prod unless disabled, false in production unless enabled. */
+export function isSignRequestsEnabled(): boolean {
+  if (typeof process.env.SIGN_REQUESTS_ENABLED === 'string') {
+    return process.env.SIGN_REQUESTS_ENABLED === 'true';
+  }
+  return (process.env.NODE_ENV || env.NODE_ENV) !== 'production';
+}

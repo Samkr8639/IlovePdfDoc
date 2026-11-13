@@ -779,6 +779,80 @@ export const openApiSpec = {
           '404': { description: 'Job not found' }
         }
       }
+    },
+    '/api/v1/features': {
+      get: {
+        tags: ['Platform'],
+        summary: 'Public runtime feature flags (e.g. signRequestsEnabled)',
+        responses: {
+          '200': { description: 'Feature flag map' }
+        }
+      }
+    },
+    '/api/v1/sign/csrf': {
+      get: {
+        tags: ['Sign PDF'],
+        summary: 'Issue double-submit CSRF cookie & token (gated by SIGN_REQUESTS_ENABLED)',
+        responses: { '200': { description: 'CSRF token issued' }, '503': { description: 'Feature disabled' } }
+      }
+    },
+    '/api/v1/sign/sender/verify-start': {
+      post: {
+        tags: ['Sign PDF'],
+        summary: 'Send 6-digit sender email verification OTP (10m expiry)',
+        responses: { '200': { description: 'OTP sent' }, '429': { description: 'Rate limited' } }
+      }
+    },
+    '/api/v1/sign/sender/verify-confirm': {
+      post: {
+        tags: ['Sign PDF'],
+        summary: 'Verify sender 6-digit OTP (locks after 5 attempts)',
+        responses: { '200': { description: 'Email verified' }, '401': { description: 'OTP_INVALID' }, '429': { description: 'OTP_LOCKED' } }
+      }
+    },
+    '/api/v1/sign/requests': {
+      post: {
+        tags: ['Sign PDF'],
+        summary: 'Create multi-party signing request and email recipients (PDF <= 25 MB, <= 100 pages)',
+        responses: { '201': { description: 'Signing request created' }, '413': { description: 'FILE_TOO_LARGE / TOO_MANY_PAGES' }, '422': { description: 'ENCRYPTED_DOCUMENT' }, '429': { description: 'RATE_LIMITED / QUOTA_EXCEEDED' } }
+      }
+    },
+    '/api/v1/sign/requests/{id}': {
+      get: {
+        tags: ['Sign PDF'],
+        summary: 'Get sender request status and tamper-evident audit chain',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Status & audit entries' }, '404': { description: 'LINK_INVALID' } }
+      },
+      delete: {
+        tags: ['Sign PDF'],
+        summary: 'Cancel active request and revoke all pending signer tokens',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Cancelled' } }
+      }
+    },
+    '/api/v1/sign/t/{token}': {
+      get: {
+        tags: ['Sign PDF'],
+        summary: 'Get signer session metadata and fields assigned to the token bearer (noindex)',
+        parameters: [{ name: 'token', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Signer session' }, '404': { description: 'LINK_INVALID' }, '409': { description: 'ALREADY_COMPLETED' }, '410': { description: 'REQUEST_EXPIRED / REQUEST_CANCELLED' } }
+      }
+    },
+    '/api/v1/sign/t/{token}/complete': {
+      post: {
+        tags: ['Sign PDF'],
+        summary: 'Submit signer consent & completed fields; assembles final PDF & Certificate when all signers complete',
+        parameters: [{ name: 'token', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Signed' }, '409': { description: 'NOT_YOUR_TURN / ALREADY_COMPLETED' } }
+      }
+    },
+    '/api/v1/sign/certificate-sign': {
+      post: {
+        tags: ['Sign PDF'],
+        summary: 'Ephemeral zero-retention .p12/.pfx X.509 detached CMS PDF signer (adbe.pkcs7.detached)',
+        responses: { '200': { description: 'Digitally signed PDF stream' }, '400': { description: 'INVALID_CERTIFICATE_OR_PASSWORD' } }
+      }
     }
   },
   components: {

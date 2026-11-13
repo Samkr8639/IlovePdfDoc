@@ -1,10 +1,9 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
 
 export const routes: Routes = [
   {
     path: '',
-    component: HomeComponent,
+    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
     title: 'PDFTailor - Online PDF Converter & Document Tools'
   },
   {
@@ -75,7 +74,14 @@ export const routes: Routes = [
   },
   {
     path: 'sign-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/sign-pdf/sign-pdf.component').then(m => m.SignPdfComponent),
+    canDeactivate: [(comp: any) => comp?.canDeactivate ? comp.canDeactivate() : true],
+    title: 'Sign PDF Online Free - Electronically Sign PDF Documents | PDFTailor'
+  },
+  {
+    path: 'sign/:token',
+    loadComponent: () => import('./pages/sign-request/sign-request.component').then(m => m.SignRequestComponent),
+    title: 'Review & Sign Document | PDFTailor'
   },
   {
     path: 'watermark-pdf',

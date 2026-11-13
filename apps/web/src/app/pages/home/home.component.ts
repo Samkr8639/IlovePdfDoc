@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, OnDestroy, signal, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, OnDestroy, signal, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
@@ -32,6 +32,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedTab = signal<ExtendedFilterCategory>('all');
   isWorkflowModalOpen = signal<boolean>(false);
 
+  @ViewChild('filterScrollTrack') filterScrollTrack?: ElementRef<HTMLElement>;
+  canScrollLeft = signal<boolean>(false);
+  canScrollRight = signal<boolean>(false);
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.checkFilterScroll();
+  }
+
   ngOnInit(): void {
     this.seo.setSeoData({
       title: 'PDFTailor - Online PDF Converter & Document Tools Free',
@@ -45,6 +54,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     const el = this.elementRef.nativeElement;
     this.animCtx = this.animationService.animateHero(el);
+    setTimeout(() => this.checkFilterScroll(), 150);
   }
 
   ngOnDestroy(): void {
@@ -71,7 +81,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     return translated && translated !== key ? translated : tool.shortDescription;
   }
 
-  onSelectCategory(tab: ExtendedFilterCategory): void {
+  onSelectCategory(tab: ExtendedFilterCategory, event?: MouseEvent): void {
     this.selectedTab.set(tab);
 
     if (tab === 'workflows') {
@@ -79,6 +89,46 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.toolRegistry.setCategory(tab);
     }
+
+    if (event?.currentTarget) {
+      (event.currentTarget as HTMLElement).scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+    setTimeout(() => this.checkFilterScroll(), 300);
+  }
+
+  onFilterWheel(event: WheelEvent): void {
+    const el = this.filterScrollTrack?.nativeElement || (event.currentTarget as HTMLElement);
+    if (el && el.scrollWidth > el.clientWidth) {
+      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        el.scrollLeft += event.deltaY;
+        event.preventDefault();
+        this.checkFilterScroll();
+      }
+    }
+  }
+
+  checkFilterScroll(): void {
+    const el = this.filterScrollTrack?.nativeElement;
+    if (!el) return;
+    const canLeft = el.scrollLeft > 6;
+    const canRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 6;
+    this.canScrollLeft.set(canLeft);
+    this.canScrollRight.set(canRight);
+  }
+
+  scrollFilter(direction: 'left' | 'right'): void {
+    const el = this.filterScrollTrack?.nativeElement;
+    if (!el) return;
+    const scrollAmount = Math.max(220, Math.floor(el.clientWidth * 0.65));
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+    setTimeout(() => this.checkFilterScroll(), 350);
   }
 
   openWorkflowModal(): void {

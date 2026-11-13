@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { BrowserPdfService, ValidatedPdfFile, MergeResult } from '../../core/services/browser-pdf.service';
 import { ToolRegistryService } from '../../core/services/tool-registry.service';
 import { SeoService } from '../../core/services/seo.service';
@@ -7,16 +6,19 @@ import { LayoutService } from '../../core/services/layout.service';
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
+import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
+import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
 @Component({
   selector: 'app-merge-pdf',
   imports: [
-    RouterLink,
     DropzoneComponent,
     ProcessingStateComponent,
-    ResultViewComponent
+    ResultViewComponent,
+    ExploreMoreToolsComponent,
+    PtAdSlotComponent
   ],
   templateUrl: './merge-pdf.component.html',
   styleUrl: './merge-pdf.component.css'

@@ -20,6 +20,78 @@
   font-display: optional;
 }
 
+/* Self-hosted OFL fonts for Sign PDF (offline, zero external CDN requests) */
+@font-face {
+  font-family: 'SignCaveat';
+  src: url('/fonts/sign/caveat-latin-600-normal.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignDancingScript';
+  src: url('/fonts/sign/dancing-script-latin-600-normal.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignGreatVibes';
+  src: url('/fonts/sign/great-vibes-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignSacramento';
+  src: url('/fonts/sign/sacramento-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignKalam';
+  src: url('/fonts/sign/kalam-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignKalamDevanagari';
+  src: url('/fonts/sign/kalam-devanagari-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignAlexBrush';
+  src: url('/fonts/sign/alex-brush-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignSatisfy';
+  src: url('/fonts/sign/satisfy-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignPatrickHand';
+  src: url('/fonts/sign/patrick-hand-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SignNotoSans';
+  src: url('/fonts/sign/noto-sans-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ==========================================================================
    PDFTAILOR "OCEAN WORKSPACE" DESIGN TOKENS
    ========================================================================== */
@@ -394,4 +466,264 @@ app-edit-pdf-hero {
 .adsense-placeholder-content svg {
   color: #334155 !important;
   opacity: 0.85 !important;
+}
+
+/* ==========================================================================
+   CANONICAL TOOL UPLOAD & EDITORIAL PATTERN (Matches Sign PDF Baseline)
+   ========================================================================== */
+.unified-hero-section {
+  background: var(--pt-subtle-bg, #F8FAFC);
+  padding: 48px 0 48px;
+  min-height: 520px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.hero-container,
+.hero-content,
+.tool-page .hero-container,
+.tool-page .hero-content {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+
+.tool-page .container {
+  width: 100%;
+  max-width: 1360px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+
+.tool-page .container.container-narrow,
+.tool-page .container-narrow {
+  width: 100%;
+  max-width: 960px !important;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+
+.tool-h1 {
+  font-family: var(--pt-font-heading);
+  font-size: clamp(32px, 4vw, 50px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--pt-navy, #0F172A);
+  margin: 0 0 14px;
+  text-align: center;
+}
+
+.hero-subtitle,
+.tool-lead {
+  font-family: var(--pt-font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--pt-muted, #475569);
+  max-width: 680px;
+  margin: 0 auto 32px;
+  text-align: center;
+}
+
+.hero-dropzone-wrap,
+.tool-page .hero-dropzone-wrap {
+  width: 100%;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 340px;
+  box-sizing: border-box;
+}
+
+.adsense-section {
+  padding: 20px 0 12px;
+  background: var(--pt-surface-white, #FFFFFF);
+  border-top: 1px solid var(--pt-soft-outline, #E2E8F0);
+}
+
+.features-section,
+.steps-section,
+.faq-section {
+  padding: 56px 0;
+  background: var(--pt-surface-white, #FFFFFF);
+}
+
+.steps-section {
+  background: var(--pt-subtle-bg, #F8FAFC);
+}
+
+.section-heading,
+.features-title,
+.steps-title,
+.faq-section-title {
+  font-family: var(--pt-font-heading);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 700;
+  color: var(--pt-navy, #0F172A);
+  text-align: center;
+  margin: 0 0 10px;
+}
+
+.section-subheading,
+.features-subtitle,
+.steps-subtitle {
+  text-align: center;
+  font-family: var(--pt-font-body);
+  color: var(--pt-muted, #475569);
+  max-width: 660px;
+  margin: 0 auto 36px;
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.feature-item-card {
+  background: var(--pt-card-bg, #FFFFFF);
+  border: 1px solid var(--pt-soft-outline, #E2E8F0);
+  border-radius: var(--pt-radius-lg, 16px);
+  padding: 24px;
+  box-shadow: var(--pt-shadow-sm, 0 1px 3px rgba(11, 18, 32, 0.04));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pt-shadow-card-hover, 0 12px 28px -6px rgba(15, 118, 110, 0.12));
+}
+
+.feature-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--pt-radius-md, 10px);
+  background: var(--pt-teal-50, #F0FDFA);
+  color: var(--pt-teal-700, #0F766E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.feature-icon-box svg {
+  width: 24px;
+  height: 24px;
+}
+
+.feature-item-card h3,
+.step-guide-card h3 {
+  font-family: var(--pt-font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--pt-navy, #0F172A);
+  margin: 0 0 8px;
+}
+
+.feature-item-card p,
+.step-guide-card p {
+  font-family: var(--pt-font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--pt-muted, #475569);
+  margin: 0;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.step-guide-card {
+  background: var(--pt-surface-white, #FFFFFF);
+  border: 1px solid var(--pt-soft-outline, #E2E8F0);
+  border-radius: var(--pt-radius-lg, 16px);
+  padding: 26px 24px;
+  box-shadow: var(--pt-shadow-sm, 0 1px 3px rgba(11, 18, 32, 0.04));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.step-guide-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pt-shadow-card-hover, 0 12px 28px -6px rgba(15, 118, 110, 0.12));
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--pt-radius-sm, 6px);
+  background: var(--pt-teal-50, #F0FDFA);
+  color: var(--pt-teal-700, #0F766E);
+  font-family: var(--pt-font-heading);
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 14px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.faq-card-item {
+  background: var(--pt-subtle-bg, #F8FAFC);
+  border: 1px solid var(--pt-soft-outline, #E2E8F0);
+  border-radius: var(--pt-radius-md, 10px);
+  padding: 20px 24px;
+  transition: border-color 0.2s ease;
+}
+
+.faq-card-item:hover {
+  border-color: var(--pt-teal-700, #0F766E);
+}
+
+.faq-card-item h4 {
+  font-family: var(--pt-font-heading);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--pt-navy, #0F172A);
+  margin: 0 0 6px;
+}
+
+.faq-card-item p {
+  font-family: var(--pt-font-body);
+  font-size: 14px;
+  color: var(--pt-muted, #475569);
+  margin: 0;
+  line-height: 1.55;
+}
+
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
 }

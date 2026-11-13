@@ -4,9 +4,9 @@
        =================================================================== -->
   @if (currentState() === 'upload') {
     <section class="unified-hero-section">
-      <div class="container hero-content">
+      <div class="container hero-container">
         <h1 class="tool-h1">PDF to Word Converter</h1>
-        <p class="tool-lead">
+        <p class="hero-subtitle">
           Convert PDF documents into editable Word files while preserving as much of the original formatting as possible.
         </p>
 
@@ -29,44 +29,36 @@
             subtitle="or drop PDFs here"
             acceptedTypes=".pdf,application/pdf"
             [multiple]="true"
-            limitInfo=""
+            limitInfo="Max 100 MB • Up to 500 pages"
             (filesSelected)="onFilesAdded($event)"
           ></app-dropzone>
         </div>
       </div>
     </section>
 
-    <!-- TOP ADSENSE ADVERTISEMENT SLOT -->
-    <section class="adsense-section">
+    <!-- ADSENSE / ADVERTISEMENT (Temporarily commented until AdSense approval)
+    <section class="adsense-section" aria-label="Advertisement">
       <div class="container">
-        <div class="adsense-card">
-          <span class="ad-label">ADVERTISEMENT</span>
-          <div class="ad-placeholder-content">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4">
-              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <span>Google AdSense Slot • Auto-Responsive Leaderboard (728 × 90 / 320 × 100)</span>
-          </div>
-        </div>
+        <app-pt-ad-slot slotType="leaderboard">
+          <span>Google AdSense Slot • Responsive Leaderboard (728 × 90 / 320 × 100)</span>
+        </app-pt-ad-slot>
       </div>
     </section>
+    -->
 
-    <!-- EDITORIAL / SEO CONTENT SECTION -->
-    <section class="editorial-features-section">
+    <!-- FEATURES SECTION (4-COLUMN CANONICAL GRID) -->
+    <section class="features-section">
       <div class="container">
-        <div class="section-title-wrap">
-          <h2 class="editorial-heading">The easiest & most accurate way to convert PDF to Word</h2>
-          <p class="editorial-subheading">
-            Engineered for accuracy, privacy, and speed. Turn non-editable PDFs into Microsoft Word (.docx) documents in seconds.
-          </p>
-        </div>
+        <h2 class="section-heading">The easiest & most accurate way to convert PDF to Word</h2>
+        <p class="section-subheading">
+          Engineered for accuracy, privacy, and speed. Turn non-editable PDFs into Microsoft Word (.docx) documents in seconds.
+        </p>
 
         <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon-box blue-box">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <article class="feature-item-card">
+            <div class="feature-icon-box" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -75,22 +67,24 @@
             </div>
             <h3>100% Genuine DOCX</h3>
             <p>Generates real Microsoft Word documents (.docx) compatible with Microsoft 365, Word 2007+, Google Docs, and LibreOffice.</p>
-          </div>
+          </article>
 
-          <div class="feature-card">
-            <div class="feature-icon-box red-box">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <article class="feature-item-card">
+            <div class="feature-icon-box" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
             </div>
             <h3>Zero-Retention Security</h3>
             <p>Documents convert via encrypted ephemeral processing with zero data retention. Your files are automatically purged after download.</p>
-          </div>
+          </article>
 
-          <div class="feature-card">
-            <div class="feature-icon-box purple-box">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <article class="feature-item-card">
+            <div class="feature-icon-box" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="2" y1="12" x2="22" y2="12"></line>
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
@@ -98,34 +92,76 @@
             </div>
             <h3>OCR for Scanned Pages</h3>
             <p>Built-in optical character recognition extracts readable text from image-based and scanned PDF pages.</p>
-          </div>
+          </article>
+
+          <article class="feature-item-card">
+            <div class="feature-icon-box" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19l7-7 3 3-7 7-3-3z" />
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+              </svg>
+            </div>
+            <h3>Preserved Formatting</h3>
+            <p>Retains tables, bullet lists, paragraph spacing, columns, and embedded images with high accuracy.</p>
+          </article>
         </div>
       </div>
     </section>
 
     <!-- 3-STEP HOW TO USE GUIDE -->
-    <section class="how-to-section">
+    <section class="steps-section">
       <div class="container">
-        <h2 class="section-heading-centered">How to convert PDF to Word online</h2>
+        <h2 class="section-heading">How to convert PDF to Word online</h2>
+        <p class="section-subheading">Three quick steps with complete local control.</p>
+
         <div class="steps-grid">
-          <div class="step-card">
-            <span class="step-badge">1</span>
+          <div class="step-guide-card">
+            <span class="step-num">01</span>
             <h3>Select PDF file</h3>
             <p>Upload your PDF document from your computer, or drag and drop it into the conversion zone.</p>
           </div>
-          <div class="step-card">
-            <span class="step-badge">2</span>
+          <div class="step-guide-card">
+            <span class="step-num">02</span>
             <h3>Choose conversion mode</h3>
             <p>Select No OCR for standard digital PDFs or OCR for scanned documents requiring text recognition.</p>
           </div>
-          <div class="step-card">
-            <span class="step-badge">3</span>
+          <div class="step-guide-card">
+            <span class="step-num">03</span>
             <h3>Download Word document</h3>
             <p>Click Convert to WORD and instantly download your editable, fully formatted DOCX file.</p>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- FAQ SECTION -->
+    <section class="faq-section">
+      <div class="container container-narrow">
+        <h2 class="section-heading">Frequently Asked Questions</h2>
+        <div class="faq-list">
+          <div class="faq-card-item">
+            <h4>Will the converted Word document be editable?</h4>
+            <p>Yes! Our converter produces native Microsoft Word DOCX files where text paragraphs, headings, bullet lists, and tables can be edited freely.</p>
+          </div>
+          <div class="faq-card-item">
+            <h4>What is the difference between No OCR and OCR modes?</h4>
+            <p>No OCR is faster and ideal for digital PDFs with selectable text. OCR performs optical character recognition for scanned or photographic PDFs.</p>
+          </div>
+          <div class="faq-card-item">
+            <h4>Are my documents kept secure?</h4>
+            <p>All transfers use TLS encryption, and converted files are automatically purged from memory after 10 minutes.</p>
+          </div>
+          <div class="faq-card-item">
+            <h4>Can I convert multi-page documents?</h4>
+            <p>Yes, PDFTailor converts multi-page documents seamlessly without page limits.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORE MORE PDF TOOLS -->
+    <app-explore-more-tools currentTool="pdf-to-word" />
   }
 
   <!-- ===================================================================
@@ -361,7 +397,7 @@
             </label>
           </div>
 
-          <!-- Dedicated Sidebar AdSense Slot -->
+          <!-- Dedicated Sidebar AdSense Slot (Temporarily commented until AdSense approval)
           <div class="sidebar-adsense-slot" aria-label="Advertisement">
             <span class="adsense-label">Advertisement</span>
             <div class="sidebar-ad-box">
@@ -373,6 +409,7 @@
               <span>Google AdSense (300 × 250)</span>
             </div>
           </div>
+          -->
         </div>
 
         <!-- ACTION FOOTER: BIG RED CONVERT BUTTON -->

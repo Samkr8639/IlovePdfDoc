@@ -8,3 +8,5 @@ export * from './excel-to-pdf';
 export * from './powerpoint-to-pdf';
 export * from './pdf-to-jpg';
 export * from './edit-pdf-ocr';
+export * from './sign-pdf';
+

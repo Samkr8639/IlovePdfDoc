@@ -1,0 +1,59 @@
+# Dependencies & Package Managers
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build & Dist Outputs
+dist/
+apps/web/dist/
+apps/api/dist/
+packages/contracts/dist/
+.angular/
+
+# Virtual environments & caches
+.venv/
+venv/
+__pycache__/
+.cache/
+.pytest_cache/
+.turbo/
+.nx/
+
+# IDE & Editor configs
+.idea/
+.vscode/
+*.suo
+*.user
+
+# Large Binaries, Fonts, WASM, and PDF Assets
+apps/web/public/cmaps/
+apps/web/public/standard_fonts/
+apps/web/public/wasm/
+apps/api/tessdata/
+*.wasm
+*.bcmap
+*.pfb
+*.ttf
+*.woff2
+*.traineddata
+
+# Test Fixtures & Audit Evidence Artifacts
+test-fixtures/
+audit-edit-pdf-evidence/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.ico
+*.zip
+*.docx
+*.xlsx
+*.pptx
+
+# Logs & Temporary Files
+*.log
+scratch/
+tmp/
+

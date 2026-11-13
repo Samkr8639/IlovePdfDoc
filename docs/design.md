@@ -224,7 +224,7 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
    - Organize sidebar: Rectangle **`300×250`** inside `.sidebar-ad-box` (`1px dashed #cbd5e1`, `#fafafa` / `#F6F8FA`).
    - Result state: Responsive Leaderboard **`728×90`** (`<app-result-view>` bottom card).
 8. **Breadcrumbs & SEO:**
-   - Optional top breadcrumb `<nav class="breadcrumb-nav" aria-label="Breadcrumb">` (`Home / <Tool Name>`, `13px`, shown on `pdf-to-jpg` & `powerpoint-to-pdf`, omitted on `merge-pdf` & `pdf-to-word`).
+   - Tool pages and static pages do **not** render breadcrumb links above hero headings; navigation stays inside `<app-header>` and `<app-footer>`.
    - Every tool component calls `this.seo.setSeoData(tool.seo)` in `ngOnInit()` (via `SeoService`), setting `<title>`, `description`, `keywords`, OpenGraph, Twitter Card, and `<link rel="canonical">`.
 
 ---
@@ -235,7 +235,7 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 
 - **Canonical references:**
   - Multi-section editorial pattern: [`apps/web/src/app/pages/merge-pdf/merge-pdf.component.html`](../apps/web/src/app/pages/merge-pdf/merge-pdf.component.html#L1-L245) & [`tool-placeholder.component.html`](../apps/web/src/app/pages/tool-placeholder/tool-placeholder.component.html)
-  - With breadcrumbs & hero ad: [`apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170`](../apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170)
+  - With hero ad: [`apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170`](../apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.html#L59-L170)
 - **Visual baselines:** [`merge-pdf-upload-1440.png`](design-assets/merge-pdf-upload-1440.png), [`pdf-to-jpg-upload-1440.png`](design-assets/pdf-to-jpg-upload-1440.png), [`merge-pdf-upload-1024.png`](design-assets/merge-pdf-upload-1024.png), [`merge-pdf-upload-390.png`](design-assets/merge-pdf-upload-390.png)
 
 ```text
@@ -245,7 +245,6 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 | [.global-error-banner (if error, sticky/top full-width #FEF2F2/#FDF3F1)]|
 |                                                                         |
 |  section.unified-hero-section (bg #F4F5F8 / --pt-subtle-bg, pad 52/32)  |
-|   +-- (optional .breadcrumb-nav: "Home / Tool Name")                    |
 |   +-- <h1 class="tool-h1"> (Sora 50px/48px w800 --pt-navy)              |
 |   +-- <p class="hero-subtitle"> (Inter 17px --pt-muted, max-w 680px)    |
 |   +-- <app-dropzone> (max-w 960px, min-h 340px, r 24px, white)          |
@@ -268,7 +267,7 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 
 - **Measurements (measured in running app at `1440×900`):**
   - `.unified-hero-section`: `padding: 52px 0 32px` (`min-height: 520px` in `styles.css#L384`)
-  - `pdf-to-jpg` `.upload-hero-section`: `padding: 48px 0 64px`, `.breadcrumb-nav`: `127.5×16px`
+  - `pdf-to-jpg` `.upload-hero-section`: `padding: 48px 0 64px`
   - `<app-dropzone>`: `.dropzone-box` `max-width: 960px`, `min-height: 340px`, `padding: 44px 32px 36px`, `border-radius: 24px`, `border: 1.5px dashed #CBD5E1`
   - `.btn-select-file`: `height: 60px; min-width: 270px; border-radius: 14px; background: var(--pt-teal-700)`
 
@@ -610,7 +609,7 @@ Tested at `1440×900`, `1024×768`, and `390×844` in headless Chrome:
    - Enable links and switch badge from `Soon` -> `Live` in [`header.component.html`](../apps/web/src/app/shared/components/header/header.component.html) (Convert PDF dropdown, Mega Menu, Mobile Drawer) and [`footer.component.html`](../apps/web/src/app/shared/components/footer/footer.component.html).
 3. **Component Folder Structure (`apps/web/src/app/pages/<tool-slug>/`):**
    - `<tool-slug>.component.ts`, `.html`, `.css`, `.spec.ts` (optional sub-services under `apps/web/src/app/core/services/<tool-slug>/`).
-   - Copy layout skeleton from **`merge-pdf`** (multi-file card workspace) or **`pdf-to-jpg`** (latest architecture with root `.global-error-banner`, breadcrumbs, `AbortController`/`runId`, duplicate rejection, `URL.revokeObjectURL`, filename sanitizer).
+   - Copy layout skeleton from **`merge-pdf`** (multi-file card workspace) or **`pdf-to-jpg`** (latest architecture with root `.global-error-banner`, `AbortController`/`runId`, duplicate rejection, `URL.revokeObjectURL`, filename sanitizer).
    - Call `LayoutService.hideFooter()` when entering `organize` / `processing`, and `showFooter()` in `upload`, `completed`, and `ngOnDestroy()`.
 4. **Required Shared Pieces & Locked Structure:**
    - Upload State: `<app-dropzone>`, AdSense leaderboard slot, features grid, 3-step guide (`01`/`02`/`03`), FAQs, related tools.
@@ -634,23 +633,22 @@ Tested at `1440×900`, `1024×768`, and `390×844` in headless Chrome:
 1. **Three Incompatible Upload Hero Patterns:**
    - `merge-pdf` / `tool-placeholder`: `.unified-hero-section` (`#f4f5f8` bg, `50px` H1, no breadcrumbs, `4`-col features, `01/02/03` steps, FAQ, 4 related cards).
    - `pdf-to-word` / `word-to-pdf` / `pdf-to-excel` / `excel-to-pdf` / `pdf-to-powerpoint`: omits FAQ & related tools, uses `3`-col features and circular `1/2/3` `.step-badge`.
-   - `pdf-to-jpg`: adds `.breadcrumb-nav` (`Home / PDF to JPG`), places `.hero-ad-slot` inside the hero (`#F6F8FA`), `48px` H1, omits FAQ & related cards.
-   - **Intended canonical:** `.unified-hero-section` with optional `.breadcrumb-nav`, leaderboard ad below hero, features, 3 steps, FAQs, related tools (`merge-pdf` cadence + `pdf-to-jpg` breadcrumb/token styling).
+   - `pdf-to-jpg`: places `.hero-ad-slot` inside the hero (`#F6F8FA`), `48px` H1, omits FAQ & related cards.
+   - **Intended canonical:** `.unified-hero-section` without breadcrumbs, leaderboard ad below hero, features, 3 steps, FAQs, related tools (`merge-pdf` cadence + `--pt-*` token styling).
 2. **Legacy Brand Names Still in Production Paths & Contracts:**
    - `apps/web/src/app/core/services/seo.service.ts#L44` defaults to `'PaperFlow - Free & Private Online PDF Toolkit'` (`canonical: 'https://paperflow.app/'`).
    - `packages/contracts/src/tools.ts` titles use `| PDF flow` and canonicals `https://pdfflow.app/...` (observed in `pdf-to-word`, `word-to-pdf`, `pdf-to-excel`, `pdf-to-powerpoint`, `images-to-pdf`, etc.).
    - `merge-pdf` result output filename in `browser-pdf.service.ts` still outputs `paperflow-merged-YYYY-MM-DD.pdf` (visible in [`merge-pdf-result-1440.png`](design-assets/merge-pdf-result-1440.png)).
    - `pdf-to-word.service.ts#L188,249` embeds `'PDF flow'` creator metadata.
-   - `apps/web/src/app/pages/press-media-kit/` still documents Coral `#e53935` / `Layered Doc Heart`.
    - `header.component.html#L186` Convert PDF dropdown footer claims `"100% Client-Side Conversion • No files uploaded to servers"` even though the same dropdown links to server/hybrid tools (`word-to-pdf`, `pdf-to-word`, etc.).
    - **Intended:** `PDFTailor` everywhere, with accurate client vs server wording.
 3. **Legacy Red / Coral Hexes (`#fca5a5`, `#e53935`, `--coral-600`) Remaining:**
-   - Hover borders on `.dropzone-box` / cards still flash red `#fca5a5` in `merge-pdf.component.css#L162,670`, `tool-placeholder.component.css#L514,544,977`, `pdf-to-word.component.css#L339`, `pdf-to-excel.component.css#L345,1274`, `about-us.component.css#L714`.
-   - `#e53935` and undefined `var(--coral-600, #e53935)` dominate `about-us`, `privacy-policy`, `gdpr-compliance`, `terms-and-conditions`, and `file-list.component.html` (`PDF` badge SVG).
+   - Hover borders on `.dropzone-box` / cards still flash red `#fca5a5` in `merge-pdf.component.css#L162,670`, `tool-placeholder.component.css#L514,544,977`, `pdf-to-word.component.css#L339`, `pdf-to-excel.component.css#L345,1274`.
+   - `#e53935` and undefined `var(--coral-600, #e53935)` still appear in `file-list.component.html` (`PDF` badge SVG). (`about-us`, `contact-us`, `privacy-policy`, `terms-and-conditions`, `gdpr-compliance`, `security-whitepaper`, `cookie-settings`, and `press-media-kit` have been migrated to `--pt-teal-700` / `--pt-navy` Ocean Workspace tokens.)
    - **Intended:** Ocean Workspace `--pt-teal-700` / `--pt-teal-100` for focus/hover; `--pt-coral` / `#B91C1C` strictly for error/destructive actions.
 4. **Legacy Unloaded Font Families (`Outfit`, `Space Grotesk`, `Plus Jakarta Sans`):**
    - `result-view.component.css#L10`, `tool-placeholder.component.css#L6`, `pdf-to-word.component.css#L6`, `pdf-to-excel.component.css#L6` declare `'Outfit'` (never loaded in `@font-face` or `index.html`), falling back to system font.
-   - Static legal/about pages (`about-us`, `privacy-policy`, `gdpr-compliance`, `terms-and-conditions`) declare `'Space Grotesk'` & `'Plus Jakarta Sans'` (observed in [`about-us-1440.png`](design-assets/about-us-1440.png) & `measurements.json`).
+   - `about-us`, `contact-us`, `privacy-policy`, `terms-and-conditions`, `gdpr-compliance`, `security-whitepaper`, `cookie-settings`, and `press-media-kit` now use `Sora` & `Inter`.
    - `<button>` controls in `pdf-to-jpg`, `edit-pdf`, and `merge-pdf` dock lack `font-family`, rendering `Arial` in Chrome.
    - **Intended:** `--pt-font-heading` (`Sora`) and `--pt-font-body` (`Inter`) everywhere.
 5. **Undefined Token References in CSS (`STYLEGUIDE.md` vs `styles.css`):**
@@ -728,7 +726,7 @@ All 33 screenshots captured on running `ng serve` (`http://localhost:4200`) usin
 - **Organize / Workspace States:** `merge-pdf-organize-1440.png`, `merge-pdf-organize-1024.png`, `merge-pdf-organize-390.png`, `merge-pdf-mobile-drawer-390.png`, `pdf-to-jpg-organize-1440.png`, `pdf-to-jpg-organize-390.png`, `split-pdf-organize-1440.png`, `compress-pdf-organize-1440.png`, `pdf-to-word-organize-1440.png`
 - **Processing & Result States:** `shared-processing-state-1440.png`, `merge-pdf-result-1440.png`, `merge-pdf-result-390.png`, `compress-pdf-result-1440.png`, `pdf-to-jpg-result-1440.png`
 - **Editor Workspace (`edit-pdf`):** `edit-pdf-workspace-1440.png`, `edit-pdf-workspace-1024.png`, `edit-pdf-workspace-390.png`
-- **Static Content Pages:** `about-us-1440.png`, `about-us-390.png`, `privacy-policy-1440.png`
+- **Static Content Pages:** `about-us-above-fold-1440.png`, `about-us-1440.png`, `about-us-1024.png`, `about-us-390.png`, `about-us-bottom-1440.png`, `privacy-policy-1440.png`, `privacy-policy-above-fold-1440.png`, `privacy-policy-1024.png`, `privacy-policy-390.png`, `privacy-policy-bottom-1440.png`, `terms-and-conditions-above-fold-1440.png`, `terms-and-conditions-1440.png`, `terms-and-conditions-1024.png`, `terms-and-conditions-390.png`, `terms-and-conditions-bottom-1440.png`, `gdpr-compliance-above-fold-1440.png`, `gdpr-compliance-1440.png`, `gdpr-compliance-1024.png`, `gdpr-compliance-390.png`, `gdpr-compliance-bottom-1440.png`, `security-whitepaper-above-fold-1440.png`, `security-whitepaper-1440.png`, `security-whitepaper-1024.png`, `security-whitepaper-390.png`, `security-whitepaper-bottom-1440.png`, `cookie-settings-above-fold-1440.png`, `cookie-settings-1440.png`, `cookie-settings-1024.png`, `cookie-settings-390.png`, `cookie-settings-bottom-1440.png`, `press-media-kit-above-fold-1440.png`, `press-media-kit-1440.png`, `press-media-kit-1024.png`, `press-media-kit-390.png`, `press-media-kit-bottom-1440.png`, `contact-us-1440.png`, `contact-us-1024.png`, `contact-us-390.png`, `contact-us-step2-1440.png`
 
 ### 14.2 Files Analysed
 
