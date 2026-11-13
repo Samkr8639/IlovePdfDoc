@@ -16,7 +16,6 @@ import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.com
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
-import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 import { MergeResult } from '../../core/services/browser-pdf.service';
 import { ImageProbeService } from '../../core/services/jpg-to-pdf/image-probe.service';
 import { PageLayoutService, MiniPreviewStyle } from '../../core/services/jpg-to-pdf/page-layout.service';
@@ -48,8 +47,7 @@ const MAX_TOTAL_SIZE_BYTES = 600 * 1024 * 1024; // 600 MB
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent,
-    ExploreMoreToolsComponent,
-    PtAdSlotComponent
+    ExploreMoreToolsComponent
   ],
   templateUrl: './jpg-to-pdf.component.html',
   styleUrl: './jpg-to-pdf.component.css',
@@ -151,14 +149,33 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
     if (!files || files.length === 0) return;
     this.errorMessage.set(null);
 
+    // Explicit check for unsupported GIF and SVG formats
+    const hasUnsupportedFormat = files.some(f => {
+      const lower = f.name.toLowerCase();
+      return lower.endsWith('.gif') || lower.endsWith('.svg') || f.type === 'image/gif' || f.type === 'image/svg+xml';
+    });
+
+    if (hasUnsupportedFormat) {
+      this.errorMessage.set('GIF and SVG formats are not supported. Please select JPG, PNG, WebP, or BMP images.');
+    }
+
+    const validCandidateFiles = files.filter(f => {
+      const lower = f.name.toLowerCase();
+      return !lower.endsWith('.gif') && !lower.endsWith('.svg') && f.type !== 'image/gif' && f.type !== 'image/svg+xml';
+    });
+
+    if (validCandidateFiles.length === 0) {
+      return;
+    }
+
     const currentList = this.selectedFiles();
-    if (currentList.length + files.length > MAX_IMAGES_COUNT) {
+    if (currentList.length + validCandidateFiles.length > MAX_IMAGES_COUNT) {
       this.errorMessage.set(`Maximum ${MAX_IMAGES_COUNT} images can be added at once.`);
       return;
     }
 
     const currentTotalSize = this.totalSizeBytes();
-    const newFilesTotal = files.reduce((acc, f) => acc + f.size, 0);
+    const newFilesTotal = validCandidateFiles.reduce((acc, f) => acc + f.size, 0);
     if (currentTotalSize + newFilesTotal > MAX_TOTAL_SIZE_BYTES) {
       this.errorMessage.set(`Total file size cannot exceed 600 MB.`);
       return;
@@ -167,7 +184,7 @@ export class JpgToPdfComponent implements OnInit, OnDestroy {
     const processedItems: JpgToPdfImageItem[] = [];
     const localWarnings: string[] = [];
 
-    for (const file of files) {
+    for (const file of validCandidateFiles) {
       // Duplicate detection
       const isDuplicate = currentList.some(
         (existing) => existing.name === file.name && existing.sizeBytes === file.size

@@ -505,7 +505,15 @@ Verified across [`merge-pdf.component.ts`](../apps/web/src/app/pages/merge-pdf/m
 4. **Cancel & Race Guard (`runId` / `AbortController`):** Async processing must instantiate an `AbortController` (`pdf-to-jpg.component.ts#L69,491`) and/or increment a monotonically increasing `runId` counter. Clicking `Cancel` aborts the controller, discards stale async results (`if (myRunId !== this.activeRunId) return`), and returns cleanly to `organize`.
 5. **Memory Cleanup (`URL.revokeObjectURL`):** Every `Blob` URL created for thumbnails, preview iframes, or downloads **must** be revoked when items are removed, `reset()` is called, inside `ngOnDestroy()`, and `setTimeout(() => URL.revokeObjectURL(url), 5000)` after triggering synthetic `<a>.click()` downloads (`pdf-to-jpg.component.ts#L607,682`, `merge-pdf.component.ts#L150,165`).
 6. **Filename Sanitizing:** Sanitize download filenames by stripping unsafe filesystem characters and preserving valid base names + target extension before setting `[download]` or `<a download>`.
-7. **Unsaved Changes Guard (`Edit PDF`):** Editor routes wire Angular's `canDeactivate` guard (`app.routes.ts` + `edit-pdf.component.ts#L1202`) to prompt users before navigating away with unexported edits.
+7. **Custom Output Filename & Author Metadata (`JPG to PDF`):**
+   - The JPG to PDF converter exposes user-editable **"Custom PDF File Name"** and **"Author Name"** inputs in the sidebar.
+   - When entered, `options.pdfTitle` sets the document title and sanitizes to the downloaded output filename (`${customFilename}.pdf`), and `options.pdfAuthor` embeds the author metadata in the PDF document.
+   - Unsupported image formats (specifically **GIF** and **SVG**) are rejected at input with floating error toast messages (`"GIF and SVG formats are not supported. Please select JPG, PNG, WebP, or BMP images."`).
+8. **Interactive Compression Level Slider (`Compress PDF`):**
+   - In addition to standard preset cards (Extreme >70%, Recommended ~50%, Less up to 20%), an interactive range slider allows users to choose exact custom compression percentages (10% to 90%).
+   - The slider and preset cards stay synchronized (moving slider to >=70% selects Extreme, ~50% selects Recommended, <=30% selects Less; selecting a card updates the slider).
+   - Browser compression combines raster downsampling, quality optimization, and canvas compaction to guarantee file size reduction matching user expectations.
+9. **Unsaved Changes Guard (`Edit PDF`):** Editor routes wire Angular's `canDeactivate` guard (`app.routes.ts` + `edit-pdf.component.ts#L1202`) to prompt users before navigating away with unexported edits.
 8. **Keyboard Shortcuts:**
    - Global Header Search: `/` or `Cmd/Ctrl + K` focuses `.header-search-input`; `ArrowDown`/`ArrowUp`/`Enter`/`Escape` navigate `.search-dropdown-panel`.
    - Upload Consent Dialog: `Escape` closes, `Tab`/`Shift+Tab` stays trapped inside modal.

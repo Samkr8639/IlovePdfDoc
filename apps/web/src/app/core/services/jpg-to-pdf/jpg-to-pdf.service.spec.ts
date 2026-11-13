@@ -95,9 +95,13 @@ describe('JpgToPdfService', () => {
 
     expect(result.isZip).toBe(false);
     expect(result.pageCount).toBe(1);
-    expect(result.downloadFilename).toBe('landscape-photo.pdf');
+    expect(result.downloadFilename).toBe('My Test PDF.pdf');
     expect(result.blob.type).toBe('application/pdf');
     expect(result.blob.size).toBeGreaterThan(100);
+
+    // Also test fallback to file name when pdfTitle is empty
+    const resultWithoutTitle = await service.buildPdf([item], { ...defaultOptions, pdfTitle: '' });
+    expect(resultWithoutTitle.downloadFilename).toBe('landscape-photo.pdf');
 
     // Verify it loads with pdf-lib and check metadata
     const parsedPdf = await PDFDocument.load(await result.blob.arrayBuffer());
@@ -133,6 +137,7 @@ describe('JpgToPdfService', () => {
     ];
     const unmergedOptions: JpgToPdfOptions = {
       ...defaultOptions,
+      pdfTitle: '',
       mergeAll: false
     };
     const result = await service.buildPdf(items, unmergedOptions);

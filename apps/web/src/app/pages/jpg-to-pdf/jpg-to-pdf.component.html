@@ -26,7 +26,7 @@
           <app-dropzone
             title="Select JPG images"
             subtitle="or drop images here (JPG, PNG, WebP, BMP)"
-            acceptedTypes="image/jpeg,image/png,image/webp,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.bmp"
+            acceptedTypes="image/jpeg,image/png,image/webp,image/bmp,.jpg,.jpeg,.png,.webp,.bmp"
             [multiple]="true"
             limitInfo="Up to 300 images • Max 50 MB per image"
             (filesSelected)="onFilesAdded($event)"
@@ -405,7 +405,7 @@
             type="file"
             hidden
             multiple
-            accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.bmp"
+            accept="image/jpeg,image/png,image/webp,image/bmp,.jpg,.jpeg,.png,.webp,.bmp"
             (change)="onFileInputChange($event)"
           />
         </div>
@@ -644,7 +644,31 @@
             </label>
           </div>
 
-          <!-- 5. MORE OPTIONS (Collapsed by default to keep sidebar simple) -->
+          <!-- 5. OUTPUT FILE NAME & METADATA -->
+          <div class="option-section">
+            <div class="input-wrap">
+              <label class="sub-label">Custom PDF File Name</label>
+              <input
+                type="text"
+                class="pt-text-input"
+                placeholder="Defaults to first file name"
+                [ngModel]="options().pdfTitle"
+                (ngModelChange)="updateOptions({ pdfTitle: $event })"
+              />
+            </div>
+            <div class="input-wrap mt-2">
+              <label class="sub-label">Author Name</label>
+              <input
+                type="text"
+                class="pt-text-input"
+                placeholder="Optional author name"
+                [ngModel]="options().pdfAuthor"
+                (ngModelChange)="updateOptions({ pdfAuthor: $event })"
+              />
+            </div>
+          </div>
+
+          <!-- 6. MORE OPTIONS (Collapsed by default to keep sidebar simple) -->
           <div class="option-section advanced-section">
             <button
               type="button"
@@ -793,29 +817,6 @@
                     />
                     <span>Fix photo rotation automatically</span>
                   </label>
-                </div>
-
-                <!-- PDF Metadata -->
-                <div class="input-wrap">
-                  <label class="sub-label">PDF Title</label>
-                  <input
-                    type="text"
-                    class="pt-text-input"
-                    placeholder="Defaults to first file name"
-                    [ngModel]="options().pdfTitle"
-                    (ngModelChange)="updateOptions({ pdfTitle: $event })"
-                  />
-                </div>
-
-                <div class="input-wrap">
-                  <label class="sub-label">PDF Author</label>
-                  <input
-                    type="text"
-                    class="pt-text-input"
-                    placeholder="Optional author name"
-                    [ngModel]="options().pdfAuthor"
-                    (ngModelChange)="updateOptions({ pdfAuthor: $event })"
-                  />
                 </div>
 
                 <div class="input-wrap">

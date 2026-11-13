@@ -33,7 +33,31 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  // Only handle GET and HEAD
+  // Proxy /api requests to backend API server at port 4000
+  if (req.url && req.url.startsWith('/api')) {
+    const proxyReq = http.request(
+      {
+        host: '127.0.0.1',
+        port: 4000,
+        path: req.url,
+        method: req.method,
+        headers: req.headers
+      },
+      (proxyRes) => {
+        res.writeHead(proxyRes.statusCode || 500, proxyRes.headers);
+        proxyRes.pipe(res);
+      }
+    );
+    proxyReq.on('error', (err) => {
+      console.error('API proxy error:', err.message);
+      res.statusCode = 502;
+      res.end(JSON.stringify({ success: false, error: 'API backend unreachable at localhost:4000' }));
+    });
+    req.pipe(proxyReq);
+    return;
+  }
+
+  // Only handle GET and HEAD for static assets
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.statusCode = 405;
     res.end('Method Not Allowed');

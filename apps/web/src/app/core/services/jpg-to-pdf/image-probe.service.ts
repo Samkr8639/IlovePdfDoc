@@ -30,9 +30,15 @@ export class ImageProbeService {
     const view = new DataView(headerBuffer);
 
     // 1. Check for Polyglots & explicitly rejected formats
-    if (this.isSvg(bytes)) {
+    if (this.isSvg(bytes) || file.name.toLowerCase().endsWith('.svg') || file.type === 'image/svg+xml') {
       return this.errorResult(
-        'SVG is not supported due to security script execution risks. Please use JPG, PNG, or WebP.'
+        'SVG format is not supported. Please use JPG, PNG, WebP, or BMP images.'
+      );
+    }
+
+    if (this.isGif(bytes) || file.name.toLowerCase().endsWith('.gif') || file.type === 'image/gif') {
+      return this.errorResult(
+        'GIF format is not supported. Please use JPG, PNG, WebP, or BMP images.'
       );
     }
 
@@ -94,15 +100,12 @@ export class ImageProbeService {
       return this.parseWebp(bytes, view);
     }
 
-    if (
-      (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && bytes[4] === 0x37 && bytes[5] === 0x61) ||
-      (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && bytes[4] === 0x39 && bytes[5] === 0x61)
-    ) {
-      return this.parseGif(bytes, view);
-    }
-
     if (bytes[0] === 0x42 && bytes[1] === 0x4d) {
       return this.parseBmp(bytes, view);
+    }
+
+    if (this.isGif(bytes)) {
+      return this.errorResult('GIF format is not supported. Please use JPG, PNG, WebP, or BMP images.');
     }
 
     return this.errorResult('Unrecognized image format or corrupt image header.');
@@ -111,6 +114,13 @@ export class ImageProbeService {
   // ---------------------------------------------------------------------------
   // FORMAT DETECTORS (Negative validation & Polyglot protection)
   // ---------------------------------------------------------------------------
+
+  private isGif(bytes: Uint8Array): boolean {
+    return (
+      (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && bytes[4] === 0x37 && bytes[5] === 0x61) ||
+      (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && bytes[4] === 0x39 && bytes[5] === 0x61)
+    );
+  }
 
   private isSvg(bytes: Uint8Array): boolean {
     const textSnippet = new TextDecoder('utf-8', { fatal: false }).decode(bytes.subarray(0, 512));

@@ -95,3 +95,7 @@ apps/web/.vscode/*
 !apps/web/.vscode/tasks.json
 !apps/web/.vscode/launch.json
 !apps/web/.vscode/extensions.json
+
+# 11. Graphify Cache & Backups
+graphify-out/cache/
+graphify-out/[0-9]*/

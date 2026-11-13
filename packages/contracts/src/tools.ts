@@ -346,12 +346,12 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
     id: 'jpg-to-pdf',
     name: 'JPG to PDF',
     shortDescription: 'Convert JPG images to PDF in seconds. Easily adjust orientation and margins.',
-    longDescription: 'Convert JPG, PNG, WebP, GIF, and BMP images into standardized PDF documents in seconds. Easily adjust orientation, margins, page sizes, and image fit with 100% in-browser privacy.',
+    longDescription: 'Convert JPG, PNG, WebP, and BMP images into standardized PDF documents in seconds. Easily adjust orientation, margins, page sizes, and image fit with 100% in-browser privacy.',
     category: 'convert',
     route: '/jpg-to-pdf',
     icon: 'image',
     processingMode: 'browser',
-    acceptedFileTypes: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', 'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'],
+    acceptedFileTypes: ['.jpg', '.jpeg', '.png', '.webp', '.bmp', 'image/jpeg', 'image/png', 'image/webp', 'image/bmp'],
     maxFiles: 300,
     maxFileSizeBytes: 50 * 1024 * 1024,
     status: 'available',
@@ -368,7 +368,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
         },
         {
           question: 'Which image formats can I convert?',
-          answer: 'You can convert JPG, JPEG, PNG, WebP, GIF, and BMP files. Up to 300 images can be combined into a single PDF or downloaded as a ZIP.'
+          answer: 'You can convert JPG, JPEG, PNG, WebP, and BMP files. GIF and SVG formats are not supported. Up to 300 images can be combined into a single PDF or downloaded as a ZIP.'
         },
         {
           question: 'Can I remove camera metadata (EXIF) from photos?',

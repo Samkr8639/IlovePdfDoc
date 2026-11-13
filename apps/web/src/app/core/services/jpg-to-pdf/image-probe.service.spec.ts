@@ -38,7 +38,15 @@ describe('ImageProbeService', () => {
     const file = new File([svgContent], 'test.svg', { type: 'image/svg+xml' });
     const res = await service.probeImage(file);
     expect(res.isValid).toBe(false);
-    expect(res.error).toContain('SVG is not supported');
+    expect(res.error).toContain('SVG format is not supported');
+  });
+
+  it('should reject GIF files', async () => {
+    const gifHeader = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x10, 0x00, 0x10, 0x00]);
+    const file = new File([gifHeader], 'animation.gif', { type: 'image/gif' });
+    const res = await service.probeImage(file);
+    expect(res.isValid).toBe(false);
+    expect(res.error).toContain('GIF format is not supported');
   });
 
   it('should reject TIFF files with clear conversion message', async () => {

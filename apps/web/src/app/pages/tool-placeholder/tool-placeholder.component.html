@@ -576,7 +576,7 @@
           <label class="options-label">Compression Level</label>
           <div class="compression-cards">
             <div class="compression-card" [class.selected]="compressionLevel() === 'extreme'"
-              (click)="compressionLevel.set('extreme')">
+              (click)="setCompressionLevel('extreme')">
               <div class="comp-radio-circle">
                 @if (compressionLevel() === 'extreme') {
                 <div class="comp-radio-dot"></div>
@@ -584,12 +584,12 @@
               </div>
               <div class="comp-card-content">
                 <h4 class="comp-card-title">Extreme Compression</h4>
-                <p class="comp-card-desc">Less quality, high compression (up to 75% smaller)</p>
+                <p class="comp-card-desc">Less quality, high compression (more than 70% smaller)</p>
               </div>
             </div>
 
             <div class="compression-card recommended-card" [class.selected]="compressionLevel() === 'recommended'"
-              (click)="compressionLevel.set('recommended')">
+              (click)="setCompressionLevel('recommended')">
               <span class="comp-recommended-badge">Recommended</span>
               <div class="comp-radio-circle">
                 @if (compressionLevel() === 'recommended') {
@@ -598,12 +598,12 @@
               </div>
               <div class="comp-card-content">
                 <h4 class="comp-card-title">Recommended Compression</h4>
-                <p class="comp-card-desc">Good quality, good compression (ideal for emails & web)</p>
+                <p class="comp-card-desc">Good quality, good compression (~50% smaller)</p>
               </div>
             </div>
 
             <div class="compression-card" [class.selected]="compressionLevel() === 'less'"
-              (click)="compressionLevel.set('less')">
+              (click)="setCompressionLevel('less')">
               <div class="comp-radio-circle">
                 @if (compressionLevel() === 'less') {
                 <div class="comp-radio-dot"></div>
@@ -611,8 +611,31 @@
               </div>
               <div class="comp-card-content">
                 <h4 class="comp-card-title">Less Compression</h4>
-                <p class="comp-card-desc">High quality, less compression (sharpest text & graphics)</p>
+                <p class="comp-card-desc">High quality, less compression (up to 20% smaller)</p>
               </div>
+            </div>
+          </div>
+
+          <!-- INTERACTIVE COMPRESSION LEVEL BAR -->
+          <div class="compression-slider-wrap">
+            <div class="comp-slider-header">
+              <span class="comp-slider-title">Custom Compression Level</span>
+              <span class="comp-slider-badge">{{ compressionPercent() }}% reduction</span>
+            </div>
+            <input
+              type="range"
+              class="comp-slider-input"
+              min="10"
+              max="90"
+              step="5"
+              [value]="compressionPercent()"
+              (input)="onCompressionSliderChange($event)"
+              aria-label="Compression percentage level bar"
+            />
+            <div class="comp-slider-ticks">
+              <span>10% (Low)</span>
+              <span>50% (Recommended)</span>
+              <span>90% (Maximum)</span>
             </div>
           </div>
         </div>

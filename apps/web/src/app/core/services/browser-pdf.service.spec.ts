@@ -218,6 +218,15 @@ describe('BrowserPdfService', () => {
       expect(res.sizeBytes).toBeGreaterThan(0);
     });
 
+    it('should compress with custom target percentage', async () => {
+      const file = await createTestPdf(2, 'custom.pdf');
+      const res = await service.compressPdf(file, 'custom', 75);
+
+      expect(res.level).toBe('custom');
+      expect(res.sizeBytes).toBeGreaterThan(0);
+      expect(res.pageCount).toBe(2);
+    });
+
     it('should compress multiple PDF files and package them into a ZIP archive', async () => {
       const file1 = await createTestPdf(2, 'doc1.pdf');
       const file2 = await createTestPdf(3, 'doc2.pdf');

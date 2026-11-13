@@ -10,7 +10,6 @@ import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.com
 import { ProcessingStateComponent } from '../../shared/components/processing-state/processing-state.component';
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
-import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
 
 type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -28,8 +27,7 @@ export interface CustomSplitRange {
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent,
-    ExploreMoreToolsComponent,
-    PtAdSlotComponent
+    ExploreMoreToolsComponent
   ],
   templateUrl: './tool-placeholder.component.html',
   styleUrl: './tool-placeholder.component.css'
@@ -55,6 +53,29 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
 
   // Compress PDF options
   compressionLevel = signal<'extreme' | 'recommended' | 'less'>('recommended');
+  compressionPercent = signal<number>(50);
+
+  setCompressionLevel(level: 'extreme' | 'recommended' | 'less'): void {
+    this.compressionLevel.set(level);
+    if (level === 'extreme') this.compressionPercent.set(75);
+    else if (level === 'recommended') this.compressionPercent.set(50);
+    else if (level === 'less') this.compressionPercent.set(20);
+  }
+
+  onCompressionSliderChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = parseInt(input.value, 10);
+    if (!isNaN(val)) {
+      this.compressionPercent.set(val);
+      if (val >= 70) {
+        this.compressionLevel.set('extreme');
+      } else if (val <= 30) {
+        this.compressionLevel.set('less');
+      } else {
+        this.compressionLevel.set('recommended');
+      }
+    }
+  }
 
   // Split PDF options (matching Screenshot 1 & 2 without green highlighted parts)
   splitMainTab = signal<'range' | 'pages'>('range'); // Range tab active
@@ -753,6 +774,7 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         const result = await this.pdfService.compressPdf(
           rawFiles,
           this.compressionLevel(),
+          this.compressionPercent(),
           (pct, msg) => {
             this.processingProgress.set(pct);
             this.processingMessage.set(msg);

@@ -205,6 +205,19 @@ describe('JpgToPdfComponent Unit Tests', () => {
     expect(component.errorMessage()).toContain('Unrecognized image format');
   });
 
+  it('should reject GIF and SVG files with clear error message', async () => {
+    const gifFile = new File(['GIF89a...'], 'animation.gif', { type: 'image/gif' });
+    const svgFile = new File(['<svg></svg>'], 'vector.svg', { type: 'image/svg+xml' });
+
+    await component.onFilesAdded([gifFile]);
+    expect(component.selectedFiles().length).toBe(0);
+    expect(component.errorMessage()).toBe('GIF and SVG formats are not supported. Please select JPG, PNG, WebP, or BMP images.');
+
+    await component.onFilesAdded([svgFile]);
+    expect(component.selectedFiles().length).toBe(0);
+    expect(component.errorMessage()).toBe('GIF and SVG formats are not supported. Please select JPG, PNG, WebP, or BMP images.');
+  });
+
   it('should reorder files with move left and move right', async () => {
     const fileA = createMockImageFile('a.jpg', 1000);
     const fileB = createMockImageFile('b.jpg', 2000);

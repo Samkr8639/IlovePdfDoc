@@ -73,9 +73,10 @@ export class JpgToPdfService {
     const pdfDoc = await PDFDocument.create();
 
     // Set PDF Document Metadata
-    const title = options.pdfTitle.trim() || this.stripExtension(items[0].name);
+    const customTitle = options.pdfTitle?.trim();
+    const title = customTitle || this.stripExtension(items[0].name);
     pdfDoc.setTitle(title);
-    if (options.pdfAuthor.trim()) {
+    if (options.pdfAuthor && options.pdfAuthor.trim()) {
       pdfDoc.setAuthor(options.pdfAuthor.trim());
     }
     pdfDoc.setCreator('PDFTailor');
@@ -131,7 +132,10 @@ export class JpgToPdfService {
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
 
-    let downloadFilename = this.sanitizeFileName(this.stripExtension(items[0].name));
+    const customName = options.pdfTitle?.trim();
+    let downloadFilename = customName
+      ? this.sanitizeFileName(this.stripExtension(customName))
+      : this.sanitizeFileName(this.stripExtension(items[0].name));
     if (!downloadFilename) downloadFilename = 'images';
     downloadFilename += '.pdf';
 
@@ -185,9 +189,12 @@ export class JpgToPdfService {
 
       try {
         const singleDoc = await PDFDocument.create();
-        const baseTitle = this.stripExtension(item.name);
+        const customTitle = options.pdfTitle?.trim();
+        const baseTitle = customTitle
+          ? `${this.sanitizeFileName(this.stripExtension(customTitle))}-${i + 1}`
+          : this.stripExtension(item.name);
         singleDoc.setTitle(baseTitle);
-        if (options.pdfAuthor.trim()) {
+        if (options.pdfAuthor && options.pdfAuthor.trim()) {
           singleDoc.setAuthor(options.pdfAuthor.trim());
         }
         singleDoc.setCreator('PDFTailor');
@@ -243,9 +250,13 @@ export class JpgToPdfService {
       message: 'Done!'
     });
 
+    const zipDownloadName = options.pdfTitle?.trim()
+      ? `${this.sanitizeFileName(this.stripExtension(options.pdfTitle.trim()))}.zip`
+      : 'images.zip';
+
     return {
       blob: zipBlob,
-      downloadFilename: 'images.zip',
+      downloadFilename: zipDownloadName,
       isZip: true,
       pageCount: zipEntries.length,
       failedCount: total - zipEntries.length,

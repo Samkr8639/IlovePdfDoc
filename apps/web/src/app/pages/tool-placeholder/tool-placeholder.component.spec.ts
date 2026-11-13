@@ -47,6 +47,22 @@ describe('ToolPlaceholderComponent Integration Test', () => {
     expect(component.heroTitle()).toBe('Compress PDF files');
     expect(component.dropzoneButtonTitle()).toBe('Select PDF files');
     expect(component.compressionLevel()).toBe('recommended');
+    expect(component.compressionPercent()).toBe(50);
+  });
+
+  it('should update compression level and slider percentage synchronously', () => {
+    component.setCompressionLevel('extreme');
+    expect(component.compressionLevel()).toBe('extreme');
+    expect(component.compressionPercent()).toBe(75);
+
+    component.setCompressionLevel('less');
+    expect(component.compressionLevel()).toBe('less');
+    expect(component.compressionPercent()).toBe(20);
+
+    const mockEvent = { target: { value: '80' } } as unknown as Event;
+    component.onCompressionSliderChange(mockEvent);
+    expect(component.compressionPercent()).toBe(80);
+    expect(component.compressionLevel()).toBe('extreme');
   });
 
   it('should transition to organize mode when a PDF file is added', async () => {

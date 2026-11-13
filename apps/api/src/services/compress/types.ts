@@ -15,8 +15,8 @@ export interface CompressionProfile {
 export const COMPRESSION_PROFILES: Record<CompressionLevel, CompressionProfile> = {
   extreme: {
     level: 'extreme',
-    maxDpi: 85, // Range 72-96 DPI
-    jpegQuality: 45, // Range 40-50
+    maxDpi: 72, // Range 72-85 DPI for >70% reduction
+    jpegQuality: 35, // High compression
     chromaSubsampling: '4:2:0',
     stripMetadata: true,
     removePieceInfo: true,
@@ -26,8 +26,8 @@ export const COMPRESSION_PROFILES: Record<CompressionLevel, CompressionProfile> 
   },
   recommended: {
     level: 'recommended',
-    maxDpi: 144, // 144 DPI standard for sharp retina screens
-    jpegQuality: 70, // Range 65-72
+    maxDpi: 120, // Standard screen resolution for ~50% reduction
+    jpegQuality: 58,
     chromaSubsampling: '4:2:0',
     stripMetadata: false,
     removePieceInfo: true,
@@ -37,8 +37,8 @@ export const COMPRESSION_PROFILES: Record<CompressionLevel, CompressionProfile> 
   },
   less: {
     level: 'less',
-    maxDpi: 240, // Range 200-300 DPI
-    jpegQuality: 85, // Range 82-88
+    maxDpi: 180, // Sharp graphics for ~20% reduction
+    jpegQuality: 80,
     chromaSubsampling: '4:4:4',
     stripMetadata: false,
     removePieceInfo: false,

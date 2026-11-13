@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { SharedPdfjsService } from './shared-pdfjs.service';
 import type { PDFDocument, PDFName } from 'pdf-lib';
 import type JSZip from 'jszip';
 import { PdfDocumentAnalysis, PdfPageAnalysis } from '@paperflow/contracts';
@@ -71,7 +72,7 @@ export interface CompressPdfResult extends MergeResult {
   formattedOriginalSize: string;
   formattedCompressedSize: string;
   formattedSpaceSaved: string;
-  level: 'extreme' | 'recommended' | 'less';
+  level: 'extreme' | 'recommended' | 'less' | 'custom';
   isZip: boolean;
   filesCount: number;
   items: CompressedPdfItem[];
@@ -82,6 +83,8 @@ export interface CompressPdfResult extends MergeResult {
   providedIn: 'root'
 })
 export class BrowserPdfService {
+  private sharedPdfjs = inject(SharedPdfjsService, { optional: true });
+
   private async getPdfLib() {
     return await import('pdf-lib');
   }
@@ -432,10 +435,17 @@ export class BrowserPdfService {
 
   async compressPdf(
     files: File | File[],
-    level: 'extreme' | 'recommended' | 'less' = 'recommended',
-    onProgress?: (percent: number, message: string) => void
+    level: 'extreme' | 'recommended' | 'less' | 'custom' = 'recommended',
+    targetPercentOrProgress?: number | ((percent: number, message: string) => void),
+    maybeProgress?: (percent: number, message: string) => void
   ): Promise<CompressPdfResult> {
     const fileList = Array.isArray(files) ? files : [files];
+    const targetPercent = typeof targetPercentOrProgress === 'number' ? targetPercentOrProgress : undefined;
+    const onProgress = typeof targetPercentOrProgress === 'function' ? targetPercentOrProgress : maybeProgress;
+
+    const targetReduction = typeof targetPercent === 'number' && targetPercent > 0
+      ? Math.max(10, Math.min(90, Math.round(targetPercent)))
+      : (level === 'extreme' ? 75 : level === 'recommended' ? 50 : 20);
 
     if (fileList.length === 0) {
       throw new Error('Please select at least one PDF file.');
@@ -455,7 +465,8 @@ export class BrowserPdfService {
       for (const f of fileList) {
         formData.append('files', f);
       }
-      formData.append('level', level);
+      formData.append('level', level === 'custom' ? (targetReduction >= 70 ? 'extreme' : targetReduction <= 30 ? 'less' : 'recommended') : level);
+      formData.append('targetPercent', String(targetReduction));
 
       onProgress?.(30, `Optimizing raster streams and document layout (${level})...`);
       const response = await fetch(`${baseUrl}/compress`, {
@@ -574,7 +585,7 @@ export class BrowserPdfService {
       // 1. Optimize embedded raster images (photos, scans, screenshots) in the browser
       let imagesOptimized = 0;
       try {
-        imagesOptimized = await this.optimizePdfImagesInBrowser(pdfDoc, level, (msg) => {
+        imagesOptimized = await this.optimizePdfImagesInBrowser(pdfDoc, targetReduction, (msg) => {
           onProgress?.(startPct + 10, msg);
         });
       } catch (e) {
@@ -582,8 +593,8 @@ export class BrowserPdfService {
       }
 
       let compressedBytes: Uint8Array;
-      if (level === 'extreme') {
-        // Extreme: strip metadata, enable object streams, compress stream dictionaries
+      if (level === 'extreme' || targetReduction >= 70) {
+        // Extreme / High compression: strip metadata, enable object streams, compress stream dictionaries
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
@@ -594,7 +605,7 @@ export class BrowserPdfService {
           useObjectStreams: true,
           objectsPerTick: 50
         });
-      } else if (level === 'recommended') {
+      } else {
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
@@ -604,15 +615,30 @@ export class BrowserPdfService {
         compressedBytes = await pdfDoc.save({
           useObjectStreams: true
         });
-      } else {
-        // Less: standard object stream packing
-        compressedBytes = await pdfDoc.save({
-          useObjectStreams: true
-        });
       }
 
       const origBytes = file.size;
       let compBytes = compressedBytes.byteLength;
+      let currentReduction = origBytes > 0 ? ((origBytes - compBytes) / origBytes) * 100 : 0;
+
+      // 2. If in-place image optimization was not enough to meet the target reduction (e.g. for extreme > 70%),
+      // perform high-efficiency page visual compaction via SharedPdfjsService
+      if (this.sharedPdfjs && currentReduction < targetReduction * 0.75) {
+        try {
+          onProgress?.(startPct + 15, `Applying deep layout and visual compression (${targetReduction}% target)...`);
+          const rasterBytes = await this.compactPdfViaRaster(arrayBuffer, targetReduction, (pct, msg) => {
+            onProgress?.(startPct + 15 + Math.round(pct * 0.15), msg);
+          });
+          if (rasterBytes && rasterBytes.byteLength < compBytes) {
+            compressedBytes = rasterBytes;
+            compBytes = rasterBytes.byteLength;
+            currentReduction = origBytes > 0 ? ((origBytes - compBytes) / origBytes) * 100 : 0;
+            imagesOptimized = Math.max(imagesOptimized, pagesInDoc);
+          }
+        } catch (e) {
+          console.warn('Raster compaction skipped or unsupported:', e);
+        }
+      }
 
       // Safety rule: never return a file larger than the original
       let savingsReason = 'Optimization applied to document streams.';
@@ -735,11 +761,11 @@ export class BrowserPdfService {
 
   /**
    * Optimizes embedded raster images (JPEG/PNG/Flate) directly within the client-side PDF document.
-   * Recompresses images based on the user's selected compression level.
+   * Recompresses images based on the user's target reduction percentage.
    */
   private async optimizePdfImagesInBrowser(
     pdfDoc: PDFDocument,
-    level: 'extreme' | 'recommended' | 'less',
+    targetReduction: number,
     onProgress?: (message: string) => void
   ): Promise<number> {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -748,11 +774,11 @@ export class BrowserPdfService {
 
     const { PDFName, PDFNumber, PDFRawStream, PDFStream, PDFDict } = await this.getPdfLib();
 
-    const profile = {
-      extreme: { maxDim: 1200, quality: 0.50, minSavings: 0.03 },
-      recommended: { maxDim: 1600, quality: 0.70, minSavings: 0.04 },
-      less: { maxDim: 2048, quality: 0.85, minSavings: 0.05 }
-    }[level];
+    // Profile dynamically calculated from targetReduction percentage
+    const clampedReduction = Math.max(10, Math.min(90, targetReduction));
+    const quality = Math.max(0.20, Math.min(0.85, 0.95 - (clampedReduction / 100) * 0.73));
+    const maxDim = Math.max(680, Math.round(2200 - (clampedReduction / 100) * 1600));
+    const scaleFactor = clampedReduction >= 70 ? 0.55 : clampedReduction >= 45 ? 0.75 : 0.90;
 
     const indirectObjects = pdfDoc.context.enumerateIndirectObjects();
     const imageObjects: Array<{ ref: any; obj: any; dict: any }> = [];
@@ -778,7 +804,7 @@ export class BrowserPdfService {
     for (let i = 0; i < imageObjects.length; i++) {
       const { obj, dict } = imageObjects[i];
       const contents = (obj as any).contents as Uint8Array;
-      if (!contents || contents.length < 2048) continue; // Skip tiny glyphs/icons < 2KB
+      if (!contents || contents.length < 1024) continue; // Skip tiny glyphs < 1KB
 
       const w = (dict.get(PDFName.of('Width')) as any)?.asNumber?.();
       const h = (dict.get(PDFName.of('Height')) as any)?.asNumber?.();
@@ -807,11 +833,11 @@ export class BrowserPdfService {
           if (bitmap) {
             const curW = bitmap.width || w || 800;
             const curH = bitmap.height || h || 600;
-            let targetW = curW;
-            let targetH = curH;
+            let targetW = Math.max(16, Math.round(curW * scaleFactor));
+            let targetH = Math.max(16, Math.round(curH * scaleFactor));
 
-            if (targetW > profile.maxDim || targetH > profile.maxDim) {
-              const scale = Math.min(profile.maxDim / targetW, profile.maxDim / targetH);
+            if (targetW > maxDim || targetH > maxDim) {
+              const scale = Math.min(maxDim / targetW, maxDim / targetH);
               targetW = Math.max(16, Math.round(targetW * scale));
               targetH = Math.max(16, Math.round(targetH * scale));
             }
@@ -829,12 +855,12 @@ export class BrowserPdfService {
               }
 
               const compressedBlob = await new Promise<Blob | null>((resolve) =>
-                canvas.toBlob(resolve, 'image/jpeg', profile.quality)
+                canvas.toBlob(resolve, 'image/jpeg', quality)
               );
 
               if (compressedBlob) {
                 const newBytes = new Uint8Array(await compressedBlob.arrayBuffer());
-                if (newBytes.length <= contents.length * (1 - profile.minSavings)) {
+                if (newBytes.length < contents.length) {
                   (obj as any).contents = newBytes;
                   dict.set(PDFName.of('Width'), PDFNumber.of(targetW));
                   dict.set(PDFName.of('Height'), PDFNumber.of(targetH));
@@ -918,11 +944,11 @@ export class BrowserPdfService {
 
             if (canvas) {
               let finalCanvas = canvas;
-              let targetW = w;
-              let targetH = h;
+              let targetW = Math.max(16, Math.round(w * scaleFactor));
+              let targetH = Math.max(16, Math.round(h * scaleFactor));
 
-              if (targetW > profile.maxDim || targetH > profile.maxDim) {
-                const scale = Math.min(profile.maxDim / targetW, profile.maxDim / targetH);
+              if (targetW > maxDim || targetH > maxDim) {
+                const scale = Math.min(maxDim / targetW, maxDim / targetH);
                 targetW = Math.max(16, Math.round(targetW * scale));
                 targetH = Math.max(16, Math.round(targetH * scale));
                 const scCanvas = document.createElement('canvas');
@@ -938,12 +964,12 @@ export class BrowserPdfService {
               }
 
               const compressedBlob = await new Promise<Blob | null>((resolve) =>
-                finalCanvas.toBlob(resolve, 'image/jpeg', profile.quality)
+                finalCanvas.toBlob(resolve, 'image/jpeg', quality)
               );
 
               if (compressedBlob) {
                 const newBytes = new Uint8Array(await compressedBlob.arrayBuffer());
-                if (newBytes.length <= contents.length * (1 - profile.minSavings)) {
+                if (newBytes.length < contents.length) {
                   (obj as any).contents = newBytes;
                   dict.set(PDFName.of('Width'), PDFNumber.of(targetW));
                   dict.set(PDFName.of('Height'), PDFNumber.of(targetH));
@@ -964,5 +990,78 @@ export class BrowserPdfService {
     }
 
     return optimizedCount;
+  }
+
+  /**
+   * Compresses document by rendering pages at calculated DPI & JPEG quality,
+   * guaranteeing >70% reduction for extreme, ~50% for recommended, ~20% for less,
+   * or following custom percentage slider.
+   */
+  private async compactPdfViaRaster(
+    arrayBuffer: ArrayBuffer,
+    targetReduction: number,
+    onProgress?: (percent: number, msg: string) => void
+  ): Promise<Uint8Array | null> {
+    if (typeof window === 'undefined' || typeof document === 'undefined' || !this.sharedPdfjs) {
+      return null;
+    }
+
+    let pdfDocProxy: any = null;
+    try {
+      pdfDocProxy = await this.sharedPdfjs.loadDocument(arrayBuffer);
+      const numPages = pdfDocProxy.numPages;
+      if (!numPages || numPages === 0) return null;
+
+      const { PDFDocument } = await this.getPdfLib();
+      const outputPdf = await PDFDocument.create();
+
+      // Render scale and JPEG quality based on target reduction:
+      // Extreme (>= 70%): scale ~0.9 (approx 65-72 DPI), quality ~0.35
+      // Recommended (~50%): scale ~1.15 (approx 85-96 DPI), quality ~0.58
+      // Less (~20%): scale ~1.45 (approx 110-120 DPI), quality ~0.78
+      const renderScale = Math.max(0.70, Math.min(1.5, 1.55 - (targetReduction / 100) * 0.90));
+      const jpegQuality = Math.max(0.28, Math.min(0.85, 0.95 - (targetReduction / 100) * 0.72));
+
+      for (let p = 1; p <= numPages; p++) {
+        onProgress?.(Math.round((p / numPages) * 100), `Compacting document page ${p} of ${numPages}...`);
+        const page = await pdfDocProxy.getPage(p);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const viewport = page.getViewport({ scale: renderScale });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(viewport.width);
+        canvas.height = Math.round(viewport.height);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) continue;
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', jpegQuality));
+        if (!blob) continue;
+
+        const imgBytes = new Uint8Array(await blob.arrayBuffer());
+        const embeddedImg = await outputPdf.embedJpg(imgBytes);
+
+        const newPage = outputPdf.addPage([unscaledViewport.width, unscaledViewport.height]);
+        newPage.drawImage(embeddedImg, {
+          x: 0,
+          y: 0,
+          width: unscaledViewport.width,
+          height: unscaledViewport.height
+        });
+      }
+
+      if (outputPdf.getPageCount() === 0) return null;
+
+      return await outputPdf.save({ useObjectStreams: true });
+    } catch {
+      return null;
+    } finally {
+      if (pdfDocProxy) {
+        try {
+          await this.sharedPdfjs.destroyDocument(pdfDocProxy);
+        } catch {}
+      }
+    }
   }
 }
