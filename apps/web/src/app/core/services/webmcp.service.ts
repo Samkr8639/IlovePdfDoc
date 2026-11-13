@@ -30,7 +30,11 @@ export class WebMcpService {
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      this.initWebMcp();
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => this.initWebMcp());
+      } else {
+        setTimeout(() => this.initWebMcp(), 250);
+      }
     }
   }
 
