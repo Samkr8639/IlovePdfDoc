@@ -120,5 +120,31 @@
     "LINK_BLOG": "Blog & Guides",
     "LINK_PRESS": "Press & Media Kit",
     "COPYRIGHT": "© 2026 PDFTailor. All rights reserved. 100% In-Browser Privacy Guarantee."
+  },
+  "SPLIT_PDF": {
+    "TITLE": "Split PDF",
+    "SUBTITLE": "Separate one page or a whole set into independent, lightweight PDF files with full privacy.",
+    "CHANGE_FILE": "Change File",
+    "MODE_CUSTOM": "Custom Ranges",
+    "MODE_CUSTOM_DESC": "Define specific page ranges to extract into separate files",
+    "MODE_FIXED": "Fixed Page Chunks",
+    "MODE_FIXED_DESC": "Split document into equal chunks of N pages",
+    "MODE_EXTRACT_ALL": "Extract All Pages",
+    "MODE_EXTRACT_ALL_DESC": "Convert every single page into an independent PDF",
+    "RANGE_FROM": "From page",
+    "RANGE_TO": "to",
+    "ADD_RANGE": "+ Add Another Range",
+    "CHUNK_SIZE_LABEL": "Pages per split file",
+    "SUMMARY_TITLE": "Split Summary",
+    "SUMMARY_FILES_COUNT": "separate PDF files will be created",
+    "SUMMARY_SINGLE_FILE": "1 PDF file will be created",
+    "SUMMARY_DELIVERY_ZIP": "Packaged as a ZIP archive",
+    "SUMMARY_DELIVERY_SINGLE": "Downloaded directly as a single PDF",
+    "BTN_SPLIT": "Split PDF",
+    "PAGE": "Page",
+    "PART": "Part",
+    "EXCLUDED": "Excluded",
+    "ERROR_SINGLE_FILE_ONLY": "Split PDF accepts one PDF at a time. Please upload a single document.",
+    "ERROR_INVALID_RANGES": "Please fix invalid page ranges before splitting."
   }
 }

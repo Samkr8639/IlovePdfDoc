@@ -120,5 +120,31 @@
     "LINK_BLOG": "Blog y guías",
     "LINK_PRESS": "Kit de prensa y medios",
     "COPYRIGHT": "© 2026 PDFTailor. Todos los derechos reservados. Garantía de privacidad 100% en el navegador."
+  },
+  "SPLIT_PDF": {
+    "TITLE": "Dividir PDF",
+    "SUBTITLE": "Extrae una página o un conjunto para convertirlo fácilmente en archivos independientes con total privacidad.",
+    "CHANGE_FILE": "Cambiar archivo",
+    "MODE_CUSTOM": "Rangos personalizados",
+    "MODE_CUSTOM_DESC": "Define rangos de páginas específicos para extraer en archivos independientes",
+    "MODE_FIXED": "Bloques fijos de páginas",
+    "MODE_FIXED_DESC": "Divide el documento en partes iguales de N páginas",
+    "MODE_EXTRACT_ALL": "Extraer todas las páginas",
+    "MODE_EXTRACT_ALL_DESC": "Convierte cada página en un archivo PDF independiente",
+    "RANGE_FROM": "Desde página",
+    "RANGE_TO": "hasta",
+    "ADD_RANGE": "+ Añadir otro rango",
+    "CHUNK_SIZE_LABEL": "Páginas por archivo dividido",
+    "SUMMARY_TITLE": "Resumen de división",
+    "SUMMARY_FILES_COUNT": "archivos PDF independientes serán creados",
+    "SUMMARY_SINGLE_FILE": "Se creará 1 archivo PDF",
+    "SUMMARY_DELIVERY_ZIP": "Empaquetado en un archivo ZIP",
+    "SUMMARY_DELIVERY_SINGLE": "Descargado directamente como un único PDF",
+    "BTN_SPLIT": "Dividir PDF",
+    "PAGE": "Página",
+    "PART": "Parte",
+    "EXCLUDED": "Excluida",
+    "ERROR_SINGLE_FILE_ONLY": "Dividir PDF acepta un archivo a la vez. Por favor sube un solo documento.",
+    "ERROR_INVALID_RANGES": "Por favor corrige los rangos de páginas no válidos antes de dividir."
   }
 }

@@ -120,5 +120,31 @@
     "LINK_BLOG": "ब्लॉग और गाइड",
     "LINK_PRESS": "प्रेस एवं मीडिया किट",
     "COPYRIGHT": "© 2026 PDFTailor. सर्वाधिकार सुरक्षित। 100% इन-ब्राउज़र गोपनीयता गारंटी।"
+  },
+  "SPLIT_PDF": {
+    "TITLE": "PDF विभाजित करें",
+    "SUBTITLE": "पूर्ण गोपनीयता के साथ एक या एकाधिक पृष्ठों को स्वतंत्र PDF फाइलों में अलग करें।",
+    "CHANGE_FILE": "फाइल बदलें",
+    "MODE_CUSTOM": "कस्टम रेंज",
+    "MODE_CUSTOM_DESC": "अलग फाइलों में निकालने के लिए विशिष्ट पेज रेंज चुनें",
+    "MODE_FIXED": "निश्चित पेज समूह",
+    "MODE_FIXED_DESC": "दस्तावेज़ को N पृष्ठों के समान भागों में विभाजित करें",
+    "MODE_EXTRACT_ALL": "सभी पेज अलग करें",
+    "MODE_EXTRACT_ALL_DESC": "प्रत्येक पृष्ठ को एक स्वतंत्र PDF फाइल में बदलें",
+    "RANGE_FROM": "पेज से",
+    "RANGE_TO": "तक",
+    "ADD_RANGE": "+ अन्य रेंज जोड़ें",
+    "CHUNK_SIZE_LABEL": "प्रति फाइल पेज संख्या",
+    "SUMMARY_TITLE": "विभाजन सारांश",
+    "SUMMARY_FILES_COUNT": "अलग-अलग PDF फाइलें बनाई जाएंगी",
+    "SUMMARY_SINGLE_FILE": "1 PDF फाइल बनाई जाएगी",
+    "SUMMARY_DELIVERY_ZIP": "ZIP संग्रह के रूप में पैक किया गया",
+    "SUMMARY_DELIVERY_SINGLE": "सीधे एकल PDF के रूप में डाउनलोड करें",
+    "BTN_SPLIT": "PDF विभाजित करें",
+    "PAGE": "पेज",
+    "PART": "भाग",
+    "EXCLUDED": "छोड़ा गया",
+    "ERROR_SINGLE_FILE_ONLY": "PDF विभाजित करें एक बार में केवल एक PDF स्वीकार करता है।",
+    "ERROR_INVALID_RANGES": "विभाजित करने से पहले कृपया अमान्य पेज रेंज ठीक करें।"
   }
 }
