@@ -32,7 +32,6 @@ export interface SplitPdfOptions {
   ranges?: PageRange[];
   pageExpression?: string;
   fixedPageCount?: number;
-  mergeOutput?: boolean;
 }
 
 export interface SplitPdfOutputFile {
@@ -321,30 +320,30 @@ export class BrowserPdfService {
     }
 
     const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_\-]/g, '_');
-    const mergeOutput = !!options.mergeOutput || targetChunks.length === 1;
+    const isSingleChunk = targetChunks.length === 1;
 
-    // 2. Scenario A: Single merged output PDF
-    if (mergeOutput) {
-      onProgress?.(45, 'Creating consolidated PDF document...');
-      const mergedDoc = await PDFDocument.create();
-
+    // 2. Scenario A: Single chunk output (1 PDF document)
+    if (isSingleChunk) {
+      onProgress?.(45, 'Creating split PDF document...');
+      const chunkDoc = await PDFDocument.create();
+      const chunk = targetChunks[0];
+      const start = Math.max(1, Math.min(chunk.from, totalPages));
+      const end = Math.max(start, Math.min(chunk.to, totalPages));
       const indicesToCopy: number[] = [];
-      for (const chunk of targetChunks) {
-        const start = Math.max(1, Math.min(chunk.from, totalPages));
-        const end = Math.max(start, Math.min(chunk.to, totalPages));
-        for (let p = start; p <= end; p++) {
-          indicesToCopy.push(p - 1);
-        }
+      for (let p = start; p <= end; p++) {
+        indicesToCopy.push(p - 1);
       }
 
-      onProgress?.(65, `Copying ${indicesToCopy.length} pages...`);
-      const copiedPages = await mergedDoc.copyPages(sourceDoc, indicesToCopy);
-      copiedPages.forEach(p => mergedDoc.addPage(p));
+      onProgress?.(65, `Extracting ${indicesToCopy.length} pages...`);
+      const copiedPages = await chunkDoc.copyPages(sourceDoc, indicesToCopy);
+      copiedPages.forEach(p => chunkDoc.addPage(p));
 
       onProgress?.(85, 'Finalizing PDF output...');
-      const bytes = await mergedDoc.save();
+      const bytes = await chunkDoc.save();
       const pdfBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
-      const filename = `${baseName}_split.pdf`;
+      const filename = start === end
+        ? `${baseName}_page_${start}.pdf`
+        : `${baseName}_split_${start}-${end}.pdf`;
       const blob = new File([pdfBuffer], filename, { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
 

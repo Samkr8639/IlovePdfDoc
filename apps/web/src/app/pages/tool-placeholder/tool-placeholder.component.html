@@ -458,17 +458,6 @@
                         </div>
                       }
 
-                      <div class="ilove-checkbox-row">
-                        <label class="ilove-checkbox-label">
-                          <input
-                            type="checkbox"
-                            [(ngModel)]="mergeExtractedPages"
-                            class="ilove-check"
-                          />
-                          <span>Merge extracted pages into one PDF file.</span>
-                        </label>
-                      </div>
-
                       <!-- Blue Info Alert matching Screenshot 1 -->
                       <div class="ilove-info-card">
                         <div class="ilove-info-icon">
@@ -479,9 +468,7 @@
                           </svg>
                         </div>
                         <p class="ilove-info-text">
-                          @if (mergeExtractedPages()) {
-                            Selected pages will be merged into 1 PDF file. 1 PDF will be created.
-                          } @else if (splitExtractMode() === 'select_pages') {
+                          @if (splitExtractMode() === 'select_pages') {
                             Selected pages will be converted into separate PDF files. {{ calculatedSplitCount() }} PDF will be created.
                           } @else {
                             Every page of this PDF will be converted into an independent PDF file. {{ selectedFiles()[0]?.pageCount || 1 }} PDFs will be created.
@@ -625,16 +612,6 @@
                         </div>
                       }
 
-                      <div class="ilove-checkbox-row">
-                        <label class="ilove-checkbox-label">
-                          <input
-                            type="checkbox"
-                            [(ngModel)]="mergeExtractedPages"
-                            class="ilove-check"
-                          />
-                          <span>Merge all ranges into one PDF file.</span>
-                        </label>
-                      </div>
                     </div>
                   }
                 </div>

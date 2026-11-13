@@ -60,7 +60,6 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
   splitRangeMode = signal<'custom' | 'fixed'>('custom'); // Only Custom and Fixed (NO Smart!)
   splitPageRanges = signal<string>(''); // Bound to input with placeholder "example: 1,5-8"
   splitFixedCount = signal<number>(1);
-  mergeExtractedPages = signal<boolean>(false); // Checkbox: Merge extracted pages into one PDF file.
 
   // Custom split ranges for Range -> Custom mode
   customRanges = signal<CustomSplitRange[]>([
@@ -761,9 +760,8 @@ export class ToolPlaceholderComponent implements OnInit, OnDestroy {
         const isPagesTab = this.splitMainTab() === 'pages';
         const isCustomRange = !isPagesTab && this.splitRangeMode() === 'custom';
         const isFixedRange = !isPagesTab && this.splitRangeMode() === 'fixed';
-        const mergeOutput = this.mergeExtractedPages();
 
-        let options: any = { mergeOutput };
+        let options: any = {};
 
         if (isPagesTab) {
           if (this.splitExtractMode() === 'extract_all') {
