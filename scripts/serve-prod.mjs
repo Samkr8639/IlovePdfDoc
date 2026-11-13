@@ -35,13 +35,17 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
   // Proxy /api requests to backend API server at port 4000
   if (req.url && req.url.startsWith('/api')) {
+    const headers = { ...req.headers };
+    headers['x-forwarded-host'] = req.headers['host'] || 'localhost';
+    headers['host'] = '127.0.0.1:4000';
+
     const proxyReq = http.request(
       {
         host: '127.0.0.1',
         port: 4000,
         path: req.url,
         method: req.method,
-        headers: req.headers
+        headers
       },
       (proxyRes) => {
         res.writeHead(proxyRes.statusCode || 500, proxyRes.headers);

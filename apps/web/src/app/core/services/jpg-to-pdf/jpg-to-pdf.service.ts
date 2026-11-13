@@ -24,7 +24,7 @@ import { createStreamingZip, ZipEntryInput } from '../pdf-to-jpg/streaming-zip';
   providedIn: 'root'
 })
 export class JpgToPdfService {
-  constructor(private layoutService: PageLayoutService) {}
+  constructor(private layoutService: PageLayoutService) { }
 
   /**
    * Converts a list of image items into a single PDF or a ZIP of individual PDFs.
