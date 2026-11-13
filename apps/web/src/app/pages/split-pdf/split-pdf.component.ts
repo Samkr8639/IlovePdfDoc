@@ -10,7 +10,7 @@ import { ProcessingStateComponent } from '../../shared/components/processing-sta
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 import { SplitRangeParser, PageRange } from '../../core/utils/split-range-parser';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 export type SplitMode = 'custom' | 'fixed' | 'extract_all';
 export type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
@@ -50,6 +50,7 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
   private toolRegistry = inject(ToolRegistryService);
   private seo = inject(SeoService);
   private layoutService = inject(LayoutService);
+  private translate = inject(TranslateService);
 
   currentState = signal<WorkspaceState>('upload');
   selectedFile = signal<ValidatedPdfFile | null>(null);
@@ -103,9 +104,9 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
     if (mode === 'fixed') {
       const size = this.fixedChunkSize();
       if (!size || size < 1) {
-        globalError = 'Pages per chunk must be at least 1.';
+        globalError = this.translate.instant('SPLIT_PDF.ERR_CHUNK_SIZE_MIN');
       } else if (size > total) {
-        globalError = `Pages per chunk cannot exceed total pages (${total}).`;
+        globalError = this.translate.instant('SPLIT_PDF.ERR_CHUNK_SIZE_MAX');
       }
       return { isValid: !globalError, errors, globalError };
     }
@@ -117,7 +118,7 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
     // Custom mode validation
     const ranges = this.customRanges();
     if (ranges.length === 0) {
-      return { isValid: false, errors, globalError: 'Please add at least one page range.' };
+      return { isValid: false, errors, globalError: this.translate.instant('SPLIT_PDF.ERR_NO_RANGES') };
     }
 
     const seenPages = new Map<number, string>(); // page -> range id
@@ -128,34 +129,34 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
       const to = Number(r.to);
 
       if (isNaN(from) || isNaN(to)) {
-        errors[r.id] = 'Page numbers must be integers.';
+        errors[r.id] = this.translate.instant('SPLIT_PDF.ERR_INVALID_NUMBER');
         continue;
       }
       if (from < 1) {
-        errors[r.id] = 'Start page must be at least 1.';
+        errors[r.id] = this.translate.instant('SPLIT_PDF.ERR_START_MIN');
         continue;
       }
       if (to < 1) {
-        errors[r.id] = 'End page must be at least 1.';
+        errors[r.id] = this.translate.instant('SPLIT_PDF.ERR_END_MIN');
         continue;
       }
       if (from > total) {
-        errors[r.id] = `Start page ${from} exceeds total pages (${total}).`;
+        errors[r.id] = this.translate.instant('SPLIT_PDF.ERR_START_EXCEEDS');
         continue;
       }
       if (to > total) {
-        errors[r.id] = `End page ${to} exceeds total pages (${total}).`;
+        errors[r.id] = this.translate.instant('SPLIT_PDF.ERR_END_EXCEEDS');
         continue;
       }
       if (from > to) {
-        errors[r.id] = `Start page (${from}) cannot be greater than end page (${to}).`;
+        errors[r.id] = this.translate.instant('SPLIT_PDF.ERR_START_GREATER');
         continue;
       }
 
       // Overlap detection
       for (let p = from; p <= to; p++) {
         if (seenPages.has(p)) {
-          errors[r.id] = `Page ${p} overlaps with an earlier range.`;
+          errors[r.id] = `Page ${p} ${this.translate.instant('SPLIT_PDF.ERR_OVERLAP')}`;
           break;
         }
         seenPages.set(p, r.id);
@@ -166,7 +167,7 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
     return {
       isValid: !hasErrors && !globalError,
       errors,
-      globalError: hasErrors ? 'Please fix the range errors above before splitting.' : null
+      globalError: hasErrors ? this.translate.instant('SPLIT_PDF.ERR_FIX_RANGES') : null
     };
   });
 
@@ -222,7 +223,7 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
     if (!files || files.length === 0) return;
 
     if (files.length > 1) {
-      this.errorMessage.set('Split PDF accepts one PDF at a time. The first file was selected.');
+      this.errorMessage.set(this.translate.instant('SPLIT_PDF.ERROR_SINGLE_FILE_ONLY'));
     }
 
     const targetFile = files[0];
@@ -298,7 +299,7 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
 
     this.isProcessing.set(true);
     this.processingProgress.set(10);
-    this.processingMessage.set('Preparing document for splitting...');
+    this.processingMessage.set(this.translate.instant('SPLIT_PDF.PREPARING_MSG'));
     this.currentState.set('processing');
 
     try {
@@ -338,3 +339,4 @@ export class SplitPdfComponent implements OnInit, OnDestroy {
     this.changeFile();
   }
 }
+
