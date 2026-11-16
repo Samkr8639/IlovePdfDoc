@@ -10,13 +10,13 @@
 | **R-006** | Workspace state with organize workspace anatomy (canvas, floating tools dock, right sidebar, bottom CTA) | 1 | `watermark-pdf.component.spec.ts` | todo | Layout verified against design specs |
 | **R-007** | Responsive at 1440px desktop, 1024px tablet, and 390px mobile (with mobile drawer / bottom bar) | 1 | Playwright responsive viewport tests | todo | Verified across viewports |
 | **R-008** | Error banner visible at top of `.tool-page` in EVERY state | 1 | `watermark-pdf.component.spec.ts` | todo | Root `.global-error-banner` present in all states |
-| **R-009** | Large live preview of real page rendered via pdf.js with accessible `aria-label` describing page & watermark | 1 | `watermark-preview.component.spec.ts` | todo | `aria-label` dynamically updated |
+| **R-009** | Large live preview of real page rendered via pdf.js with accessible `aria-label` describing page & watermark | 1 | `watermark-preview.component.spec.ts` | done | Accessible `aria-label` computed with page, watermark text/image, angle, and position |
 | **R-010** | Page navigation ("n / N", prev/next, virtualized page list/thumbnail strip up to 500 pages) | 1 | `watermark-pdf.component.spec.ts` | todo | Page navigation & thumbnail strip |
 | **R-011** | Zoom controls (fit page default, 50%–300%) | 1 | `watermark-pdf.component.spec.ts` | todo | Zoom state & canvas scaling |
-| **R-012** | "Hold to compare" (hides watermark while pressed, toggle with `aria-pressed`, C keyboard shortcut, touch toggle) | 1 | `watermark-pdf.component.spec.ts` | todo | Hold, toggle, and C key shortcuts |
-| **R-013** | "Not included" badge on pages excluded by page selection | 1 | `watermark-pdf.component.spec.ts` | todo | Overlay badge when page outside range |
+| **R-012** | "Hold to compare" (hides watermark while pressed, toggle with `aria-pressed`, C keyboard shortcut, touch toggle) | 1 | `watermark-preview.component.spec.ts` | done | Hold, toggle, and C key shortcuts verified in component spec |
+| **R-013** | "Not included" badge on pages excluded by page selection | 1 | `watermark-preview.component.spec.ts` | done | Overlay badge displayed and aria-label annotated when page excluded |
 | **R-014** | Mosaic preview shows full tiling accurately | 2 | `watermark-layout.service.spec.ts` | todo | Multi-tile preview rendering |
-| **R-015** | Opacity parity: offscreen canvas composited with `globalAlpha = opacity`, matching PDF transparency group | 1 | `watermark-preview.spec.ts` | todo | Offscreen composite ensures uniform opacity |
+| **R-015** | Opacity parity: offscreen canvas composited with `globalAlpha = opacity`, matching PDF transparency group | 1 | `watermark-preview.component.spec.ts` | done | Offscreen canvas composited with single globalAlpha and layer stacking |
 | **R-016** | Layer stack for Over vs Below: Below paints watermark beneath transparent pdf.js canvas; Over paints on top | 1 | `watermark-export.service.spec.ts` | done | Stream order (Over = after, Below = before) verified in PDF content streams |
 | **R-017** | Overlay redraw latency < 100 ms without re-rendering pdf.js; keep current page ±1 rendered; cleanup on destroy | 1 | Benchmark & memory specs | todo | Independent watermark overlay canvas |
 | **R-018** | Segmented tabs: PLACE TEXT \| PLACE IMAGE; settings preserved across tabs; active tab applied | 1 | `watermark-pdf.component.spec.ts` | todo | Tab switching retains state |
