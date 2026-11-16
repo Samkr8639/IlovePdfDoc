@@ -37,4 +37,12 @@ describe('ToolRegistryService', () => {
   it('should mark pdf-to-jpg as live', () => {
     expect(service.isLive('pdf-to-jpg')).toBe(true);
   });
+
+  it('should mark watermark-pdf as live and return exact shortDescription', () => {
+    expect(service.isLive('watermark-pdf')).toBe(true);
+    const tool = service.getToolByRoute('/watermark-pdf');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('Watermark PDF');
+    expect(tool?.shortDescription).toBe('Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.');
+  });
 });

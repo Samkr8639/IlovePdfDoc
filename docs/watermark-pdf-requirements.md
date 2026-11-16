@@ -1,0 +1,64 @@
+# Watermark PDF - Requirements Traceability Matrix
+
+| ID | Requirement | Phase | Test File / Test Name | Status | Evidence / Notes |
+| :--- | :--- | :---: | :--- | :---: | :--- |
+| **R-001** | Git branch setup `feature/watermark-pdf` branched from `dev`, small commits, PR targets `dev` | 1 | Git repository verification | done | Branch created & checked out from `dev` |
+| **R-002** | Verify `dev` contains shared components & building blocks; reuse shared services without duplication | 1 | Repository inventory check | done | Verified shared components, tokens, services, `docs/design.md` |
+| **R-003** | Remove Watermark from `tool-placeholder` if present; register in tool-registry and live tool ids | 1 | `tool-registry.service.spec.ts` | todo | Will register `watermark-pdf` in `TOOL_REGISTRY` & `LIVE_TOOL_IDS` |
+| **R-004** | Follow PDFTailor Ocean Workspace design style and tokens exactly; no hardcoded hex/fonts/radii | 1 | Token compliance grep & visual tests | todo | Uses `--pt-*` tokens and Sora/Inter fonts |
+| **R-005** | Upload state with standard hero (breadcrumbs, H1 "Watermark PDF", lead, dropzone, ad slot, features, 3-step guide) | 1 | `watermark-pdf.component.spec.ts` | todo | Standard upload hero matching `docs/design.md` |
+| **R-006** | Workspace state with organize workspace anatomy (canvas, floating tools dock, right sidebar, bottom CTA) | 1 | `watermark-pdf.component.spec.ts` | todo | Layout verified against design specs |
+| **R-007** | Responsive at 1440px desktop, 1024px tablet, and 390px mobile (with mobile drawer / bottom bar) | 1 | Playwright responsive viewport tests | todo | Verified across viewports |
+| **R-008** | Error banner visible at top of `.tool-page` in EVERY state | 1 | `watermark-pdf.component.spec.ts` | todo | Root `.global-error-banner` present in all states |
+| **R-009** | Large live preview of real page rendered via pdf.js with accessible `aria-label` describing page & watermark | 1 | `watermark-preview.component.spec.ts` | todo | `aria-label` dynamically updated |
+| **R-010** | Page navigation ("n / N", prev/next, virtualized page list/thumbnail strip up to 500 pages) | 1 | `watermark-pdf.component.spec.ts` | todo | Page navigation & thumbnail strip |
+| **R-011** | Zoom controls (fit page default, 50%–300%) | 1 | `watermark-pdf.component.spec.ts` | todo | Zoom state & canvas scaling |
+| **R-012** | "Hold to compare" (hides watermark while pressed, toggle with `aria-pressed`, C keyboard shortcut, touch toggle) | 1 | `watermark-pdf.component.spec.ts` | todo | Hold, toggle, and C key shortcuts |
+| **R-013** | "Not included" badge on pages excluded by page selection | 1 | `watermark-pdf.component.spec.ts` | todo | Overlay badge when page outside range |
+| **R-014** | Mosaic preview shows full tiling accurately | 2 | `watermark-layout.service.spec.ts` | todo | Multi-tile preview rendering |
+| **R-015** | Opacity parity: offscreen canvas composited with `globalAlpha = opacity`, matching PDF transparency group | 1 | `watermark-preview.spec.ts` | todo | Offscreen composite ensures uniform opacity |
+| **R-016** | Layer stack for Over vs Below: Below paints watermark beneath transparent pdf.js canvas; Over paints on top | 1 | `watermark-preview.spec.ts` | todo | Canvas z-stack respects layer mode |
+| **R-017** | Overlay redraw latency < 100 ms without re-rendering pdf.js; keep current page ±1 rendered; cleanup on destroy | 1 | Benchmark & memory specs | todo | Independent watermark overlay canvas |
+| **R-018** | Segmented tabs: PLACE TEXT \| PLACE IMAGE; settings preserved across tabs; active tab applied | 1 | `watermark-pdf.component.spec.ts` | todo | Tab switching retains state |
+| **R-019** | Text watermark input (multiline up to 500 chars, strip control & bidi-override chars, empty = invalid) | 1 | `watermark-text.spec.ts` | todo | Text sanitization & length limits |
+| **R-020** | Quick text chips ("Confidential", "Draft", "Do not copy", "Sample", "Approved", "Copy" localized) | 1 | `watermark-pdf.component.spec.ts` | todo | Chip click populates text input |
+| **R-021** | Text formatting toolbar: font family (bundled OFL fonts), size (Auto-fit or 6–400 pt), bold, italic, underline, color swatches + custom hex, outline | 1 | `watermark-pdf.component.spec.ts` | todo | Formatting toolbar controls |
+| **R-022** | Text Auto-fit: compute largest font size fitting inside page minus 5% margin; warning & disabled CTA if < 6 pt | 1 | `watermark-layout.service.spec.ts` | done | `WatermarkLayoutService.computeAutoFitFontSize` tests pass |
+| **R-023** | Image watermark upload/drop: PNG/JPG/WebP; magic byte validation; <= 10 MB; <= 5000 px / <= 25 MP header check before decode; no SVG; GIF/WebP first frame | 1 | `watermark-image.service.spec.ts` | todo | Magic byte & dimension probe before decode |
+| **R-024** | Image controls: thumbnail with Replace/Remove, width % (5–100%, default 40%) or 96 DPI, remove white background toggle + tolerance | 1 | `watermark-image.service.spec.ts` | todo | Background removal & scaling options |
+| **R-025** | Position grid: 3x3 radio group with 9 anchors inset by margin (0–100 mm, unit select) | 1 | `watermark-layout.service.spec.ts` | done | `WatermarkLayoutService.computeGridAnchorCenter` tests pass for 9 anchors |
+| **R-026** | Opacity control: slider 5–100% with presets (100, 75, 50, 25) + numeric input | 1 | `watermark-pdf.component.spec.ts` | todo | Dual slider + numeric binding |
+| **R-027** | Rotation control: presets 0°, 45° (Diagonal), 90°, 180°, 270° + custom field -180°…180° | 1 | `watermark-layout.service.spec.ts` | done | `WatermarkLayoutService.computeRotatedBoundingBox` angle tests pass |
+| **R-028** | Page selection: "All pages" \| "Custom" (forgiving parser "1-3, 5, 8-10", inline validation, page-count hint, "Will be added to X of N pages") | 1 | `watermark-range-parser.spec.ts` | done | `parseWatermarkPages` tests pass with reverse range, clamping, filters |
+| **R-029** | Layer options: "Over the PDF content" \| "Below the PDF content" with diagrams + helper text warning | 1 | `watermark-pdf.component.spec.ts` | todo | Layer selection & advisory text |
+| **R-030** | Primary button "Add watermark ➔": disabled with `aria-describedby` until valid | 1 | `watermark-pdf.component.spec.ts` | todo | Validation state binding to primary CTA |
+| **R-031** | Default values matching exact spec (text empty placeholder "CONFIDENTIAL", auto-fit, grey, 50% opacity, 45° rotation, centre, 10mm margin, All pages, Over) | 1 | `watermark-pdf.component.spec.ts` | todo | Defaults initialization |
+| **R-032** | Mosaic watermark: checkbox, horizontal/vertical gap (0–200 mm), "Stagger alternate rows" (default on), grid disabled with hint, pattern rotation, cap 400 tiles | 2 | `watermark-layout.service.spec.ts` | todo | Mosaic geometry & bounding-box intersection |
+| **R-033** | Dynamic tokens in text watermark: `{page}`, `{pages}`, `{date}` (Intl localized), `{filename}` (no extension) | 2 | `watermark-token.service.spec.ts` | todo | Token parser & per-page evaluation |
+| **R-034** | Custom drag positioning on canvas with X/Y fields in percent, snapping to guides/center/margins | 2 | `watermark-interaction.spec.ts` | todo | Pointer drag & guide snapping |
+| **R-035** | Canvas rotate handle for custom angle | 2 | `watermark-interaction.spec.ts` | todo | Interactive rotate knob on canvas |
+| **R-036** | Page selection quick options: Odd / Even / First page only / Last page only | 2 | `watermark-range-parser.spec.ts` | todo | Filter presets |
+| **R-037** | Multiple PDFs: file selector above canvas, per-file settings, "Same settings for all files" switch, "Apply to all" button, per-file range validation & clamping | 2 | `watermark-multi-file.spec.ts` | todo | Multi-file settings store & synchronization |
+| **R-038** | ZIP download `watermarked-pdfs.zip` with sanitized unique filenames for multiple files | 2 | `watermark-export.service.spec.ts` | todo | Streaming ZIP creation via `fflate` |
+| **R-039** | Presets on device: save/list/delete in IndexedDB including image; "Remember my settings" opt-in in localStorage | 2 | `watermark-storage.service.spec.ts` | todo | IndexedDB preset persistence |
+| **R-040** | Script coverage and font packs: detect Unicode script, lazy-load per-script OFL font pack (Latin, Indic, Arabic, Hebrew, Thai, CJK), font preview loading, emoji warning | 2 | `watermark-font.service.spec.ts` | todo | Dynamic fontkit font pack loader |
+| **R-041** | PDF/A and PDF/X detection & warning (transparency not allowed for PDF/A-1; offer 100% opacity confirmation; never claim conformance) | 2 | `watermark-compliance.service.spec.ts` | todo | XMP metadata inspection & warning flow |
+| **R-042** | Advanced options: "Mark as artifact" (`/Artifact <</Type /Pagination /Subtype /Watermark>> BDC ... EMC`, default ON) | 3 | `watermark-export.service.spec.ts` | todo | Artifact tagging operators in PDF stream |
+| **R-043** | Advanced options: "Make it a removable layer (Optional Content)" (OCG "Watermark", Print & View ON, `/OC /MCn BDC ... EMC`, catalog merge) | 3 | `watermark-export.service.spec.ts` | todo | Optional Content Group dictionary & operators |
+| **R-044** | Existing digital signatures detected -> confirmation dialog ("Adding a watermark will invalidate them") | 3 | `watermark-pdf.component.spec.ts` | todo | Signature inspection & confirm modal |
+| **R-045** | Encrypted source handling: password prompt, pass to pdf.js & pdf-lib; warn output is not password-protected | 3 | `watermark-pdf.component.spec.ts` | todo | Password dialog & decryption workflow |
+| **R-046** | XFA/dynamic form detection -> warn form content may not render | 3 | `watermark-compliance.service.spec.ts` | todo | `/XFA` detection & warning badge |
+| **R-047** | CMYK colour space / OutputIntent detection -> warn colors may shift | 3 | `watermark-compliance.service.spec.ts` | todo | CMYK OutputIntent detection |
+| **R-048** | Layer = Below opaque-page detection (image or rect >= 90% opaque) -> list affected pages in badge and result warnings | 3 | `watermark-inspection.service.spec.ts` | todo | Opaque backdrop heuristic |
+| **R-049** | Dedicated Web Worker for export: one file & page at a time with yields, progress reporting, cancel support | 1 & 3 | `watermark-worker.spec.ts` | todo | Web Worker export pipeline |
+| **R-050** | Device-aware limits (100 MB / 500 pages desktop; 50 MB / 200 pages when memory <= 4GB or mobile; 10 files; allocation failure handling) | 3 | `watermark-limits.service.spec.ts` | todo | Hardware concurrency & memory throttling |
+| **R-051** | Real-world corpus test benchmark script with >= 100 varied PDFs, reporting >= 98% success rate in `docs/watermark-pdf-benchmark.md` | 3 | `scripts/benchmark-watermark.ts` | todo | Public PDF test corpus evaluation |
+| **R-052** | Text vector outlines: shape with fontkit (`font.layout`, GSUB/GPOS, script/bidi reordering, line breaking), glyph paths to PDF path operators and canvas Path2D (parity <= 1 pt) | 1 | `watermark-text-shaper.spec.ts` | todo | Fontkit outline extractor & PDF path writer |
+| **R-053** | Faux bold (fill + stroke ~2.5% font size) and faux italic (12° shear matrix) when font lacks variant | 1 | `watermark-text-shaper.spec.ts` | todo | Synthetic typography transformations |
+| **R-054** | Form XObject transparency group (`/Group << /S /Transparency /CS /DeviceRGB >>`) and ExtGState (`ca`/`CA`) for uniform opacity. Reuse XObject | 1 | `watermark-export.service.spec.ts` | todo | PDF Form XObject transparency group |
+| **R-055** | Graphics state isolation & `q`/`Q` balance repair: scan original streams, balance `q`/`Q`, clean graphics state | 1 | `watermark-export.service.spec.ts` | todo | Stream stream tokenizer & state isolation |
+| **R-056** | Preservation: page count, page sizes, CropBox, Rotate, UserUnit, annotations, AcroForm, bookmarks, links, metadata preserved (only ModDate updated) | 1 | `watermark-export.service.spec.ts` | todo | Metadata preservation assertions |
+| **R-057** | Accessibility: ARIA tabs, 3x3 radiogroup, keyboard nudging, numeric inputs, C key compare, `aria-live`, >= 44px touch targets | 1 | Accessibility audit & tests | todo | WCAG 2.1 AA & Lighthouse >= 95 |
+| **R-058** | All user-visible strings translated via translation system | 1 | Localization audit | todo | Keys in `default-en.ts` and language files |
+| **R-059** | SEO metadata, tool registry, canonical, JSON-LD, breadcrumbs, honest copy | 1 | `tool-registry.service.spec.ts` | todo | SEO tags and tool card metadata |
+| **R-060** | Security: 100% in-browser, no network calls carrying user bytes, magic byte validation, no SVG, no unsafe `innerHTML`, token evaluation safety, sanitised filenames | 1 | Security & network audit | todo | Zero network egress & input sanitization |

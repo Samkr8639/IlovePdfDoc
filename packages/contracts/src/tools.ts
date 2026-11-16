@@ -11,7 +11,8 @@ export const LIVE_TOOL_IDS: readonly string[] = [
   'edit-pdf',
   'pdf-to-jpg',
   'jpg-to-pdf',
-  'sign-pdf'
+  'sign-pdf',
+  'watermark-pdf'
 ] as const;
 
 export type ProcessingMode = 'browser' | 'server' | 'hybrid';
@@ -416,24 +417,37 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   },
   {
     id: 'watermark-pdf',
-    name: 'Watermark',
+    name: 'Watermark PDF',
     shortDescription: 'Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.',
-    longDescription: 'Protect intellectual property and confidentiality by stamping custom text or logo watermarks.',
+    longDescription: 'Stamp text or image watermarks on your PDF files online free. Customize typography, position, transparency, and mosaic tiling privately in your browser.',
     category: 'edit',
     route: '/watermark-pdf',
     icon: 'watermark-stamp',
     processingMode: 'browser',
     acceptedFileTypes: ['.pdf', 'application/pdf'],
-    maxFiles: 1,
-    maxFileSizeBytes: 50 * 1024 * 1024,
-    status: 'planned',
-    badgeText: 'Planned',
+    maxFiles: 10,
+    maxFileSizeBytes: 100 * 1024 * 1024,
+    status: 'available',
+    badgeText: '100% In-Browser',
     seo: {
-      title: 'Watermark PDF Online | PDF flow',
-      description: 'Add text or image watermarks to your PDF documents.',
-      keywords: ['watermark pdf', 'add watermark to pdf', 'stamp pdf'],
+      title: 'Watermark PDF Online Free - Add Text & Image Watermarks | PDFTailor',
+      description: 'Stamp an image or text over your PDF in seconds. Choose typography, transparency, position and mosaic tiling privately in your browser.',
+      keywords: ['watermark pdf', 'add watermark to pdf', 'stamp pdf', 'free pdf watermark', 'in-browser watermark'],
       canonical: 'https://pdfflow.app/watermark-pdf',
-      faqs: []
+      faqs: [
+        {
+          question: 'Are my PDF documents uploaded to your servers when watermarking?',
+          answer: 'No. Your PDF is watermarked in your browser and is never uploaded to our servers. Processing takes place entirely on your device using client-side WebAssembly.'
+        },
+        {
+          question: 'Does a watermark prevent unauthorized copying or editing of my PDF?',
+          answer: 'A watermark is a visual mark. It can be removed by PDF editing tools, so it does not protect a document from copying. For legal protection or access restriction, consider permission controls.'
+        },
+        {
+          question: 'Can I add watermarks to multiple PDF files at once?',
+          answer: 'Yes. You can upload up to 10 PDF documents at once, customize settings per file or apply identical settings across all files, and download the watermarked PDFs as a single ZIP archive.'
+        }
+      ]
     }
   },
   {
