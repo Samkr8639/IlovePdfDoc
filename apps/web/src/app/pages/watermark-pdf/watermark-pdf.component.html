@@ -672,7 +672,7 @@
                 [ngModel]="settings().textConfig.fontFamily" (ngModelChange)="setFontFamily($event)"
                 aria-label="Font family">
                 @for (font of availableFonts; track font.id) {
-                <option [value]="font.family">{{ font.name }}</option>
+                <option [value]="font.family" [style.font-family]="font.family">{{ font.name }}</option>
                 }
               </select>
 

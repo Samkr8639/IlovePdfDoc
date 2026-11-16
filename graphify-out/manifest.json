@@ -2534,9 +2534,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-export.service.ts": {
-    "mtime": 1794820535.7097018,
-    "seen": 1794821803.3714724,
-    "ast_hash": "f5eef089e76ca255a28897f235965267",
+    "mtime": 1794837206.9909687,
+    "seen": 1794837367.7590308,
+    "ast_hash": "4db88807e60342a2583d42fd1ef00826",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-image.service.spec.ts": {
@@ -2594,9 +2594,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.ts": {
-    "mtime": 1794828567.5277016,
-    "seen": 1794831309.0405548,
-    "ast_hash": "bf4da3d7ecae890b4957f6e248886d3c",
+    "mtime": 1794837252.1021268,
+    "seen": 1794837367.7590492,
+    "ast_hash": "8bb7471248e93e3ffc7fe3676ca6d8e7",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark.worker.ts": {
@@ -2612,9 +2612,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
-    "mtime": 1794831415.9654682,
-    "seen": 1794834923.8381128,
-    "ast_hash": "387b7c363d0abf85cf2ab748eb1c625d",
+    "mtime": 1794837069.9866407,
+    "seen": 1794837367.7591655,
+    "ast_hash": "c495186213d44e46b54550dcecf1eaf4",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.spec.ts": {
@@ -2624,9 +2624,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.ts": {
-    "mtime": 1794835133.296777,
-    "seen": 1794835878.1590264,
-    "ast_hash": "5d0d680b56dd0548ff54846b0a9e0ef2",
+    "mtime": 1794837181.5079472,
+    "seen": 1794837367.7591677,
+    "ast_hash": "a2e158ad38fee8c8b1d6985727442251",
     "semantic_hash": ""
   },
   "packages/contracts/src/watermark-pdf.ts": {
@@ -2642,9 +2642,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794834709.5835807,
-    "seen": 1794834923.8382387,
-    "ast_hash": "d91dba5f869749a323d86bd672d6f6be",
+    "mtime": 1794837191.76591,
+    "seen": 1794837367.7592914,
+    "ast_hash": "01f61e773b94d02b19f794fc9b399d44",
     "semantic_hash": ""
   },
   "docs/watermark-pdf-requirements.md": {
@@ -2684,9 +2684,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-font.service.ts": {
-    "mtime": 1794818354.2739816,
-    "seen": 1794821803.3714747,
-    "ast_hash": "389bc6153f6a3c458fe34e8c343f6f77",
+    "mtime": 1794836976.9301915,
+    "seen": 1794837367.759034,
+    "ast_hash": "baff20061acccb533a0041a45afd7439",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-storage.service.spec.ts": {

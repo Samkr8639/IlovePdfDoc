@@ -261,6 +261,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
         colorHex: s.textConfig.color,
         strokeColorHex: s.textConfig.strokeColor,
         strokeWidthPt: s.textConfig.strokeWidth,
+        fontFamily: s.textConfig.fontFamily,
         fontkitFont: this.fontkitFont()
       });
 
@@ -329,6 +330,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
               colorHex: s.textConfig.color,
               strokeColorHex: s.textConfig.strokeColor,
               strokeWidthPt: s.textConfig.strokeWidth,
+              fontFamily: s.textConfig.fontFamily,
               fontkitFont: this.fontkitFont()
             });
 
@@ -339,7 +341,9 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
           underline: s.textConfig.underline,
           colorHex: s.textConfig.color,
           strokeColorHex: s.textConfig.strokeColor,
-          strokeWidthPt: s.textConfig.strokeWidth
+          strokeWidthPt: s.textConfig.strokeWidth,
+          fontFamily: s.textConfig.fontFamily,
+          fontkitFont: this.fontkitFont()
         });
       } else if (this.loadedImageElement && this.loadedImageElement.complete) {
         offCtx.drawImage(

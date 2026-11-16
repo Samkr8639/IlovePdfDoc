@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { WatermarkTextShaper } from './watermark-text-shaper';
 
 export type WatermarkDetectedScript =
   | 'latin'
@@ -69,6 +70,46 @@ const SCRIPT_METADATA: Record<WatermarkDetectedScript, FontPackInfo> = {
 })
 export class WatermarkFontService {
   private fontCache = new Map<string, Uint8Array>();
+  private fontkitCache = new Map<string, any>();
+
+  /**
+   * Resolves the exact font asset URL based on font family, bold/italic style, and detected Unicode script.
+   */
+  resolveFontUrl(family = 'Noto Sans', bold = false, italic = false, text = ''): string {
+    const script = this.detectScript(text);
+    if (script === 'indic') {
+      return '/fonts/sign/noto-sans-devanagari-devanagari-400-normal.woff';
+    }
+    if (script === 'arabic') {
+      return '/fonts/sign/noto-sans-arabic-arabic-400-normal.woff';
+    }
+
+    const fam = (family || '').toLowerCase().trim();
+    if (fam.includes('liberation')) {
+      if (bold && italic) return '/standard_fonts/LiberationSans-BoldItalic.ttf';
+      if (bold) return '/standard_fonts/LiberationSans-Bold.ttf';
+      if (italic) return '/standard_fonts/LiberationSans-Italic.ttf';
+      return '/standard_fonts/LiberationSans-Regular.ttf';
+    }
+    if (fam.includes('kalam')) {
+      return '/fonts/sign/kalam-latin-400-normal.woff';
+    }
+    if (fam.includes('caveat')) {
+      return '/fonts/sign/caveat-latin-600-normal.woff';
+    }
+    if (fam.includes('dancing')) {
+      return '/fonts/sign/dancing-script-latin-600-normal.woff';
+    }
+    if (fam.includes('great') || fam.includes('vibes')) {
+      return '/fonts/sign/great-vibes-latin-400-normal.woff';
+    }
+
+    // Default / Noto Sans / fallback
+    if (/[\u0400-\u04FF]/.test(text)) {
+      return '/fonts/sign/noto-sans-cyrillic-400-normal.woff';
+    }
+    return '/fonts/sign/noto-sans-latin-400-normal.woff';
+  }
 
   /**
    * Detects whether the string contains colored emoji characters.
@@ -145,5 +186,25 @@ export class WatermarkFontService {
     }
 
     return null;
+  }
+
+  /**
+   * Loads or retrieves a cached fontkit instance for the given font URL
+   */
+  async loadFontkitInstance(url: string): Promise<any> {
+    if (this.fontkitCache.has(url)) {
+      return this.fontkitCache.get(url);
+    }
+    const bytes = await this.loadFontBuffer(url);
+    if (!bytes) return null;
+    try {
+      const font = WatermarkTextShaper.loadFontkit(bytes);
+      if (font) {
+        this.fontkitCache.set(url, font);
+      }
+      return font;
+    } catch {
+      return null;
+    }
   }
 }

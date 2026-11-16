@@ -49,6 +49,7 @@ export interface TextShapingOptions {
   colorHex: string;
   strokeColorHex?: string;
   strokeWidthPt?: number;
+  fontFamily?: string;
   fontkitFont?: any;
 }
 
@@ -281,6 +282,8 @@ export class WatermarkTextShaper {
       colorHex,
       strokeColorHex,
       strokeWidthPt,
+      fontFamily: options.fontFamily,
+      fontkitFont,
       maxLineWidth,
       lineHeight,
       totalHeight
@@ -314,6 +317,8 @@ export class WatermarkTextShaper {
       colorHex: string;
       strokeColorHex?: string;
       strokeWidthPt?: number;
+      fontFamily?: string;
+      fontkitFont?: any;
       maxLineWidth: number;
       lineHeight: number;
       totalHeight: number;
@@ -328,6 +333,7 @@ export class WatermarkTextShaper {
       colorHex,
       strokeColorHex,
       strokeWidthPt,
+      fontkitFont,
       maxLineWidth,
       lineHeight,
       totalHeight
@@ -338,8 +344,18 @@ export class WatermarkTextShaper {
 
     let ops = 'q\n';
 
-    // Faux italic: 12° shear matrix [1, 0, tan(12°), 1, 0, 0]
-    if (italic) {
+    const isAlreadyBold = Boolean(
+      fontkitFont?.subfamilyName?.toLowerCase().includes('bold') ||
+      fontkitFont?.postscriptName?.toLowerCase().includes('bold')
+    );
+    const isAlreadyItalic = Boolean(
+      fontkitFont?.subfamilyName?.toLowerCase().includes('italic') ||
+      fontkitFont?.subfamilyName?.toLowerCase().includes('oblique') ||
+      fontkitFont?.postscriptName?.toLowerCase().includes('italic')
+    );
+
+    // Faux italic: 12° shear matrix [1, 0, tan(12°), 1, 0, 0] ONLY if font does not already have italic glyphs
+    if (italic && !isAlreadyItalic) {
       const shear = Number(Math.tan((12 * Math.PI) / 180).toFixed(6));
       ops += `1 0 ${shear} 1 0 0 cm\n`;
     }
@@ -359,7 +375,7 @@ export class WatermarkTextShaper {
       ops += `${effectiveStrokeWidth.toFixed(2)} w\n`;
       ops += '1 J 1 j\n'; // Round cap & round join for smooth outlines
     } else if (isFauxBold) {
-      effectiveStrokeWidth = fontSize * 0.025; // ~2.5% font size
+      effectiveStrokeWidth = fontSize * 0.035; // ~3.5% font size for distinct faux bold
       ops += `${rgb.r} ${rgb.g} ${rgb.b} RG\n`;
       ops += `${effectiveStrokeWidth.toFixed(2)} w\n`;
       ops += '1 J 1 j\n';
@@ -461,14 +477,24 @@ export class WatermarkTextShaper {
     result: TextShapingResult,
     options: TextShapingOptions
   ): void {
-    const { fontSize, bold, italic, underline, colorHex, strokeColorHex, strokeWidthPt } = options;
+    const { fontSize, bold, italic, underline, colorHex, strokeColorHex, strokeWidthPt, fontFamily, fontkitFont } = options;
     const { lines, totalHeight } = result;
     const uPerEm = result.unitsPerEm || 1000;
     const glyphScale = fontSize / uPerEm;
 
+    const isAlreadyBold = Boolean(
+      fontkitFont?.subfamilyName?.toLowerCase().includes('bold') ||
+      fontkitFont?.postscriptName?.toLowerCase().includes('bold')
+    );
+    const isAlreadyItalic = Boolean(
+      fontkitFont?.subfamilyName?.toLowerCase().includes('italic') ||
+      fontkitFont?.subfamilyName?.toLowerCase().includes('oblique') ||
+      fontkitFont?.postscriptName?.toLowerCase().includes('italic')
+    );
+
     ctx.save();
 
-    if (italic) {
+    if (italic && !isAlreadyItalic) {
       const shear = Math.tan((12 * Math.PI) / 180);
       ctx.transform(1, 0, shear, 1, 0, 0);
     }
@@ -505,7 +531,7 @@ export class WatermarkTextShaper {
             ctx.lineJoin = 'round';
           } else if (isFauxBold) {
             ctx.strokeStyle = colorHex;
-            ctx.lineWidth = (fontSize * 0.025) / glyphScale;
+            ctx.lineWidth = (fontSize * 0.035) / glyphScale;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
           }
@@ -524,7 +550,8 @@ export class WatermarkTextShaper {
         ctx.save();
         const fontStyle = italic ? 'italic' : 'normal';
         const fontWeight = bold ? 'bold' : 'normal';
-        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px sans-serif`;
+        const fam = fontFamily ? `'${fontFamily}', sans-serif` : 'sans-serif';
+        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fam}`;
         ctx.fillStyle = colorHex;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
@@ -533,13 +560,17 @@ export class WatermarkTextShaper {
           ctx.strokeStyle = strokeColorHex || colorHex;
           ctx.lineWidth = strokeWidthPt!;
           ctx.strokeText(line.lineText, 0, baselineY);
+        } else if (isFauxBold) {
+          ctx.strokeStyle = colorHex;
+          ctx.lineWidth = fontSize * 0.035;
+          ctx.strokeText(line.lineText, 0, baselineY);
         }
         ctx.restore();
       }
 
       if (underline && line.width > 0) {
         const ulY = baselineY + fontSize * 0.15;
-        const ulH = fontSize * 0.06;
+        const ulH = Math.max(1.5, fontSize * 0.06);
         ctx.fillRect(lineStartX, ulY, line.width, ulH);
       }
     }

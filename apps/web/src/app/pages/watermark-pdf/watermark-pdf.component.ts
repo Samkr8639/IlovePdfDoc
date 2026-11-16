@@ -14,6 +14,7 @@ import {
   OnInit,
   ViewChild,
   computed,
+  effect,
   inject,
   signal
 } from '@angular/core';
@@ -110,7 +111,11 @@ export const AVAILABLE_FONTS: FontOption[] = [
   { id: 'noto-sans', name: 'Noto Sans (Default)', family: 'Noto Sans' },
   { id: 'liberation-sans', name: 'Liberation Sans', family: 'Liberation Sans' },
   { id: 'roboto', name: 'Roboto', family: 'Roboto' },
-  { id: 'source-sans', name: 'Source Sans 3', family: 'Source Sans 3' }
+  { id: 'source-sans', name: 'Source Sans 3', family: 'Source Sans 3' },
+  { id: 'kalam', name: 'Kalam (Marker / Stamp)', family: 'Kalam' },
+  { id: 'caveat', name: 'Caveat (Handwritten)', family: 'Caveat' },
+  { id: 'dancing-script', name: 'Dancing Script (Cursive)', family: 'Dancing Script' },
+  { id: 'great-vibes', name: 'Great Vibes (Calligraphy)', family: 'Great Vibes' }
 ];
 
 @Component({
@@ -152,6 +157,7 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   readonly errorMessage = signal<string | null>(null);
   readonly isSidePanelOpen = signal<boolean>(false);
   readonly fontkitFont = signal<any>(null);
+  readonly currentFontBytes = signal<Uint8Array | null>(null);
 
   // Multi-file state (R-037)
   readonly files = signal<WatermarkFileItem[]>([]);
@@ -326,12 +332,20 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     return null;
   });
 
+  constructor() {
+    // Reactively load and apply typography whenever font family, bold, italic, or text changes
+    effect(async () => {
+      const textCfg = this.settings().textConfig;
+      await this.syncTypographyFont(textCfg.fontFamily, textCfg.bold, textCfg.italic, textCfg.text);
+    });
+  }
+
   ngOnInit(): void {
     const tool = this.toolRegistry.getToolById('watermark-pdf');
     if (tool) {
       this.seo.setSeoData(tool.seo);
     }
-    this.loadDefaultFont();
+    this.syncTypographyFont();
 
     // Check device preferences (R-039)
     this.isRememberSettings.set(this.storageService.isRememberSettingsEnabled());
@@ -347,14 +361,35 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.cleanupResultUrl();
   }
 
-  private async loadDefaultFont(): Promise<void> {
+  /**
+   * Dynamically loads and switches the active font based on typography settings & script
+   */
+  async syncTypographyFont(
+    family?: string,
+    bold?: boolean,
+    italic?: boolean,
+    text?: string
+  ): Promise<void> {
+    const textCfg = this.settings().textConfig;
+    const resolvedFamily = family ?? textCfg.fontFamily;
+    const resolvedBold = bold ?? textCfg.bold;
+    const resolvedItalic = italic ?? textCfg.italic;
+    const resolvedText = text ?? textCfg.text;
+
+    const url = this.fontService.resolveFontUrl(
+      resolvedFamily,
+      resolvedBold,
+      resolvedItalic,
+      resolvedText
+    );
+
     try {
-      if (typeof window !== 'undefined' && typeof fetch === 'function') {
-        const resp = await fetch('/standard_fonts/LiberationSans-Regular.ttf');
-        if (resp.ok) {
-          const buf = await resp.arrayBuffer();
-          this.defaultFontBytes = new Uint8Array(buf);
-          const font = WatermarkTextShaper.loadFontkit(this.defaultFontBytes);
+      const bytes = await this.fontService.loadFontBuffer(url);
+      if (bytes && bytes.length > 0) {
+        this.currentFontBytes.set(bytes);
+        this.defaultFontBytes = bytes;
+        const font = await this.fontService.loadFontkitInstance(url);
+        if (font) {
           this.fontkitFont.set(font);
         }
       }
@@ -904,7 +939,7 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
           fileItem.bytes,
           fileItem.name,
           settingsToUse,
-          this.defaultFontBytes,
+          this.currentFontBytes() || this.defaultFontBytes,
           progress => {
             this.processingProgress.set(progress.percent);
             if (progress.message) {
@@ -938,7 +973,7 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
         const multiOutcome = await this.processingService.processMultipleWatermarks(
           filesToProcess,
-          this.defaultFontBytes,
+          this.currentFontBytes() || this.defaultFontBytes,
           progress => {
             this.processingProgress.set(progress.percent);
             if (progress.message) {

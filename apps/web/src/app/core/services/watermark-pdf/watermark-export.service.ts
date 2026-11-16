@@ -283,6 +283,7 @@ export class WatermarkExportService {
         colorHex: settings.textConfig.color,
         strokeColorHex: settings.textConfig.strokeColor,
         strokeWidthPt: settings.textConfig.strokeWidth,
+        fontFamily: settings.textConfig.fontFamily,
         fontkitFont: options.fontkitFont
       });
 
@@ -397,6 +398,7 @@ export class WatermarkExportService {
           colorHex: settings.textConfig.color,
           strokeColorHex: settings.textConfig.strokeColor,
           strokeWidthPt: settings.textConfig.strokeWidth,
+          fontFamily: settings.textConfig.fontFamily,
           fontkitFont: options.fontkitFont
         });
         xobjOps = shapedForSize.pdfPathOperators;
