@@ -315,8 +315,22 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       offCtx.scale(scale, scale);
 
       if (isText && textMetrics?.shaped) {
-        WatermarkTextShaper.renderToCanvas(offCtx, textMetrics.shaped, {
-          fontSize: p.fontSize || 36,
+        const resolvedSize = p.fontSize || 36;
+        const shapedForPlacement = (textMetrics.shaped.fontSize === resolvedSize)
+          ? textMetrics.shaped
+          : WatermarkTextShaper.shapeText(textMetrics.shaped.text, {
+              fontSize: resolvedSize,
+              bold: s.textConfig.bold,
+              italic: s.textConfig.italic,
+              underline: s.textConfig.underline,
+              colorHex: s.textConfig.color,
+              strokeColorHex: s.textConfig.strokeColor,
+              strokeWidthPt: s.textConfig.strokeWidth,
+              fontkitFont: this.fontkitFont()
+            });
+
+        WatermarkTextShaper.renderToCanvas(offCtx, shapedForPlacement, {
+          fontSize: resolvedSize,
           bold: s.textConfig.bold,
           italic: s.textConfig.italic,
           underline: s.textConfig.underline,

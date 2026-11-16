@@ -2588,15 +2588,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.spec.ts": {
-    "mtime": 1794811165.939448,
-    "seen": 1794813836.915693,
-    "ast_hash": "fa12ff7c925f052651d197aadee55d82",
+    "mtime": 1794827826.910021,
+    "seen": 1794828338.807131,
+    "ast_hash": "fdb3ca2cf08b70396e4756ccca72c3a0",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.ts": {
-    "mtime": 1794813153.7468817,
-    "seen": 1794813836.9156938,
-    "ast_hash": "c5228a4f0d005a669f576e4da0fa23b1",
+    "mtime": 1794827846.4150932,
+    "seen": 1794828338.807133,
+    "ast_hash": "bf4da3d7ecae890b4957f6e248886d3c",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark.worker.ts": {
@@ -2612,9 +2612,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
-    "mtime": 1794823504.0497217,
-    "seen": 1794826488.28186,
-    "ast_hash": "265cc00defc166753f463b3eb22a5469",
+    "mtime": 1794827786.093039,
+    "seen": 1794828338.8072522,
+    "ast_hash": "0ccb82fe432211ebbf52f7fd52bbf723",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.spec.ts": {
@@ -2636,14 +2636,14 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.html": {
-    "mtime": 1794823050.0195043,
-    "seen": 1794826488.2820442,
+    "mtime": 1794826637.5700967,
+    "seen": 1794828338.8073769,
     "ast_hash": "8f8f1da9f884c4896496f7184a3f873d",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794823266.4444795,
-    "seen": 1794826488.2820456,
+    "mtime": 1794826638.2151527,
+    "seen": 1794828338.8073783,
     "ast_hash": "7ccacd71f0988a8f5f7394e62116e368",
     "semantic_hash": ""
   },

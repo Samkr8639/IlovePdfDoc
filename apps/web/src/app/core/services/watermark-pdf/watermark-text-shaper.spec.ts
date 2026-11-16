@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import * as fontkit from '@pdf-lib/fontkit';
 import { WatermarkTextShaper } from './watermark-text-shaper';
 
@@ -184,6 +184,66 @@ describe('WatermarkTextShaper', () => {
       expect(res.lines.length).toBe(1);
       expect(res.lines[0].glyphs.length).toBe(6);
       expect(res.maxWidth).toBeGreaterThan(0);
+      expect(res.unitsPerEm).toBe(1000);
+    });
+
+    it('renderToCanvas applies exact fontkit glyph scaling and does not draw oversized paths', () => {
+      const fakeCtx: any = {
+        save: vi.fn(),
+        restore: vi.fn(),
+        translate: vi.fn(),
+        rotate: vi.fn(),
+        scale: vi.fn(),
+        transform: vi.fn(),
+        fill: vi.fn(),
+        stroke: vi.fn(),
+        fillRect: vi.fn(),
+        fillText: vi.fn(),
+        strokeText: vi.fn()
+      };
+
+      const result = {
+        text: 'test',
+        lines: [
+          {
+            lineText: 'test',
+            width: 50,
+            glyphs: [
+              {
+                glyphId: 1,
+                advance: 12,
+                xOffset: 0,
+                yOffset: 0,
+                commands: [],
+                svgPath: 'M0 0 L100 100'
+              }
+            ]
+          }
+        ],
+        maxWidth: 50,
+        totalHeight: 40,
+        fontSize: 36,
+        unitsPerEm: 2048,
+        unitWidth: 50 / 36,
+        unitHeight: 40 / 36,
+        pdfPathOperators: '',
+        unsupportedChars: []
+      };
+
+      WatermarkTextShaper.renderToCanvas(fakeCtx, result, {
+        fontSize: 36,
+        bold: false,
+        italic: false,
+        underline: false,
+        colorHex: '#000000'
+      });
+
+      // Expected glyphScale = 36 / 2048 ≈ 0.017578
+      const expectedScale = 36 / 2048;
+      expect(fakeCtx.scale).toHaveBeenCalledWith(
+        expect.closeTo(expectedScale, 4),
+        expect.closeTo(-expectedScale, 4)
+      );
     });
   });
 });

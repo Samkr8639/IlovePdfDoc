@@ -34,6 +34,7 @@ export interface TextShapingResult {
   maxWidth: number;
   totalHeight: number;
   fontSize: number;
+  unitsPerEm: number;
   unitWidth: number;
   unitHeight: number;
   pdfPathOperators: string;
@@ -291,6 +292,7 @@ export class WatermarkTextShaper {
       maxWidth: maxLineWidth,
       totalHeight,
       fontSize,
+      unitsPerEm,
       unitWidth,
       unitHeight,
       pdfPathOperators: pdfOperators,
@@ -461,6 +463,8 @@ export class WatermarkTextShaper {
   ): void {
     const { fontSize, bold, italic, underline, colorHex, strokeColorHex, strokeWidthPt } = options;
     const { lines, totalHeight } = result;
+    const uPerEm = result.unitsPerEm || 1000;
+    const glyphScale = fontSize / uPerEm;
 
     ctx.save();
 
@@ -473,17 +477,6 @@ export class WatermarkTextShaper {
 
     const isFauxBold = bold;
     const customStroke = typeof strokeWidthPt === 'number' && strokeWidthPt > 0;
-    if (customStroke) {
-      ctx.strokeStyle = strokeColorHex || colorHex;
-      ctx.lineWidth = strokeWidthPt!;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-    } else if (isFauxBold) {
-      ctx.strokeStyle = colorHex;
-      ctx.lineWidth = fontSize * 0.025;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-    }
 
     const lineHeight = fontSize * 1.2;
     // In Canvas 2D, Y points downwards. Center of watermark is (0, 0).
@@ -494,19 +487,52 @@ export class WatermarkTextShaper {
       const baselineY = startBaselineY + lineIdx * lineHeight;
       const lineStartX = -line.width / 2;
 
-      for (const glyph of line.glyphs) {
-        if (!glyph.svgPath) continue;
+      const hasSvgGlyphs = line.glyphs.some(g => Boolean(g.svgPath));
 
+      if (hasSvgGlyphs) {
+        for (const glyph of line.glyphs) {
+          if (!glyph.svgPath) continue;
+
+          ctx.save();
+          // Translate to glyph position. Invert Y because font coordinate system has Y pointing up.
+          ctx.translate(lineStartX + glyph.xOffset, baselineY - glyph.yOffset);
+          ctx.scale(glyphScale, -glyphScale);
+
+          if (customStroke) {
+            ctx.strokeStyle = strokeColorHex || colorHex;
+            ctx.lineWidth = strokeWidthPt! / glyphScale;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+          } else if (isFauxBold) {
+            ctx.strokeStyle = colorHex;
+            ctx.lineWidth = (fontSize * 0.025) / glyphScale;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+          }
+
+          if (typeof Path2D !== 'undefined') {
+            const path = new Path2D(glyph.svgPath);
+            ctx.fill(path);
+            if (isFauxBold || customStroke) {
+              ctx.stroke(path);
+            }
+          }
+          ctx.restore();
+        }
+      } else if (line.lineText) {
+        // Fallback when fontkit vector path is unavailable
         ctx.save();
-        // Translate to glyph position. Invert Y because font coordinate system has Y pointing up.
-        ctx.translate(lineStartX + glyph.xOffset, baselineY + glyph.yOffset);
-        const scale = fontSize / 1000; // SVG paths in fontkit are scaled by 1/unitsPerEm in toSVG
-        ctx.scale(1, -1);
-
-        const path = new Path2D(glyph.svgPath);
-        ctx.fill(path);
-        if (isFauxBold || customStroke) {
-          ctx.stroke(path);
+        const fontStyle = italic ? 'italic' : 'normal';
+        const fontWeight = bold ? 'bold' : 'normal';
+        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px sans-serif`;
+        ctx.fillStyle = colorHex;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(line.lineText, 0, baselineY);
+        if (customStroke) {
+          ctx.strokeStyle = strokeColorHex || colorHex;
+          ctx.lineWidth = strokeWidthPt!;
+          ctx.strokeText(line.lineText, 0, baselineY);
         }
         ctx.restore();
       }
