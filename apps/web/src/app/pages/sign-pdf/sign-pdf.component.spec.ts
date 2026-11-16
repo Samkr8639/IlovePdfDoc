@@ -740,6 +740,67 @@ describe('SignPdfComponent & Dialogs', () => {
       expect(component.fields()[0].color).toBe('#0F766E');
     });
 
+    it('updates signing details caption with the new signature name when placing multiple distinct signatures', () => {
+      component.addSigningDetails.set(true);
+
+      // Create and apply first signature "Insguygy"
+      component.signatureDialogKind.set('signature');
+      component.onSignatureApplied({
+        imageDataUrl: 'data:image/png;base64,SIG_1',
+        mode: 'type',
+        text: 'Insguygy',
+        color: '#14213D'
+      });
+      fixture.detectChanges();
+
+      // Place first signature
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      expect(component.fields().length).toBe(1);
+      const field1 = component.fields()[0];
+      expect(field1.text).toBe('Insguygy');
+      expect(field1.signingDetailsText).toContain('Signed by Insguygy');
+
+      // Create and apply second signature "guddey"
+      component.signatureDialogKind.set('signature');
+      component.onSignatureApplied({
+        imageDataUrl: 'data:image/png;base64,SIG_2',
+        mode: 'type',
+        text: 'guddey',
+        color: '#14213D'
+      });
+      fixture.detectChanges();
+
+      // Place second signature
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      expect(component.fields().length).toBe(2);
+      const field2 = component.fields()[1];
+      expect(field2.text).toBe('guddey');
+      expect(field2.signingDetailsText).toContain('Signed by guddey');
+      expect(field2.signingDetailsText).not.toContain('Insguygy');
+
+      // Updating field 1 via openEditSignature updates its text and caption without altering field 2
+      component.openEditSignature(field1);
+      component.onSignatureApplied({
+        imageDataUrl: 'data:image/png;base64,SIG_1_UPDATED',
+        mode: 'type',
+        text: 'Tony Stark',
+        color: '#0F766E'
+      });
+      fixture.detectChanges();
+
+      const updatedField1 = component.fields().find(f => f.id === field1.id);
+      const unchangedField2 = component.fields().find(f => f.id === field2.id);
+
+      expect(updatedField1?.text).toBe('Tony Stark');
+      expect(updatedField1?.signingDetailsText).toContain('Signed by Tony Stark');
+      expect(unchangedField2?.text).toBe('guddey');
+      expect(unchangedField2?.signingDetailsText).toContain('Signed by guddey');
+    });
+
     it('does not render SIGNER & DOCUMENT DETAILS accordion in sidebar', () => {
       fixture.detectChanges();
       const el = fixture.nativeElement as HTMLElement;

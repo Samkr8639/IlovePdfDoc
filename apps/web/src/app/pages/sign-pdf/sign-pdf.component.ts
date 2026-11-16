@@ -323,6 +323,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   private pendingSignatureInsertType: SignFieldType | null = null;
   private pendingEncryptedBytes: Uint8Array | null = null;
   private pendingEncryptedFile: File | null = null;
+  private latestSignatureText: string | null = null;
   private dragState: {
     kind: 'move' | 'resize' | 'rotate';
     field: SignFieldElement;
@@ -840,6 +841,11 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     const maxZ = this.fields().reduce((m, f) => Math.max(m, f.zIndex ?? 0), 0);
     const activeDate = this.customDateValue() || formatSigningDate(new Date(), this.dateFormat());
     const nameText = (this.fullName() || 'Signer Name').trim();
+    const signerName = (
+      type === 'signature' && this.latestSignatureText
+        ? this.latestSignatureText
+        : nameText
+    ).trim();
 
     const elId = `sf-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const el: SignFieldElement = {
@@ -861,13 +867,15 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       stampSource: type === 'stamp' ? (this.stampSource() || undefined) : undefined,
       templateId: type === 'stamp' ? this.activeStampTemplateId : undefined,
       text:
-        type === 'name'
-          ? nameText
-          : type === 'date'
-            ? activeDate
-            : type === 'text'
-              ? ''
-              : undefined,
+        type === 'signature'
+          ? signerName
+          : type === 'name'
+            ? nameText
+            : type === 'date'
+              ? activeDate
+              : type === 'text'
+                ? ''
+                : undefined,
       textConfig:
         type === 'text'
           ? {
@@ -902,7 +910,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       checked: type === 'checkbox' ? true : undefined,
       showSigningDetailsLine: type === 'signature' ? this.addSigningDetails() : undefined,
       signingDetailsText: type === 'signature' && this.addSigningDetails()
-        ? `Signed by ${nameText} · ${activeDate}`
+        ? `Signed by ${signerName} · ${activeDate}`
         : undefined
     };
 
@@ -923,6 +931,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
     if (type === 'signature') {
       this.signatureDataUrl.set(null);
+      this.latestSignatureText = null;
     }
 
     this.announce(`${preset.label} placed on page ${pageIndex + 1}`);
@@ -1443,12 +1452,18 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
     if (target) {
       const before = { ...target };
+      const who = (res.text || target.text || this.fullName() || 'Signer').trim();
+      const when = this.customDateValue() || formatSigningDate(new Date(), target.dateFormat || this.dateFormat());
       const after: SignFieldElement = {
         ...target,
         imageDataUrl: res.imageDataUrl,
         color: res.color,
-        ...(res.text ? { text: res.text } : {})
+        ...(res.text ? { text: res.text } : {}),
+        ...(target.showSigningDetailsLine ? { signingDetailsText: `Signed by ${who} · ${when}` } : {})
       };
+      if (res.text) {
+        this.fullName.set(res.text);
+      }
       this.history.execute({
         description: `Update ${target.type}`,
         execute: () => {
@@ -1465,12 +1480,27 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     if (kind === 'signature') {
       this.signatureDataUrl.set(res.imageDataUrl);
       this.signatureColor.set(res.color);
-      if (res.text && !this.fullName().trim()) {
+      if (res.text) {
+        this.latestSignatureText = res.text;
         this.fullName.set(res.text);
+      } else {
+        this.latestSignatureText = null;
       }
       // Update any existing signature fields if empty
       this.fields.update(list =>
-        list.map(f => (f.type === 'signature' && !f.imageDataUrl ? { ...f, imageDataUrl: res.imageDataUrl } : f))
+        list.map(f => {
+          if (f.type === 'signature' && !f.imageDataUrl) {
+            const who = (res.text || f.text || this.fullName() || 'Signer').trim();
+            const when = this.customDateValue() || formatSigningDate(new Date(), f.dateFormat || this.dateFormat());
+            return {
+              ...f,
+              imageDataUrl: res.imageDataUrl,
+              ...(res.text ? { text: res.text } : {}),
+              ...(f.showSigningDetailsLine ? { signingDetailsText: `Signed by ${who} · ${when}` } : {})
+            };
+          }
+          return f;
+        })
       );
     } else {
       this.initialsDataUrl.set(res.imageDataUrl);
@@ -1793,8 +1823,8 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   toggleFieldSigningDetails(sel: SignFieldElement, event: Event): void {
     const input = event.target as HTMLInputElement;
     const checked = input.checked;
-    const who = (this.fullName() || 'Signer').trim();
-    const when = this.customDateValue() || formatSigningDate(new Date(), this.dateFormat());
+    const who = (sel.text || this.fullName() || 'Signer').trim();
+    const when = this.customDateValue() || formatSigningDate(new Date(), sel.dateFormat || this.dateFormat());
     const before = { ...sel };
     const after: SignFieldElement = {
       ...sel,
@@ -1823,18 +1853,18 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
   onAddSigningDetailsToggle(checked: boolean): void {
     this.addSigningDetails.set(checked);
-    const who = (this.fullName() || 'Signer').trim();
+    const defaultWho = (this.fullName() || 'Signer').trim();
     const when = this.customDateValue() || formatSigningDate(new Date(), this.dateFormat());
     this.fields.update(list =>
-      list.map(f =>
-        f.type === 'signature'
-          ? {
-            ...f,
-            showSigningDetailsLine: checked,
-            signingDetailsText: checked ? `Signed by ${who} · ${when}` : undefined
-          }
-          : f
-      )
+      list.map(f => {
+        if (f.type !== 'signature') return f;
+        const who = (f.text || defaultWho).trim();
+        return {
+          ...f,
+          showSigningDetailsLine: checked,
+          signingDetailsText: checked ? `Signed by ${who} · ${when}` : undefined
+        };
+      })
     );
   }
 
@@ -2424,6 +2454,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     this.history.clear();
     this.selectedFieldId.set(null);
     this.armedToolType.set(null);
+    this.signatureDataUrl.set(null);
+    this.initialsDataUrl.set(null);
+    this.latestSignatureText = null;
     this.inspectionSummary.set(null);
     this.wasEncryptedOnLoad.set(false);
     this.invalidatedExistingSigConfirmed.set(false);
