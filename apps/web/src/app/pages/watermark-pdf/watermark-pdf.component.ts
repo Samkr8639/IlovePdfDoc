@@ -151,6 +151,13 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   readonly colorSwatches = COLOR_SWATCHES;
   readonly availableFonts = AVAILABLE_FONTS;
 
+  readonly availableTokens = [
+    { token: '{page}', label: 'Page number' },
+    { token: '{pages}', label: 'Total pages' },
+    { token: '{date}', label: 'Current date' },
+    { token: '{filename}', label: 'Document name' }
+  ];
+
   // Computed signals
   readonly activeTab = computed<WatermarkTab>(() => this.settings().common.activeTab);
 
@@ -302,6 +309,15 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.zoom.set(Math.min(3.0, Math.max(0.5, zoom)));
   }
 
+  onPositionChange(pos: { customXPercent: number; customYPercent: number; rotation: number }): void {
+    this.updateCommon({
+      useCustomPosition: true,
+      customXPercent: pos.customXPercent,
+      customYPercent: pos.customYPercent,
+      rotation: pos.rotation
+    });
+  }
+
   toggleMobileSidePanel(): void {
     this.isSidePanelOpen.set(!this.isSidePanelOpen());
   }
@@ -323,6 +339,29 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
   applyQuickChip(chipValue: string): void {
     this.updateTextConfig({ text: chipValue });
+  }
+
+  insertToken(token: string): void {
+    const current = this.settings().textConfig.text;
+    const separator = current.length > 0 && !current.endsWith(' ') ? ' ' : '';
+    this.updateTextConfig({ text: `${current}${separator}${token}` });
+  }
+
+  // Mosaic Controls
+  toggleMosaic(): void {
+    this.updateCommon({ mosaic: !this.settings().common.mosaic });
+  }
+
+  setHorizontalGapMm(val: number): void {
+    this.updateCommon({ horizontalGapMm: Math.min(200, Math.max(0, val)) });
+  }
+
+  setVerticalGapMm(val: number): void {
+    this.updateCommon({ verticalGapMm: Math.min(200, Math.max(0, val)) });
+  }
+
+  toggleStagger(): void {
+    this.updateCommon({ stagger: !this.settings().common.stagger });
   }
 
   setFontFamily(family: string): void {

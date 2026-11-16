@@ -120,6 +120,10 @@
         class="watermark-overlay-canvas"
         [style.z-index]="settings().common.layer === 'below' ? 1 : 2"
         [style.opacity]="isCompareActive() ? 0 : 1"
+        (pointerdown)="onCanvasPointerDown($event)"
+        (pointermove)="onCanvasPointerMove($event)"
+        (pointerup)="onCanvasPointerUp($event)"
+        (pointercancel)="onCanvasPointerUp($event)"
         aria-hidden="true"
       ></canvas>
 

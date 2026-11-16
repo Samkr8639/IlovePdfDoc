@@ -261,6 +261,59 @@ describe('WatermarkPdfComponent', () => {
     expect(mockLayoutService.showFooter).toHaveBeenCalled();
   });
 
+  it('handles dynamic tokens insertion and mosaic configuration (R-032, R-033)', () => {
+    component.onTextChange('Doc');
+    component.insertToken('{page}');
+    expect(component.settings().textConfig.text).toBe('Doc {page}');
+
+    component.insertToken('{pages}');
+    expect(component.settings().textConfig.text).toBe('Doc {page} {pages}');
+
+    expect(component.settings().common.mosaic).toBe(false);
+    component.toggleMosaic();
+    expect(component.settings().common.mosaic).toBe(true);
+
+    component.setHorizontalGapMm(35);
+    expect(component.settings().common.horizontalGapMm).toBe(35);
+
+    component.setVerticalGapMm(40);
+    expect(component.settings().common.verticalGapMm).toBe(40);
+
+    expect(component.settings().common.stagger).toBe(true);
+    component.toggleStagger();
+    expect(component.settings().common.stagger).toBe(false);
+  });
+
+  it('handles page filter presets for odd, even, first, and last (R-036)', () => {
+    component.totalPages.set(10);
+    component.setPageMode('all');
+
+    component.setFilterPreset('odd');
+    expect(component.settings().common.filterPreset).toBe('odd');
+    expect(component.includedPagesCount()).toBe(5);
+    expect(component.includedPageNumbers()).toEqual([1, 3, 5, 7, 9]);
+
+    component.setFilterPreset('even');
+    expect(component.includedPagesCount()).toBe(5);
+    expect(component.includedPageNumbers()).toEqual([2, 4, 6, 8, 10]);
+
+    component.setFilterPreset('first');
+    expect(component.includedPagesCount()).toBe(1);
+    expect(component.includedPageNumbers()).toEqual([1]);
+
+    component.setFilterPreset('last');
+    expect(component.includedPagesCount()).toBe(1);
+    expect(component.includedPageNumbers()).toEqual([10]);
+  });
+
+  it('handles interactive position and rotation changes from preview (R-032, R-034)', () => {
+    component.onPositionChange({ customXPercent: 70, customYPercent: 30, rotation: 90 });
+    expect(component.settings().common.useCustomPosition).toBe(true);
+    expect(component.settings().common.customXPercent).toBe(70);
+    expect(component.settings().common.customYPercent).toBe(30);
+    expect(component.settings().common.rotation).toBe(90);
+  });
+
   it('cancels processing and returns to organize workspace', () => {
     component.currentState.set('processing');
     component.isProcessing.set(true);

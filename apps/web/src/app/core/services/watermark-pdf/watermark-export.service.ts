@@ -23,6 +23,7 @@ import {
 import { screenPointToPdfPointCoords } from '@paperflow/contracts';
 import { WatermarkLayoutService } from './watermark-layout.service';
 import { WatermarkTextShaper } from './watermark-text-shaper';
+import { WatermarkTokenService } from './watermark-token.service';
 import { parseWatermarkPages } from './watermark-range-parser';
 import { VisualPageBox, WatermarkPlacement } from './watermark-document-model';
 
@@ -122,6 +123,8 @@ export function analyzeStreamGraphicsBalance(streamBytes: Uint8Array): StreamBal
   providedIn: 'root'
 })
 export class WatermarkExportService {
+  private tokenService = new WatermarkTokenService();
+
   constructor(private layoutService: WatermarkLayoutService) {}
 
   /**
@@ -211,8 +214,16 @@ export class WatermarkExportService {
     let imageWidthPt = 0;
     let imageHeightPt = 0;
 
+    const rawTemplateText = settings.textConfig.text || 'CONFIDENTIAL';
+    const hasPerPageToken = this.tokenService.hasPerPageToken(rawTemplateText);
+    const evaluatedGlobalText = this.tokenService.evaluate(rawTemplateText, {
+      pageNumber: 1,
+      totalPages,
+      filename
+    });
+
     if (isText) {
-      textShaping = WatermarkTextShaper.shapeText(settings.textConfig.text || 'CONFIDENTIAL', {
+      textShaping = WatermarkTextShaper.shapeText(evaluatedGlobalText, {
         fontSize: typeof settings.textConfig.fontSize === 'number' ? settings.textConfig.fontSize : 36,
         bold: settings.textConfig.bold,
         italic: settings.textConfig.italic,
@@ -316,9 +327,17 @@ export class WatermarkExportService {
       let xobjOps = '';
       let xobjResources: any = undefined;
 
-      if (isText && textShaping) {
+      if (isText) {
+        const pageText = hasPerPageToken
+          ? this.tokenService.evaluate(rawTemplateText, {
+              pageNumber: pageIdx + 1,
+              totalPages,
+              filename
+            })
+          : evaluatedGlobalText;
+
         const resolvedSize = firstPlacement.fontSize || 36;
-        const shapedForSize = WatermarkTextShaper.shapeText(settings.textConfig.text || 'CONFIDENTIAL', {
+        const shapedForSize = WatermarkTextShaper.shapeText(pageText, {
           fontSize: resolvedSize,
           bold: settings.textConfig.bold,
           italic: settings.textConfig.italic,

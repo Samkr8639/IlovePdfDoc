@@ -193,6 +193,7 @@
           [fontkitFont]="fontkitFont()"
           (pageChange)="onPageChange($event)"
           (zoomChange)="onZoomChange($event)"
+          (positionChange)="onPositionChange($event)"
         ></app-watermark-preview>
 
         <!-- FLOATING TOOLS DOCK -->
@@ -370,6 +371,23 @@
                       {{ chip.label }}
                     </button>
                   }
+                </div>
+
+                <!-- Dynamic Tokens Helper -->
+                <div class="tokens-helper-row" aria-label="Insert dynamic watermark tokens">
+                  <span class="tokens-guide-label">Insert dynamic token:</span>
+                  <div class="tokens-chips-list">
+                    @for (t of availableTokens; track t.token) {
+                      <button
+                        type="button"
+                        class="token-chip-btn"
+                        (click)="insertToken(t.token)"
+                        [title]="'Insert ' + t.label"
+                      >
+                        {{ t.token }}
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
 
@@ -607,11 +625,73 @@
 
           <!-- COMMON OPTIONS (APPLY TO BOTH TEXT AND IMAGE) -->
 
-          <!-- 1. POSITION (3x3 Grid) -->
+          <!-- MOSAIC WATERMARK (Phase 2) -->
           <div class="form-field-group">
+            <label class="pt-checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="settings().common.mosaic"
+                (change)="toggleMosaic()"
+              />
+              <span class="bold-label">Repeat watermark as mosaic pattern</span>
+            </label>
+
+            @if (settings().common.mosaic) {
+              <div class="mosaic-options-card">
+                <!-- Horizontal gap -->
+                <div class="field-label-row sub-label-row">
+                  <span class="field-sublabel">Horizontal gap</span>
+                  <span class="slider-val-badge">{{ settings().common.horizontalGapMm }} mm</span>
+                </div>
+                <input
+                  type="range"
+                  class="pt-range-slider"
+                  min="0"
+                  max="200"
+                  step="1"
+                  [ngModel]="settings().common.horizontalGapMm"
+                  (ngModelChange)="setHorizontalGapMm($event)"
+                  aria-label="Horizontal gap in millimeters"
+                />
+
+                <!-- Vertical gap -->
+                <div class="field-label-row sub-label-row" style="margin-top: 10px;">
+                  <span class="field-sublabel">Vertical gap</span>
+                  <span class="slider-val-badge">{{ settings().common.verticalGapMm }} mm</span>
+                </div>
+                <input
+                  type="range"
+                  class="pt-range-slider"
+                  min="0"
+                  max="200"
+                  step="1"
+                  [ngModel]="settings().common.verticalGapMm"
+                  (ngModelChange)="setVerticalGapMm($event)"
+                  aria-label="Vertical gap in millimeters"
+                />
+
+                <!-- Stagger alternate rows -->
+                <label class="pt-checkbox-label" style="margin-top: 12px;">
+                  <input
+                    type="checkbox"
+                    [checked]="settings().common.stagger"
+                    (change)="toggleStagger()"
+                  />
+                  <span>Stagger alternate rows</span>
+                </label>
+              </div>
+            }
+          </div>
+
+          <!-- 1. POSITION (3x3 Grid) -->
+          <div class="form-field-group" [class.field-group-disabled]="settings().common.mosaic">
             <div class="field-label-row">
               <label class="field-label">POSITION</label>
-              <span class="position-current-text">{{ settings().common.position }}</span>
+              @if (settings().common.mosaic) {
+                <span class="mosaic-disabled-hint">Disabled in Mosaic</span>
+              } @else {
+                <span class="position-current-text">{{ settings().common.position }}</span>
+              }
             </div>
 
             <div class="position-3x3-grid" role="radiogroup" aria-label="Watermark placement anchor">
@@ -886,6 +966,50 @@
                 </span>
               </div>
             }
+
+            <!-- Quick Filter Presets (R-036) -->
+            <div class="quick-chips-row page-filters-row" aria-label="Page filter presets">
+              <button
+                type="button"
+                class="quick-chip-pill"
+                [class.chip-active]="settings().common.filterPreset === 'all'"
+                (click)="setFilterPreset('all')"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                class="quick-chip-pill"
+                [class.chip-active]="settings().common.filterPreset === 'odd'"
+                (click)="setFilterPreset('odd')"
+              >
+                Odd pages
+              </button>
+              <button
+                type="button"
+                class="quick-chip-pill"
+                [class.chip-active]="settings().common.filterPreset === 'even'"
+                (click)="setFilterPreset('even')"
+              >
+                Even pages
+              </button>
+              <button
+                type="button"
+                class="quick-chip-pill"
+                [class.chip-active]="settings().common.filterPreset === 'first'"
+                (click)="setFilterPreset('first')"
+              >
+                First page
+              </button>
+              <button
+                type="button"
+                class="quick-chip-pill"
+                [class.chip-active]="settings().common.filterPreset === 'last'"
+                (click)="setFilterPreset('last')"
+              >
+                Last page
+              </button>
+            </div>
           </div>
 
           <!-- 5. LAYER (OVER VS BELOW) -->

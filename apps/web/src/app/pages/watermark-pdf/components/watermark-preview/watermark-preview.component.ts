@@ -27,6 +27,7 @@ import {
 } from '@paperflow/contracts';
 import { WatermarkLayoutService } from '../../../../core/services/watermark-pdf/watermark-layout.service';
 import { WatermarkTextShaper } from '../../../../core/services/watermark-pdf/watermark-text-shaper';
+import { WatermarkTokenService } from '../../../../core/services/watermark-pdf/watermark-token.service';
 import { VisualPageBox, WatermarkPlacement } from '../../../../core/services/watermark-pdf/watermark-document-model';
 
 @Component({
@@ -51,6 +52,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() zoomChange = new EventEmitter<number>();
+  @Output() positionChange = new EventEmitter<{ customXPercent: number; customYPercent: number; rotation: number }>();
 
   // Compare state (Hold to compare hides watermark while active)
   readonly isCompareActive = signal<boolean>(false);
@@ -62,6 +64,14 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   private loadedImageElement: HTMLImageElement | null = null;
   private cachedPageMetrics: VisualPageBox | null = null;
   private keydownListener?: (e: KeyboardEvent) => void;
+  private tokenService = new WatermarkTokenService();
+
+  // Interactive Drag & Rotate State
+  isDragging = false;
+  isRotating = false;
+  private dragPointerId = -1;
+  private currentSinglePlacement: WatermarkPlacement | null = null;
+  private guideSnaps = { showCenterX: false, showCenterY: false };
 
   constructor(private layoutService: WatermarkLayoutService) {
     effect(() => {
@@ -229,7 +239,12 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     let imageMetrics: any = null;
 
     if (isText) {
-      const text = s.textConfig.text || 'CONFIDENTIAL';
+      const rawText = s.textConfig.text || 'CONFIDENTIAL';
+      const text = this.tokenService.evaluate(rawText, {
+        pageNumber: this.currentPage(),
+        totalPages: this.totalPages(),
+        filename: 'Document'
+      });
       const shaped = WatermarkTextShaper.shapeText(text, {
         fontSize: typeof s.textConfig.fontSize === 'number' ? s.textConfig.fontSize : 36,
         bold: s.textConfig.bold,
@@ -322,6 +337,207 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     ctx.globalAlpha = Math.max(0.05, Math.min(1.0, s.common.opacity / 100));
     ctx.drawImage(this.offscreenCanvas, 0, 0);
     ctx.restore();
+
+    // Render interactive selection outline & rotate knob if single watermark
+    if (!s.common.mosaic && layout.placements.length === 1) {
+      this.currentSinglePlacement = layout.placements[0];
+      this.drawInteractiveHandles(ctx, this.currentSinglePlacement, scale);
+    } else {
+      this.currentSinglePlacement = null;
+    }
+  }
+
+  private drawInteractiveHandles(ctx: CanvasRenderingContext2D, p: WatermarkPlacement, scale: number): void {
+    if (!this.cachedPageMetrics) return;
+    const canvasX = p.centerX * scale;
+    const canvasY = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+    const rotRad = (-p.rotation * Math.PI) / 180;
+
+    // Center guide snaps
+    if (this.guideSnaps.showCenterX) {
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#0F766E';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(canvasX, 0);
+      ctx.lineTo(canvasX, ctx.canvas.height);
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (this.guideSnaps.showCenterY) {
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#0F766E';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, canvasY);
+      ctx.lineTo(ctx.canvas.width, canvasY);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.translate(canvasX, canvasY);
+    ctx.rotate(rotRad);
+
+    const halfW = (p.width * scale) / 2;
+    const halfH = (p.height * scale) / 2;
+
+    // Bounding box dashed outline
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeRect(-halfW, -halfH, p.width * scale, p.height * scale);
+
+    // Rotate stem line
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -halfH);
+    ctx.lineTo(0, -halfH - 20);
+    ctx.stroke();
+
+    // Rotate knob handle
+    const knobY = -halfH - 20;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, knobY, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // Pointer Drag & Rotate Handlers
+  onCanvasPointerDown(e: PointerEvent): void {
+    if (!this.currentSinglePlacement || !this.cachedPageMetrics) return;
+
+    const canvas = this.watermarkCanvasRef?.nativeElement;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
+    const scale = this.zoom() * dpr;
+
+    const p = this.currentSinglePlacement;
+    const cx = p.centerX * scale;
+    const cy = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+    const rotRad = (-p.rotation * Math.PI) / 180;
+
+    // Check pointer relative to watermark center
+    const dx = clickX - cx;
+    const dy = clickY - cy;
+
+    // Unrotate point back to local axis
+    const cos = Math.cos(-rotRad);
+    const sin = Math.sin(-rotRad);
+    const localX = dx * cos - dy * sin;
+    const localY = dx * sin + dy * cos;
+
+    const halfW = (p.width * scale) / 2;
+    const halfH = (p.height * scale) / 2;
+    const knobY = -halfH - 20;
+
+    // Check rotate knob hit (within 14px)
+    if (Math.hypot(localX, localY - knobY) <= 14) {
+      this.isRotating = true;
+      this.dragPointerId = e.pointerId;
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      return;
+    }
+
+    // Check bounding box hit
+    if (Math.abs(localX) <= halfW + 10 && Math.abs(localY) <= halfH + 10) {
+      this.isDragging = true;
+      this.dragPointerId = e.pointerId;
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    }
+  }
+
+  onCanvasPointerMove(e: PointerEvent): void {
+    if (!this.cachedPageMetrics) return;
+    const canvas = this.watermarkCanvasRef?.nativeElement;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const ptrX = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const ptrY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
+    const scale = this.zoom() * dpr;
+    const p = this.currentSinglePlacement;
+    if (!p) return;
+
+    const cx = p.centerX * scale;
+    const cy = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+
+    if (this.isRotating) {
+      const angleRad = Math.atan2(ptrY - cy, ptrX - cx);
+      // Canvas angle: 0 is right, Math.PI/2 is down
+      let deg = Math.round((-angleRad * 180) / Math.PI) - 90;
+      deg = ((deg + 180) % 360 + 360) % 360 - 180;
+
+      // Magnetic snap to standard angles (0, 45, 90, 180, 270/-90) within 3 degrees
+      const snapAngles = [0, 45, 90, 180, -90, -45, -180];
+      for (const snap of snapAngles) {
+        if (Math.abs(deg - snap) <= 3) {
+          deg = snap;
+          break;
+        }
+      }
+
+      this.positionChange.emit({
+        customXPercent: this.settings().common.customXPercent,
+        customYPercent: this.settings().common.customYPercent,
+        rotation: deg
+      });
+      return;
+    }
+
+    if (this.isDragging) {
+      const pageW = this.cachedPageMetrics.visualWidth * scale;
+      const pageH = this.cachedPageMetrics.visualHeight * scale;
+
+      let xPct = Math.round((ptrX / pageW) * 100);
+      let yPct = Math.round(((pageH - ptrY) / pageH) * 100);
+
+      // Clamp 0 to 100
+      xPct = Math.max(0, Math.min(100, xPct));
+      yPct = Math.max(0, Math.min(100, yPct));
+
+      // Magnetic snapping to 50% center
+      this.guideSnaps.showCenterX = Math.abs(xPct - 50) <= 2;
+      if (this.guideSnaps.showCenterX) xPct = 50;
+
+      this.guideSnaps.showCenterY = Math.abs(yPct - 50) <= 2;
+      if (this.guideSnaps.showCenterY) yPct = 50;
+
+      this.positionChange.emit({
+        customXPercent: xPct,
+        customYPercent: yPct,
+        rotation: this.settings().common.rotation
+      });
+    }
+  }
+
+  onCanvasPointerUp(e: PointerEvent): void {
+    if (this.isDragging || this.isRotating) {
+      this.isDragging = false;
+      this.isRotating = false;
+      this.guideSnaps.showCenterX = false;
+      this.guideSnaps.showCenterY = false;
+      try {
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+      this.drawWatermarkOverlay();
+    }
   }
 
   // Navigation handlers
