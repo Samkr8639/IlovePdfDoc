@@ -57,6 +57,14 @@ export class WatermarkTextShaper {
   private static fontCache = new Map<string, any>();
 
   /**
+   * Loads a fontkit font object from raw font bytes.
+   */
+  static loadFontkit(fontBuffer: Uint8Array): any {
+    const fk = (fontkit as any).default || fontkit;
+    return fk.create(fontBuffer);
+  }
+
+  /**
    * Strips control characters (except newline \n) and bidi override characters.
    * Caps text at 500 characters.
    */

@@ -99,6 +99,7 @@
                    "LINK_COMPRESS":  "Compress PDF",
                    "LINK_EDIT":  "Edit PDF",
                    "LINK_SIGN":  "Sign PDF",
+                   "LINK_WATERMARK":  "Watermark PDF",
                    "LINK_WORD_TO_PDF":  "Word to PDF",
                    "LINK_EXCEL_TO_PDF":  "Excel to PDF",
                    "LINK_PPT_TO_PDF":  "PowerPoint to PDF",

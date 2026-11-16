@@ -85,7 +85,8 @@ export const routes: Routes = [
   },
   {
     path: 'watermark-pdf',
-    redirectTo: ''
+    loadComponent: () => import('./pages/watermark-pdf/watermark-pdf.component').then(m => m.WatermarkPdfComponent),
+    title: 'Watermark PDF Online Free - Stamp Text & Images on PDF | PDFTailor'
   },
   {
     path: 'rotate-pdf',

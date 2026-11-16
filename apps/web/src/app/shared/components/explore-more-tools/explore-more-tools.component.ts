@@ -16,7 +16,8 @@ const RELATED_MAP: Record<string, string[]> = {
   'powerpoint-to-pdf': ['pdf-to-powerpoint', 'word-to-pdf', 'merge-pdf', 'edit-pdf'],
   'pdf-to-powerpoint': ['powerpoint-to-pdf', 'pdf-to-word', 'edit-pdf', 'merge-pdf'],
   'split-pdf': ['merge-pdf', 'compress-pdf', 'edit-pdf', 'sign-pdf'],
-  'compress-pdf': ['merge-pdf', 'edit-pdf', 'pdf-to-jpg', 'sign-pdf']
+  'compress-pdf': ['merge-pdf', 'edit-pdf', 'pdf-to-jpg', 'sign-pdf'],
+  'watermark-pdf': ['edit-pdf', 'sign-pdf', 'merge-pdf', 'compress-pdf']
 };
 
 @Component({
