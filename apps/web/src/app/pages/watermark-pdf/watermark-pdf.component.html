@@ -21,6 +21,76 @@
   </div>
   }
 
+  <!-- SIGNATURE WARNING MODAL (R-044) -->
+  @if (showSignatureModal()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="sigModalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <svg class="modal-warning-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <h2 id="sigModalTitle" class="modal-title">Digital Signatures Detected</h2>
+        </div>
+        <p class="modal-body-text">
+          One or more documents contain digital signatures. Adding a watermark alters the PDF structure and will <strong>invalidate all existing cryptographic signatures</strong>.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-secondary" (click)="showSignatureModal.set(false)">
+            Cancel
+          </button>
+          <button type="button" class="btn-modal-danger" (click)="confirmSignatureAndExecute()">
+            Continue Anyway
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- PASSWORD PROMPT MODAL (R-045) -->
+  @if (showPasswordModal()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pwdModalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <svg class="modal-lock-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <h2 id="pwdModalTitle" class="modal-title">Password Protected Document</h2>
+        </div>
+        <p class="modal-body-text">
+          This PDF is encrypted with a password. Please enter the password to open and watermark it.
+        </p>
+        <div class="password-input-wrap">
+          <input
+            type="password"
+            class="pt-text-input"
+            placeholder="Enter PDF password"
+            [ngModel]="passwordInput()"
+            (ngModelChange)="passwordInput.set($event)"
+            (keyup.enter)="submitPassword()"
+            aria-label="PDF Password"
+          />
+          @if (passwordError()) {
+            <span class="password-error-msg" role="alert">{{ passwordError() }}</span>
+          }
+        </div>
+        <p class="modal-disclaimer">
+          Note: The watermarked output will be saved decrypted without password protection.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-secondary" (click)="cancelPasswordPrompt()">
+            Cancel
+          </button>
+          <button type="button" class="btn-modal-primary" (click)="submitPassword()">
+            Unlock PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- 1. UPLOAD STATE -->
   @if (currentState() === 'upload') {
   <section class="unified-hero-section">
@@ -888,6 +958,38 @@
             />
             <span>Remember my settings for future visits</span>
           </label>
+        </div>
+
+        <!-- 7. ADVANCED OPTIONS (R-042, R-043) -->
+        <div class="form-field-group advanced-group">
+          <label class="field-label">ADVANCED OPTIONS</label>
+          <div class="checkbox-options-stack">
+            <label class="adv-checkbox-label">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [checked]="settings().common.markAsArtifact"
+                (change)="toggleMarkAsArtifact()"
+              />
+              <div class="adv-checkbox-text">
+                <span class="adv-title">Mark as artifact (Accessibility)</span>
+                <span class="adv-desc">Marks watermark as pagination so screen readers ignore it.</span>
+              </div>
+            </label>
+
+            <label class="adv-checkbox-label">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [checked]="settings().common.optionalContentLayer"
+                (change)="toggleOptionalContentLayer()"
+              />
+              <div class="adv-checkbox-text">
+                <span class="adv-title">Removable layer (Optional Content)</span>
+                <span class="adv-desc">Creates a toggleable "Watermark" layer in PDF viewers.</span>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 

@@ -4,6 +4,10 @@ export interface WatermarkComplianceReport {
   isPdfA: boolean;
   isPdfA1: boolean;
   isPdfX: boolean;
+  hasSignatures: boolean;
+  isEncrypted: boolean;
+  hasXfa: boolean;
+  hasCmyk: boolean;
   conformanceLevel: string | null;
   warningMessage: string | null;
 }
@@ -13,13 +17,17 @@ export interface WatermarkComplianceReport {
 })
 export class WatermarkComplianceService {
   /**
-   * Scans PDF byte array for PDF/A and PDF/X indicators in XMP metadata and trailer
+   * Scans PDF byte array for PDF/A, PDF/X, digital signatures, encryption, XFA, and CMYK indicators.
    */
   checkCompliance(pdfBytes: Uint8Array): WatermarkComplianceReport {
     const report: WatermarkComplianceReport = {
       isPdfA: false,
       isPdfA1: false,
       isPdfX: false,
+      hasSignatures: false,
+      isEncrypted: false,
+      hasXfa: false,
+      hasCmyk: false,
       conformanceLevel: null,
       warningMessage: null
     };
@@ -29,12 +37,33 @@ export class WatermarkComplianceService {
     }
 
     try {
-      // Decode a reasonable chunk of text (or search binary substrings)
-      // XMP packets are typically located in the first 256KB or trailer
       const sampleSize = Math.min(pdfBytes.length, 512 * 1024);
       const textSample = new TextDecoder('latin1').decode(pdfBytes.subarray(0, sampleSize));
 
-      // 1. PDF/A Checks
+      // 1. Digital Signatures Check (R-044)
+      const hasSig =
+        /\/ByteRange\b/.test(textSample) &&
+        (/\/Type\s*\/Sig\b/.test(textSample) || /\/FT\s*\/Sig\b/.test(textSample));
+      if (hasSig) {
+        report.hasSignatures = true;
+      }
+
+      // 2. Encryption / Password Check (R-045)
+      if (/\/Encrypt\b/.test(textSample)) {
+        report.isEncrypted = true;
+      }
+
+      // 3. Dynamic XFA Form Check (R-046)
+      if (/\/XFA\b/.test(textSample)) {
+        report.hasXfa = true;
+      }
+
+      // 4. CMYK Color Space Check (R-047)
+      if (textSample.includes('/DeviceCMYK') || textSample.includes('/DefaultCMYK')) {
+        report.hasCmyk = true;
+      }
+
+      // 5. PDF/A Checks (R-041)
       const pdfaPartMatch = textSample.match(/pdfaid:part[=>"'\s]+([1-4])/i);
       const isPdfA1Direct =
         textSample.includes('GTS_PDFA1') ||
@@ -55,7 +84,7 @@ export class WatermarkComplianceService {
         report.conformanceLevel = `PDF/A-${pdfaPartMatch[1]}`;
       }
 
-      // 2. PDF/X Checks
+      // 6. PDF/X Checks
       if (textSample.includes('GTS_PDFX') || textSample.includes('PDF/X-')) {
         report.isPdfX = true;
         report.warningMessage =

@@ -1700,6 +1700,187 @@
   background-color: rgba(15, 118, 110, 0.05);
 }
 
+/* ==========================================================================
+   ADVANCED OPTIONS (R-042, R-043)
+   ========================================================================== */
+.advanced-group {
+  border-top: 1px solid var(--pt-soft-outline, #E2E8F0);
+  padding-top: 16px;
+}
+
+.checkbox-options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adv-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.adv-checkbox-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adv-title {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pt-navy, #14213D);
+}
+
+.adv-desc {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--pt-muted, #4B5563);
+}
+
+/* ==========================================================================
+   MODALS (R-044, R-045)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(11, 18, 32, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-card {
+  background-color: var(--pt-surface-white, #FFFFFF);
+  border-radius: var(--pt-radius-lg, 16px);
+  max-width: 440px;
+  width: 100%;
+  padding: 28px 24px;
+  box-shadow: 0 20px 25px -5px rgba(11, 18, 32, 0.2);
+  border: 1px solid var(--pt-outline, #D0D5DD);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.modal-warning-icon {
+  color: var(--pt-coral, #E05D44);
+  flex-shrink: 0;
+}
+
+.modal-lock-icon {
+  color: var(--pt-primary, #0F766E);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-family: var(--pt-font-heading, 'Sora', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pt-navy, #14213D);
+  margin: 0;
+}
+
+.modal-body-text {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pt-muted, #4B5563);
+  margin-bottom: 16px;
+}
+
+.password-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.password-error-msg {
+  font-size: 11px;
+  color: #DC2626;
+  font-weight: 500;
+}
+
+.modal-disclaimer {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  color: var(--pt-muted-light, #667085);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-modal-secondary {
+  height: 38px;
+  padding: 0 16px;
+  background-color: var(--pt-surface-white, #FFFFFF);
+  border: 1px solid var(--pt-outline, #D0D5DD);
+  border-radius: var(--pt-radius-sm, 8px);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--pt-navy, #14213D);
+  transition: all 0.15s ease;
+}
+
+.btn-modal-secondary:hover {
+  background-color: var(--pt-subtle-bg, #F6F8FA);
+}
+
+.btn-modal-primary {
+  height: 38px;
+  padding: 0 18px;
+  background-color: var(--pt-primary, #0F766E);
+  border: none;
+  border-radius: var(--pt-radius-sm, 8px);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #FFFFFF;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-primary:hover {
+  background-color: var(--pt-primary-hover, #0D655E);
+}
+
+.btn-modal-danger {
+  height: 38px;
+  padding: 0 18px;
+  background-color: var(--pt-coral, #E05D44);
+  border: none;
+  border-radius: var(--pt-radius-sm, 8px);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #FFFFFF;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-danger:hover {
+  background-color: #C54B33;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

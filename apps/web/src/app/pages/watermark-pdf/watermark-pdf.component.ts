@@ -181,6 +181,14 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   readonly newPresetName = signal<string>('');
   readonly isRememberSettings = signal<boolean>(false);
 
+  // Modals state (R-044, R-045)
+  readonly showSignatureModal = signal<boolean>(false);
+  readonly showPasswordModal = signal<boolean>(false);
+  readonly passwordInput = signal<string>('');
+  readonly passwordError = signal<string | null>(null);
+  private pendingEncryptedBytes: Uint8Array | null = null;
+  private pendingEncryptedFile: File | null = null;
+
   // Constants exposed to template
   readonly quickChips = QUICK_TEXT_CHIPS;
   readonly colorSwatches = COLOR_SWATCHES;
@@ -341,7 +349,21 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       try {
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-        const pdfProxy = await this.sharedPdfjs.loadDocument(bytes);
+        let pdfProxy: any;
+        try {
+          pdfProxy = await this.sharedPdfjs.loadDocument(bytes);
+        } catch (loadErr: any) {
+          const errStr = String(loadErr?.message || loadErr?.name || '').toLowerCase();
+          if (errStr.includes('password') || loadErr?.code === 'PASSWORD_REQUIRED') {
+            this.pendingEncryptedBytes = bytes;
+            this.pendingEncryptedFile = file;
+            this.passwordInput.set('');
+            this.passwordError.set(null);
+            this.showPasswordModal.set(true);
+            return;
+          }
+          throw loadErr;
+        }
 
         if (pdfProxy.numPages > WATERMARK_LIMITS.desktopMaxPages) {
           this.errorMessage.set(
@@ -652,12 +674,90 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Execution: Add Watermark (Single or Multiple R-037, R-038)
+  toggleMarkAsArtifact(): void {
+    this.updateCommon({ markAsArtifact: !this.settings().common.markAsArtifact });
+  }
+
+  toggleOptionalContentLayer(): void {
+    this.updateCommon({ optionalContentLayer: !this.settings().common.optionalContentLayer });
+  }
+
+  cancelPasswordPrompt(): void {
+    this.showPasswordModal.set(false);
+    this.pendingEncryptedBytes = null;
+    this.pendingEncryptedFile = null;
+    this.passwordInput.set('');
+    this.passwordError.set(null);
+  }
+
+  async submitPassword(): Promise<void> {
+    const pwd = this.passwordInput().trim();
+    if (!pwd) {
+      this.passwordError.set('Please enter a password.');
+      return;
+    }
+    if (!this.pendingEncryptedBytes || !this.pendingEncryptedFile) {
+      this.cancelPasswordPrompt();
+      return;
+    }
+
+    try {
+      const pdfProxy = await this.sharedPdfjs.loadDocument(this.pendingEncryptedBytes, {
+        password: pwd
+      });
+      const file = this.pendingEncryptedFile;
+      const bytes = this.pendingEncryptedBytes;
+      const compliance = this.complianceService.checkCompliance(bytes);
+      compliance.warningMessage =
+        'This PDF was password-protected. The watermarked copy will be saved without encryption.';
+
+      const addedItem: WatermarkFileItem = {
+        id: `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        file,
+        name: file.name,
+        size: file.size,
+        bytes,
+        totalPages: pdfProxy.numPages,
+        pdfProxy,
+        settings: JSON.parse(JSON.stringify(this.settings())),
+        complianceReport: compliance
+      };
+
+      const updated = [...this.files(), addedItem];
+      this.files.set(updated);
+      this.selectedFileIndex.set(updated.length - 1);
+      this.totalPages.set(pdfProxy.numPages);
+      this.currentPage.set(1);
+      this.currentState.set('organize');
+      this.layoutService.hideFooter();
+      this.cancelPasswordPrompt();
+    } catch {
+      this.passwordError.set('Incorrect password. Please try again.');
+    }
+  }
+
+  confirmSignatureAndExecute(): void {
+    this.showSignatureModal.set(false);
+    this.proceedWithExecution();
+  }
+
+  // Execution: Add Watermark (Single or Multiple R-037, R-038, R-044)
   async executeWatermark(): Promise<void> {
     if (!this.isSettingsValid() || this.files().length === 0) {
       return;
     }
 
+    // Check for existing digital signatures (R-044)
+    const hasAnySignature = this.files().some(f => f.complianceReport.hasSignatures);
+    if (hasAnySignature) {
+      this.showSignatureModal.set(true);
+      return;
+    }
+
+    await this.proceedWithExecution();
+  }
+
+  async proceedWithExecution(): Promise<void> {
     this.errorMessage.set(null);
     this.isProcessing.set(true);
     this.processingProgress.set(5);

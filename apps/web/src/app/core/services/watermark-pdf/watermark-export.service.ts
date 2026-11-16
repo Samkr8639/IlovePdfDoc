@@ -13,7 +13,8 @@ import {
   PDFPage,
   PDFRef,
   PDFStream,
-  PDFRawStream
+  PDFRawStream,
+  decodePDFRawStream
 } from 'pdf-lib';
 import { zipSync, Zippable } from 'fflate';
 import {
@@ -191,6 +192,31 @@ export class WatermarkExportService {
     const pages = pdfDoc.getPages();
     const totalPages = pages.length;
 
+    // CMYK color space check (R-047)
+    let hasCmyk = rawSample.includes('/DeviceCMYK') || rawSample.includes('/DefaultCMYK');
+    if (!hasCmyk) {
+      try {
+        for (const p of pages) {
+          const res = p.node.Resources();
+          if (res instanceof PDFDict) {
+            const cs = res.lookup(PDFName.of('ColorSpace'));
+            const csStr = cs ? cs.toString() : '';
+            if (csStr.includes('DeviceCMYK') || csStr.includes('CMYK')) {
+              hasCmyk = true;
+              break;
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (hasCmyk) {
+      warnings.push({
+        type: 'cmyk',
+        message: 'This document contains CMYK colors. In-browser watermarking processes in RGB, which may cause subtle color shifts.'
+      });
+    }
+
     // Resolve page selection
     const pageSelection = parseWatermarkPages(
       settings.common.pageMode,
@@ -208,6 +234,31 @@ export class WatermarkExportService {
 
     const selectedSet = new Set(pageSelection.pageIndices);
     const isText = settings.common.activeTab === 'text';
+
+    // Initialize Optional Content Group (OCG) if requested (R-043)
+    let ocgRef: PDFRef | null = null;
+    if (settings.common.optionalContentLayer) {
+      const ocgDict = pdfDoc.context.obj({
+        Type: PDFName.of('OCG'),
+        Name: 'Watermark'
+      });
+      ocgRef = pdfDoc.context.register(ocgDict);
+
+      const dDict = pdfDoc.context.obj({
+        Name: 'Default',
+        BaseState: PDFName.of('ON'),
+        ON: pdfDoc.context.obj([ocgRef]),
+        Order: pdfDoc.context.obj([ocgRef])
+      });
+
+      const ocProps = pdfDoc.context.obj({
+        OCGs: pdfDoc.context.obj([ocgRef]),
+        D: dDict
+      });
+      pdfDoc.catalog.set(PDFName.of('OCProperties'), ocProps);
+    }
+
+    const opaquePages: number[] = [];
 
     // 1. Text or Image Watermark Preparation
     let textShaping: any = null;
@@ -381,8 +432,43 @@ export class WatermarkExportService {
       page.node.setXObject(PDFName.of(wmName), xobjRef);
       page.node.setExtGState(PDFName.of('GS_WM'), gsRef);
 
+      // Check for opaque backdrop if Layer is Below (R-048)
+      if (settings.common.layer === 'below' && this.isPageBackdropOpaque(page)) {
+        opaquePages.push(pageIdx + 1);
+      }
+
+      // Register OCG in page resources if present (R-043)
+      if (ocgRef) {
+        let resources = page.node.get(PDFName.of('Resources'));
+        if (!(resources instanceof PDFDict)) {
+          resources = pdfDoc.context.obj({});
+          page.node.set(PDFName.of('Resources'), resources);
+        }
+        let properties = (resources as PDFDict).get(PDFName.of('Properties'));
+        if (!(properties instanceof PDFDict)) {
+          properties = pdfDoc.context.obj({});
+          (resources as PDFDict).set(PDFName.of('Properties'), properties);
+        }
+        (properties as PDFDict).set(PDFName.of('OC_WM'), ocgRef);
+      }
+
       // 5. Build Watermark Page Stream Operators
-      let wmOps = 'q /GS_WM gs\n';
+      let wmOps = '';
+      let emcCount = 0;
+
+      // Mark as Artifact (R-042)
+      if (settings.common.markAsArtifact) {
+        wmOps += '/Artifact <</Type /Pagination /Subtype /Watermark>> BDC\n';
+        emcCount++;
+      }
+
+      // Optional Content Group (R-043)
+      if (settings.common.optionalContentLayer && ocgRef) {
+        wmOps += '/OC /OC_WM BDC\n';
+        emcCount++;
+      }
+
+      wmOps += 'q /GS_WM gs\n';
 
       const pageMeta = {
         pageIndex: pageIdx,
@@ -412,11 +498,25 @@ export class WatermarkExportService {
       }
       wmOps += 'Q\n';
 
+      while (emcCount > 0) {
+        wmOps += 'EMC\n';
+        emcCount--;
+      }
+
       const wmStream = pdfDoc.context.flateStream(wmOps);
       const wmRef = pdfDoc.context.register(wmStream);
 
       // 6. Graphics State Isolation & q/Q Balance Repair
       this.isolateAndLayerPageContents(pdfDoc, page, wmRef, settings.common.layer);
+    }
+
+    // Collect opaque page warning for Layer Below (R-048)
+    if (opaquePages.length > 0 && settings.common.layer === 'below') {
+      warnings.push({
+        type: 'opaque_pages',
+        message: `Watermark placed below content may be obscured on ${opaquePages.length} page(s) with opaque backgrounds: ${opaquePages.join(', ')}.`,
+        pages: opaquePages
+      });
     }
 
     // 7. Metadata Preservation: preserve original Creator & Producer; update only ModDate
@@ -551,6 +651,41 @@ export class WatermarkExportService {
       zipBytes,
       zipFilename: 'watermarked-pdfs.zip'
     };
+  }
+
+  private isPageBackdropOpaque(page: PDFPage): boolean {
+    try {
+      const origContents = page.node.Contents();
+      if (!origContents) return false;
+
+      let contentsText = '';
+      const inspectStream = (ref: any) => {
+        const stream = page.doc.context.lookup(ref);
+        if (stream instanceof PDFRawStream || stream instanceof PDFStream) {
+          try {
+            const decompressed = decodePDFRawStream(stream as any).decode();
+            contentsText += new TextDecoder('latin1').decode(decompressed);
+          } catch {
+            contentsText += new TextDecoder('latin1').decode((stream as any).getContents());
+          }
+        }
+      };
+
+      if (origContents instanceof PDFArray) {
+        for (let i = 0; i < origContents.size(); i++) {
+          inspectStream(origContents.get(i));
+        }
+      } else {
+        inspectStream(origContents);
+      }
+
+      // Detect full-page filled rectangle or image paint (R-048)
+      const hasFullPageRect = /\b\d+\s+\d+\s+\d+\s+\d+\s+re\s+[fFbB]/i.test(contentsText);
+      const hasImageDo = /\/([a-zA-Z0-9_-]+)\s+Do\b/.test(contentsText);
+      return hasFullPageRect || hasImageDo;
+    } catch {
+      return false;
+    }
   }
 
   buildWatermarkedFilename(originalFilename: string): string {

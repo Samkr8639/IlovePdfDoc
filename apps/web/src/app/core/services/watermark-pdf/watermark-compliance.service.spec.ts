@@ -58,4 +58,22 @@ describe('WatermarkComplianceService', () => {
     expect(report.isPdfX).toBe(true);
     expect(report.warningMessage).toContain('PDF/X print specifications');
   });
+
+  it('detects digital signatures, encryption, XFA, and CMYK (R-044, R-045, R-046, R-047)', () => {
+    const raw = `
+      %PDF-1.6
+      1 0 obj << /Type /Sig /ByteRange [0 100 200 300] >> endobj
+      2 0 obj << /Encrypt 3 0 R >> endobj
+      3 0 obj << /XFA [ (template) 4 0 R ] >> endobj
+      4 0 obj << /ColorSpace /DeviceCMYK >> endobj
+      trailer << /Root 1 0 R >> %%EOF
+    `;
+    const bytes = new TextEncoder().encode(raw);
+    const report = service.checkCompliance(bytes);
+
+    expect(report.hasSignatures).toBe(true);
+    expect(report.isEncrypted).toBe(true);
+    expect(report.hasXfa).toBe(true);
+    expect(report.hasCmyk).toBe(true);
+  });
 });

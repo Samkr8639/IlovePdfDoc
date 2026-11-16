@@ -284,4 +284,96 @@ describe('WatermarkExportService', () => {
       expect(progressCalls[progressCalls.length - 1].totalFiles).toBe(2);
     });
   });
+
+  describe('Phase 3 Advanced Export Options (R-042, R-043, R-047, R-048)', () => {
+    it('wraps watermark in /Artifact BDC ... EMC operators (R-042)', async () => {
+      const doc = await PDFDocument.create();
+      doc.addPage([400, 400]);
+      (doc as any).updateInfoDict = function () {};
+      const bytes = await doc.save();
+
+      const settings = JSON.parse(JSON.stringify(WATERMARK_DEFAULT_SETTINGS));
+      settings.common.markAsArtifact = true;
+      settings.common.optionalContentLayer = false;
+
+      const res = await exportService.exportWatermarkedPdf(bytes, 'artifact.pdf', settings);
+      const reloaded = await PDFDocument.load(res.pdfBytes, { updateMetadata: false });
+      const page = reloaded.getPage(0);
+      const contentsArray = page.node.Contents() as PDFArray;
+      const lastStreamRef = contentsArray.get(contentsArray.size() - 1);
+      const stream = reloaded.context.lookup(lastStreamRef) as any;
+      const text = new TextDecoder('latin1').decode(decodePDFRawStream(stream).decode());
+
+      expect(text).toContain('/Artifact');
+      expect(text).toContain('/Pagination');
+      expect(text).toContain('BDC');
+      expect(text).toContain('EMC');
+    });
+
+    it('creates Optional Content Group /OCG and wraps in /OC BDC ... EMC (R-043)', async () => {
+      const doc = await PDFDocument.create();
+      doc.addPage([400, 400]);
+      (doc as any).updateInfoDict = function () {};
+      const bytes = await doc.save();
+
+      const settings = JSON.parse(JSON.stringify(WATERMARK_DEFAULT_SETTINGS));
+      settings.common.markAsArtifact = false;
+      settings.common.optionalContentLayer = true;
+
+      const res = await exportService.exportWatermarkedPdf(bytes, 'ocg.pdf', settings);
+      const reloaded = await PDFDocument.load(res.pdfBytes, { updateMetadata: false });
+
+      // Check Catalog OCProperties
+      const ocProps = reloaded.catalog.lookup(PDFName.of('OCProperties'));
+      expect(ocProps).toBeDefined();
+
+      const page = reloaded.getPage(0);
+      const contentsArray = page.node.Contents() as PDFArray;
+      const lastStreamRef = contentsArray.get(contentsArray.size() - 1);
+      const stream = reloaded.context.lookup(lastStreamRef) as any;
+      const text = new TextDecoder('latin1').decode(decodePDFRawStream(stream).decode());
+
+      expect(text).toContain('/OC /OC_WM BDC');
+      expect(text).toContain('EMC');
+    });
+
+    it('warns when Layer Below is placed on opaque pages (R-048)', async () => {
+      const doc = await PDFDocument.create();
+      const page = doc.addPage([500, 500]);
+      // Paint full page rectangle
+      const rectStream = doc.context.flateStream('0 0 500 500 re f');
+      page.node.set(PDFName.of('Contents'), doc.context.register(rectStream));
+      (doc as any).updateInfoDict = function () {};
+      const bytes = await doc.save();
+
+      const settings = JSON.parse(JSON.stringify(WATERMARK_DEFAULT_SETTINGS));
+      settings.common.layer = 'below';
+
+      const res = await exportService.exportWatermarkedPdf(bytes, 'opaque.pdf', settings);
+      const opaqueWarn = res.warnings.find(w => w.type === 'opaque_pages');
+      expect(opaqueWarn).toBeDefined();
+      expect(opaqueWarn?.message).toContain('obscured');
+      expect(opaqueWarn?.pages).toContain(1);
+    });
+
+    it('warns when source PDF contains CMYK colors (R-047)', async () => {
+      const doc = await PDFDocument.create();
+      const page = doc.addPage([300, 300]);
+      (doc as any).updateInfoDict = function () {};
+      page.node.set(
+        PDFName.of('Resources'),
+        doc.context.obj({
+          ColorSpace: {
+            CS1: PDFName.of('DeviceCMYK')
+          }
+        })
+      );
+      const cmykBytes = await doc.save();
+
+      const res = await exportService.exportWatermarkedPdf(cmykBytes, 'cmyk.pdf', WATERMARK_DEFAULT_SETTINGS);
+      const cmykWarn = res.warnings.find(w => w.type === 'cmyk');
+      expect(cmykWarn).toBeDefined();
+      expect(cmykWarn?.message).toContain('CMYK');
+    });
+  });
 });

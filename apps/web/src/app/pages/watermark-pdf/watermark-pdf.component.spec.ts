@@ -406,6 +406,73 @@ describe('WatermarkPdfComponent', () => {
     expect(component.files().length).toBe(1);
   });
 
+  it('toggles advanced artifact and optional content layer settings (R-042, R-043)', () => {
+    expect(component.settings().common.markAsArtifact).toBe(true);
+    component.toggleMarkAsArtifact();
+    expect(component.settings().common.markAsArtifact).toBe(false);
+
+    expect(component.settings().common.optionalContentLayer).toBe(false);
+    component.toggleOptionalContentLayer();
+    expect(component.settings().common.optionalContentLayer).toBe(true);
+  });
+
+  it('triggers digital signature warning modal and proceeds on confirmation (R-044)', async () => {
+    const sigFile = new File([new Uint8Array([37, 80, 68, 70])], 'signed.pdf', { type: 'application/pdf' });
+    await component.onFilesAdded([sigFile]);
+
+    // Mock compliance report indicating digital signatures
+    component.files.update(list => list.map(f => ({
+      ...f,
+      complianceReport: { ...f.complianceReport, hasSignatures: true }
+    })));
+
+    component.applyQuickChip('CONFIDENTIAL');
+    await component.executeWatermark();
+
+    // Modal should be shown, not completed immediately
+    expect(component.showSignatureModal()).toBe(true);
+    expect(component.currentState()).toBe('organize');
+
+    // Confirm execution
+    component.confirmSignatureAndExecute();
+    expect(component.showSignatureModal()).toBe(false);
+  });
+
+  it('handles password-protected PDFs with unlock workflow (R-045)', async () => {
+    mockSharedPdfjs.loadDocument.mockRejectedValueOnce({
+      name: 'PasswordException',
+      code: 'PASSWORD_REQUIRED',
+      message: 'Password required'
+    });
+
+    const encFile = new File([new Uint8Array([37, 80, 68, 70])], 'locked.pdf', { type: 'application/pdf' });
+    await component.onFilesAdded([encFile]);
+
+    expect(component.showPasswordModal()).toBe(true);
+
+    // Empty password rejected
+    await component.submitPassword();
+    expect(component.passwordError()).toContain('enter a password');
+
+    // Incorrect password rejected
+    mockSharedPdfjs.loadDocument.mockRejectedValueOnce(new Error('Incorrect password'));
+    component.passwordInput.set('wrongpass');
+    await component.submitPassword();
+    expect(component.passwordError()).toContain('Incorrect password');
+
+    // Correct password unlocks
+    mockSharedPdfjs.loadDocument.mockResolvedValueOnce({
+      numPages: 3,
+      getPage: vi.fn()
+    });
+    component.passwordInput.set('correctpass');
+    await component.submitPassword();
+
+    expect(component.showPasswordModal()).toBe(false);
+    expect(component.currentState()).toBe('organize');
+    expect(component.files().length).toBeGreaterThanOrEqual(1);
+  });
+
   it('cancels processing and returns to organize workspace', () => {
     component.currentState.set('processing');
     component.isProcessing.set(true);

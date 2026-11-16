@@ -111,4 +111,22 @@ describe('WatermarkPreviewComponent', () => {
     expect(wmCanvas.style.zIndex).toBe('1');
     expect(pageCanvas.style.zIndex).toBe('2');
   });
+
+  it('handles mosaic mode preview layout', () => {
+    fixture.componentRef.setInput('settings', {
+      ...component.settings(),
+      common: {
+        ...component.settings().common,
+        mosaic: true,
+        horizontalGapMm: 20,
+        verticalGapMm: 20,
+        stagger: true
+      }
+    });
+    fixture.detectChanges();
+
+    expect(component.settings().common.mosaic).toBe(true);
+    // Trigger overlay redraw directly
+    expect(() => component.drawWatermarkOverlay()).not.toThrow();
+  });
 });
