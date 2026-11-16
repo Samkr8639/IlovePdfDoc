@@ -262,78 +262,165 @@
 
     <!-- CANVAS MAIN AREA -->
     <main class="canvas-main-area" aria-label="PDF Watermark Preview Area">
-      <!-- MULTI-FILE SELECTOR BAR (R-037) -->
-      @if (files().length > 0) {
-        <div class="file-selector-bar" role="tablist" aria-label="Loaded PDF documents">
-          <div class="file-tabs-scroll">
-            @for (fileItem of files(); track fileItem.id; let i = $index) {
-              <div
-                class="file-tab-item"
-                [class.active]="i === selectedFileIndex()"
-                role="tab"
-                [attr.aria-selected]="i === selectedFileIndex()"
-                (click)="selectFile(i)"
+      <!-- UNIFIED WORKSPACE TOP TOOLBAR (Single Clean Bar) -->
+      <div class="workspace-top-bar" role="toolbar" aria-label="Workspace document and preview controls">
+        <!-- Left: Active Document Pill & Multi-file Switcher -->
+        <div class="top-bar-left">
+          <div class="toolbar-doc-pill">
+            <svg class="doc-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span class="doc-name-chip" [title]="currentFileItem()?.name || 'Document'">{{ currentFileItem()?.name || 'Document' }}</span>
+            <span class="doc-pages-chip">{{ totalPages() }} {{ totalPages() === 1 ? 'page' : 'pages' }}</span>
+            @if (files().length > 1) {
+              <button
+                type="button"
+                class="doc-tab-close"
+                (click)="removeFile(selectedFileIndex(), $event)"
+                title="Remove this document"
+                aria-label="Remove document"
               >
-                <svg class="file-tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-                <span class="file-tab-name" [title]="fileItem.name">{{ fileItem.name }}</span>
-                <span class="file-tab-badge">{{ fileItem.totalPages }} p</span>
-                <button
-                  type="button"
-                  class="file-tab-remove"
-                  (click)="removeFile(i, $event)"
-                  aria-label="Remove document"
-                  title="Remove document"
-                >
-                  &times;
-                </button>
-              </div>
+                &times;
+              </button>
             }
           </div>
 
-          <div class="file-bar-actions">
+          <!-- Multi-file Tabs (Compact) -->
+          @if (files().length > 1) {
+            <div class="multi-doc-tabs" role="tablist" aria-label="Switch document">
+              @for (fileItem of files(); track fileItem.id; let i = $index) {
+                @if (i !== selectedFileIndex()) {
+                  <button
+                    type="button"
+                    class="multi-tab-btn"
+                    role="tab"
+                    (click)="selectFile(i)"
+                    [title]="fileItem.name"
+                  >
+                    <span class="tab-btn-name">{{ fileItem.name }}</span>
+                    <span class="tab-btn-pages">{{ fileItem.totalPages }}p</span>
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Center: Page Navigation & Zoom Controls -->
+        <div class="top-bar-center">
+          <div class="toolbar-nav-group">
             <button
               type="button"
-              class="btn-add-more-files"
-              (click)="docFileInput.click()"
-              [disabled]="files().length >= 10"
-              title="Add another PDF document"
+              class="ctrl-btn"
+              [disabled]="currentPage() <= 1"
+              (click)="onPageChange(currentPage() - 1)"
+              aria-label="Previous page"
+              title="Previous page"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <span class="page-counter-text" aria-live="polite">
+              Page <strong>{{ currentPage() }}</strong> of {{ totalPages() }}
+            </span>
+
+            <button
+              type="button"
+              class="ctrl-btn"
+              [disabled]="currentPage() >= totalPages()"
+              (click)="onPageChange(currentPage() + 1)"
+              aria-label="Next page"
+              title="Next page"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div class="toolbar-divider" aria-hidden="true"></div>
+
+          <div class="toolbar-zoom-group">
+            <button
+              type="button"
+              class="ctrl-btn"
+              [disabled]="zoom() <= 0.5"
+              (click)="onZoomChange(zoom() - 0.25)"
+              aria-label="Zoom out"
+              title="Zoom out"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+
+            <span class="zoom-level-text">{{ (zoom() * 100) | number:'1.0-0' }}%</span>
+
+            <button
+              type="button"
+              class="ctrl-btn"
+              [disabled]="zoom() >= 3.0"
+              (click)="onZoomChange(zoom() + 0.25)"
+              aria-label="Zoom in"
+              title="Zoom in"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Add files</span>
             </button>
 
-            @if (files().length > 1) {
-              <div class="sync-settings-control">
-                <label class="sync-switch-label">
-                  <input
-                    type="checkbox"
-                    class="pt-checkbox"
-                    [checked]="sameSettingsForAll()"
-                    (change)="toggleSameSettingsForAll(!sameSettingsForAll())"
-                  />
-                  <span>Same settings for all</span>
-                </label>
-                @if (!sameSettingsForAll()) {
-                  <button
-                    type="button"
-                    class="btn-apply-all"
-                    (click)="applyCurrentSettingsToAll()"
-                    title="Copy current settings to all files"
-                  >
-                    Apply to all
-                  </button>
-                }
-              </div>
-            }
+            <button
+              type="button"
+              class="ctrl-btn btn-fit-text"
+              (click)="onZoomChange(1.0)"
+              title="Reset zoom to 100%"
+            >
+              Fit
+            </button>
           </div>
         </div>
-      }
+
+        <!-- Right: Hold to Compare (and sync toggle for multi-file) -->
+        <div class="top-bar-right">
+          @if (files().length > 1) {
+            <label class="sync-switch-label" title="Apply same settings to all loaded files">
+              <input
+                type="checkbox"
+                class="pt-checkbox"
+                [checked]="sameSettingsForAll()"
+                (change)="toggleSameSettingsForAll(!sameSettingsForAll())"
+              />
+              <span>Same for all</span>
+            </label>
+          }
+
+          <button
+            type="button"
+            class="btn-compare-action"
+            [class.active]="isCompareActive()"
+            [attr.aria-pressed]="isCompareActive()"
+            (mousedown)="onCompareHoldStart()"
+            (mouseup)="onCompareHoldEnd()"
+            (mouseleave)="onCompareHoldEnd()"
+            (touchstart)="onCompareHoldStart()"
+            (touchend)="onCompareHoldEnd()"
+            (click)="toggleCompare()"
+            title="Hold or click to hide watermark (or press 'C' key)"
+            aria-label="Hold to compare without watermark"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>Hold to compare</span>
+            <kbd class="shortcut-key">C</kbd>
+          </button>
+        </div>
+      </div>
 
       <!-- COMPLIANCE WARNING BANNER (R-041) -->
       @if (complianceWarning()) {
@@ -347,48 +434,98 @@
         </div>
       }
 
-      <app-watermark-preview [pdfDocProxy]="pdfDocProxy()" [settings]="settings()" [currentPage]="currentPage()"
-        [totalPages]="totalPages()" [zoom]="zoom()" [isPageIncluded]="isCurrentPageIncluded()"
-        [fontkitFont]="fontkitFont()" (pageChange)="onPageChange($event)" (zoomChange)="onZoomChange($event)"
-        (positionChange)="onPositionChange($event)"></app-watermark-preview>
+      <app-watermark-preview
+        [pdfDocProxy]="pdfDocProxy()"
+        [settings]="settings()"
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [zoom]="zoom()"
+        [isPageIncluded]="isCurrentPageIncluded()"
+        [fontkitFont]="fontkitFont()"
+        (pageChange)="onPageChange($event)"
+        (zoomChange)="onZoomChange($event)"
+        (positionChange)="onPositionChange($event)"
+        (sizeChange)="onSizeChange($event)"
+      ></app-watermark-preview>
 
-      <!-- FLOATING TOOLS DOCK -->
-      <aside class="floating-tools-dock" aria-label="Quick document actions">
-        <button type="button" class="dock-square-btn btn-count-stack" (click)="docFileInput.click()"
-          title="Add or replace document" aria-label="Add or replace PDF document">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-          <span class="count-badge" [attr.aria-label]="files().length + ' documents loaded'">{{ files().length }}</span>
-        </button>
-
+      <!-- CANONICAL FLOATING TOOLS DOCK (Exact match to previous pages) -->
+      <div class="floating-tools-dock" role="toolbar" aria-label="Add more documents">
         <input #docFileInput type="file" accept=".pdf,application/pdf" multiple class="visually-hidden"
           (change)="onFileInputChange($event)" />
 
-        <button type="button" class="dock-pill-btn" (click)="docFileInput.click()"
-          title="Choose another PDF from device" aria-label="Choose another PDF from device">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-            <line x1="8" y1="21" x2="16" y2="21"></line>
-            <line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-        </button>
+        <!-- 1. Add More Files (+ in teal rounded-square with count badge) -->
+        <div class="dock-btn-wrap">
+          <button
+            type="button"
+            class="dock-square-btn add-more-action"
+            (click)="docFileInput.click()"
+            title="Add more files"
+            aria-label="Add more files"
+          >
+            <span class="dock-count-badge">{{ files().length }}</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <span class="dock-tooltip-label">Add more files</span>
+        </div>
 
-        <button type="button" class="dock-pill-btn btn-cloud-disabled" disabled
-          title="Google Drive integration coming soon" aria-label="Google Drive integration coming soon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 19h20L12 2z"></path>
-          </svg>
-        </button>
+        <!-- 2. Computer / Laptop Upload -->
+        <div class="dock-btn-wrap">
+          <button
+            type="button"
+            class="dock-icon-btn pc-action"
+            (click)="docFileInput.click()"
+            title="Upload from computer"
+            aria-label="Upload from computer"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="3"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </button>
+          <span class="dock-tooltip-label">Upload from PC</span>
+        </div>
 
-        <button type="button" class="dock-pill-btn btn-cloud-disabled" disabled title="Dropbox integration coming soon"
-          aria-label="Dropbox integration coming soon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2l-7 5 7 5-7 5 7 5 7-5-7-5 7-5-7-5z"></path>
-          </svg>
-        </button>
-      </aside>
+        <!-- 3. Google Drive (Authentic Full-Color Logo) -->
+        <div class="dock-btn-wrap">
+          <button
+            type="button"
+            class="dock-icon-btn drive-action"
+            (click)="openGoogleDrive($event)"
+            title="Google Drive"
+            aria-label="Add from Google Drive"
+          >
+            <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none">
+              <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+              <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
+              <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
+              <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+              <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+              <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+            </svg>
+          </button>
+          <span class="dock-tooltip-label">Google Drive</span>
+        </div>
+
+        <!-- 4. Dropbox (Authentic Blue Logo) -->
+        <div class="dock-btn-wrap">
+          <button
+            type="button"
+            class="dock-icon-btn dropbox-action"
+            (click)="openDropbox($event)"
+            title="Dropbox"
+            aria-label="Add from Dropbox"
+          >
+            <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF">
+              <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+            </svg>
+          </button>
+          <span class="dock-tooltip-label">Dropbox</span>
+        </div>
+      </div>
     </main>
 
     <!-- MOBILE PANEL BACKDROP OVERLAY -->
@@ -529,21 +666,99 @@
               </div>
             </div>
 
-            <!-- Font Size & Auto-fit -->
-            <div class="font-size-row">
-              <label class="pt-checkbox-label">
-                <input type="checkbox" [checked]="settings().textConfig.fontSize === 'auto'"
-                  (change)="setFontSize($any($event.target).checked ? 'auto' : 48)" />
-                <span>Auto-fit to page</span>
-              </label>
-
-              @if (settings().textConfig.fontSize !== 'auto') {
-              <div class="custom-size-input-wrap">
-                <input type="number" class="pt-number-input size-input" [ngModel]="settings().textConfig.fontSize"
-                  (ngModelChange)="setFontSize($event)" min="6" max="400" step="1" aria-label="Font size in points" />
-                <span class="input-suffix">pt</span>
+            <!-- FONT SIZE & RESIZE CONTROLS (Always Visible) -->
+            <div class="font-size-section">
+              <div class="font-size-header-row">
+                <span class="subfield-label">FONT SIZE</span>
+                <span class="size-badge-pill" [class.is-auto]="settings().textConfig.fontSize === 'auto'">
+                  @if (settings().textConfig.fontSize === 'auto') {
+                    Auto-fit
+                  } @else {
+                    {{ settings().textConfig.fontSize }} pt
+                  }
+                </span>
               </div>
-              }
+
+              <!-- Slider & Number input -->
+              <div class="font-size-slider-row">
+                <input
+                  type="range"
+                  class="pt-range-slider font-size-range"
+                  min="8"
+                  max="144"
+                  step="1"
+                  [ngModel]="currentNumericFontSize()"
+                  (ngModelChange)="setFontSize($event)"
+                  aria-label="Font size slider"
+                />
+                <div class="font-size-num-box">
+                  <input
+                    id="fontSizeInput"
+                    type="number"
+                    class="pt-number-input font-size-num"
+                    min="6"
+                    max="400"
+                    step="1"
+                    [ngModel]="currentNumericFontSize()"
+                    (ngModelChange)="setFontSize($event)"
+                    aria-label="Font size in points"
+                  />
+                  <span class="pt-unit">pt</span>
+                </div>
+              </div>
+
+              <!-- Quick Size Preset Pills -->
+              <div class="size-preset-chips" role="group" aria-label="Font size presets">
+                <button
+                  type="button"
+                  class="size-pill-btn"
+                  [class.active]="settings().textConfig.fontSize === 18"
+                  (click)="setFontSize(18)"
+                >
+                  18 pt
+                </button>
+                <button
+                  type="button"
+                  class="size-pill-btn"
+                  [class.active]="settings().textConfig.fontSize === 24"
+                  (click)="setFontSize(24)"
+                >
+                  24 pt
+                </button>
+                <button
+                  type="button"
+                  class="size-pill-btn"
+                  [class.active]="settings().textConfig.fontSize === 36"
+                  (click)="setFontSize(36)"
+                >
+                  36 pt
+                </button>
+                <button
+                  type="button"
+                  class="size-pill-btn"
+                  [class.active]="settings().textConfig.fontSize === 48"
+                  (click)="setFontSize(48)"
+                >
+                  48 pt
+                </button>
+                <button
+                  type="button"
+                  class="size-pill-btn"
+                  [class.active]="settings().textConfig.fontSize === 72"
+                  (click)="setFontSize(72)"
+                >
+                  72 pt
+                </button>
+                <button
+                  type="button"
+                  class="size-pill-btn autofit-btn"
+                  [class.active]="settings().textConfig.fontSize === 'auto'"
+                  (click)="setFontSize(settings().textConfig.fontSize === 'auto' ? 36 : 'auto')"
+                  title="Automatically fit watermark to page size"
+                >
+                  Auto-fit
+                </button>
+              </div>
             </div>
           </div>
 

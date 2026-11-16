@@ -156,10 +156,10 @@
     "semantic_hash": "d9b3b2efa4571929c0a2294599681c92"
   },
   "apps/api/src/services/compress/image-optimizer.ts": {
-    "mtime": 1793110535.316708,
-    "seen": 1794460514.2518032,
-    "ast_hash": "f72922c38c3e36e8787eae29f82e4f64",
-    "semantic_hash": "f72922c38c3e36e8787eae29f82e4f64"
+    "mtime": 1794813147.3079588,
+    "seen": 1794813836.9154034,
+    "ast_hash": "d16702741977ec823b3dddadb370a433",
+    "semantic_hash": ""
   },
   "apps/api/src/services/compress/index.ts": {
     "mtime": 1793110535.316708,
@@ -378,10 +378,10 @@
     "semantic_hash": "32f7751c599f3d5674f24deafa38eccf"
   },
   "apps/api/tests/custom-environment.js": {
-    "mtime": 1793353359.2888992,
-    "seen": 1794460514.2542872,
-    "ast_hash": "75a2ac8643decb5b2df2b5fd84339d9a",
-    "semantic_hash": "75a2ac8643decb5b2df2b5fd84339d9a"
+    "mtime": 1794813499.792001,
+    "seen": 1794813836.915459,
+    "ast_hash": "b0310bb5aa2f49985a0e6ac9e129909c",
+    "semantic_hash": ""
   },
   "apps/api/tests/edit-pdf-ocr.spec.ts": {
     "mtime": 1793854985.3780231,
@@ -600,9 +600,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/app.routes.ts": {
-    "mtime": 1794565499.0974765,
-    "seen": 1794569655.238467,
-    "ast_hash": "b0b9d2f02892b1eeaa313a73d554312c",
+    "mtime": 1794822102.9735048,
+    "seen": 1794826488.2815726,
+    "ast_hash": "364687a4a342a5cd487e6e56ddd4fbb4",
     "semantic_hash": ""
   },
   "apps/web/src/app/app.spec.ts": {
@@ -624,9 +624,9 @@
     "semantic_hash": "bca873d6d9f3ec1a94f24a1d3cdf9b5f"
   },
   "apps/web/src/app/core/i18n/default-en.ts": {
-    "mtime": 1794565499.0984795,
-    "seen": 1794569655.2384717,
-    "ast_hash": "36d376990f0c481227957b1912cf8e74",
+    "mtime": 1794822103.0635924,
+    "seen": 1794826488.2815776,
+    "ast_hash": "01391967e732130d40841b3e55b92337",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/animation.service.spec.ts": {
@@ -642,15 +642,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/browser-pdf.service.spec.ts": {
-    "mtime": 1794807070.995231,
-    "seen": 1794807958.1865864,
-    "ast_hash": "561fe82947a5b10ad23e3ec01c502d92",
+    "mtime": 1794813432.1497037,
+    "seen": 1794813836.9155579,
+    "ast_hash": "97e21cd2841d6fd580c1d546a4392fd9",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/browser-pdf.service.ts": {
-    "mtime": 1794807070.995231,
-    "seen": 1794807958.1865873,
-    "ast_hash": "80e6b7dcd7cf97e5a44008151c1b29ac",
+    "mtime": 1794814412.8979871,
+    "seen": 1794821803.3714094,
+    "ast_hash": "7120896da855cbd61fdaf13262ef79d2",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/consent.service.ts": {
@@ -858,15 +858,15 @@
     "semantic_hash": "70bbeb3051bcc2e7ee03b281f6d50626"
   },
   "apps/web/src/app/core/services/tool-registry.service.spec.ts": {
-    "mtime": 1793964221.090198,
-    "seen": 1794460514.259747,
-    "ast_hash": "16ec452f66e1a1a46d0de86dbb76e46d",
-    "semantic_hash": "16ec452f66e1a1a46d0de86dbb76e46d"
+    "mtime": 1794810409.8337934,
+    "seen": 1794813836.9156582,
+    "ast_hash": "9e3d2c831c22d7f590d430bc30744e0d",
+    "semantic_hash": ""
   },
   "apps/web/src/app/core/services/tool-registry.service.ts": {
-    "mtime": 1794565499.1022334,
-    "seen": 1794569655.2385252,
-    "ast_hash": "1669dae62f869df7b898a7932d514b1b",
+    "mtime": 1794822103.1564012,
+    "seen": 1794826488.281636,
+    "ast_hash": "4b9010f4004752165e921f6bbbebadf6",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/translation.service.spec.ts": {
@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/word-to-pdf.service.ts": {
-    "mtime": 1794807070.995231,
-    "seen": 1794807958.186646,
-    "ast_hash": "19800ce09572ff686f5fe7ee7e7d7645",
+    "mtime": 1794813329.8847504,
+    "seen": 1794813836.915702,
+    "ast_hash": "6531dc4836c3e1ce9f16b0ad1c0fe396",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/utils/split-range-parser.spec.ts": {
@@ -936,16 +936,16 @@
     "semantic_hash": "6908e5c5d9fc6a1bc4ce4f3a2939c3c1"
   },
   "apps/web/src/app/pages/contact-us/contact-us.component.spec.ts": {
-    "mtime": 1794565499.1050272,
-    "seen": 1794569655.238539,
-    "ast_hash": "b78bd39027b5fd3d176eaa96c3a6f51b",
+    "mtime": 1794812542.7982361,
+    "seen": 1794813836.915714,
+    "ast_hash": "8791a547b313aeb52ac545363d1cb268",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/contact-us/contact-us.component.ts": {
-    "mtime": 1793190533.0094745,
-    "seen": 1794460514.2606773,
-    "ast_hash": "97fca4a23a04c6a0c09b8225d4e5a2e9",
-    "semantic_hash": "97fca4a23a04c6a0c09b8225d4e5a2e9"
+    "mtime": 1794812542.7992454,
+    "seen": 1794813836.9157152,
+    "ast_hash": "60ee22bf55ed1b19333d1b0071fa9168",
+    "semantic_hash": ""
   },
   "apps/web/src/app/pages/cookie-settings/cookie-settings.component.ts": {
     "mtime": 1793190533.010672,
@@ -1266,9 +1266,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/jpg-to-pdf/jpg-to-pdf.component.spec.ts": {
-    "mtime": 1794807071.0102358,
-    "seen": 1794807958.186717,
-    "ast_hash": "7f6d3bc0dc8f8dd67c5ac6a9c1fbbbf1",
+    "mtime": 1794813479.5655038,
+    "seen": 1794813836.9158378,
+    "ast_hash": "f4d790444a7e9b3b0a61825eaf88a3e1",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/jpg-to-pdf/jpg-to-pdf.component.ts": {
@@ -1386,15 +1386,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/word-to-pdf/word-to-pdf.component.spec.ts": {
-    "mtime": 1793350617.5620818,
-    "seen": 1794460514.2657087,
-    "ast_hash": "efdec1a1b1f7ad604db5acba5d219c23",
-    "semantic_hash": "efdec1a1b1f7ad604db5acba5d219c23"
+    "mtime": 1794813412.8433697,
+    "seen": 1794813836.9159079,
+    "ast_hash": "050d2381d41233feee49af4175ba7f0c",
+    "semantic_hash": ""
   },
   "apps/web/src/app/pages/word-to-pdf/word-to-pdf.component.ts": {
-    "mtime": 1794565499.1320217,
-    "seen": 1794569655.2386355,
-    "ast_hash": "b1e05567200ef25b4903465905cdb28c",
+    "mtime": 1794813339.656448,
+    "seen": 1794813836.915909,
+    "ast_hash": "a13bf28c6d4548d9e146c2e5ef8a0eaa",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/back-to-top/back-to-top.component.ts": {
@@ -1580,9 +1580,9 @@
     "semantic_hash": "48917407d0b2a7e0cef706682c19f256"
   },
   "packages/contracts/src/index.ts": {
-    "mtime": 1794565499.345813,
-    "seen": 1794569655.2386794,
-    "ast_hash": "abb2d947859a92da9a8f96644c6a3be0",
+    "mtime": 1794810342.6326249,
+    "seen": 1794813836.9159796,
+    "ast_hash": "b636604a87b800984988d136dc27d228",
     "semantic_hash": ""
   },
   "packages/contracts/src/pdf-to-excel.ts": {
@@ -1616,9 +1616,9 @@
     "semantic_hash": "b6e29e00e9e4613c68e8aa15a22b4e29"
   },
   "packages/contracts/src/tools.ts": {
-    "mtime": 1794807071.0461996,
-    "seen": 1794807958.1867993,
-    "ast_hash": "a8dc807c7e4403ab22b8b266fa51446a",
+    "mtime": 1794810364.3415668,
+    "seen": 1794813836.9159954,
+    "ast_hash": "ac36348fd6e9c032441806e393dea8f0",
     "semantic_hash": ""
   },
   "packages/contracts/src/word-to-pdf.ts": {
@@ -1706,9 +1706,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/contact-us/contact-us.component.html": {
-    "mtime": 1794565499.1050272,
-    "seen": 1794569655.2387218,
-    "ast_hash": "2ea4f2ad6f7876f8d932d2567236afed",
+    "mtime": 1794812542.7982361,
+    "seen": 1794813836.9160428,
+    "ast_hash": "930251eb29f946935ab44f662d364be6",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/cookie-settings/cookie-settings.component.html": {
@@ -1832,15 +1832,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/footer/footer.component.html": {
-    "mtime": 1794565499.1330233,
-    "seen": 1794569655.2387466,
-    "ast_hash": "af17412636e38dfd958e86a657d5ef89",
+    "mtime": 1794813011.4252436,
+    "seen": 1794813836.9160721,
+    "ast_hash": "c5d2253da1fc561ae11c5dfb62af3f74",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/header/header.component.html": {
-    "mtime": 1794565499.134025,
-    "seen": 1794569655.2387474,
-    "ast_hash": "d3b21bdd46c937c26199b14caf057cb7",
+    "mtime": 1794822105.6219957,
+    "seen": 1794826488.2820523,
+    "ast_hash": "2b5b9a811db708f52ee9e23afa797c4a",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/processing-state/processing-state.component.html": {
@@ -2372,8 +2372,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/sign-pdf/sign-pdf.component.ts": {
-    "mtime": 1794809782.5976527,
-    "seen": 1794809859.3300784,
+    "mtime": 1794822289.3419914,
+    "seen": 1794826488.2818441,
     "ast_hash": "a1d450a1931cc04f30e1b8f7a18fa0b7",
     "semantic_hash": ""
   },
@@ -2390,9 +2390,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/explore-more-tools/explore-more-tools.component.ts": {
-    "mtime": 1794565499.1330233,
-    "seen": 1794569655.238639,
-    "ast_hash": "1baedd9fafc026fc3da4aa9d037fc1d0",
+    "mtime": 1794822104.8697062,
+    "seen": 1794826488.2818747,
+    "ast_hash": "08aadfaf944c4cd65604dd6fe795f305",
     "semantic_hash": ""
   },
   "apps/web/src/types/fontkit.d.ts": {
@@ -2519,6 +2519,198 @@
     "mtime": 1794807070.9922528,
     "seen": 1794807958.18682,
     "ast_hash": "d3f2d47a84fe1ad71119eda743c9937e",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-document-model.ts": {
+    "mtime": 1794810690.7235024,
+    "seen": 1794813836.9156709,
+    "ast_hash": "9385ce32a77ace2216a9dc1cd029c486",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-export.service.spec.ts": {
+    "mtime": 1794820436.8940294,
+    "seen": 1794821803.3714714,
+    "ast_hash": "b92793a4d14a882e5273118a53f11c68",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-export.service.ts": {
+    "mtime": 1794820535.7097018,
+    "seen": 1794821803.3714724,
+    "ast_hash": "f5eef089e76ca255a28897f235965267",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-image.service.spec.ts": {
+    "mtime": 1794811465.3039782,
+    "seen": 1794813836.9156778,
+    "ast_hash": "9245aa1cfbc36f65e030b778e92dafb5",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-image.service.ts": {
+    "mtime": 1794811445.3973198,
+    "seen": 1794813836.9156787,
+    "ast_hash": "5b47737ff6dc9ef1979262c1b17ead25",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-layout.service.spec.ts": {
+    "mtime": 1794810845.1805048,
+    "seen": 1794813836.9156814,
+    "ast_hash": "06c6459c1593df8fb5ed19ec3c456930",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-layout.service.ts": {
+    "mtime": 1794810727.0349443,
+    "seen": 1794813836.9156823,
+    "ast_hash": "d9157c344dd561a6e9dc3a00f86d0f62",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-processing.service.spec.ts": {
+    "mtime": 1794818750.4092264,
+    "seen": 1794821803.3714805,
+    "ast_hash": "f97617aca0f8329a415500b9338fe5da",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-processing.service.ts": {
+    "mtime": 1794818725.4602103,
+    "seen": 1794821803.3714817,
+    "ast_hash": "d003c4204004cd147c5d5d2e2bda92e8",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-range-parser.spec.ts": {
+    "mtime": 1794810532.0766027,
+    "seen": 1794813836.9156892,
+    "ast_hash": "1c8a10fb74308ea962f300929ab9a70a",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-range-parser.ts": {
+    "mtime": 1794810522.1289737,
+    "seen": 1794813836.91569,
+    "ast_hash": "d61e3db564daea400a8670e11bf8c139",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.spec.ts": {
+    "mtime": 1794811165.939448,
+    "seen": 1794813836.915693,
+    "ast_hash": "fa12ff7c925f052651d197aadee55d82",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.ts": {
+    "mtime": 1794813153.7468817,
+    "seen": 1794813836.9156938,
+    "ast_hash": "c5228a4f0d005a669f576e4da0fa23b1",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark.worker.ts": {
+    "mtime": 1794812106.2484722,
+    "seen": 1794813836.915696,
+    "ast_hash": "0d0675e27d2f12c81cb8eaa712c29630",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.spec.ts": {
+    "mtime": 1794821662.8447824,
+    "seen": 1794821803.3715992,
+    "ast_hash": "916c2a53cc7722e15e69b874f0f6782e",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
+    "mtime": 1794823504.0497217,
+    "seen": 1794826488.28186,
+    "ast_hash": "265cc00defc166753f463b3eb22a5469",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.spec.ts": {
+    "mtime": 1794821079.9860928,
+    "seen": 1794821803.3716013,
+    "ast_hash": "f1a814c28c29dba0d9d5b83a2bae6286",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.ts": {
+    "mtime": 1794823166.9567626,
+    "seen": 1794826488.281864,
+    "ast_hash": "90f5d47916bf2e8551b8d3bfd54d9b03",
+    "semantic_hash": ""
+  },
+  "packages/contracts/src/watermark-pdf.ts": {
+    "mtime": 1794810333.889151,
+    "seen": 1794813836.9159977,
+    "ast_hash": "592c29c3a046c32b53cd962ad76f1b50",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.html": {
+    "mtime": 1794823050.0195043,
+    "seen": 1794826488.2820442,
+    "ast_hash": "8f8f1da9f884c4896496f7184a3f873d",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
+    "mtime": 1794823266.4444795,
+    "seen": 1794826488.2820456,
+    "ast_hash": "7ccacd71f0988a8f5f7394e62116e368",
+    "semantic_hash": ""
+  },
+  "docs/watermark-pdf-requirements.md": {
+    "mtime": 1794822105.6668315,
+    "seen": 1794826488.282112,
+    "ast_hash": "5e994be5cba488e53e0800574a93cc64",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-token.service.spec.ts": {
+    "mtime": 1794813911.0939467,
+    "seen": 1794814340.3209884,
+    "ast_hash": "7524f54f78f31f757e9515b300ecd33e",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-token.service.ts": {
+    "mtime": 1794813902.315784,
+    "seen": 1794814340.3209908,
+    "ast_hash": "398a7a9a3ac896e2ed0805e22f2445ad",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-compliance.service.spec.ts": {
+    "mtime": 1794820912.282785,
+    "seen": 1794821803.371467,
+    "ast_hash": "16ef9cad184309918f059dda4000a15a",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-compliance.service.ts": {
+    "mtime": 1794820899.1092203,
+    "seen": 1794821803.3714685,
+    "ast_hash": "62aa041b5b03378e9d0d30fcd4847f15",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-font.service.spec.ts": {
+    "mtime": 1794818361.4494448,
+    "seen": 1794821803.3714736,
+    "ast_hash": "2738892ea4d8801cf5ce1cda0a7f9cb8",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-font.service.ts": {
+    "mtime": 1794818354.2739816,
+    "seen": 1794821803.3714747,
+    "ast_hash": "389bc6153f6a3c458fe34e8c343f6f77",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-storage.service.spec.ts": {
+    "mtime": 1794818285.2165935,
+    "seen": 1794821803.3714852,
+    "ast_hash": "b30b75117ced29de36cf4e54751cd69e",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/core/services/watermark-pdf/watermark-storage.service.ts": {
+    "mtime": 1794818254.2492156,
+    "seen": 1794821803.3714862,
+    "ast_hash": "c1a4b9c0fba4e0515c11f82f24d0c120",
+    "semantic_hash": ""
+  },
+  "scripts/benchmark-watermark.ts": {
+    "mtime": 1794821584.618848,
+    "seen": 1794821803.3716726,
+    "ast_hash": "9ae636731af8476a39790dec6096fd6c",
+    "semantic_hash": ""
+  },
+  "docs/watermark-pdf-benchmark.md": {
+    "mtime": 1794821596.1863148,
+    "seen": 1794821803.3717644,
+    "ast_hash": "b7716490e50430d9017512f3d925f9b9",
     "semantic_hash": ""
   },
   "package-lock.json": {

@@ -53,6 +53,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   @Output() pageChange = new EventEmitter<number>();
   @Output() zoomChange = new EventEmitter<number>();
   @Output() positionChange = new EventEmitter<{ customXPercent: number; customYPercent: number; rotation: number }>();
+  @Output() sizeChange = new EventEmitter<{ fontSize?: number; widthPercent?: number }>();
 
   // Compare state (Hold to compare hides watermark while active)
   readonly isCompareActive = signal<boolean>(false);
@@ -66,9 +67,13 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   private keydownListener?: (e: KeyboardEvent) => void;
   private tokenService = new WatermarkTokenService();
 
-  // Interactive Drag & Rotate State
+  // Interactive Drag, Rotate & Resize State
   isDragging = false;
   isRotating = false;
+  isResizing = false;
+  private resizeStartDist = 0;
+  private resizeStartFontSize = 36;
+  private resizeStartWidthPercent = 40;
   private dragPointerId = -1;
   private currentSinglePlacement: WatermarkPlacement | null = null;
   private guideSnaps = { showCenterX: false, showCenterY: false };
@@ -390,8 +395,24 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     ctx.setLineDash([4, 4]);
     ctx.strokeRect(-halfW, -halfH, p.width * scale, p.height * scale);
 
-    // Rotate stem line
+    // 4 Corner resize handles
+    const handleSize = 8;
+    const corners = [
+      { x: -halfW, y: -halfH },
+      { x: halfW, y: -halfH },
+      { x: halfW, y: halfH },
+      { x: -halfW, y: halfH }
+    ];
     ctx.setLineDash([]);
+    for (const c of corners) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#2563EB';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(c.x - handleSize / 2, c.y - handleSize / 2, handleSize, handleSize);
+      ctx.strokeRect(c.x - handleSize / 2, c.y - handleSize / 2, handleSize, handleSize);
+    }
+
+    // Rotate stem line
     ctx.strokeStyle = '#2563EB';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -453,6 +474,27 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Check 4 corner resize handles hit (within 12px)
+    const corners = [
+      { x: -halfW, y: -halfH },
+      { x: halfW, y: -halfH },
+      { x: halfW, y: halfH },
+      { x: -halfW, y: halfH }
+    ];
+    for (const c of corners) {
+      if (Math.hypot(localX - c.x, localY - c.y) <= 12) {
+        this.isResizing = true;
+        this.dragPointerId = e.pointerId;
+        this.resizeStartDist = Math.max(10, Math.hypot(localX, localY));
+        const fsVal = this.settings().textConfig.fontSize;
+        const currentFs = typeof fsVal === 'number' ? fsVal : 36;
+        this.resizeStartFontSize = currentFs;
+        this.resizeStartWidthPercent = this.settings().imageConfig.widthPercent;
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        return;
+      }
+    }
+
     // Check bounding box hit
     if (Math.abs(localX) <= halfW + 10 && Math.abs(localY) <= halfH + 10) {
       this.isDragging = true;
@@ -477,6 +519,54 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
     const cx = p.centerX * scale;
     const cy = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+    const rotRad = (-p.rotation * Math.PI) / 180;
+
+    const dx = ptrX - cx;
+    const dy = ptrY - cy;
+    const cos = Math.cos(-rotRad);
+    const sin = Math.sin(-rotRad);
+    const localX = dx * cos - dy * sin;
+    const localY = dx * sin + dy * cos;
+
+    const halfW = (p.width * scale) / 2;
+    const halfH = (p.height * scale) / 2;
+    const knobY = -halfH - 20;
+
+    // Dynamic cursor feedback when hovering
+    if (!this.isDragging && !this.isRotating && !this.isResizing) {
+      const corners = [
+        { x: -halfW, y: -halfH },
+        { x: halfW, y: -halfH },
+        { x: halfW, y: halfH },
+        { x: -halfW, y: halfH }
+      ];
+      const isKnobHover = Math.hypot(localX, localY - knobY) <= 14;
+      const isCornerHover = corners.some(c => Math.hypot(localX - c.x, localY - c.y) <= 12);
+      const isBoxHover = Math.abs(localX) <= halfW + 10 && Math.abs(localY) <= halfH + 10;
+
+      if (isKnobHover) {
+        canvas.style.cursor = 'grab';
+      } else if (isCornerHover) {
+        canvas.style.cursor = 'nwse-resize';
+      } else if (isBoxHover) {
+        canvas.style.cursor = 'move';
+      } else {
+        canvas.style.cursor = 'default';
+      }
+    }
+
+    if (this.isResizing) {
+      const currentDist = Math.hypot(localX, localY);
+      const ratio = currentDist / (this.resizeStartDist || 1);
+      if (this.settings().common.activeTab === 'text') {
+        const newSize = Math.max(8, Math.min(200, Math.round(this.resizeStartFontSize * ratio)));
+        this.sizeChange.emit({ fontSize: newSize });
+      } else {
+        const newPct = Math.max(5, Math.min(100, Math.round(this.resizeStartWidthPercent * ratio)));
+        this.sizeChange.emit({ widthPercent: newPct });
+      }
+      return;
+    }
 
     if (this.isRotating) {
       const angleRad = Math.atan2(ptrY - cy, ptrX - cx);
@@ -528,9 +618,10 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   }
 
   onCanvasPointerUp(e: PointerEvent): void {
-    if (this.isDragging || this.isRotating) {
+    if (this.isDragging || this.isRotating || this.isResizing) {
       this.isDragging = false;
       this.isRotating = false;
+      this.isResizing = false;
       this.guideSnaps.showCenterX = false;
       this.guideSnaps.showCenterY = false;
       try {

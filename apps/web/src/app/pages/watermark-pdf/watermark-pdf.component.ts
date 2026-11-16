@@ -221,6 +221,13 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   readonly detectedScript = computed(() => this.fontService.detectScript(this.settings().textConfig.text));
   readonly scriptInfo = computed<FontPackInfo>(() => this.fontService.getScriptInfo(this.detectedScript()));
 
+  readonly currentNumericFontSize = computed<number>(() => {
+    const fs = this.settings().textConfig.fontSize;
+    return typeof fs === 'number' ? fs : 36;
+  });
+
+  readonly isCompareActive = signal<boolean>(false);
+
   // Active tab & page selections
   readonly activeTab = computed<WatermarkTab>(() => this.settings().common.activeTab);
 
@@ -511,6 +518,57 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
   setFontSize(size: number | 'auto'): void {
     this.updateTextConfig({ fontSize: size });
+  }
+
+  onSizeChange(size: { fontSize?: number; widthPercent?: number }): void {
+    if (size.fontSize !== undefined) {
+      this.setFontSize(size.fontSize);
+    }
+    if (size.widthPercent !== undefined) {
+      this.setImageWidthPercent(size.widthPercent);
+    }
+  }
+
+  onCompareHoldStart(): void {
+    this.isCompareActive.set(true);
+  }
+
+  onCompareHoldEnd(): void {
+    this.isCompareActive.set(false);
+  }
+
+  toggleCompare(): void {
+    this.isCompareActive.set(!this.isCompareActive());
+  }
+
+  openGoogleDrive(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://drive.google.com/', '_blank', 'noopener,noreferrer');
+  }
+
+  openDropbox(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    window.open('https://www.dropbox.com/home', '_blank', 'noopener,noreferrer');
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onWindowKeyDown(e: KeyboardEvent): void {
+    if (
+      e.target instanceof HTMLInputElement ||
+      e.target instanceof HTMLTextAreaElement ||
+      e.target instanceof HTMLSelectElement
+    ) {
+      return;
+    }
+    if (e.key === 'c' || e.key === 'C') {
+      this.toggleCompare();
+    }
   }
 
   toggleBold(): void {
