@@ -22,7 +22,6 @@ type WorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
     ProcessingStateComponent,
     ResultViewComponent,
     ExploreMoreToolsComponent,
-    PtAdSlotComponent
   ],
   templateUrl: './pdf-to-word.component.html',
   styleUrl: './pdf-to-word.component.css'

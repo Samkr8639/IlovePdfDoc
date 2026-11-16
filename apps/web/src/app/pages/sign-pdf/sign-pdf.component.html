@@ -563,11 +563,13 @@
                     <img [src]="signatureDataUrl()!" alt="Current signature preview" class="tile-live-preview" />
                   </div>
                   } @else {
-                  <span class="tile-placeholder-hint req-action-hint">Click or drag to place on PDF</span>
+                  <span class="tile-placeholder-hint req-action-hint">
+                    {{ getFieldPlacedCount('signature') > 0 ? '+ Click to add new signature' : 'Click or drag to place on PDF' }}
+                  </span>
                   }
                 </div>
               </button>
-              @if (whoSigns() === 'only_me') {
+              @if (whoSigns() === 'only_me' && signatureDataUrl()) {
               <button type="button" class="tile-edit-btn" aria-label="Edit default signature"
                 title="Edit default signature" (click)="$event.stopPropagation(); signatureDialogKind.set('signature')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1149,63 +1151,7 @@
           </div>
           }
 
-          <!-- Section 6: SIGNER & DOCUMENT DETAILS (Collapsible Accordion) -->
-          <div class="sidebar-option-block accordion-block">
-            <button type="button" class="accordion-header-btn" (click)="detailsExpanded.set(!detailsExpanded())"
-              [attr.aria-expanded]="detailsExpanded()">
-              <div class="accordion-title-col">
-                <span class="section-badge-title">SIGNER &amp; DOCUMENT DETAILS</span>
-                <span class="accordion-sub-hint">Signer full name, date format &amp; caption line</span>
-              </div>
-              <svg class="chevron-icon" [class.rotated]="detailsExpanded()" width="16" height="16" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
 
-            @if (detailsExpanded()) {
-            <div class="accordion-content">
-              <p class="accordion-intro-note">
-                Sets the default signer name for fields and certificates, the date format on date fields, and the
-                optional caption line under signatures.
-              </p>
-
-              <label class="inspector-field">
-                <span>Full name</span>
-                <input type="text" class="pt-sidebar-input" placeholder="Enter full name" [ngModel]="fullName()"
-                  (ngModelChange)="onFullNameChange($event)" />
-              </label>
-
-              <label class="pt-checkbox-row">
-                <input type="checkbox" [ngModel]="rememberName()" (ngModelChange)="onRememberNameToggle($event)" />
-                <span>Remember name on this device</span>
-              </label>
-
-              <label class="inspector-field">
-                <span>Default date format</span>
-                <select class="pt-sidebar-input" [ngModel]="dateFormat()" (ngModelChange)="onDateFormatChange($event)">
-                  @for (opt of dateFormatOptions; track opt.value) {
-                  <option [value]="opt.value">{{ opt.label }}</option>
-                  }
-                </select>
-              </label>
-
-              <label class="pt-checkbox-row">
-                <input type="checkbox" [ngModel]="addSigningDetails()"
-                  (ngModelChange)="onAddSigningDetailsToggle($event)" />
-                <span>Add signing details line under signature</span>
-              </label>
-
-              @if (inspectionSummary()?.hasAcroFormFields) {
-              <label class="pt-checkbox-row">
-                <input type="checkbox" [ngModel]="flattenFormFields()"
-                  (ngModelChange)="flattenFormFields.set($event)" />
-                <span>Flatten form fields ({{ inspectionSummary()?.acroFormFieldCount }} found)</span>
-              </label>
-              }
-            </div>
-            }
-          </div>
         </div>
 
         <!-- Section 7: Fixed Bottom Sign Button -->

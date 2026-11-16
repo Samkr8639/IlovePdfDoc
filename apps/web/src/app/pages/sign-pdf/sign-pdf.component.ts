@@ -98,7 +98,6 @@ interface SmartGuideLine {
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent,
-    PtAdSlotComponent,
     ExploreMoreToolsComponent,
     PdfThumbnailsPanelComponent,
     PdfBottomBarComponent,
@@ -735,8 +734,8 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     event.preventDefault();
     const isRemote = this.whoSigns() === 'several_people';
     if (!isRemote && ((type === 'signature' && !this.signatureDataUrl()) ||
-        (type === 'initials' && !this.initialsDataUrl()) ||
-        (type === 'stamp' && !this.stampDataUrl()))) {
+      (type === 'initials' && !this.initialsDataUrl()) ||
+      (type === 'stamp' && !this.stampDataUrl()))) {
       this.onPaletteTileClick(type);
       return;
     }
@@ -872,29 +871,29 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       textConfig:
         type === 'text'
           ? {
-              content: '',
-              fontSize: 14,
-              color: '#14213D',
-              align: 'left',
-              lineHeight: 1.25,
-              opacity: 1,
-              autoGrow: true,
-              boxWidth: pdfRect.widthPt
-            }
+            content: '',
+            fontSize: 14,
+            color: '#14213D',
+            align: 'left',
+            lineHeight: 1.25,
+            opacity: 1,
+            autoGrow: true,
+            boxWidth: pdfRect.widthPt
+          }
           : undefined,
       checkboxConfig:
         type === 'checkbox'
           ? {
-              checked: true,
-              mark: 'tick',
-              boxSize: 18,
-              label: {
-                content: '',
-                fontSize: 12,
-                color: '#14213D'
-              },
-              labelPosition: 'right'
-            }
+            checked: true,
+            mark: 'tick',
+            boxSize: 18,
+            label: {
+              content: '',
+              fontSize: 12,
+              color: '#14213D'
+            },
+            labelPosition: 'right'
+          }
           : undefined,
       fontId: type === 'text' ? 'noto-sans' : undefined,
       fontSizePt: type === 'name' || type === 'date' || type === 'text' ? 14 : undefined,
@@ -921,6 +920,10 @@ export class SignPdfComponent implements OnInit, OnDestroy {
         if (this.selectedFieldId() === el.id) this.selectedFieldId.set(null);
       }
     });
+
+    if (type === 'signature') {
+      this.signatureDataUrl.set(null);
+    }
 
     this.announce(`${preset.label} placed on page ${pageIndex + 1}`);
   }
@@ -1429,6 +1432,7 @@ export class SignPdfComponent implements OnInit, OnDestroy {
   closeSignatureDialog(): void {
     this.signatureDialogKind.set(null);
     this.editingSignatureField.set(null);
+    this.pendingSignatureInsertType = null;
   }
 
   onSignatureApplied(res: SignatureApplyResult): void {
@@ -1825,10 +1829,10 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       list.map(f =>
         f.type === 'signature'
           ? {
-              ...f,
-              showSigningDetailsLine: checked,
-              signingDetailsText: checked ? `Signed by ${who} · ${when}` : undefined
-            }
+            ...f,
+            showSigningDetailsLine: checked,
+            signingDetailsText: checked ? `Signed by ${who} · ${when}` : undefined
+          }
           : f
       )
     );
@@ -2311,9 +2315,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
         this.sentResult.update(cur =>
           cur
             ? {
-                ...cur,
-                devSigningLinks: { ...(cur.devSigningLinks || {}), [signerId]: out.devSigningUrl! }
-              }
+              ...cur,
+              devSigningLinks: { ...(cur.devSigningLinks || {}), [signerId]: out.devSigningUrl! }
+            }
             : cur
         );
       }

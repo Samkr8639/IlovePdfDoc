@@ -27,6 +27,7 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
     <div
       class="sign-field-object"
       [class.is-selected]="selected()"
+      [class.has-content]="!!field().imageDataUrl || !!field().text"
       [class.is-locked-type]="isAspectLocked()"
       [class.is-editing]="isEditingText() || isEditingLabel()"
       [style.left.px]="screenRect().x"
@@ -323,12 +324,22 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .sign-field-object.has-content:not(.is-selected) {
+      border-color: transparent !important;
+      background: transparent !important;
+    }
+    .sign-field-object.has-content:not(.is-selected):hover {
+      border-color: var(--pt-teal-600) !important;
+      background: rgba(230, 245, 243, 0.15) !important;
     }
     .sign-field-object:focus-visible,
     .sign-field-object.is-selected {
       outline: none;
-      box-shadow: 0 0 0 2px var(--pt-teal-700);
-      background: rgba(230, 245, 243, 0.4);
+      border: 1.5px solid var(--pt-teal-700);
+      box-shadow: 0 0 0 1.5px var(--pt-teal-700);
+      background: rgba(230, 245, 243, 0.35);
     }
     .sign-field-object.is-editing {
       border-style: solid;

@@ -709,6 +709,42 @@ describe('SignPdfComponent & Dialogs', () => {
       fixture.detectChanges();
       expect(component.fields()[0].rotation).toBe(180);
     });
+
+    it('resets signatureDataUrl after placing first signature so user can add a new signature, while updating works for placed fields', () => {
+      component.signatureDataUrl.set('data:image/png;base64,FIRST_SIG');
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      // Placed signature receives the image data
+      expect(component.fields().length).toBe(1);
+      expect(component.fields()[0].imageDataUrl).toBe('data:image/png;base64,FIRST_SIG');
+
+      // signatureDataUrl is cleared so palette tile removes preview and allows adding new signature
+      expect(component.signatureDataUrl()).toBeNull();
+
+      // Palette tile click opens dialog to add a new signature
+      component.onPaletteTileClick('signature');
+      expect(component.signatureDialogKind()).toBe('signature');
+
+      // Applying update to existing placed signature works directly via openEditSignature
+      const firstField = component.fields()[0];
+      component.openEditSignature(firstField);
+      component.onSignatureApplied({
+        imageDataUrl: 'data:image/png;base64,UPDATED_SIG',
+        mode: 'draw',
+        color: '#0F766E'
+      });
+      fixture.detectChanges();
+
+      expect(component.fields()[0].imageDataUrl).toBe('data:image/png;base64,UPDATED_SIG');
+      expect(component.fields()[0].color).toBe('#0F766E');
+    });
+
+    it('does not render SIGNER & DOCUMENT DETAILS accordion in sidebar', () => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.textContent).not.toContain('SIGNER & DOCUMENT DETAILS');
+    });
   });
 });
 

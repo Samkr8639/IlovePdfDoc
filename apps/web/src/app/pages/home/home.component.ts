@@ -14,7 +14,7 @@ type ExtendedFilterCategory = ToolCategory | 'all' | 'workflows' | 'intelligence
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, FormsModule, PtSectionHeaderComponent, PtAdSlotComponent, TranslatePipe],
+  imports: [RouterLink, FormsModule, PtSectionHeaderComponent, TranslatePipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
