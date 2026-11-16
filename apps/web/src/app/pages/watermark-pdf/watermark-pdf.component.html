@@ -903,50 +903,54 @@
           <div class="field-label-row">
             <label class="field-label">POSITION</label>
             @if (settings().common.mosaic) {
-            <span class="mosaic-disabled-hint">Disabled in Mosaic</span>
+              <span class="mosaic-disabled-hint">Disabled in Mosaic</span>
+            } @else if (settings().common.useCustomPosition) {
+              <span class="position-current-text custom-drag-badge" title="Watermark is positioned via on-canvas drag">
+                Custom drag ({{ settings().common.customXPercent }}%, {{ settings().common.customYPercent }}%)
+              </span>
             } @else {
-            <span class="position-current-text">{{ settings().common.position }}</span>
+              <span class="position-current-text">{{ settings().common.position }}</span>
             }
           </div>
 
           <div class="position-3x3-grid" role="radiogroup" aria-label="Watermark placement anchor">
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'top-left'"
-              [attr.aria-checked]="settings().common.position === 'top-left'" (click)="setPosition('top-left')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'top-left'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'top-left'" (click)="setPosition('top-left')"
               title="Top Left" aria-label="Top Left">↖</button>
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'top-center'"
-              [attr.aria-checked]="settings().common.position === 'top-center'" (click)="setPosition('top-center')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'top-center'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'top-center'" (click)="setPosition('top-center')"
               title="Top Center" aria-label="Top Center">↑</button>
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'top-right'"
-              [attr.aria-checked]="settings().common.position === 'top-right'" (click)="setPosition('top-right')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'top-right'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'top-right'" (click)="setPosition('top-right')"
               title="Top Right" aria-label="Top Right">↗</button>
 
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'middle-left'"
-              [attr.aria-checked]="settings().common.position === 'middle-left'" (click)="setPosition('middle-left')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'middle-left'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'middle-left'" (click)="setPosition('middle-left')"
               title="Middle Left" aria-label="Middle Left">←</button>
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'center'"
-              [attr.aria-checked]="settings().common.position === 'center'" (click)="setPosition('center')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'center'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'center'" (click)="setPosition('center')"
               title="Center" aria-label="Center">•</button>
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'middle-right'"
-              [attr.aria-checked]="settings().common.position === 'middle-right'" (click)="setPosition('middle-right')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'middle-right'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'middle-right'" (click)="setPosition('middle-right')"
               title="Middle Right" aria-label="Middle Right">→</button>
 
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'bottom-left'"
-              [attr.aria-checked]="settings().common.position === 'bottom-left'" (click)="setPosition('bottom-left')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'bottom-left'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'bottom-left'" (click)="setPosition('bottom-left')"
               title="Bottom Left" aria-label="Bottom Left">↙</button>
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'bottom-center'"
-              [attr.aria-checked]="settings().common.position === 'bottom-center'"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'bottom-center'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'bottom-center'"
               (click)="setPosition('bottom-center')" title="Bottom Center" aria-label="Bottom Center">↓</button>
             <button type="button" role="radio" class="grid-anchor-btn"
-              [class.selected]="settings().common.position === 'bottom-right'"
-              [attr.aria-checked]="settings().common.position === 'bottom-right'" (click)="setPosition('bottom-right')"
+              [class.selected]="!settings().common.useCustomPosition && settings().common.position === 'bottom-right'"
+              [attr.aria-checked]="!settings().common.useCustomPosition && settings().common.position === 'bottom-right'" (click)="setPosition('bottom-right')"
               title="Bottom Right" aria-label="Bottom Right">↘</button>
           </div>
 

@@ -2588,14 +2588,14 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.spec.ts": {
-    "mtime": 1794827826.910021,
-    "seen": 1794828338.807131,
+    "mtime": 1794828582.5711162,
+    "seen": 1794831309.0405529,
     "ast_hash": "fdb3ca2cf08b70396e4756ccca72c3a0",
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.ts": {
-    "mtime": 1794827846.4150932,
-    "seen": 1794828338.807133,
+    "mtime": 1794828567.5277016,
+    "seen": 1794831309.0405548,
     "ast_hash": "bf4da3d7ecae890b4957f6e248886d3c",
     "semantic_hash": ""
   },
@@ -2612,9 +2612,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
-    "mtime": 1794827786.093039,
-    "seen": 1794828338.8072522,
-    "ast_hash": "0ccb82fe432211ebbf52f7fd52bbf723",
+    "mtime": 1794830894.9101985,
+    "seen": 1794831309.040669,
+    "ast_hash": "387b7c363d0abf85cf2ab748eb1c625d",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.spec.ts": {
@@ -2642,9 +2642,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794826638.2151527,
-    "seen": 1794828338.8073783,
-    "ast_hash": "7ccacd71f0988a8f5f7394e62116e368",
+    "mtime": 1794830916.587769,
+    "seen": 1794831309.0407877,
+    "ast_hash": "4ccfaff4cefa37c46da89b4cb7459996",
     "semantic_hash": ""
   },
   "docs/watermark-pdf-requirements.md": {

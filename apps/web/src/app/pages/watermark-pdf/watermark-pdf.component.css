@@ -682,6 +682,15 @@
   text-transform: capitalize;
 }
 
+.custom-drag-badge {
+  background-color: #CCFBF1;
+  color: #0F766E;
+  padding: 2px 8px;
+  border-radius: var(--pt-radius-pill, 9999px);
+  font-size: 11px;
+  text-transform: none;
+}
+
 /* Inputs */
 .pt-text-input {
   width: 100%;

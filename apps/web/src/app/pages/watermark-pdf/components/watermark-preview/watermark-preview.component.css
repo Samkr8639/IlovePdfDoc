@@ -164,7 +164,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  pointer-events: none;
+  touch-action: none;
+  pointer-events: auto;
+  cursor: default;
   transition: opacity 0.1s ease;
   border-radius: 4px;
 }

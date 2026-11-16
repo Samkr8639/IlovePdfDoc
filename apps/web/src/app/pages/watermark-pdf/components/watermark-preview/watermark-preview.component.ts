@@ -75,6 +75,9 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   private resizeStartFontSize = 36;
   private resizeStartWidthPercent = 40;
   private dragPointerId = -1;
+  private dragStartOffsetX = 0;
+  private dragStartOffsetY = 0;
+  private activeHandle: 'tl' | 'tr' | 'br' | 'bl' | 't' | 'r' | 'b' | 'l' | null = null;
   private currentSinglePlacement: WatermarkPlacement | null = null;
   private guideSnaps = { showCenterX: false, showCenterY: false };
 
@@ -377,7 +380,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       ctx.save();
       ctx.setLineDash([4, 4]);
       ctx.strokeStyle = '#0F766E';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(canvasX, 0);
       ctx.lineTo(canvasX, ctx.canvas.height);
@@ -388,7 +391,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       ctx.save();
       ctx.setLineDash([4, 4]);
       ctx.strokeStyle = '#0F766E';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(0, canvasY);
       ctx.lineTo(ctx.canvas.width, canvasY);
@@ -403,51 +406,87 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     const halfW = (p.width * scale) / 2;
     const halfH = (p.height * scale) / 2;
 
-    // Bounding box dashed outline
+    // 1. Bounding box dashed outline
     ctx.strokeStyle = '#2563EB';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 4]);
     ctx.strokeRect(-halfW, -halfH, p.width * scale, p.height * scale);
 
-    // 4 Corner resize handles
-    const handleSize = 8;
+    // 2. Rotate stem line
+    const knobY = -halfH - 24;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -halfH);
+    ctx.lineTo(0, knobY);
+    ctx.stroke();
+
+    // 3. Rotate knob handle (circular)
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 1;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, knobY, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Inner knob dot
+    ctx.fillStyle = '#2563EB';
+    ctx.beginPath();
+    ctx.arc(0, knobY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 4. 4 Corner resize handles (10x10 px squares)
+    const cornerSize = 10;
     const corners = [
       { x: -halfW, y: -halfH },
       { x: halfW, y: -halfH },
       { x: halfW, y: halfH },
       { x: -halfW, y: halfH }
     ];
-    ctx.setLineDash([]);
     for (const c of corners) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#2563EB';
+      ctx.lineWidth = 2;
+      ctx.fillRect(c.x - cornerSize / 2, c.y - cornerSize / 2, cornerSize, cornerSize);
+      ctx.strokeRect(c.x - cornerSize / 2, c.y - cornerSize / 2, cornerSize, cornerSize);
+      ctx.restore();
+    }
+
+    // 5. 4 Edge resize handles (8x8 px squares)
+    const edgeSize = 8;
+    const edges = [
+      { x: 0, y: -halfH },
+      { x: halfW, y: 0 },
+      { x: 0, y: halfH },
+      { x: -halfW, y: 0 }
+    ];
+    for (const ed of edges) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      ctx.shadowBlur = 3;
       ctx.fillStyle = '#FFFFFF';
       ctx.strokeStyle = '#2563EB';
       ctx.lineWidth = 1.5;
-      ctx.fillRect(c.x - handleSize / 2, c.y - handleSize / 2, handleSize, handleSize);
-      ctx.strokeRect(c.x - handleSize / 2, c.y - handleSize / 2, handleSize, handleSize);
+      ctx.fillRect(ed.x - edgeSize / 2, ed.y - edgeSize / 2, edgeSize, edgeSize);
+      ctx.strokeRect(ed.x - edgeSize / 2, ed.y - edgeSize / 2, edgeSize, edgeSize);
+      ctx.restore();
     }
-
-    // Rotate stem line
-    ctx.strokeStyle = '#2563EB';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(0, -halfH);
-    ctx.lineTo(0, -halfH - 20);
-    ctx.stroke();
-
-    // Rotate knob handle
-    const knobY = -halfH - 20;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.strokeStyle = '#2563EB';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, knobY, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
 
     ctx.restore();
   }
 
-  // Pointer Drag & Rotate Handlers
+  // Pointer Drag, Rotate & Resize Handlers
   onCanvasPointerDown(e: PointerEvent): void {
     if (!this.currentSinglePlacement || !this.cachedPageMetrics) return;
 
@@ -478,26 +517,27 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
     const halfW = (p.width * scale) / 2;
     const halfH = (p.height * scale) / 2;
-    const knobY = -halfH - 20;
+    const knobY = -halfH - 24;
 
-    // Check rotate knob hit (within 14px)
-    if (Math.hypot(localX, localY - knobY) <= 14) {
+    // 1. Check rotate knob hit (within 18px radius)
+    if (Math.hypot(localX, localY - knobY) <= 18) {
       this.isRotating = true;
       this.dragPointerId = e.pointerId;
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
       return;
     }
 
-    // Check 4 corner resize handles hit (within 12px)
-    const corners = [
-      { x: -halfW, y: -halfH },
-      { x: halfW, y: -halfH },
-      { x: halfW, y: halfH },
-      { x: -halfW, y: halfH }
+    // 2. Check 4 corner resize handles hit (within 16px radius)
+    const corners: { type: 'tl' | 'tr' | 'br' | 'bl'; x: number; y: number }[] = [
+      { type: 'tl', x: -halfW, y: -halfH },
+      { type: 'tr', x: halfW, y: -halfH },
+      { type: 'br', x: halfW, y: halfH },
+      { type: 'bl', x: -halfW, y: halfH }
     ];
     for (const c of corners) {
-      if (Math.hypot(localX - c.x, localY - c.y) <= 12) {
+      if (Math.hypot(localX - c.x, localY - c.y) <= 16) {
         this.isResizing = true;
+        this.activeHandle = c.type;
         this.dragPointerId = e.pointerId;
         this.resizeStartDist = Math.max(10, Math.hypot(localX, localY));
         const fsVal = this.settings().textConfig.fontSize;
@@ -509,12 +549,45 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Check bounding box hit
+    // 3. Check 4 edge resize handles hit (within 14px radius)
+    const edges: { type: 't' | 'r' | 'b' | 'l'; x: number; y: number }[] = [
+      { type: 't', x: 0, y: -halfH },
+      { type: 'r', x: halfW, y: 0 },
+      { type: 'b', x: 0, y: halfH },
+      { type: 'l', x: -halfW, y: 0 }
+    ];
+    for (const ed of edges) {
+      if (Math.hypot(localX - ed.x, localY - ed.y) <= 14) {
+        this.isResizing = true;
+        this.activeHandle = ed.type;
+        this.dragPointerId = e.pointerId;
+        this.resizeStartDist = Math.max(10, Math.hypot(localX, localY));
+        const fsVal = this.settings().textConfig.fontSize;
+        const currentFs = typeof fsVal === 'number' ? fsVal : 36;
+        this.resizeStartFontSize = currentFs;
+        this.resizeStartWidthPercent = this.settings().imageConfig.widthPercent;
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        return;
+      }
+    }
+
+    // 4. Check inside bounding box hit (drag to position anywhere with offset)
     if (Math.abs(localX) <= halfW + 10 && Math.abs(localY) <= halfH + 10) {
       this.isDragging = true;
       this.dragPointerId = e.pointerId;
+      this.dragStartOffsetX = clickX - cx;
+      this.dragStartOffsetY = clickY - cy;
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      return;
     }
+
+    // 5. Click anywhere on page canvas to jump & drag watermark to that position!
+    this.isDragging = true;
+    this.dragPointerId = e.pointerId;
+    this.dragStartOffsetX = 0;
+    this.dragStartOffsetY = 0;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    this.updateDragPosition(clickX, clickY, scale);
   }
 
   onCanvasPointerMove(e: PointerEvent): void {
@@ -544,36 +617,44 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
     const halfW = (p.width * scale) / 2;
     const halfH = (p.height * scale) / 2;
-    const knobY = -halfH - 20;
+    const knobY = -halfH - 24;
 
-    // Dynamic cursor feedback when hovering
+    // Hover cursor feedback when idle
     if (!this.isDragging && !this.isRotating && !this.isResizing) {
-      const corners = [
-        { x: -halfW, y: -halfH },
-        { x: halfW, y: -halfH },
-        { x: halfW, y: halfH },
-        { x: -halfW, y: halfH }
-      ];
-      const isKnobHover = Math.hypot(localX, localY - knobY) <= 14;
-      const isCornerHover = corners.some(c => Math.hypot(localX - c.x, localY - c.y) <= 12);
-      const isBoxHover = Math.abs(localX) <= halfW + 10 && Math.abs(localY) <= halfH + 10;
+      const isKnob = Math.hypot(localX, localY - knobY) <= 18;
+      const isTL = Math.hypot(localX - (-halfW), localY - (-halfH)) <= 16;
+      const isBR = Math.hypot(localX - halfW, localY - halfH) <= 16;
+      const isTR = Math.hypot(localX - halfW, localY - (-halfH)) <= 16;
+      const isBL = Math.hypot(localX - (-halfW), localY - halfH) <= 16;
+      const isT = Math.hypot(localX, localY - (-halfH)) <= 14;
+      const isB = Math.hypot(localX, localY - halfH) <= 14;
+      const isR = Math.hypot(localX - halfW, localY) <= 14;
+      const isL = Math.hypot(localX - (-halfW), localY) <= 14;
+      const isBox = Math.abs(localX) <= halfW + 10 && Math.abs(localY) <= halfH + 10;
 
-      if (isKnobHover) {
+      if (isKnob) {
         canvas.style.cursor = 'grab';
-      } else if (isCornerHover) {
+      } else if (isTL || isBR) {
         canvas.style.cursor = 'nwse-resize';
-      } else if (isBoxHover) {
+      } else if (isTR || isBL) {
+        canvas.style.cursor = 'nesw-resize';
+      } else if (isT || isB) {
+        canvas.style.cursor = 'ns-resize';
+      } else if (isR || isL) {
+        canvas.style.cursor = 'ew-resize';
+      } else if (isBox) {
         canvas.style.cursor = 'move';
       } else {
-        canvas.style.cursor = 'default';
+        canvas.style.cursor = 'crosshair';
       }
     }
 
     if (this.isResizing) {
-      const currentDist = Math.hypot(localX, localY);
+      canvas.style.cursor = 'nwse-resize';
+      const currentDist = Math.max(5, Math.hypot(localX, localY));
       const ratio = currentDist / (this.resizeStartDist || 1);
       if (this.settings().common.activeTab === 'text') {
-        const newSize = Math.max(8, Math.min(200, Math.round(this.resizeStartFontSize * ratio)));
+        const newSize = Math.max(6, Math.min(300, Math.round(this.resizeStartFontSize * ratio)));
         this.sizeChange.emit({ fontSize: newSize });
       } else {
         const newPct = Math.max(5, Math.min(100, Math.round(this.resizeStartWidthPercent * ratio)));
@@ -583,15 +664,15 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     }
 
     if (this.isRotating) {
+      canvas.style.cursor = 'grabbing';
       const angleRad = Math.atan2(ptrY - cy, ptrX - cx);
-      // Canvas angle: 0 is right, Math.PI/2 is down
       let deg = Math.round((-angleRad * 180) / Math.PI) - 90;
       deg = ((deg + 180) % 360 + 360) % 360 - 180;
 
-      // Magnetic snap to standard angles (0, 45, 90, 180, 270/-90) within 3 degrees
+      // Magnetic snap to standard angles within 4 degrees
       const snapAngles = [0, 45, 90, 180, -90, -45, -180];
       for (const snap of snapAngles) {
-        if (Math.abs(deg - snap) <= 3) {
+        if (Math.abs(deg - snap) <= 4) {
           deg = snap;
           break;
         }
@@ -606,29 +687,37 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     }
 
     if (this.isDragging) {
-      const pageW = this.cachedPageMetrics.visualWidth * scale;
-      const pageH = this.cachedPageMetrics.visualHeight * scale;
-
-      let xPct = Math.round((ptrX / pageW) * 100);
-      let yPct = Math.round(((pageH - ptrY) / pageH) * 100);
-
-      // Clamp 0 to 100
-      xPct = Math.max(0, Math.min(100, xPct));
-      yPct = Math.max(0, Math.min(100, yPct));
-
-      // Magnetic snapping to 50% center
-      this.guideSnaps.showCenterX = Math.abs(xPct - 50) <= 2;
-      if (this.guideSnaps.showCenterX) xPct = 50;
-
-      this.guideSnaps.showCenterY = Math.abs(yPct - 50) <= 2;
-      if (this.guideSnaps.showCenterY) yPct = 50;
-
-      this.positionChange.emit({
-        customXPercent: xPct,
-        customYPercent: yPct,
-        rotation: this.settings().common.rotation
-      });
+      canvas.style.cursor = 'grabbing';
+      const targetCx = ptrX - this.dragStartOffsetX;
+      const targetCy = ptrY - this.dragStartOffsetY;
+      this.updateDragPosition(targetCx, targetCy, scale);
     }
+  }
+
+  private updateDragPosition(targetCx: number, targetCy: number, scale: number): void {
+    if (!this.cachedPageMetrics) return;
+    const pageW = this.cachedPageMetrics.visualWidth * scale;
+    const pageH = this.cachedPageMetrics.visualHeight * scale;
+
+    let xPct = Math.round((targetCx / pageW) * 100);
+    let yPct = Math.round(((pageH - targetCy) / pageH) * 100);
+
+    // Clamped strictly to 0..100
+    xPct = Math.max(0, Math.min(100, xPct));
+    yPct = Math.max(0, Math.min(100, yPct));
+
+    // Magnetic center snapping (within 2%)
+    this.guideSnaps.showCenterX = Math.abs(xPct - 50) <= 2;
+    if (this.guideSnaps.showCenterX) xPct = 50;
+
+    this.guideSnaps.showCenterY = Math.abs(yPct - 50) <= 2;
+    if (this.guideSnaps.showCenterY) yPct = 50;
+
+    this.positionChange.emit({
+      customXPercent: xPct,
+      customYPercent: yPct,
+      rotation: this.settings().common.rotation
+    });
   }
 
   onCanvasPointerUp(e: PointerEvent): void {
@@ -636,11 +725,16 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       this.isDragging = false;
       this.isRotating = false;
       this.isResizing = false;
+      this.activeHandle = null;
       this.guideSnaps.showCenterX = false;
       this.guideSnaps.showCenterY = false;
       try {
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
       } catch {}
+      const canvas = this.watermarkCanvasRef?.nativeElement;
+      if (canvas) {
+        canvas.style.cursor = 'default';
+      }
       this.drawWatermarkOverlay();
     }
   }
