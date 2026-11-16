@@ -432,12 +432,25 @@
 }
 
 .sidebar-scrollable-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 22px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pt-border-subtle, #cbd5e1) transparent;
+}
+
+.sidebar-scrollable-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--pt-border-subtle, #cbd5e1);
+  border-radius: 4px;
 }
 
 .option-section {
@@ -725,6 +738,7 @@
   padding: 20px 24px;
   border-top: 1px solid var(--pt-soft-outline, #e2e8f0);
   background: var(--pt-surface-white, #ffffff);
+  flex-shrink: 0;
 }
 
 .prime-action-btn {

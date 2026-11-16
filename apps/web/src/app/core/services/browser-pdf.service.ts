@@ -594,13 +594,50 @@ export class BrowserPdfService {
 
       let compressedBytes: Uint8Array;
       if (level === 'extreme' || targetReduction >= 70) {
-        // Extreme / High compression: strip metadata, enable object streams, compress stream dictionaries
+        // Extreme / High compression: strip metadata, PieceInfo, Thumb, recompress streams at level 9
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
         pdfDoc.setKeywords([]);
         pdfDoc.setProducer('');
         pdfDoc.setCreator('');
+
+        try {
+          const { PDFName, PDFNumber, PDFRawStream } = await this.getPdfLib();
+          if (pdfDoc.catalog.get(PDFName.of('Metadata'))) {
+            pdfDoc.catalog.delete(PDFName.of('Metadata'));
+          }
+          if (pdfDoc.catalog.get(PDFName.of('PieceInfo'))) {
+            pdfDoc.catalog.delete(PDFName.of('PieceInfo'));
+          }
+          for (const p of pdfDoc.getPages()) {
+            if (p.node.get(PDFName.of('Thumb'))) {
+              p.node.delete(PDFName.of('Thumb'));
+            }
+            if (p.node.get(PDFName.of('PieceInfo'))) {
+              p.node.delete(PDFName.of('PieceInfo'));
+            }
+          }
+
+          const { unzlibSync, zlibSync } = await import('fflate');
+          const context = pdfDoc.context;
+          for (const [, obj] of context.enumerateIndirectObjects()) {
+            if (obj instanceof PDFRawStream) {
+              const flt = obj.dict?.get(PDFName.of('Filter'))?.toString();
+              if (flt?.includes('FlateDecode') && obj.contents && obj.contents.length > 512) {
+                try {
+                  const uncompressed = unzlibSync(obj.contents);
+                  const recompressed = zlibSync(uncompressed, { level: 9 });
+                  if (recompressed.length < obj.contents.length) {
+                    (obj as any).contents = recompressed;
+                    obj.dict.set(PDFName.of('Length'), PDFNumber.of(recompressed.length));
+                  }
+                } catch {}
+              }
+            }
+          }
+        } catch {}
+
         compressedBytes = await pdfDoc.save({
           useObjectStreams: true,
           objectsPerTick: 50
@@ -759,6 +796,61 @@ export class BrowserPdfService {
     };
   }
 
+  private unfilterPngPredictor(
+    input: Uint8Array,
+    width: number,
+    height: number,
+    channels: number
+  ): Uint8Array {
+    const rowBytes = width * channels;
+    const stride = 1 + rowBytes;
+    const output = new Uint8Array(width * height * channels);
+
+    for (let y = 0; y < height; y++) {
+      const inOffset = y * stride;
+      const filterType = input[inOffset];
+      const outOffset = y * rowBytes;
+      const prevOutOffset = (y - 1) * rowBytes;
+
+      for (let x = 0; x < rowBytes; x++) {
+        const rawVal = input[inOffset + 1 + x];
+        let val = rawVal;
+        const bpp = channels;
+
+        if (filterType === 1) {
+          const left = x >= bpp ? output[outOffset + x - bpp] : 0;
+          val = (rawVal + left) & 0xff;
+        } else if (filterType === 2) {
+          const up = y > 0 ? output[prevOutOffset + x] : 0;
+          val = (rawVal + up) & 0xff;
+        } else if (filterType === 3) {
+          const left = x >= bpp ? output[outOffset + x - bpp] : 0;
+          const up = y > 0 ? output[prevOutOffset + x] : 0;
+          val = (rawVal + Math.floor((left + up) / 2)) & 0xff;
+        } else if (filterType === 4) {
+          const left = x >= bpp ? output[outOffset + x - bpp] : 0;
+          const up = y > 0 ? output[prevOutOffset + x] : 0;
+          const upLeft = y > 0 && x >= bpp ? output[prevOutOffset + x - bpp] : 0;
+          const p = left + up - upLeft;
+          const pa = Math.abs(p - left);
+          const pb = Math.abs(p - up);
+          const pc = Math.abs(p - upLeft);
+          let pr = left;
+          if (pb <= pa && pb <= pc) {
+            pr = up;
+          } else if (pc <= pa && pc <= pb) {
+            pr = upLeft;
+          }
+          val = (rawVal + pr) & 0xff;
+        }
+
+        output[outOffset + x] = val;
+      }
+    }
+
+    return output;
+  }
+
   /**
    * Optimizes embedded raster images (JPEG/PNG/Flate) directly within the client-side PDF document.
    * Recompresses images based on the user's target reduction percentage.
@@ -896,6 +988,15 @@ export class BrowserPdfService {
           }
 
           if (rawPixels) {
+            // Handle PNG Predictor filtering if present
+            if (rawPixels.length === (w * 3 + 1) * h) {
+              rawPixels = this.unfilterPngPredictor(rawPixels, w, h, 3);
+            } else if (rawPixels.length === (w * 4 + 1) * h) {
+              rawPixels = this.unfilterPngPredictor(rawPixels, w, h, 4);
+            } else if (rawPixels.length === (w * 1 + 1) * h) {
+              rawPixels = this.unfilterPngPredictor(rawPixels, w, h, 1);
+            }
+
             let canvas: HTMLCanvasElement | null = null;
             if (rawPixels.length === w * h * 3) {
               canvas = document.createElement('canvas');
@@ -1016,11 +1117,13 @@ export class BrowserPdfService {
       const outputPdf = await PDFDocument.create();
 
       // Render scale and JPEG quality based on target reduction:
-      // Extreme (>= 70%): scale ~0.9 (approx 65-72 DPI), quality ~0.35
-      // Recommended (~50%): scale ~1.15 (approx 85-96 DPI), quality ~0.58
-      // Less (~20%): scale ~1.45 (approx 110-120 DPI), quality ~0.78
-      const renderScale = Math.max(0.70, Math.min(1.5, 1.55 - (targetReduction / 100) * 0.90));
-      const jpegQuality = Math.max(0.28, Math.min(0.85, 0.95 - (targetReduction / 100) * 0.72));
+      const isExtreme = targetReduction >= 70;
+      const renderScale = isExtreme
+        ? 0.75
+        : Math.max(0.70, Math.min(1.5, 1.55 - (targetReduction / 100) * 0.90));
+      const jpegQuality = isExtreme
+        ? 0.30
+        : Math.max(0.28, Math.min(0.85, 0.95 - (targetReduction / 100) * 0.72));
 
       for (let p = 1; p <= numPages; p++) {
         onProgress?.(Math.round((p / numPages) * 100), `Compacting document page ${p} of ${numPages}...`);

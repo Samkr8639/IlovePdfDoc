@@ -1,6 +1,17 @@
 const NodeEnvironment = require('jest-environment-node').TestEnvironment;
 
 class CustomNodeEnvironment extends NodeEnvironment {
+  constructor(config, context) {
+    super(config, context);
+    if (!this.global.DOMMatrix) {
+      this.global.DOMMatrix = class DOMMatrix {
+        constructor() {
+          this.a = 1; this.b = 0; this.c = 0; this.d = 1; this.e = 0; this.f = 0;
+        }
+      };
+    }
+  }
+
   async teardown() {
     if (this.fakeTimers) {
       this.fakeTimers.dispose();

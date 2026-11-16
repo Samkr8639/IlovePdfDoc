@@ -99,29 +99,59 @@
           @if (currentStep() === 1) {
             <div class="step-content">
               <div class="form-row-grid">
-                <div class="form-field">
+                <div class="form-field" [class.has-error]="nameTouched() && !isNameValid()">
                   <label for="userName" class="field-label">Your name<span class="required-asterisk" aria-hidden="true">*</span></label>
                   <input
                     id="userName"
                     type="text"
                     class="text-input"
+                    [class.input-invalid]="nameTouched() && !isNameValid()"
                     placeholder="e.g. John Doe"
                     [(ngModel)]="formData.name"
+                    (blur)="nameTouched.set(true)"
+                    (input)="nameTouched.set(true)"
                     name="userName"
+                    [attr.aria-invalid]="nameTouched() && !isNameValid()"
+                    [attr.aria-describedby]="nameTouched() && !isNameValid() ? 'userName-error' : null"
                     required
                   />
+                  @if (nameTouched() && !isNameValid()) {
+                    <span id="userName-error" class="field-error-msg" role="alert">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <span>{{ getNameErrorMessage() }}</span>
+                    </span>
+                  }
                 </div>
-                <div class="form-field">
+                <div class="form-field" [class.has-error]="emailTouched() && !isEmailValid()">
                   <label for="userEmail" class="field-label">Your email<span class="required-asterisk" aria-hidden="true">*</span></label>
                   <input
                     id="userEmail"
                     type="email"
                     class="text-input"
+                    [class.input-invalid]="emailTouched() && !isEmailValid()"
                     placeholder="e.g. john@example.com"
                     [(ngModel)]="formData.email"
+                    (blur)="emailTouched.set(true)"
+                    (input)="emailTouched.set(true)"
                     name="userEmail"
+                    [attr.aria-invalid]="emailTouched() && !isEmailValid()"
+                    [attr.aria-describedby]="emailTouched() && !isEmailValid() ? 'userEmail-error' : null"
                     required
                   />
+                  @if (emailTouched() && !isEmailValid()) {
+                    <span id="userEmail-error" class="field-error-msg" role="alert">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <span>{{ getEmailErrorMessage() }}</span>
+                    </span>
+                  }
                 </div>
               </div>
 

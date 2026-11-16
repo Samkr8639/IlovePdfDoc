@@ -30,6 +30,9 @@ export class ContactUsComponent implements OnInit {
   readonly apiError = signal<string | null>(null);
   readonly submissionResult = signal<ContactSubmissionResult | null>(null);
 
+  readonly nameTouched = signal<boolean>(false);
+  readonly emailTouched = signal<boolean>(false);
+
   readonly productInterestOptions: string[] = ['Web', 'Desktop', 'Mobile', 'Signature', 'REST API'];
 
   formData: ContactFormData = {
@@ -76,19 +79,51 @@ export class ContactUsComponent implements OnInit {
     }
   }
 
-  isStep1Valid(): boolean {
+  isNameValid(): boolean {
+    return this.formData.name.trim().length >= 2;
+  }
+
+  isEmailValid(): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(this.formData.email.trim());
+  }
+
+  getNameErrorMessage(): string {
+    if (!this.formData.name || this.formData.name.trim().length === 0) {
+      return 'Please enter your name.';
+    }
+    if (this.formData.name.trim().length < 2) {
+      return 'Name must be at least 2 characters.';
+    }
+    return '';
+  }
+
+  getEmailErrorMessage(): string {
+    if (!this.formData.email || this.formData.email.trim().length === 0) {
+      return 'Please enter your email address.';
+    }
+    if (!this.isEmailValid()) {
+      return 'Please enter a valid email address (e.g. name@example.com).';
+    }
+    return '';
+  }
+
+  isStep1Valid(): boolean {
     return (
-      this.formData.name.trim().length >= 2 &&
-      emailRegex.test(this.formData.email.trim()) &&
+      this.isNameValid() &&
+      this.isEmailValid() &&
       this.formData.subject.trim().length > 0
     );
   }
 
   goToStep(step: number): void {
     this.apiError.set(null);
-    if (step === 2 && !this.isStep1Valid()) {
-      return;
+    if (step === 2) {
+      this.nameTouched.set(true);
+      this.emailTouched.set(true);
+      if (!this.isStep1Valid()) {
+        return;
+      }
     }
     if (step === 4 && this.formData.message.trim().length < 10) {
       return;
@@ -145,6 +180,8 @@ export class ContactUsComponent implements OnInit {
     this.submissionResult.set(null);
     this.currentStep.set(1);
     this.apiError.set(null);
+    this.nameTouched.set(false);
+    this.emailTouched.set(false);
     this.formData = {
       name: '',
       email: '',

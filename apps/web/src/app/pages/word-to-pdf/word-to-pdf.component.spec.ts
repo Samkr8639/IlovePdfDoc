@@ -133,5 +133,20 @@ describe('WordToPdfComponent Integration Test', () => {
     expect(component.currentState()).toBe('upload');
     expect(component.conversionResult()).toBeNull();
   });
+
+  it('should handle "Failed to fetch" gracefully with a user-friendly error message', async () => {
+    vi.spyOn(service, 'convertToPdf').mockRejectedValue(new TypeError('Failed to fetch'));
+
+    const file = createTestWordFile('document.docx');
+    await component.onFilesAdded([file]);
+    fixture.detectChanges();
+
+    await component.startConversion();
+    fixture.detectChanges();
+
+    expect(component.currentState()).toBe('organize');
+    expect(component.errorMessage()).not.toBe('Failed to fetch');
+    expect(component.errorMessage()).toContain('Unable to connect to conversion server');
+  });
 });
 

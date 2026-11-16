@@ -1,4 +1,4 @@
-﻿export const DEFAULT_EN_TRANSLATIONS: Record<string, any> = {
+export const DEFAULT_EN_TRANSLATIONS: Record<string, any> = {
     "NAV":  {
                 "MERGE_PDF":  "Merge PDF",
                 "SPLIT_PDF":  "Split PDF",

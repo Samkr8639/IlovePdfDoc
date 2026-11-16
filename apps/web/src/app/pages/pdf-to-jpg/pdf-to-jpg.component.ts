@@ -57,7 +57,6 @@ export interface SelectedPdfFile {
     DropzoneComponent,
     ProcessingStateComponent,
     ExploreMoreToolsComponent,
-    PtAdSlotComponent
   ],
   templateUrl: './pdf-to-jpg.component.html',
   styleUrl: './pdf-to-jpg.component.css',

@@ -38,6 +38,68 @@ function multiplyMatrix(
 }
 
 /**
+ * Reverses PNG predictors (None, Sub, Up, Average, Paeth) on decompressed Flate streams
+ */
+export function unfilterPngStream(
+  input: Buffer,
+  width: number,
+  height: number,
+  channels: number
+): Buffer {
+  const rowBytes = width * channels;
+  const stride = 1 + rowBytes;
+  const output = Buffer.alloc(width * height * channels);
+
+  for (let y = 0; y < height; y++) {
+    const inOffset = y * stride;
+    const filterType = input[inOffset];
+    const outOffset = y * rowBytes;
+    const prevOutOffset = (y - 1) * rowBytes;
+
+    for (let x = 0; x < rowBytes; x++) {
+      const rawVal = input[inOffset + 1 + x];
+      let val = rawVal;
+      const bpp = channels;
+
+      if (filterType === 1) {
+        // Sub
+        const left = x >= bpp ? output[outOffset + x - bpp] : 0;
+        val = (rawVal + left) & 0xff;
+      } else if (filterType === 2) {
+        // Up
+        const up = y > 0 ? output[prevOutOffset + x] : 0;
+        val = (rawVal + up) & 0xff;
+      } else if (filterType === 3) {
+        // Average
+        const left = x >= bpp ? output[outOffset + x - bpp] : 0;
+        const up = y > 0 ? output[prevOutOffset + x] : 0;
+        val = (rawVal + Math.floor((left + up) / 2)) & 0xff;
+      } else if (filterType === 4) {
+        // Paeth
+        const left = x >= bpp ? output[outOffset + x - bpp] : 0;
+        const up = y > 0 ? output[prevOutOffset + x] : 0;
+        const upLeft = y > 0 && x >= bpp ? output[prevOutOffset + x - bpp] : 0;
+        const p = left + up - upLeft;
+        const pa = Math.abs(p - left);
+        const pb = Math.abs(p - up);
+        const pc = Math.abs(p - upLeft);
+        let pr = left;
+        if (pb <= pa && pb <= pc) {
+          pr = up;
+        } else if (pc <= pa && pc <= pb) {
+          pr = upLeft;
+        }
+        val = (rawVal + pr) & 0xff;
+      }
+
+      output[outOffset + x] = val;
+    }
+  }
+
+  return output;
+}
+
+/**
  * Scans page content streams to map image XObject references to their displayed width & height in points
  */
 export function extractImageDisplayDimensions(
@@ -297,6 +359,13 @@ export async function optimizeImageStreams(
         targetWidth = Math.max(16, Math.min(w, Math.round(dispWidthInches * profile.maxDpi)));
         targetHeight = Math.max(16, Math.min(h, Math.round(dispHeightInches * profile.maxDpi)));
       }
+    } else if (profile.level === 'extreme') {
+      const maxDim = 1200;
+      if (w > maxDim || h > maxDim) {
+        const scale = Math.min(maxDim / w, maxDim / h);
+        targetWidth = Math.max(16, Math.round(w * scale));
+        targetHeight = Math.max(16, Math.round(h * scale));
+      }
     }
 
     try {
@@ -314,6 +383,15 @@ export async function optimizeImageStreams(
           inflated = zlib.inflateSync(Buffer.from(contents));
         } catch {
           continue;
+        }
+
+        // Handle PNG Predictor filtering if present
+        if (inflated.length === (w * 3 + 1) * h) {
+          inflated = unfilterPngStream(inflated, w, h, 3);
+        } else if (inflated.length === (w * 4 + 1) * h) {
+          inflated = unfilterPngStream(inflated, w, h, 4);
+        } else if (inflated.length === (w * 1 + 1) * h) {
+          inflated = unfilterPngStream(inflated, w, h, 1);
         }
 
         if (inflated.length === w * h * 3) {

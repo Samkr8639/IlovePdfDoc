@@ -45,7 +45,24 @@ describe('ContactUsComponent', () => {
   it('should validate Step 1 before allowing progression to Step 2', () => {
     expect(component.isStep1Valid()).toBe(false);
 
+    component.goToStep(2);
+    expect(component.currentStep()).toBe(1);
+    expect(component.nameTouched()).toBe(true);
+    expect(component.emailTouched()).toBe(true);
+    expect(component.getNameErrorMessage()).toBe('Please enter your name.');
+    expect(component.getEmailErrorMessage()).toBe('Please enter your email address.');
+
+    // Name too short
+    component.formData.name = 'J';
+    expect(component.isNameValid()).toBe(false);
+    expect(component.getNameErrorMessage()).toBe('Name must be at least 2 characters.');
+
+    // Invalid email
     component.formData.name = 'John Doe';
+    component.formData.email = 'not-an-email';
+    expect(component.isEmailValid()).toBe(false);
+    expect(component.getEmailErrorMessage()).toBe('Please enter a valid email address (e.g. name@example.com).');
+
     component.formData.email = 'john@example.com';
     component.formData.subject = 'Sales';
     expect(component.isStep1Valid()).toBe(true);

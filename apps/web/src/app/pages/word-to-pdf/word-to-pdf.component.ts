@@ -191,10 +191,13 @@ export class WordToPdfComponent implements OnInit, OnDestroy {
       }
     } catch (err: unknown) {
       if (this.currentRunId === runId && !this.abortController?.signal.aborted) {
-        const errorMsg =
+        let errorMsg =
           err instanceof Error
             ? err.message
             : 'Conversion failed. Please verify your document and try again.';
+        if (errorMsg === 'Failed to fetch' || errorMsg.includes('Failed to fetch')) {
+          errorMsg = 'Unable to connect to conversion server. Please check your network connection and try again.';
+        }
         this.errorMessage.set(errorMsg);
         this.currentState.set('organize');
         this.layoutService.hideFooter();

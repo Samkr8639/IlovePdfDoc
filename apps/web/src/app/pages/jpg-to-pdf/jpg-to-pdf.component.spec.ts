@@ -344,6 +344,10 @@ describe('JpgToPdfComponent Unit Tests', () => {
 
     component.setQuality('optimised');
     expect(component.options().quality).toBe('optimised');
+
+    component.updateOptions({ pdfTitle: 'Custom Document Name', pdfAuthor: 'Jane Doe' });
+    expect(component.options().pdfTitle).toBe('Custom Document Name');
+    expect(component.options().pdfAuthor).toBe('Jane Doe');
   });
 
   it('should execute conversion successfully and transition to completed', async () => {

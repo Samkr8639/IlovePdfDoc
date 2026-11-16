@@ -210,6 +210,26 @@ describe('BrowserPdfService', () => {
       expect(verified.getTitle()).toBeFalsy();
     });
 
+    it('should strip metadata and recompress streams with extreme profile', async () => {
+      const doc = await PDFDocument.create();
+      doc.setTitle('Document To Compress');
+      doc.setAuthor('Author Name');
+      doc.setSubject('Testing Subject');
+      doc.addPage([595, 842]);
+      const bytes = await doc.save();
+      const file = new File([bytes.buffer as ArrayBuffer], 'test-doc.pdf', { type: 'application/pdf' });
+
+      const res = await service.compressPdf(file, 'extreme');
+      expect(res.level).toBe('extreme');
+      expect(res.sizeBytes).toBeGreaterThan(0);
+      expect(res.sizeBytes).toBeLessThanOrEqual(file.size);
+
+      const buf = await res.blob.arrayBuffer();
+      const loaded = await PDFDocument.load(buf);
+      expect(loaded.getTitle()).toBeFalsy();
+      expect(loaded.getAuthor()).toBeFalsy();
+    });
+
     it('should compress with less compression profile', async () => {
       const file = await createTestPdf(2, 'graphic.pdf');
       const res = await service.compressPdf(file, 'less');
