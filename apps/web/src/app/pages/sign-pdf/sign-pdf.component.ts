@@ -331,6 +331,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     startClientY: number;
     origField: SignFieldElement;
     corner?: ResizeCorner;
+    rotateCenter?: { x: number; y: number };
+    startAngle?: number;
+    hasRotatedMoved?: boolean;
   } | null = null;
 
   ngOnInit(): void {
@@ -965,13 +968,33 @@ export class SignPdfComponent implements OnInit, OnDestroy {
 
   onFieldRotateStart(payload: { event: MouseEvent; field: SignFieldElement }): void {
     payload.event.preventDefault();
+    payload.event.stopPropagation();
     this.selectedFieldId.set(payload.field.id);
+
+    const target = payload.event.target as HTMLElement | null;
+    const boxEl = target?.closest('.sign-field-object') as HTMLElement | null;
+    let centerX = payload.event.clientX;
+    let centerY = payload.event.clientY;
+    if (boxEl) {
+      const rect = boxEl.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+    }
+
+    const startAngle = Math.atan2(
+      payload.event.clientY - centerY,
+      payload.event.clientX - centerX
+    ) * (180 / Math.PI);
+
     this.dragState = {
       kind: 'rotate',
       field: payload.field,
       startClientX: payload.event.clientX,
       startClientY: payload.event.clientY,
-      origField: { ...payload.field }
+      origField: { ...payload.field },
+      rotateCenter: { x: centerX, y: centerY },
+      startAngle,
+      hasRotatedMoved: false
     };
   }
 
@@ -996,12 +1019,18 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       this.rafDragId = null;
     }
     if (!this.dragState) return;
-    const { origField, field } = this.dragState;
+    const { origField, field, kind, hasRotatedMoved } = this.dragState;
     const current = this.fields().find(f => f.id === field.id);
     this.dragState = null;
     this.smartGuides.set(new Map());
 
     if (!current) return;
+
+    if (kind === 'rotate' && !hasRotatedMoved) {
+      this.rotateField(field.id, 90);
+      return;
+    }
+
     const moved =
       origField.pageIndex !== current.pageIndex ||
       Math.abs(origField.xPt - current.xPt) > 0.1 ||
@@ -1014,7 +1043,9 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       const snapshotAfter = { ...current };
       const snapshotBefore = { ...origField };
       this.history.execute({
-        description: 'Transform field',
+        description: (origField.rotation ?? 0) !== (snapshotAfter.rotation ?? 0)
+          ? `Rotate field to ${snapshotAfter.rotation ?? 0}°`
+          : 'Transform field',
         execute: () => this.replaceField(snapshotAfter),
         undo: () => this.replaceField(snapshotBefore)
       });
@@ -1121,10 +1152,24 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       const nextPdf = this.transform.screenRectToPdfRect({ x, y, width, height }, pageMeta, z);
       this.replaceField({ ...st.origField, ...nextPdf });
     } else if (st.kind === 'rotate') {
-      const rotDelta = Math.round(dxPx * 0.8);
+      const center = st.rotateCenter || { x: st.startClientX, y: st.startClientY };
+      const currentAngle = Math.atan2(clientY - center.y, clientX - center.x) * (180 / Math.PI);
+      const deltaAngle = currentAngle - (st.startAngle ?? 0);
+      if (Math.abs(deltaAngle) > 2) {
+        st.hasRotatedMoved = true;
+      }
+      let newAngle = Math.round(((st.origField.rotation ?? 0) + deltaAngle) % 360);
+      if (newAngle < 0) newAngle += 360;
+
+      // Smart snapping within 4 degrees of cardinal angles (0, 90, 180, 270)
+      if (Math.abs(newAngle - 0) <= 4 || Math.abs(newAngle - 360) <= 4) newAngle = 0;
+      else if (Math.abs(newAngle - 90) <= 4) newAngle = 90;
+      else if (Math.abs(newAngle - 180) <= 4) newAngle = 180;
+      else if (Math.abs(newAngle - 270) <= 4) newAngle = 270;
+
       this.replaceField({
         ...st.origField,
-        rotation: ((st.origField.rotation ?? 0) + rotDelta) % 360
+        rotation: newAngle
       });
     }
   }
@@ -1236,6 +1281,23 @@ export class SignPdfComponent implements OnInit, OnDestroy {
       },
       undo: () => this.fields.update(l => l.filter(f => f.id !== clone.id))
     });
+  }
+
+  rotateField(fieldId?: string, delta = 90): void {
+    const id = fieldId || this.selectedFieldId();
+    if (!id) return;
+    const cur = this.fields().find(f => f.id === id);
+    if (!cur) return;
+    const oldAngle = cur.rotation ?? 0;
+    const newAngle = ((oldAngle + delta) % 360 + 360) % 360;
+    const before = { ...cur };
+    const after = { ...cur, rotation: newAngle };
+    this.history.execute({
+      description: `Rotate field to ${newAngle}°`,
+      execute: () => this.replaceField(after),
+      undo: () => this.replaceField(before)
+    });
+    this.announce(`Rotated ${cur.type} to ${newAngle} degrees.`);
   }
 
   bringForward(id: string): void {
@@ -2404,6 +2466,11 @@ export class SignPdfComponent implements OnInit, OnDestroy {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') {
       event.preventDefault();
       this.history.redo();
+      return;
+    }
+    if (event.key.toLowerCase() === 'r' && !event.ctrlKey && !event.metaKey && !event.altKey && this.selectedFieldId()) {
+      event.preventDefault();
+      this.rotateField(this.selectedFieldId()!, 90);
       return;
     }
     if (event.key === 'Escape') {

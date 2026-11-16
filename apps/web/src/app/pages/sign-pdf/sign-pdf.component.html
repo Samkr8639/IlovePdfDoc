@@ -268,6 +268,7 @@
                   [autoFocusEdit]="newlyPlacedFieldId() === field.id" (selectedField)="selectedFieldId.set($event)"
                   (dragStart)="onFieldDragStart($event)" (touchDragStart)="onFieldTouchDragStart($event)"
                   (resizeStart)="onFieldResizeStart($event)" (rotateStart)="onFieldRotateStart($event)"
+                  (rotateField)="rotateField($event, 90)"
                   (removed)="removeField($event)" (duplicate)="duplicateField($event)"
                   (bringForward)="bringForward($event)" (sendBackward)="sendBackward($event)"
                   (nudge)="nudgeField($event)" (toggleCheckbox)="toggleCheckboxField($event)"
@@ -771,9 +772,14 @@
             <div class="inspector-card-header">
               <div class="inspector-title-row">
                 <span class="section-badge-title">SELECTED FIELD</span>
-                <span class="inspector-type-badge">{{ sel.type }} · Page {{ sel.pageIndex + 1 }}</span>
+                <span class="inspector-type-badge">{{ sel.type }} · Page {{ sel.pageIndex + 1 }} · {{ sel.rotation || 0 }}°</span>
               </div>
               <div class="inspector-quick-actions">
+                <button type="button" class="btn-icon-xs" title="Rotate 90° (R)" aria-label="Rotate field 90 degrees" (click)="rotateField(sel.id, 90)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
+                </button>
                 <button type="button" class="btn-icon-xs" title="Duplicate (Ctrl+D)" (click)="duplicateField(sel.id)">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="9" y="9" width="13" height="13" rx="2" />
