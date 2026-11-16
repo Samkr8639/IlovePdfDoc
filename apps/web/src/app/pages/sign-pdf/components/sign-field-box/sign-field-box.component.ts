@@ -295,16 +295,6 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
             </button>
           }
 
-          <button
-            type="button"
-            class="quick-btn"
-            title="Rotate 90° (R)"
-            aria-label="Rotate field 90 degrees"
-            (click)="rotateField.emit(field().id); $event.stopPropagation()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-            </svg>
-          </button>
           <button type="button" class="quick-btn" title="Duplicate (Ctrl+D)" aria-label="Duplicate field" (click)="duplicate.emit(field().id); $event.stopPropagation()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>

@@ -770,38 +770,55 @@
           @if (selectedField(); as sel) {
           <div class="sidebar-option-block selected-inspector-block">
             <div class="inspector-card-header">
-              <div class="inspector-title-row">
-                <span class="section-badge-title">SELECTED FIELD</span>
-                <span class="inspector-type-badge">{{ sel.type }} · Page {{ sel.pageIndex + 1 }} · {{ sel.rotation || 0 }}°</span>
+              <div class="inspector-header-top">
+                <div class="inspector-field-badge-group">
+                  <span class="section-badge-title">SELECTED FIELD</span>
+                  <span class="inspector-type-pill">{{ sel.type }}</span>
+                </div>
+                <div class="inspector-meta-pills">
+                  <span class="meta-pill">Page {{ sel.pageIndex + 1 }}</span>
+                  <span class="meta-pill" [title]="'Current rotation: ' + (sel.rotation || 0) + '°'">{{ sel.rotation || 0 }}°</span>
+                  <button type="button" class="inspector-close-btn" (click)="selectedFieldId.set(null)" title="Deselect field (Esc)" aria-label="Deselect field">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div class="inspector-quick-actions">
-                <button type="button" class="btn-icon-xs" title="Rotate 90° (R)" aria-label="Rotate field 90 degrees" (click)="rotateField(sel.id, 90)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <div class="inspector-actions-bar" role="toolbar" aria-label="Selected field quick actions">
+                <button type="button" class="inspector-action-btn" title="Rotate 90° clockwise (R)" aria-label="Rotate field 90 degrees" (click)="rotateField(sel.id, 90)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                   </svg>
+                  <span>Rotate</span>
                 </button>
-                <button type="button" class="btn-icon-xs" title="Duplicate (Ctrl+D)" (click)="duplicateField(sel.id)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="inspector-action-btn" title="Duplicate field (Ctrl+D)" aria-label="Duplicate field" (click)="duplicateField(sel.id)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <rect x="9" y="9" width="13" height="13" rx="2" />
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                   </svg>
+                  <span>Duplicate</span>
                 </button>
-                <button type="button" class="btn-icon-xs" title="Bring forward" (click)="bringForward(sel.id)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="18 15 12 9 6 15" />
-                  </svg>
-                </button>
-                <button type="button" class="btn-icon-xs" title="Send backward" (click)="sendBackward(sel.id)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-                <button type="button" class="btn-icon-xs danger" title="Delete (Del)" (click)="removeField(sel.id)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                  </svg>
-                </button>
+                <div class="inspector-action-group">
+                  <button type="button" class="inspector-icon-btn" title="Bring forward (PageUp)" aria-label="Bring forward" (click)="bringForward(sel.id)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="18 15 12 9 6 15" />
+                    </svg>
+                  </button>
+                  <button type="button" class="inspector-icon-btn" title="Send backward (PageDown)" aria-label="Send backward" (click)="sendBackward(sel.id)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                  <button type="button" class="inspector-icon-btn danger" title="Delete field (Del / Backspace)" aria-label="Delete field" (click)="removeField(sel.id)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -967,12 +984,16 @@
             @else if (sel.type === 'stamp') {
             <div class="inspector-controls-col">
               @if (sel.imageDataUrl) {
-              <div class="stamp-inspector-preview">
-                <img [src]="sel.imageDataUrl" alt="Selected stamp" />
+              <div class="signature-inspector-preview-card">
+                <img [src]="sel.imageDataUrl" alt="Selected stamp" class="sig-preview-img" />
               </div>
               }
-              <button type="button" class="btn-outline-xs" (click)="openEditStamp(sel)">
-                Edit Stamp Details…
+              <button type="button" class="btn-change-signature" (click)="openEditStamp(sel)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                <span>Edit stamp details…</span>
               </button>
             </div>
             }
@@ -981,17 +1002,24 @@
             @else if (sel.type === 'signature') {
             <div class="inspector-controls-col">
               @if (sel.imageDataUrl) {
-              <div class="stamp-inspector-preview">
-                <img [src]="sel.imageDataUrl" alt="Selected signature" />
+              <div class="signature-inspector-preview-card">
+                <img [src]="sel.imageDataUrl" alt="Selected signature" class="sig-preview-img" />
               </div>
               }
-              <button type="button" class="btn-outline-xs" (click)="openEditSignature(sel)">
-                Change Signature…
+              <button type="button" class="btn-change-signature" (click)="openEditSignature(sel)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                <span>Change signature…</span>
               </button>
-              <label class="pt-checkbox-row" style="margin-top: 4px;">
+              <label class="signing-details-toggle-card">
                 <input type="checkbox" [checked]="sel.showSigningDetailsLine"
-                  (change)="toggleFieldSigningDetails(sel, $event)" />
-                <span>Add signing details line</span>
+                  (change)="toggleFieldSigningDetails(sel, $event)" class="details-checkbox" />
+                <div class="toggle-text-col">
+                  <span class="toggle-title">Add signing details line</span>
+                  <span class="toggle-desc">Include signer name, date, and verification text below signature</span>
+                </div>
               </label>
             </div>
             }
@@ -1000,12 +1028,16 @@
             @else if (sel.type === 'initials') {
             <div class="inspector-controls-col">
               @if (sel.imageDataUrl) {
-              <div class="stamp-inspector-preview">
-                <img [src]="sel.imageDataUrl" alt="Selected initials" />
+              <div class="signature-inspector-preview-card">
+                <img [src]="sel.imageDataUrl" alt="Selected initials" class="sig-preview-img" />
               </div>
               }
-              <button type="button" class="btn-outline-xs" (click)="openEditSignature(sel)">
-                Change Initials…
+              <button type="button" class="btn-change-signature" (click)="openEditSignature(sel)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                <span>Change initials…</span>
               </button>
             </div>
             }

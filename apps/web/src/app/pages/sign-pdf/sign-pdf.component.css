@@ -1182,19 +1182,163 @@
 /* Section 5: SELECTED FIELD Panel */
 .selected-inspector-block {
   border: 1.5px solid var(--pt-teal-700);
-  border-radius: var(--pt-radius-md);
-  background: var(--pt-teal-50);
-  padding: 12px;
-  gap: 10px;
+  border-radius: var(--pt-radius-lg);
+  background: var(--pt-surface-white);
+  padding: 14px 16px;
+  gap: 12px;
+  box-shadow: 0 4px 14px -2px rgba(15, 118, 110, 0.1), 0 2px 4px -2px rgba(11, 18, 32, 0.04);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.selected-inspector-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 2.5px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, var(--pt-teal-700), var(--pt-teal-600));
 }
 
 .inspector-card-header {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--pt-soft-outline);
+  padding-bottom: 10px;
+}
+
+.inspector-header-top {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border-bottom: 1px solid var(--pt-teal-100);
-  padding-bottom: 8px;
+}
+
+.inspector-field-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inspector-type-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--pt-teal-800);
+  background: var(--pt-teal-100);
+  padding: 2px 7px;
+  border-radius: var(--pt-radius-pill);
+}
+
+.inspector-meta-pills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.meta-pill {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--pt-muted);
+  background: var(--pt-subtle-bg);
+  border: 1px solid var(--pt-soft-outline);
+  padding: 2px 6px;
+  border-radius: var(--pt-radius-pill);
+  line-height: 1.2;
+}
+
+.inspector-close-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: var(--pt-subtle-bg);
+  color: var(--pt-muted);
+  border-radius: var(--pt-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 2px;
+}
+
+.inspector-close-btn:hover {
+  background: var(--pt-hover-bg);
+  color: var(--pt-navy);
+}
+
+.inspector-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.inspector-action-btn {
+  flex: 1;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-soft-outline);
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-subtle-bg);
+  color: var(--pt-navy);
+  font-family: var(--pt-font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inspector-action-btn:hover {
+  border-color: var(--pt-teal-700);
+  background: var(--pt-surface-white);
+  color: var(--pt-teal-700);
+  box-shadow: var(--pt-shadow-sm);
+}
+
+.inspector-action-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--pt-soft-outline);
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-subtle-bg);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.inspector-icon-btn {
+  width: 28px;
+  height: 30px;
+  border: none;
+  border-right: 1px solid var(--pt-soft-outline);
+  background: transparent;
+  color: var(--pt-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inspector-icon-btn:last-child {
+  border-right: none;
+}
+
+.inspector-icon-btn:hover {
+  background: var(--pt-surface-white);
+  color: var(--pt-teal-700);
+}
+
+.inspector-icon-btn.danger:hover {
+  background: var(--pt-coral-subtle);
+  color: var(--pt-coral);
 }
 
 .inspector-title-row {
@@ -1340,21 +1484,113 @@
   width: 100%;
 }
 
-.stamp-inspector-preview {
-  height: 60px;
+.stamp-inspector-preview,
+.signature-inspector-preview-card {
+  min-height: 76px;
+  max-height: 84px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--pt-surface-white);
-  border-radius: var(--pt-radius-sm);
-  border: 1px solid var(--pt-outline);
-  padding: 4px;
+  background: var(--pt-subtle-bg);
+  border-radius: var(--pt-radius-md);
+  border: 1.5px dashed var(--pt-outline);
+  padding: 8px 14px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.15s ease;
 }
 
-.stamp-inspector-preview img {
-  max-height: 100%;
+.signature-inspector-preview-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  background-image: radial-gradient(var(--pt-outline-strong) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+}
+
+.stamp-inspector-preview img,
+.sig-preview-img {
+  max-height: 58px;
   max-width: 100%;
   object-fit: contain;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(11, 18, 32, 0.08));
+}
+
+.btn-change-signature {
+  width: 100%;
+  height: 38px;
+  border-radius: var(--pt-radius-sm);
+  border: 1.5px solid var(--pt-soft-outline);
+  background: var(--pt-surface-white);
+  color: var(--pt-navy);
+  font-family: var(--pt-font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-change-signature:hover {
+  border-color: var(--pt-teal-700);
+  background: var(--pt-teal-50);
+  color: var(--pt-teal-800);
+  box-shadow: var(--pt-shadow-sm);
+}
+
+.signing-details-toggle-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--pt-soft-outline);
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-surface-white);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  margin-top: 2px;
+}
+
+.signing-details-toggle-card:hover {
+  border-color: var(--pt-teal-600);
+  background: var(--pt-subtle-bg);
+}
+
+.signing-details-toggle-card .details-checkbox {
+  margin-top: 2px;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--pt-teal-700);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle-text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toggle-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pt-navy);
+  line-height: 1.3;
+}
+
+.toggle-desc {
+  font-size: 10.5px;
+  color: var(--pt-muted);
+  line-height: 1.35;
 }
 
 /* Section 6: Collapsible Accordion */
