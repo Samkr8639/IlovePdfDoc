@@ -643,6 +643,72 @@ describe('SignPdfComponent & Dialogs', () => {
       expect(withoutDetails?.showSigningDetailsLine).toBe(false);
       expect(withoutDetails?.signingDetailsText).toBeUndefined();
     });
+
+    it('allows rotating placed signature field by 90 degrees with undo and redo support', () => {
+      component.signatureDataUrl.set('data:image/png;base64,TEST_SIG');
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      const sigField = component.fields()[0];
+      expect(sigField.rotation ?? 0).toBe(0);
+
+      // Rotate 90 deg clockwise
+      component.rotateField(sigField.id, 90);
+      fixture.detectChanges();
+      expect(component.fields()[0].rotation).toBe(90);
+
+      // Rotate again -> 180
+      component.rotateField(sigField.id, 90);
+      fixture.detectChanges();
+      expect(component.fields()[0].rotation).toBe(180);
+
+      // Rotate again -> 270
+      component.rotateField(sigField.id, 90);
+      fixture.detectChanges();
+      expect(component.fields()[0].rotation).toBe(270);
+
+      // Rotate again -> 0
+      component.rotateField(sigField.id, 90);
+      fixture.detectChanges();
+      expect(component.fields()[0].rotation).toBe(0);
+
+      // Undo
+      component.history.undo();
+      expect(component.fields()[0].rotation).toBe(270);
+
+      // Redo
+      component.history.redo();
+      expect(component.fields()[0].rotation).toBe(0);
+    });
+
+    it('handles rotate start and single-click or drag rotation', () => {
+      component.signatureDataUrl.set('data:image/png;base64,TEST_SIG');
+      component.onPaletteTileEnter('signature', enterEvt);
+      fixture.detectChanges();
+
+      const sigField = component.fields()[0];
+
+      // Single click on rotate handle (no move) -> rotates 90 deg
+      const mockEvt = {
+        clientX: 100,
+        clientY: 50,
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        target: { closest: () => null }
+      } as unknown as MouseEvent;
+
+      component.onFieldRotateStart({ event: mockEvt, field: sigField });
+      component.onDocumentPointerUp();
+      fixture.detectChanges();
+
+      expect(component.fields()[0].rotation).toBe(90);
+
+      // Keydown 'r' rotates by 90 deg
+      component.selectedFieldId.set(sigField.id);
+      component.onDocumentKeyDown(new KeyboardEvent('keydown', { key: 'r' }));
+      fixture.detectChanges();
+      expect(component.fields()[0].rotation).toBe(180);
+    });
   });
 });
 

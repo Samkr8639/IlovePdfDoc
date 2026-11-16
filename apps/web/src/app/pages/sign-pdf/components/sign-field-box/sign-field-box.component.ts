@@ -226,11 +226,12 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
         <button
           type="button"
           class="field-ctrl-btn rotate-btn"
-          title="Drag to rotate"
+          [attr.title]="'Drag to rotate (or click to rotate 90°). Current: ' + (field().rotation || 0) + '°'"
           aria-label="Rotate field"
-          (mousedown)="rotateStart.emit({ event: $event, field: field() })"
+          (mousedown)="onRotateStart($event)"
+          (touchstart)="onRotateTouchStart($event)"
           (click)="$event.stopPropagation()">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
           </svg>
         </button>
@@ -294,6 +295,16 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
             </button>
           }
 
+          <button
+            type="button"
+            class="quick-btn"
+            title="Rotate 90° (R)"
+            aria-label="Rotate field 90 degrees"
+            (click)="rotateField.emit(field().id); $event.stopPropagation()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+          </button>
           <button type="button" class="quick-btn" title="Duplicate (Ctrl+D)" aria-label="Duplicate field" (click)="duplicate.emit(field().id); $event.stopPropagation()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
@@ -473,13 +484,12 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
     .handle-w { top: calc(50% - 4.5px); left: -5px; cursor: ew-resize; }
     .rotate-btn {
       position: absolute;
-      top: -28px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 22px;
-      height: 22px;
+      top: -16px;
+      left: -16px;
+      width: 24px;
+      height: 24px;
       border-radius: var(--pt-radius-pill);
-      border: 1px solid var(--pt-teal-700);
+      border: 1.5px solid var(--pt-teal-700);
       background: var(--pt-surface-white);
       color: var(--pt-teal-700);
       display: flex;
@@ -487,6 +497,18 @@ export type ResizeCorner = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
       justify-content: center;
       cursor: grab;
       box-shadow: var(--pt-shadow-sm);
+      z-index: 25;
+      transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+      padding: 0;
+    }
+    .rotate-btn:hover {
+      background: var(--pt-teal-700);
+      color: var(--pt-surface-white);
+      transform: scale(1.15);
+      box-shadow: var(--pt-shadow-md);
+    }
+    .rotate-btn:active {
+      cursor: grabbing;
     }
     .field-quick-toolbar {
       position: absolute;
@@ -551,6 +573,7 @@ export class SignFieldBoxComponent {
   readonly touchDragStart = output<{ event: TouchEvent; field: SignFieldElement }>();
   readonly resizeStart = output<{ event: MouseEvent; field: SignFieldElement; corner: ResizeCorner }>();
   readonly rotateStart = output<{ event: MouseEvent; field: SignFieldElement }>();
+  readonly rotateField = output<string>();
   readonly removed = output<string>();
   readonly duplicate = output<string>();
   readonly bringForward = output<string>();
@@ -662,6 +685,29 @@ export class SignFieldBoxComponent {
   readonly ariaFieldLabel = computed(() =>
     `${this.field().type} field on page ${this.field().pageIndex + 1}`
   );
+
+  onRotateStart(ev: MouseEvent): void {
+    ev.stopPropagation();
+    ev.preventDefault();
+    this.rotateStart.emit({ event: ev, field: this.field() });
+  }
+
+  onRotateTouchStart(ev: TouchEvent): void {
+    ev.stopPropagation();
+    ev.preventDefault();
+    const t = ev.touches[0];
+    if (t) {
+      this.rotateStart.emit({
+        event: {
+          clientX: t.clientX,
+          clientY: t.clientY,
+          preventDefault: () => ev.preventDefault(),
+          stopPropagation: () => ev.stopPropagation()
+        } as any,
+        field: this.field()
+      });
+    }
+  }
 
   onMouseDown(ev: MouseEvent): void {
     if (this.isEditingText() || this.isEditingLabel()) return;
@@ -814,6 +860,11 @@ export class SignFieldBoxComponent {
           event.preventDefault();
           this.duplicate.emit(this.field().id);
         }
+        break;
+      case 'r':
+      case 'R':
+        event.preventDefault();
+        this.rotateField.emit(this.field().id);
         break;
     }
   }
