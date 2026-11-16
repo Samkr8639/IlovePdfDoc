@@ -58,6 +58,8 @@ import { ProcessingStateComponent } from '../../shared/components/processing-sta
 import { ResultViewComponent } from '../../shared/components/result-view/result-view.component';
 import { ExploreMoreToolsComponent } from '../../shared/components/explore-more-tools/explore-more-tools.component';
 import { PtAdSlotComponent } from '../../shared/components/pt-ad-slot/pt-ad-slot.component';
+import { PtGuidedTourComponent } from '../../shared/components/guided-tour/pt-guided-tour.component';
+import { GuidedTourService, TourStep } from '../../core/services/guided-tour/guided-tour.service';
 
 export type WatermarkWorkspaceState = 'upload' | 'organize' | 'processing' | 'completed';
 
@@ -122,7 +124,8 @@ export const AVAILABLE_FONTS: FontOption[] = [
     ProcessingStateComponent,
     ResultViewComponent,
     ExploreMoreToolsComponent,
-    PtAdSlotComponent
+    PtAdSlotComponent,
+    PtGuidedTourComponent
   ],
   templateUrl: './watermark-pdf.component.html',
   styleUrl: './watermark-pdf.component.css'
@@ -139,6 +142,7 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   readonly storageService = inject(WatermarkStorageService);
   readonly fontService = inject(WatermarkFontService);
   readonly complianceService = inject(WatermarkComplianceService);
+  readonly guidedTourService = inject(GuidedTourService);
 
   @ViewChild('imageFileInput') imageFileInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('docFileInput') docFileInputRef?: ElementRef<HTMLInputElement>;
@@ -199,6 +203,38 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     { token: '{pages}', label: 'Total pages' },
     { token: '{date}', label: 'Current date' },
     { token: '{filename}', label: 'Document name' }
+  ];
+
+  // Interactive Guided Tour Steps
+  readonly WATERMARK_TOUR_STEPS: TourStep[] = [
+    {
+      id: 'step-files-dock',
+      title: 'Upload & Manage Files',
+      content: 'Add multiple PDFs or upload directly from your computer, Google Drive, or Dropbox. You can watermark multiple files at once.',
+      targetSelector: '.floating-tools-dock',
+      placement: 'left'
+    },
+    {
+      id: 'step-workspace-preview',
+      title: 'Explore the Workspace',
+      content: 'Preview your document with watermarks in real time. Drag the watermark anywhere on the page, or use corner handles to resize and rotate.',
+      targetSelector: 'app-watermark-preview',
+      placement: 'bottom'
+    },
+    {
+      id: 'step-watermark-settings',
+      title: 'Customize Your Settings',
+      content: 'Fine-tune your watermark with text or image options, typography, transparency, rotation, 9-point grid alignment, or full mosaic repeat.',
+      targetSelector: '.sidebar-action-panel',
+      placement: 'left'
+    },
+    {
+      id: 'step-process-download',
+      title: 'Process and Download',
+      content: 'When ready, click "Add watermark" to stamp your documents privately in your browser and download the watermarked PDF or ZIP archive.',
+      targetSelector: '.giant-action-submit-btn',
+      placement: 'top'
+    }
   ];
 
   // Derived current file computed signals
@@ -409,6 +445,42 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
     this.currentState.set('organize');
     this.layoutService.hideFooter();
+
+    // Auto-launch guided tour for first-time users
+    if (!this.guidedTourService.isTourCompleted('watermark-pdf')) {
+      setTimeout(() => {
+        if (this.currentState() === 'organize' && !this.guidedTourService.isActive()) {
+          this.startGuidedTour(false);
+        }
+      }, 600);
+    }
+  }
+
+  /**
+   * Starts or replays the interactive guided walkthrough
+   */
+  startGuidedTour(force = true): void {
+    if (this.currentState() === 'organize') {
+      this.guidedTourService.startTour({
+        tourId: 'watermark-pdf',
+        steps: this.WATERMARK_TOUR_STEPS,
+        force
+      });
+    } else {
+      this.guidedTourService.startTour({
+        tourId: 'watermark-pdf-upload',
+        steps: [
+          {
+            id: 'step-upload-intro',
+            title: 'Upload Your File',
+            content: 'Drag and drop your PDF documents here or click Select PDF files to begin customizing your watermark.',
+            targetSelector: '.hero-dropzone-wrap',
+            placement: 'bottom'
+          }
+        ],
+        force
+      });
+    }
   }
 
   onFileInputChange(event: Event): void {

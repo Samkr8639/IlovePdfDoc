@@ -1,5 +1,8 @@
 <div class="tool-page" [class.organize-mode]="currentState() === 'organize'">
 
+  <!-- INTERACTIVE GUIDED TOUR OVERLAY -->
+  <app-pt-guided-tour></app-pt-guided-tour>
+
   <!-- ROOT ERROR TOAST / BANNER (VISIBLE IN ALL STATES) -->
   @if (errorMessage()) {
   <div class="global-error-container" role="alert" aria-live="assertive">
@@ -99,6 +102,17 @@
       <p class="hero-subtitle">
         Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.
       </p>
+
+      <!-- QUICK TOUR LAUNCHER -->
+      <div class="hero-tour-trigger">
+        <button type="button" class="btn-hero-tour" (click)="startGuidedTour(true)" aria-label="Take a Quick Tour">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon>
+          </svg>
+          <span>Take a Quick Tour</span>
+        </button>
+      </div>
 
       <!-- DROPZONE COMPONENT -->
       <div class="hero-dropzone-wrap">
@@ -397,6 +411,21 @@
               <span>Same for all</span>
             </label>
           }
+
+          <button
+            type="button"
+            class="btn-tour-action"
+            (click)="startGuidedTour(true)"
+            title="Take a Quick Tour of the workspace"
+            aria-label="Take a Quick Tour"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>Tour</span>
+          </button>
 
           <button
             type="button"

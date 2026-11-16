@@ -1,0 +1,147 @@
+@if (isActive() && currentStep()) {
+  <div class="guided-tour-backdrop-layer">
+    <!-- SVG Spotlight Mask -->
+    <svg class="guided-tour-svg-canvas" width="100%" height="100%" aria-hidden="true">
+      <defs>
+        <mask id="tourSpotlightMask">
+          <!-- White reveals the darkened backdrop -->
+          <rect x="0" y="0" width="100%" height="100%" fill="white" />
+          <!-- Black cuts out the spotlight area around target element -->
+          @if (spotlight(); as sp) {
+            <rect
+              class="spotlight-hole"
+              [attr.x]="sp.x"
+              [attr.y]="sp.y"
+              [attr.width]="sp.width"
+              [attr.height]="sp.height"
+              [attr.rx]="sp.radius"
+              [attr.ry]="sp.radius"
+              fill="black"
+            />
+          }
+        </mask>
+      </defs>
+
+      <!-- Shaded backdrop with hole cutout -->
+      <rect
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        fill="rgba(15, 23, 42, 0.62)"
+        mask="url(#tourSpotlightMask)"
+      />
+
+      <!-- Soft pulsing spotlight halo ring around target -->
+      @if (spotlight(); as sp) {
+        <rect
+          class="spotlight-halo-ring"
+          [attr.x]="sp.x"
+          [attr.y]="sp.y"
+          [attr.width]="sp.width"
+          [attr.height]="sp.height"
+          [attr.rx]="sp.radius"
+          [attr.ry]="sp.radius"
+        />
+      }
+    </svg>
+
+    <!-- Interactive Popover Card -->
+    <div
+      #popoverCard
+      class="guided-tour-popover-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tourTitle"
+      aria-describedby="tourDesc"
+      [ngStyle]="popoverStyle()"
+    >
+      <!-- Card Header -->
+      <div class="popover-header">
+        <div class="popover-badge-group">
+          <span class="step-counter-pill">
+            Step {{ currentStepIndex() + 1 }} of {{ totalSteps() }}
+          </span>
+          <div class="step-progress-dots" role="presentation" aria-hidden="true">
+            @for (s of [].constructor(totalSteps()); track $index) {
+              <span class="progress-dot" [class.active]="$index === currentStepIndex()" [class.completed]="$index < currentStepIndex()"></span>
+            }
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="popover-close-btn"
+          (click)="skipTour()"
+          title="Close walkthrough (Esc)"
+          aria-label="Close walkthrough"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Card Body -->
+      <div class="popover-body">
+        <h3 id="tourTitle" class="popover-title">{{ currentStep()?.title }}</h3>
+        <p id="tourDesc" class="popover-text">{{ currentStep()?.content }}</p>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="popover-footer">
+        <div class="footer-left">
+          @if (canSkipRest()) {
+            <button
+              type="button"
+              class="btn-skip-rest"
+              (click)="skipRest()"
+              title="End walkthrough now and return to workspace"
+            >
+              Skip the rest
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="btn-skip-tour"
+              (click)="skipTour()"
+              title="Skip walkthrough"
+            >
+              Skip tour
+            </button>
+          }
+        </div>
+
+        <div class="footer-right">
+          @if (!isFirstStep()) {
+            <button
+              type="button"
+              class="btn-tour-prev"
+              (click)="prevStep()"
+              aria-label="Previous step"
+            >
+              Back
+            </button>
+          }
+
+          <button
+            type="button"
+            class="btn-tour-next"
+            (click)="isLastStep() ? completeTour() : nextStep()"
+            [attr.aria-label]="isLastStep() ? 'Finish tour' : 'Next step'"
+          >
+            <span>{{ isLastStep() ? 'Finish' : 'Next' }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              @if (isLastStep()) {
+                <polyline points="20 6 9 17 4 12"></polyline>
+              } @else {
+                <polyline points="9 18 15 12 9 6"></polyline>
+              }
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

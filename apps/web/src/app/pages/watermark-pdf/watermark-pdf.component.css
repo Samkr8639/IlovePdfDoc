@@ -1511,6 +1511,59 @@
   cursor: pointer;
 }
 
+.btn-tour-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--pt-surface-white, #FFFFFF);
+  border: 1.5px solid var(--pt-teal-200, #CCEBE6);
+  border-radius: var(--pt-radius-md, 12px);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pt-teal-700, #0F766E);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-tour-action:hover {
+  background-color: var(--pt-teal-50, #ECF7F5);
+  border-color: var(--pt-teal-600, #14B8A6);
+  color: var(--pt-teal-800, #0B5D57);
+}
+
+.hero-tour-trigger {
+  margin-top: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-hero-tour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background-color: var(--pt-teal-50, #ECF7F5);
+  border: 1px solid var(--pt-teal-100, #CCEBE6);
+  border-radius: var(--pt-radius-pill, 9999px);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--pt-teal-700, #0F766E);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-hero-tour:hover {
+  background-color: var(--pt-teal-100, #CCEBE6);
+  border-color: var(--pt-teal-200, #99D7CD);
+  color: var(--pt-teal-800, #0B5D57);
+  transform: translateY(-1px);
+}
+
 /* ==========================================================================
    FONT SIZE & RESIZE CONTROLS (ALWAYS VISIBLE)
    ========================================================================== */

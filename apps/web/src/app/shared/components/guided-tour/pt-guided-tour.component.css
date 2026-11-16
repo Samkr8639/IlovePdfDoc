@@ -1,0 +1,273 @@
+/* ==========================================================================
+   GUIDED TOUR BACKDROP & SPOTLIGHT
+   ========================================================================== */
+.guided-tour-backdrop-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.guided-tour-svg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+/* Smooth transition for spotlight hole movement */
+.spotlight-hole {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Animated halo ring around highlighted element */
+.spotlight-halo-ring {
+  fill: none;
+  stroke: var(--pt-teal-600, #14B8A6);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 3;
+  animation: pulseHalo 2.5s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pulseHalo {
+  0%, 100% {
+    stroke-opacity: 0.85;
+    filter: drop-shadow(0 0 4px rgba(20, 184, 166, 0.4));
+  }
+  50% {
+    stroke-opacity: 0.4;
+    filter: drop-shadow(0 0 1px rgba(20, 184, 166, 0.2));
+  }
+}
+
+/* ==========================================================================
+   GUIDED TOUR POPOVER CARD
+   ========================================================================== */
+.guided-tour-popover-card {
+  position: fixed;
+  z-index: 9999;
+  background-color: var(--pt-surface-white, #FFFFFF);
+  border: 1px solid var(--pt-soft-outline, #E4E7EC);
+  border-radius: var(--pt-radius-lg, 16px);
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.25), 0 0 1px rgba(15, 23, 42, 0.12);
+  padding: 20px 22px;
+  box-sizing: border-box;
+  animation: tourCardFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tourCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card Header */
+.popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.popover-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-counter-pill {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--pt-teal-700, #0F766E);
+  background-color: var(--pt-teal-50, #ECF7F5);
+  border: 1px solid var(--pt-teal-100, #CCEBE6);
+  padding: 3px 9px;
+  border-radius: var(--pt-radius-pill, 9999px);
+  letter-spacing: 0.02em;
+}
+
+.step-progress-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--pt-radius-pill, 9999px);
+  background-color: var(--pt-soft-outline, #E4E7EC);
+  transition: all 0.2s ease;
+}
+
+.progress-dot.active {
+  width: 14px;
+  background-color: var(--pt-teal-700, #0F766E);
+}
+
+.progress-dot.completed {
+  background-color: var(--pt-teal-600, #14B8A6);
+}
+
+.popover-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--pt-muted-light, #667085);
+  padding: 4px;
+  cursor: pointer;
+  border-radius: var(--pt-radius-xs, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.popover-close-btn:hover {
+  color: var(--pt-navy, #14213D);
+  background-color: var(--pt-subtle-bg, #F6F8FA);
+}
+
+/* Card Body */
+.popover-body {
+  margin-bottom: 18px;
+}
+
+.popover-title {
+  font-family: var(--pt-font-heading, 'Sora', sans-serif);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--pt-navy, #14213D);
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+
+.popover-text {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--pt-muted, #4B5563);
+  margin: 0;
+}
+
+/* Card Footer */
+.popover-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pt-soft-outline, #E4E7EC);
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+}
+
+.btn-skip-tour,
+.btn-skip-rest {
+  background: transparent;
+  border: none;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--pt-muted-light, #667085);
+  cursor: pointer;
+  padding: 6px 4px;
+  transition: color 0.15s ease;
+}
+
+.btn-skip-tour:hover,
+.btn-skip-rest:hover {
+  color: var(--pt-navy, #14213D);
+  text-decoration: underline;
+}
+
+.btn-skip-rest {
+  color: var(--pt-teal-700, #0F766E);
+  font-weight: 600;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-tour-prev {
+  background: transparent;
+  border: 1px solid var(--pt-soft-outline, #E4E7EC);
+  border-radius: var(--pt-radius-sm, 8px);
+  padding: 7px 14px;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pt-muted, #4B5563);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-tour-prev:hover {
+  background-color: var(--pt-subtle-bg, #F6F8FA);
+  color: var(--pt-navy, #14213D);
+  border-color: var(--pt-outline, #D0D5DD);
+}
+
+.btn-tour-next {
+  background-color: var(--pt-teal-700, #0F766E);
+  border: none;
+  border-radius: var(--pt-radius-sm, 8px);
+  padding: 7px 16px;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-tour-next:hover {
+  background-color: var(--pt-teal-800, #0B5D57);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   RESPONSIVE & ACCESSIBILITY
+   ========================================================================== */
+@media (max-width: 640px) {
+  .guided-tour-popover-card {
+    position: fixed;
+    bottom: 20px !important;
+    left: 16px !important;
+    right: 16px !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guided-tour-popover-card,
+  .spotlight-hole,
+  .spotlight-halo-ring {
+    animation: none !important;
+    transition: none !important;
+  }
+}
