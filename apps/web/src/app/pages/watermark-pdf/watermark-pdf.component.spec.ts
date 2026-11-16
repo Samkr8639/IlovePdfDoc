@@ -53,6 +53,26 @@ describe('WatermarkPdfComponent', () => {
         watermarkedPagesCount: 5,
         warnings: []
       }),
+      processMultipleWatermarks: vi.fn().mockResolvedValue({
+        results: [
+          {
+            filename: 'test1-watermarked.pdf',
+            pdfBytes: new Uint8Array([37, 80, 68, 70]),
+            totalPages: 5,
+            watermarkedPagesCount: 5,
+            warnings: []
+          },
+          {
+            filename: 'test2-watermarked.pdf',
+            pdfBytes: new Uint8Array([37, 80, 68, 70]),
+            totalPages: 5,
+            watermarkedPagesCount: 5,
+            warnings: []
+          }
+        ],
+        zipBytes: new Uint8Array([80, 75, 3, 4]),
+        zipFilename: 'watermarked-pdfs.zip'
+      }),
       cancel: vi.fn()
     };
 
@@ -312,6 +332,78 @@ describe('WatermarkPdfComponent', () => {
     expect(component.settings().common.customXPercent).toBe(70);
     expect(component.settings().common.customYPercent).toBe(30);
     expect(component.settings().common.rotation).toBe(90);
+  });
+
+  it('manages device presets and "Remember my settings" (R-039)', async () => {
+    component.newPresetName.set('Draft Stamp');
+    component.applyQuickChip('DRAFT');
+    await component.saveCurrentAsPreset();
+
+    expect(component.presets().length).toBeGreaterThanOrEqual(1);
+    const saved = component.presets().find(p => p.name === 'Draft Stamp');
+    expect(saved).toBeDefined();
+
+    // Modify settings then apply preset
+    component.applyQuickChip('CONFIDENTIAL');
+    expect(component.settings().textConfig.text).toBe('CONFIDENTIAL');
+
+    component.applyPreset(saved!);
+    expect(component.settings().textConfig.text).toBe('DRAFT');
+
+    // Test delete preset
+    await component.deletePreset(saved!.id);
+    expect(component.presets().some(p => p.id === saved!.id)).toBe(false);
+
+    // Test remember settings
+    component.toggleRememberSettings(true);
+    expect(component.isRememberSettings()).toBe(true);
+    component.toggleRememberSettings(false);
+    expect(component.isRememberSettings()).toBe(false);
+  });
+
+  it('detects Unicode scripts and flags color emojis (R-040)', () => {
+    component.onTextChange('TOP SECRET 🚀');
+    expect(component.hasEmoji()).toBe(true);
+
+    component.onTextChange('गोपनीय दस्तऐवज');
+    expect(component.hasEmoji()).toBe(false);
+    expect(component.detectedScript()).toBe('indic');
+    expect(component.scriptInfo().name).toContain('Indic');
+  });
+
+  it('handles multi-file upload, selection, settings sync, and ZIP export (R-037, R-038)', async () => {
+    const f1 = new File([new Uint8Array([37, 80, 68, 70])], 'doc1.pdf', { type: 'application/pdf' });
+    const f2 = new File([new Uint8Array([37, 80, 68, 70])], 'doc2.pdf', { type: 'application/pdf' });
+
+    await component.onFilesAdded([f1, f2]);
+    expect(component.files().length).toBe(2);
+    expect(component.selectedFileIndex()).toBe(0);
+    expect(component.selectedFile()?.name).toBe('doc1.pdf');
+
+    // Switch active file
+    component.selectFile(1);
+    expect(component.selectedFileIndex()).toBe(1);
+    expect(component.selectedFile()?.name).toBe('doc2.pdf');
+
+    // Toggle same settings for all
+    expect(component.sameSettingsForAll()).toBe(true);
+    component.toggleSameSettingsForAll(false);
+    expect(component.sameSettingsForAll()).toBe(false);
+
+    component.applyCurrentSettingsToAll();
+
+    // Execute multi-file export
+    component.applyQuickChip('CONFIDENTIAL');
+    await component.executeWatermark();
+
+    expect(component.currentState()).toBe('completed');
+    expect(component.multiFileResults().length).toBe(2);
+    expect(component.zipBlobUrl()).not.toBeNull();
+    expect(component.zipFilename()).toBe('watermarked-pdfs.zip');
+
+    // Test remove file
+    component.removeFile(0);
+    expect(component.files().length).toBe(1);
   });
 
   it('cancels processing and returns to organize workspace', () => {

@@ -16,6 +16,14 @@ describe('WatermarkProcessingService', () => {
         totalPages: 2,
         watermarkedPagesCount: 2,
         warnings: []
+      }),
+      exportMultipleFiles: vi.fn().mockResolvedValue({
+        results: [
+          { filename: 'doc1-watermarked.pdf', pdfBytes: new Uint8Array([1]), totalPages: 1, watermarkedPagesCount: 1, warnings: [] },
+          { filename: 'doc2-watermarked.pdf', pdfBytes: new Uint8Array([2]), totalPages: 1, watermarkedPagesCount: 1, warnings: [] }
+        ],
+        zipBytes: new Uint8Array([10, 20]),
+        zipFilename: 'watermarked-pdfs.zip'
       })
     };
 
@@ -94,6 +102,23 @@ describe('WatermarkProcessingService', () => {
       await expect(
         service.processWatermark(dummyPdfBytes, 'doc.pdf', WATERMARK_DEFAULT_SETTINGS)
       ).rejects.toThrow('cancelled');
+    });
+
+    it('processes multiple watermarks and produces zip result (R-037, R-038)', async () => {
+      const dummyPdfBytes = new Uint8Array([37, 80, 68, 70]);
+      const files = [
+        { filename: 'doc1.pdf', pdfBytes: dummyPdfBytes, settings: WATERMARK_DEFAULT_SETTINGS },
+        { filename: 'doc2.pdf', pdfBytes: dummyPdfBytes, settings: WATERMARK_DEFAULT_SETTINGS }
+      ];
+
+      const progressEvents: any[] = [];
+      const multiResult = await service.processMultipleWatermarks(files, undefined, (p) => {
+        progressEvents.push(p);
+      });
+
+      expect(multiResult.results.length).toBe(2);
+      expect(multiResult.zipFilename).toBe('watermarked-pdfs.zip');
+      expect(exportServiceMock.exportMultipleFiles).toHaveBeenCalled();
     });
   });
 });

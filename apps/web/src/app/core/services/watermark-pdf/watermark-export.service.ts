@@ -15,6 +15,7 @@ import {
   PDFStream,
   PDFRawStream
 } from 'pdf-lib';
+import { zipSync, Zippable } from 'fflate';
 import {
   WatermarkExportWarning,
   WatermarkFileSettings,
@@ -490,6 +491,66 @@ export class WatermarkExportService {
     }
 
     page.node.set(PDFName.of('Contents'), pdfDoc.context.obj(finalStreams));
+  }
+
+  /**
+   * Processes multiple PDF files and packages them into a ZIP archive with unique filenames (R-037, R-038).
+   */
+  async exportMultipleFiles(
+    files: Array<{ filename: string; pdfBytes: Uint8Array; settings: WatermarkFileSettings }>,
+    options: WatermarkExportOptions = {}
+  ): Promise<{ results: WatermarkProcessResult[]; zipBytes: Uint8Array; zipFilename: string }> {
+    const results: WatermarkProcessResult[] = [];
+    const zipData: Zippable = {};
+    const seenNames = new Map<string, number>();
+
+    for (let i = 0; i < files.length; i++) {
+      if (options.shouldCancel?.()) {
+        throw new Error('Export cancelled by user.');
+      }
+
+      const file = files[i];
+      const singleOptions: WatermarkExportOptions = {
+        ...options,
+        onProgress: (p) => {
+          options.onProgress?.({
+            currentFile: i + 1,
+            totalFiles: files.length,
+            currentPage: p.currentPage,
+            totalPages: p.totalPages
+          });
+        }
+      };
+
+      const result = await this.exportWatermarkedPdf(
+        file.pdfBytes,
+        file.filename,
+        file.settings,
+        singleOptions
+      );
+
+      // Unique filename resolution
+      let outName = result.filename;
+      const count = seenNames.get(outName) || 0;
+      seenNames.set(outName, count + 1);
+      if (count > 0) {
+        const dotIdx = outName.lastIndexOf('.');
+        outName = dotIdx > 0
+          ? `${outName.substring(0, dotIdx)}-${count}${outName.substring(dotIdx)}`
+          : `${outName}-${count}`;
+        result.filename = outName;
+      }
+
+      results.push(result);
+      zipData[outName] = result.pdfBytes;
+    }
+
+    const zipBytes = zipSync(zipData);
+    return {
+      results,
+      zipBytes,
+      zipFilename: 'watermarked-pdfs.zip'
+    };
   }
 
   buildWatermarkedFilename(originalFilename: string): string {

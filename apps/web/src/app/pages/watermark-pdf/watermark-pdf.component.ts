@@ -2,7 +2,8 @@
  * Watermark PDF Component
  * Production-ready in-browser PDF watermarking page component.
  * Provides Upload Hero, Organize Workspace with Canvas Preview, Segmented
- * Watermark Options Sidebar, Processing State, and Result View.
+ * Watermark Options Sidebar, Presets & Device Preferences, Script Font Detection,
+ * Multi-File Processing with ZIP export, Processing State, and Result View.
  */
 
 import {
@@ -29,10 +30,11 @@ import {
   WatermarkLayer,
   WatermarkPageFilterPreset,
   WatermarkPageMode,
+  WatermarkPreset,
   WatermarkProcessResult,
   WatermarkTab
 } from '@paperflow/contracts';
-import { BrowserPdfService, MergeResult, ValidatedPdfFile } from '../../core/services/browser-pdf.service';
+import { BrowserPdfService, MergeResult } from '../../core/services/browser-pdf.service';
 import { SharedPdfjsService } from '../../core/services/shared-pdfjs.service';
 import { SeoService } from '../../core/services/seo.service';
 import { LayoutService } from '../../core/services/layout.service';
@@ -41,6 +43,12 @@ import { WatermarkExportService } from '../../core/services/watermark-pdf/waterm
 import { WatermarkProcessingService } from '../../core/services/watermark-pdf/watermark-processing.service';
 import { WatermarkImageService } from '../../core/services/watermark-pdf/watermark-image.service';
 import { WatermarkTextShaper } from '../../core/services/watermark-pdf/watermark-text-shaper';
+import { WatermarkStorageService } from '../../core/services/watermark-pdf/watermark-storage.service';
+import { WatermarkFontService, FontPackInfo } from '../../core/services/watermark-pdf/watermark-font.service';
+import {
+  WatermarkComplianceReport,
+  WatermarkComplianceService
+} from '../../core/services/watermark-pdf/watermark-compliance.service';
 import { parseWatermarkPages } from '../../core/services/watermark-pdf/watermark-range-parser';
 import { WatermarkPreviewComponent } from './components/watermark-preview/watermark-preview.component';
 
@@ -62,6 +70,18 @@ export interface FontOption {
   id: string;
   name: string;
   family: string;
+}
+
+export interface WatermarkFileItem {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  bytes: Uint8Array;
+  totalPages: number;
+  pdfProxy: any;
+  settings: WatermarkFileSettings;
+  complianceReport: WatermarkComplianceReport;
 }
 
 export const QUICK_TEXT_CHIPS: QuickTextChip[] = [
@@ -116,24 +136,31 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   private exportService = inject(WatermarkExportService);
   private processingService = inject(WatermarkProcessingService);
   private imageService = inject(WatermarkImageService);
+  readonly storageService = inject(WatermarkStorageService);
+  readonly fontService = inject(WatermarkFontService);
+  readonly complianceService = inject(WatermarkComplianceService);
 
   @ViewChild('imageFileInput') imageFileInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('docFileInput') docFileInputRef?: ElementRef<HTMLInputElement>;
 
   // Component state
   readonly currentState = signal<WatermarkWorkspaceState>('upload');
-  readonly selectedFile = signal<File | null>(null);
-  readonly fileBytes = signal<Uint8Array | null>(null);
-  readonly pdfDocProxy = signal<any>(null);
-  readonly currentPage = signal<number>(1);
-  readonly totalPages = signal<number>(1);
-  readonly zoom = signal<number>(1.0);
   readonly errorMessage = signal<string | null>(null);
   readonly isSidePanelOpen = signal<boolean>(false);
   readonly fontkitFont = signal<any>(null);
 
+  // Multi-file state (R-037)
+  readonly files = signal<WatermarkFileItem[]>([]);
+  readonly selectedFileIndex = signal<number>(0);
+  readonly sameSettingsForAll = signal<boolean>(true);
+
   // Settings state (deep copy of defaults)
   readonly settings = signal<WatermarkFileSettings>(JSON.parse(JSON.stringify(WATERMARK_DEFAULT_SETTINGS)));
+
+  // Navigation & preview viewport state
+  readonly currentPage = signal<number>(1);
+  readonly totalPages = signal<number>(1);
+  readonly zoom = signal<number>(1.0);
 
   private defaultFontBytes?: Uint8Array;
 
@@ -142,9 +169,17 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   readonly processingProgress = signal<number>(0);
   readonly processingMessage = signal<string>('Applying watermark...');
 
-  // Result state
+  // Single & Multi result state (R-038)
   readonly resultData = signal<MergeResult | null>(null);
   readonly resultWarnings = signal<WatermarkExportWarning[]>([]);
+  readonly multiFileResults = signal<WatermarkProcessResult[]>([]);
+  readonly zipBlobUrl = signal<string | null>(null);
+  readonly zipFilename = signal<string>('watermarked-pdfs.zip');
+
+  // Presets & Preferences state (R-039)
+  readonly presets = signal<WatermarkPreset[]>([]);
+  readonly newPresetName = signal<string>('');
+  readonly isRememberSettings = signal<boolean>(false);
 
   // Constants exposed to template
   readonly quickChips = QUICK_TEXT_CHIPS;
@@ -158,7 +193,27 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     { token: '{filename}', label: 'Document name' }
   ];
 
-  // Computed signals
+  // Derived current file computed signals
+  readonly currentFileItem = computed<WatermarkFileItem | null>(() => {
+    const list = this.files();
+    const idx = this.selectedFileIndex();
+    return list[idx] || null;
+  });
+
+  readonly selectedFile = computed<File | null>(() => this.currentFileItem()?.file || null);
+  readonly fileBytes = computed<Uint8Array | null>(() => this.currentFileItem()?.bytes || null);
+  readonly pdfDocProxy = computed<any>(() => this.currentFileItem()?.pdfProxy || null);
+  readonly complianceReport = computed<WatermarkComplianceReport | null>(
+    () => this.currentFileItem()?.complianceReport || null
+  );
+  readonly complianceWarning = computed<string | null>(() => this.complianceReport()?.warningMessage || null);
+
+  // Font script & emoji detection (R-040)
+  readonly hasEmoji = computed<boolean>(() => this.fontService.hasEmoji(this.settings().textConfig.text));
+  readonly detectedScript = computed(() => this.fontService.detectScript(this.settings().textConfig.text));
+  readonly scriptInfo = computed<FontPackInfo>(() => this.fontService.getScriptInfo(this.detectedScript()));
+
+  // Active tab & page selections
   readonly activeTab = computed<WatermarkTab>(() => this.settings().common.activeTab);
 
   readonly pageSelection = computed(() => {
@@ -190,7 +245,6 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
   readonly isTextValid = computed<boolean>(() => {
     const text = this.settings().textConfig.text.trim();
-    // In text mode, empty is invalid unless placeholder is accepted or text is entered
     return text.length > 0 && text.length <= WATERMARK_LIMITS.maxTextLength;
   });
 
@@ -227,6 +281,14 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       this.seo.setSeoData(tool.seo);
     }
     this.loadDefaultFont();
+
+    // Check device preferences (R-039)
+    this.isRememberSettings.set(this.storageService.isRememberSettingsEnabled());
+    const last = this.storageService.getLastSettings();
+    if (last) {
+      this.settings.set(last);
+    }
+    this.loadPresets();
   }
 
   ngOnDestroy(): void {
@@ -250,44 +312,74 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     }
   }
 
-  // File Upload Handler
-  async onFilesAdded(files: File[]): Promise<void> {
+  // File Upload Handlers (Supports Multi-File R-037)
+  async onFilesAdded(newFiles: File[]): Promise<void> {
     this.errorMessage.set(null);
-    if (!files || files.length === 0) return;
+    if (!newFiles || newFiles.length === 0) return;
 
-    const file = files[0];
-    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+    const validPdfs = newFiles.filter(
+      f => f.name.toLowerCase().endsWith('.pdf') || f.type === 'application/pdf'
+    );
+    if (validPdfs.length === 0) {
       this.errorMessage.set('Please select a valid PDF document.');
       return;
     }
 
-    if (file.size > WATERMARK_LIMITS.desktopMaxFileSizeBytes) {
-      this.errorMessage.set(`File size exceeds maximum limit of 100 MB.`);
+    const currentList = [...this.files()];
+    if (currentList.length + validPdfs.length > WATERMARK_LIMITS.maxFiles) {
+      this.errorMessage.set(`You can add up to ${WATERMARK_LIMITS.maxFiles} files at once.`);
       return;
     }
 
-    try {
-      const buffer = await file.arrayBuffer();
-      const uint8 = new Uint8Array(buffer);
-      const pdfProxy = await this.sharedPdfjs.loadDocument(uint8);
-
-      if (pdfProxy.numPages > WATERMARK_LIMITS.desktopMaxPages) {
-        this.errorMessage.set(`Document has ${pdfProxy.numPages} pages, exceeding the 500-page limit.`);
+    const addedItems: WatermarkFileItem[] = [];
+    for (const file of validPdfs) {
+      if (file.size > WATERMARK_LIMITS.desktopMaxFileSizeBytes) {
+        this.errorMessage.set(`File "${file.name}" exceeds maximum limit of 100 MB.`);
         return;
       }
 
-      this.selectedFile.set(file);
-      this.fileBytes.set(uint8);
-      this.pdfDocProxy.set(pdfProxy);
-      this.totalPages.set(pdfProxy.numPages);
-      this.currentPage.set(1);
+      try {
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const pdfProxy = await this.sharedPdfjs.loadDocument(bytes);
 
-      // Transition to organize workspace
-      this.currentState.set('organize');
-      this.layoutService.hideFooter();
-    } catch (err: any) {
-      this.errorMessage.set(err?.message || 'Failed to load PDF document.');
+        if (pdfProxy.numPages > WATERMARK_LIMITS.desktopMaxPages) {
+          this.errorMessage.set(
+            `Document "${file.name}" has ${pdfProxy.numPages} pages, exceeding the 500-page limit.`
+          );
+          return;
+        }
+
+        const compliance = this.complianceService.checkCompliance(bytes);
+        const fileSettings: WatermarkFileSettings = JSON.parse(JSON.stringify(this.settings()));
+
+        addedItems.push({
+          id: `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          file,
+          name: file.name,
+          size: file.size,
+          bytes,
+          totalPages: pdfProxy.numPages,
+          pdfProxy,
+          settings: fileSettings,
+          complianceReport: compliance
+        });
+      } catch (err: any) {
+        this.errorMessage.set(`Failed to load "${file.name}": ${err?.message || 'Invalid PDF'}`);
+        return;
+      }
     }
+
+    const updatedList = [...currentList, ...addedItems];
+    this.files.set(updatedList);
+    if (currentList.length === 0 && updatedList.length > 0) {
+      this.selectedFileIndex.set(0);
+      this.totalPages.set(updatedList[0].totalPages);
+      this.currentPage.set(1);
+    }
+
+    this.currentState.set('organize');
+    this.layoutService.hideFooter();
   }
 
   onFileInputChange(event: Event): void {
@@ -296,6 +388,51 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       this.onFilesAdded(Array.from(input.files));
       input.value = '';
     }
+  }
+
+  // Multi-File Navigation & Settings Management (R-037)
+  selectFile(index: number): void {
+    if (index >= 0 && index < this.files().length) {
+      if (!this.sameSettingsForAll()) {
+        const list = [...this.files()];
+        const oldIdx = this.selectedFileIndex();
+        if (list[oldIdx]) {
+          list[oldIdx].settings = JSON.parse(JSON.stringify(this.settings()));
+        }
+        this.settings.set(JSON.parse(JSON.stringify(list[index].settings)));
+        this.files.set(list);
+      }
+      this.selectedFileIndex.set(index);
+      this.totalPages.set(this.files()[index].totalPages);
+      this.currentPage.set(1);
+    }
+  }
+
+  removeFile(index: number, event?: Event): void {
+    event?.stopPropagation();
+    const list = this.files().filter((_, i) => i !== index);
+    if (list.length === 0) {
+      this.resetTool();
+      return;
+    }
+    this.files.set(list);
+    const newIdx = Math.max(0, Math.min(this.selectedFileIndex(), list.length - 1));
+    this.selectedFileIndex.set(newIdx);
+    this.totalPages.set(list[newIdx].totalPages);
+    this.currentPage.set(1);
+  }
+
+  toggleSameSettingsForAll(same: boolean): void {
+    this.sameSettingsForAll.set(same);
+    if (!same) {
+      const current = JSON.stringify(this.settings());
+      this.files.update(list => list.map(f => ({ ...f, settings: JSON.parse(current) })));
+    }
+  }
+
+  applyCurrentSettingsToAll(): void {
+    const current = JSON.stringify(this.settings());
+    this.files.update(list => list.map(f => ({ ...f, settings: JSON.parse(current) })));
   }
 
   // Workspace Navigation & Zoom
@@ -331,37 +468,19 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.updateCommon({ activeTab: tab });
   }
 
-  // Text Options
-  onTextChange(rawText: string): void {
-    const sanitized = WatermarkTextShaper.sanitizeText(rawText).text;
-    this.updateTextConfig({ text: sanitized });
-  }
-
-  applyQuickChip(chipValue: string): void {
-    this.updateTextConfig({ text: chipValue });
+  applyQuickChip(text: string): void {
+    this.updateTextConfig({ text });
   }
 
   insertToken(token: string): void {
     const current = this.settings().textConfig.text;
-    const separator = current.length > 0 && !current.endsWith(' ') ? ' ' : '';
-    this.updateTextConfig({ text: `${current}${separator}${token}` });
+    const spacer = current.length > 0 && !current.endsWith(' ') ? ' ' : '';
+    this.updateTextConfig({ text: `${current}${spacer}${token}` });
   }
 
-  // Mosaic Controls
-  toggleMosaic(): void {
-    this.updateCommon({ mosaic: !this.settings().common.mosaic });
-  }
-
-  setHorizontalGapMm(val: number): void {
-    this.updateCommon({ horizontalGapMm: Math.min(200, Math.max(0, val)) });
-  }
-
-  setVerticalGapMm(val: number): void {
-    this.updateCommon({ verticalGapMm: Math.min(200, Math.max(0, val)) });
-  }
-
-  toggleStagger(): void {
-    this.updateCommon({ stagger: !this.settings().common.stagger });
+  onTextChange(text: string): void {
+    const sanitized = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\u202A-\u202E\u2066-\u2069]/g, '');
+    this.updateTextConfig({ text: sanitized.slice(0, WATERMARK_LIMITS.maxTextLength) });
   }
 
   setFontFamily(family: string): void {
@@ -386,6 +505,14 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
   setColor(color: string): void {
     this.updateTextConfig({ color });
+  }
+
+  setStrokeColor(strokeColor: string): void {
+    this.updateTextConfig({ strokeColor });
+  }
+
+  setStrokeWidth(strokeWidth: number): void {
+    this.updateTextConfig({ strokeWidth: Math.max(0.5, Math.min(10, strokeWidth)) });
   }
 
   // Image Options
@@ -467,50 +594,151 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.updateCommon({ filterPreset: preset });
   }
 
+  toggleMosaic(): void {
+    this.updateCommon({ mosaic: !this.settings().common.mosaic });
+  }
+
+  setHorizontalGapMm(mm: number): void {
+    this.updateCommon({ horizontalGapMm: Math.max(0, Math.min(200, mm)) });
+  }
+
+  setVerticalGapMm(mm: number): void {
+    this.updateCommon({ verticalGapMm: Math.max(0, Math.min(200, mm)) });
+  }
+
+  toggleStagger(): void {
+    this.updateCommon({ stagger: !this.settings().common.stagger });
+  }
+
   setLayer(layer: WatermarkLayer): void {
     this.updateCommon({ layer });
   }
 
-  // Execution: Add Watermark
+  // Presets & Preferences Actions (R-039)
+  async loadPresets(): Promise<void> {
+    const list = await this.storageService.listPresets();
+    this.presets.set(list);
+  }
+
+  async saveCurrentAsPreset(): Promise<void> {
+    const name = this.newPresetName().trim() || 'Custom Preset';
+    const s = this.settings();
+    const imgData = s.common.activeTab === 'image' ? s.imageConfig.imageDataUrl : null;
+    await this.storageService.savePreset(name, s, imgData);
+    this.newPresetName.set('');
+    await this.loadPresets();
+  }
+
+  applyPreset(preset: WatermarkPreset): void {
+    this.settings.set(JSON.parse(JSON.stringify(preset.settings)));
+    if (this.sameSettingsForAll()) {
+      this.applyCurrentSettingsToAll();
+    }
+  }
+
+  async deletePreset(id: string, event?: Event): Promise<void> {
+    event?.stopPropagation();
+    await this.storageService.deletePreset(id);
+    await this.loadPresets();
+  }
+
+  toggleRememberSettings(enabled: boolean): void {
+    this.isRememberSettings.set(enabled);
+    this.storageService.setRememberSettings(enabled);
+    if (enabled) {
+      this.storageService.saveLastSettings(this.settings());
+    } else {
+      this.storageService.clearLastSettings();
+    }
+  }
+
+  // Execution: Add Watermark (Single or Multiple R-037, R-038)
   async executeWatermark(): Promise<void> {
-    if (!this.isSettingsValid() || !this.selectedFile() || !this.fileBytes()) {
+    if (!this.isSettingsValid() || this.files().length === 0) {
       return;
     }
 
     this.errorMessage.set(null);
     this.isProcessing.set(true);
-    this.processingProgress.set(10);
-    this.processingMessage.set('Preparing document and stamping watermark...');
+    this.processingProgress.set(5);
+    this.processingMessage.set('Preparing documents and stamping watermark...');
     this.currentState.set('processing');
 
     try {
-      const outcome = await this.processingService.processWatermark(
-        this.fileBytes()!,
-        this.selectedFile()!.name,
-        this.settings(),
-        this.defaultFontBytes,
-        (progress) => {
-          this.processingProgress.set(progress.percent);
-          if (progress.message) {
-            this.processingMessage.set(progress.message);
+      if (this.files().length === 1) {
+        // Single file processing
+        const fileItem = this.files()[0];
+        const settingsToUse = this.sameSettingsForAll() ? this.settings() : fileItem.settings;
+
+        const outcome = await this.processingService.processWatermark(
+          fileItem.bytes,
+          fileItem.name,
+          settingsToUse,
+          this.defaultFontBytes,
+          progress => {
+            this.processingProgress.set(progress.percent);
+            if (progress.message) {
+              this.processingMessage.set(progress.message);
+            }
           }
+        );
+
+        const blob = new Blob([outcome.pdfBytes as any], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const formattedSize = this.formatBytes(blob.size);
+
+        this.resultData.set({
+          blob,
+          url,
+          filename: outcome.filename,
+          pageCount: outcome.totalPages,
+          sizeBytes: blob.size,
+          formattedSize,
+          previewUrl: url
+        });
+        this.resultWarnings.set(outcome.warnings);
+        this.multiFileResults.set([outcome]);
+      } else {
+        // Multi-file processing with ZIP (R-037, R-038)
+        const filesToProcess = this.files().map(f => ({
+          filename: f.name,
+          pdfBytes: f.bytes,
+          settings: this.sameSettingsForAll() ? this.settings() : f.settings
+        }));
+
+        const multiOutcome = await this.processingService.processMultipleWatermarks(
+          filesToProcess,
+          this.defaultFontBytes,
+          progress => {
+            this.processingProgress.set(progress.percent);
+            if (progress.message) {
+              this.processingMessage.set(progress.message);
+            }
+          }
+        );
+
+        const zipBlob = new Blob([multiOutcome.zipBytes as any], { type: 'application/zip' });
+        const zipUrl = URL.createObjectURL(zipBlob);
+        this.zipBlobUrl.set(zipUrl);
+        this.zipFilename.set(multiOutcome.zipFilename);
+        this.multiFileResults.set(multiOutcome.results);
+
+        const allWarnings: WatermarkExportWarning[] = [];
+        for (const res of multiOutcome.results) {
+          allWarnings.push(...res.warnings);
         }
-      );
+        this.resultWarnings.set(allWarnings);
 
-      const blob = new Blob([outcome.pdfBytes as any], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const formattedSize = this.formatBytes(blob.size);
-
-      this.resultData.set({
-        blob,
-        url,
-        filename: outcome.filename,
-        pageCount: outcome.totalPages,
-        sizeBytes: blob.size,
-        formattedSize,
-        previewUrl: url
-      });
-      this.resultWarnings.set(outcome.warnings);
+        this.resultData.set({
+          blob: zipBlob,
+          url: zipUrl,
+          filename: multiOutcome.zipFilename,
+          pageCount: multiOutcome.results.reduce((sum, r) => sum + r.totalPages, 0),
+          sizeBytes: zipBlob.size,
+          formattedSize: this.formatBytes(zipBlob.size),
+          previewUrl: undefined
+        });
+      }
 
       this.isProcessing.set(false);
       this.currentState.set('completed');
@@ -528,16 +756,43 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.currentState.set('organize');
   }
 
+  downloadSingleResult(res: WatermarkProcessResult): void {
+    const blob = new Blob([res.pdfBytes as any], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = res.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  downloadAllZip(): void {
+    const url = this.zipBlobUrl();
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.zipFilename();
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   resetTool(): void {
     this.cleanupResultUrl();
-    this.selectedFile.set(null);
-    this.fileBytes.set(null);
-    this.pdfDocProxy.set(null);
+    if (this.zipBlobUrl()) {
+      URL.revokeObjectURL(this.zipBlobUrl()!);
+      this.zipBlobUrl.set(null);
+    }
+    this.files.set([]);
+    this.selectedFileIndex.set(0);
     this.currentPage.set(1);
     this.totalPages.set(1);
     this.zoom.set(1.0);
     this.resultData.set(null);
     this.resultWarnings.set([]);
+    this.multiFileResults.set([]);
     this.errorMessage.set(null);
     this.settings.set(JSON.parse(JSON.stringify(WATERMARK_DEFAULT_SETTINGS)));
     this.currentState.set('upload');
@@ -546,24 +801,81 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
   // Helpers
   private updateCommon(patch: Partial<WatermarkFileSettings['common']>): void {
-    this.settings.update(s => ({
-      ...s,
-      common: { ...s.common, ...patch }
-    }));
+    this.settings.update(s => {
+      const updated = {
+        ...s,
+        common: { ...s.common, ...patch }
+      };
+      if (this.isRememberSettings()) {
+        this.storageService.saveLastSettings(updated);
+      }
+      return updated;
+    });
+
+    if (this.sameSettingsForAll()) {
+      const currentSettings = JSON.stringify(this.settings());
+      this.files.update(list => list.map(f => ({ ...f, settings: JSON.parse(currentSettings) })));
+    } else {
+      const idx = this.selectedFileIndex();
+      this.files.update(list => {
+        if (!list[idx]) return list;
+        const copy = [...list];
+        copy[idx] = { ...copy[idx], settings: JSON.parse(JSON.stringify(this.settings())) };
+        return copy;
+      });
+    }
   }
 
   private updateTextConfig(patch: Partial<TextWatermarkConfig>): void {
-    this.settings.update(s => ({
-      ...s,
-      textConfig: { ...s.textConfig, ...patch }
-    }));
+    this.settings.update(s => {
+      const updated = {
+        ...s,
+        textConfig: { ...s.textConfig, ...patch }
+      };
+      if (this.isRememberSettings()) {
+        this.storageService.saveLastSettings(updated);
+      }
+      return updated;
+    });
+
+    if (this.sameSettingsForAll()) {
+      const currentSettings = JSON.stringify(this.settings());
+      this.files.update(list => list.map(f => ({ ...f, settings: JSON.parse(currentSettings) })));
+    } else {
+      const idx = this.selectedFileIndex();
+      this.files.update(list => {
+        if (!list[idx]) return list;
+        const copy = [...list];
+        copy[idx] = { ...copy[idx], settings: JSON.parse(JSON.stringify(this.settings())) };
+        return copy;
+      });
+    }
   }
 
   private updateImageConfig(patch: Partial<ImageWatermarkConfig>): void {
-    this.settings.update(s => ({
-      ...s,
-      imageConfig: { ...s.imageConfig, ...patch }
-    }));
+    this.settings.update(s => {
+      const updated = {
+        ...s,
+        imageConfig: { ...s.imageConfig, ...patch }
+      };
+      if (this.isRememberSettings()) {
+        this.storageService.saveLastSettings(updated);
+      }
+      return updated;
+    });
+
+    if (this.sameSettingsForAll()) {
+      const currentSettings = JSON.stringify(this.settings());
+      this.files.update(list => list.map(f => ({ ...f, settings: JSON.parse(currentSettings) })));
+    } else {
+      const idx = this.selectedFileIndex();
+      this.files.update(list => {
+        if (!list[idx]) return list;
+        const copy = [...list];
+        copy[idx] = { ...copy[idx], settings: JSON.parse(JSON.stringify(this.settings())) };
+        return copy;
+      });
+    }
   }
 
   private cleanupResultUrl(): void {

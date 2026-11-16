@@ -140,6 +140,46 @@ export class WatermarkProcessingService {
   }
 
   /**
+   * Processes multiple PDF files, reporting aggregate progress and packaging into a ZIP archive (R-037, R-038).
+   */
+  async processMultipleWatermarks(
+    files: Array<{ filename: string; pdfBytes: Uint8Array; settings: WatermarkFileSettings }>,
+    fontBytes?: Uint8Array,
+    onProgress?: (progress: ProcessingProgressEvent) => void
+  ): Promise<{ results: WatermarkProcessResult[]; zipBytes: Uint8Array; zipFilename: string }> {
+    this.currentCancelFlag = false;
+    const totalFiles = files.length;
+
+    try {
+      return await this.exportService.exportMultipleFiles(files, {
+        shouldCancel: () => this.currentCancelFlag,
+        onProgress: (p) => {
+          const fileWeight = 100 / totalFiles;
+          const currentFileProgress = (p.currentPage / Math.max(1, p.totalPages)) * fileWeight;
+          const overallPercent = Math.min(
+            100,
+            Math.round((p.currentFile - 1) * fileWeight + currentFileProgress)
+          );
+          onProgress?.({
+            currentFile: p.currentFile,
+            totalFiles: p.totalFiles,
+            currentPage: p.currentPage,
+            totalPages: p.totalPages,
+            percent: overallPercent,
+            message: `Watermarking file ${p.currentFile} of ${p.totalFiles} (page ${p.currentPage} of ${p.totalPages})...`
+          });
+        }
+      });
+    } catch (err: any) {
+      if (this.currentCancelFlag) {
+        throw new Error('Watermark processing was cancelled.');
+      }
+      this.handleAllocationError(err);
+      throw err;
+    }
+  }
+
+  /**
    * Cancels active processing and terminates worker immediately.
    */
   cancel(): void {

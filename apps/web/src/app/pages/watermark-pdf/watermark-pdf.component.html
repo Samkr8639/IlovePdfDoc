@@ -2,1134 +2,1038 @@
 
   <!-- ROOT ERROR TOAST / BANNER (VISIBLE IN ALL STATES) -->
   @if (errorMessage()) {
-    <div class="global-error-container" role="alert" aria-live="assertive">
-      <div class="global-error-banner">
-        <svg class="error-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+  <div class="global-error-container" role="alert" aria-live="assertive">
+    <div class="global-error-banner">
+      <svg class="error-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span class="error-text">{{ errorMessage() }}</span>
+      <button type="button" class="error-close-btn" (click)="errorMessage.set(null)" aria-label="Dismiss error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-        <span class="error-text">{{ errorMessage() }}</span>
-        <button type="button" class="error-close-btn" (click)="errorMessage.set(null)" aria-label="Dismiss error">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
+      </button>
     </div>
+  </div>
   }
 
   <!-- 1. UPLOAD STATE -->
   @if (currentState() === 'upload') {
-    <section class="unified-hero-section">
-      <div class="container hero-content">
-        <h1 class="tool-h1">Watermark PDF</h1>
-        <p class="hero-subtitle">
-          Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.
+  <section class="unified-hero-section">
+    <div class="container hero-content">
+      <h1 class="tool-h1">Watermark PDF</h1>
+      <p class="hero-subtitle">
+        Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.
+      </p>
+
+      <!-- DROPZONE COMPONENT -->
+      <div class="hero-dropzone-wrap">
+        <app-dropzone
+          title="Select PDF files"
+          subtitle="or drop PDFs here"
+          acceptedTypes=".pdf,application/pdf"
+          [multiple]="true"
+          limitInfo="Max 100 MB • Up to 500 pages • Up to 10 files"
+          (filesSelected)="onFilesAdded($event)"
+        ></app-dropzone>
+      </div>
+    </div>
+  </section>
+
+  <!-- AD SLOT -->
+  <section class="adsense-section">
+    <div class="container">
+      <app-pt-ad-slot slotType="leaderboard"></app-pt-ad-slot>
+    </div>
+  </section>
+
+  <!-- EDITORIAL FEATURES -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-header">
+        <h2 class="features-title">The easiest & safest way to watermark PDF documents</h2>
+        <p class="features-subtitle">Engineered for client-side privacy, vector precision, and strict PDF compliance.
         </p>
+      </div>
 
-        <!-- DROPZONE COMPONENT -->
-        <div class="hero-dropzone-wrap">
-          <app-dropzone
-            title="Select PDF file"
-            subtitle="or drop PDF here"
-            acceptedTypes=".pdf,application/pdf"
-            [multiple]="false"
-            limitInfo="Max 100 MB • Up to 500 pages"
-            (filesSelected)="onFilesAdded($event)"
-          ></app-dropzone>
+      <div class="features-grid">
+        <div class="feature-item-card">
+          <div class="feature-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <h3>100% In-Browser Privacy</h3>
+          <p>Your documents never leave your device. All rendering, vector font shaping, and stamping happen in client
+            memory via WebAssembly.</p>
+        </div>
+
+        <div class="feature-item-card">
+          <div class="feature-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 7V4h16v3" />
+              <path d="M9 20h6" />
+              <path d="M12 4v16" />
+            </svg>
+          </div>
+          <h3>True Vector Outlines</h3>
+          <p>Text is shaped directly into vector glyph paths using real OpenType metrics for razor-sharp rendering at
+            any zoom level.</p>
+        </div>
+
+        <div class="feature-item-card">
+          <div class="feature-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <line x1="15" y1="3" x2="15" y2="21" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="3" y1="15" x2="21" y2="15" />
+            </svg>
+          </div>
+          <h3>9-Point Precision Anchors</h3>
+          <p>Anchor watermarks exactly where you want with 9 position presets, custom margin control, and full
+            360-degree rotation.</p>
+        </div>
+
+        <div class="feature-item-card">
+          <div class="feature-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h3>Form & Metadata Preserved</h3>
+          <p>Original AcroForms, interactive links, bookmarks, and document metadata remain 100% intact with zero visual
+            degradation.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- AD SLOT -->
-    <section class="adsense-section">
-      <div class="container">
-        <app-pt-ad-slot slotType="leaderboard"></app-pt-ad-slot>
+  <!-- 3-STEP HOW-TO GUIDE -->
+  <section class="steps-section">
+    <div class="container">
+      <div class="steps-header">
+        <h2 class="steps-title">How to watermark a PDF in 3 simple steps</h2>
+        <p class="steps-subtitle">Fast, accessible, and completely free in your web browser.</p>
       </div>
-    </section>
 
-    <!-- EDITORIAL FEATURES -->
-    <section class="features-section">
-      <div class="container">
-        <div class="features-header">
-          <h2 class="features-title">The easiest & safest way to watermark PDF documents</h2>
-          <p class="features-subtitle">Engineered for client-side privacy, vector precision, and strict PDF compliance.</p>
+      <div class="steps-grid">
+        <div class="step-item-card">
+          <div class="step-number-badge">01</div>
+          <h3>Upload PDF Document</h3>
+          <p>Select your PDF file from your computer or drag and drop it into the dropzone above.</p>
         </div>
 
-        <div class="features-grid">
-          <div class="feature-item-card">
-            <div class="feature-icon-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <h3>100% In-Browser Privacy</h3>
-            <p>Your documents never leave your device. All rendering, vector font shaping, and stamping happen in client memory via WebAssembly.</p>
-          </div>
+        <div class="step-item-card">
+          <div class="step-number-badge">02</div>
+          <h3>Customize Watermark</h3>
+          <p>Type text or upload an image. Choose the typography, opacity, rotation, and exact placement.</p>
+        </div>
 
-          <div class="feature-item-card">
-            <div class="feature-icon-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 7V4h16v3"/>
-                <path d="M9 20h6"/>
-                <path d="M12 4v16"/>
-              </svg>
-            </div>
-            <h3>True Vector Outlines</h3>
-            <p>Text is shaped directly into vector glyph paths using real OpenType metrics for razor-sharp rendering at any zoom level.</p>
-          </div>
-
-          <div class="feature-item-card">
-            <div class="feature-icon-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <line x1="9" y1="3" x2="9" y2="21"/>
-                <line x1="15" y1="3" x2="15" y2="21"/>
-                <line x1="3" y1="9" x2="21" y2="9"/>
-                <line x1="3" y1="15" x2="21" y2="15"/>
-              </svg>
-            </div>
-            <h3>9-Point Precision Anchors</h3>
-            <p>Anchor watermarks exactly where you want with 9 position presets, custom margin control, and full 360-degree rotation.</p>
-          </div>
-
-          <div class="feature-item-card">
-            <div class="feature-icon-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <h3>Form & Metadata Preserved</h3>
-            <p>Original AcroForms, interactive links, bookmarks, and document metadata remain 100% intact with zero visual degradation.</p>
-          </div>
+        <div class="step-item-card">
+          <div class="step-number-badge">03</div>
+          <h3>Download Watermarked PDF</h3>
+          <p>Click Add Watermark to generate your stamped PDF document and download it instantly.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 3-STEP HOW-TO GUIDE -->
-    <section class="steps-section">
-      <div class="container">
-        <div class="steps-header">
-          <h2 class="steps-title">How to watermark a PDF in 3 simple steps</h2>
-          <p class="steps-subtitle">Fast, accessible, and completely free in your web browser.</p>
+  <!-- FAQS -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="faq-header">
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+        <p class="faq-subtitle">Everything you need to know about stamping watermarks with PDFTailor.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-card-item">
+          <h3>Is my PDF document uploaded to any external server?</h3>
+          <p>No. PDFTailor operates 100% locally inside your web browser memory. Your files never touch external servers
+            or cloud storage.</p>
         </div>
 
-        <div class="steps-grid">
-          <div class="step-item-card">
-            <div class="step-number-badge">01</div>
-            <h3>Upload PDF Document</h3>
-            <p>Select your PDF file from your computer or drag and drop it into the dropzone above.</p>
-          </div>
+        <div class="faq-card-item">
+          <h3>Can I watermark only specific pages in my PDF?</h3>
+          <p>Yes! Under the Pages section, select "Custom range" and enter page numbers or ranges (e.g. 1-3, 5, 8-10).
+          </p>
+        </div>
 
-          <div class="step-item-card">
-            <div class="step-number-badge">02</div>
-            <h3>Customize Watermark</h3>
-            <p>Type text or upload an image. Choose the typography, opacity, rotation, and exact placement.</p>
-          </div>
-
-          <div class="step-item-card">
-            <div class="step-number-badge">03</div>
-            <h3>Download Watermarked PDF</h3>
-            <p>Click Add Watermark to generate your stamped PDF document and download it instantly.</p>
-          </div>
+        <div class="faq-card-item">
+          <h3>Will adding a watermark damage my existing PDF forms or links?</h3>
+          <p>No. Our export engine isolates the graphics state and preserves existing AcroForm fields, hyperlinks,
+            bookmarks, and metadata.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- FAQS -->
-    <section class="faq-section">
-      <div class="container">
-        <div class="faq-header">
-          <h2 class="faq-title">Frequently Asked Questions</h2>
-          <p class="faq-subtitle">Everything you need to know about stamping watermarks with PDFTailor.</p>
-        </div>
-
-        <div class="faq-list">
-          <div class="faq-card-item">
-            <h3>Is my PDF document uploaded to any external server?</h3>
-            <p>No. PDFTailor operates 100% locally inside your web browser memory. Your files never touch external servers or cloud storage.</p>
-          </div>
-
-          <div class="faq-card-item">
-            <h3>Can I watermark only specific pages in my PDF?</h3>
-            <p>Yes! Under the Pages section, select "Custom range" and enter page numbers or ranges (e.g. 1-3, 5, 8-10).</p>
-          </div>
-
-          <div class="faq-card-item">
-            <h3>Will adding a watermark damage my existing PDF forms or links?</h3>
-            <p>No. Our export engine isolates the graphics state and preserves existing AcroForm fields, hyperlinks, bookmarks, and metadata.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RELATED TOOLS -->
-    <section class="related-tools-section">
-      <div class="container">
-        <app-explore-more-tools [currentTool]="'watermark-pdf'"></app-explore-more-tools>
-      </div>
-    </section>
+  <!-- RELATED TOOLS -->
+  <section class="related-tools-section">
+    <div class="container">
+      <app-explore-more-tools [currentTool]="'watermark-pdf'"></app-explore-more-tools>
+    </div>
+  </section>
   }
 
   <!-- 2. ORGANIZE / WORKSPACE STATE -->
   @if (currentState() === 'organize') {
-    <div class="organize-workspace-screen">
-      <!-- Hidden H1 for heading hierarchy accessibility -->
-      <h1 class="visually-hidden">Watermark PDF Workspace</h1>
+  <div class="organize-workspace-screen">
+    <!-- Hidden H1 for heading hierarchy accessibility -->
+    <h1 class="visually-hidden">Watermark PDF Workspace</h1>
 
-      <!-- CANVAS MAIN AREA -->
-      <main class="canvas-main-area" aria-label="PDF Watermark Preview Area">
-        <app-watermark-preview
-          [pdfDocProxy]="pdfDocProxy()"
-          [settings]="settings()"
-          [currentPage]="currentPage()"
-          [totalPages]="totalPages()"
-          [zoom]="zoom()"
-          [isPageIncluded]="isCurrentPageIncluded()"
-          [fontkitFont]="fontkitFont()"
-          (pageChange)="onPageChange($event)"
-          (zoomChange)="onZoomChange($event)"
-          (positionChange)="onPositionChange($event)"
-        ></app-watermark-preview>
-
-        <!-- FLOATING TOOLS DOCK -->
-        <aside class="floating-tools-dock" aria-label="Quick document actions">
-          <button
-            type="button"
-            class="dock-square-btn btn-count-stack"
-            (click)="docFileInput.click()"
-            title="Replace document"
-            aria-label="Replace current PDF document"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
-            <span class="count-badge" aria-label="1 document loaded">1</span>
-          </button>
-
-          <input
-            #docFileInput
-            type="file"
-            accept=".pdf,application/pdf"
-            class="visually-hidden"
-            (change)="onFileInputChange($event)"
-          />
-
-          <button
-            type="button"
-            class="dock-pill-btn"
-            (click)="docFileInput.click()"
-            title="Choose another PDF from device"
-            aria-label="Choose another PDF from device"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-          </button>
-
-          <button
-            type="button"
-            class="dock-pill-btn btn-cloud-disabled"
-            disabled
-            title="Google Drive integration coming soon"
-            aria-label="Google Drive integration coming soon"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2L2 19h20L12 2z"></path>
-            </svg>
-          </button>
-
-          <button
-            type="button"
-            class="dock-pill-btn btn-cloud-disabled"
-            disabled
-            title="Dropbox integration coming soon"
-            aria-label="Dropbox integration coming soon"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2l-7 5 7 5-7 5 7 5 7-5-7-5 7-5-7-5z"></path>
-            </svg>
-          </button>
-        </aside>
-      </main>
-
-      <!-- MOBILE PANEL BACKDROP OVERLAY -->
-      @if (isSidePanelOpen()) {
-        <div
-          class="mobile-panel-backdrop"
-          (click)="closeMobileSidePanel()"
-          aria-hidden="true"
-        ></div>
-      }
-
-      <!-- MOBILE GEAR FAB (OPENS SIDEBAR DRAWER) -->
-      <button
-        type="button"
-        class="mobile-gear-btn"
-        (click)="toggleMobileSidePanel()"
-        [attr.aria-expanded]="isSidePanelOpen()"
-        aria-label="Toggle watermark options panel"
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </button>
-
-      <!-- RIGHT PROPERTIES SIDEBAR -->
-      <aside
-        class="sidebar-action-panel"
-        [class.panel-open]="isSidePanelOpen()"
-        role="region"
-        aria-label="Watermark options panel"
-      >
-        <div class="sidebar-scroll-body">
-          <!-- SIDEBAR HEADER -->
-          <div class="sidebar-header-row">
-            <h2 class="sidebar-heading">Watermark options</h2>
-            <button
-              type="button"
-              class="mobile-close-panel-btn"
-              (click)="closeMobileSidePanel()"
-              aria-label="Close options panel"
-            >
-              ✕
-            </button>
+    <!-- CANVAS MAIN AREA -->
+    <main class="canvas-main-area" aria-label="PDF Watermark Preview Area">
+      <!-- MULTI-FILE SELECTOR BAR (R-037) -->
+      @if (files().length > 0) {
+        <div class="file-selector-bar" role="tablist" aria-label="Loaded PDF documents">
+          <div class="file-tabs-scroll">
+            @for (fileItem of files(); track fileItem.id; let i = $index) {
+              <div
+                class="file-tab-item"
+                [class.active]="i === selectedFileIndex()"
+                role="tab"
+                [attr.aria-selected]="i === selectedFileIndex()"
+                (click)="selectFile(i)"
+              >
+                <svg class="file-tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <span class="file-tab-name" [title]="fileItem.name">{{ fileItem.name }}</span>
+                <span class="file-tab-badge">{{ fileItem.totalPages }} p</span>
+                <button
+                  type="button"
+                  class="file-tab-remove"
+                  (click)="removeFile(i, $event)"
+                  aria-label="Remove document"
+                  title="Remove document"
+                >
+                  &times;
+                </button>
+              </div>
+            }
           </div>
 
-          <!-- SEGMENTED TABS: PLACE TEXT | PLACE IMAGE -->
-          <div class="segmented-tabs-wrapper" role="tablist" aria-label="Watermark type selection">
+          <div class="file-bar-actions">
             <button
               type="button"
-              role="tab"
-              class="seg-tab-btn"
-              [class.active]="activeTab() === 'text'"
-              [attr.aria-selected]="activeTab() === 'text'"
-              (click)="setActiveTab('text')"
+              class="btn-add-more-files"
+              (click)="docFileInput.click()"
+              [disabled]="files().length >= 10"
+              title="Add another PDF document"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <polyline points="4 7 4 4 20 4 20 7"></polyline>
-                <line x1="9" y1="20" x2="15" y2="20"></line>
-                <line x1="12" y1="4" x2="12" y2="20"></line>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Place text</span>
+              <span>Add files</span>
             </button>
 
-            <button
-              type="button"
-              role="tab"
-              class="seg-tab-btn"
-              [class.active]="activeTab() === 'image'"
-              [attr.aria-selected]="activeTab() === 'image'"
-              (click)="setActiveTab('image')"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            @if (files().length > 1) {
+              <div class="sync-settings-control">
+                <label class="sync-switch-label">
+                  <input
+                    type="checkbox"
+                    class="pt-checkbox"
+                    [checked]="sameSettingsForAll()"
+                    (change)="toggleSameSettingsForAll(!sameSettingsForAll())"
+                  />
+                  <span>Same settings for all</span>
+                </label>
+                @if (!sameSettingsForAll()) {
+                  <button
+                    type="button"
+                    class="btn-apply-all"
+                    (click)="applyCurrentSettingsToAll()"
+                    title="Copy current settings to all files"
+                  >
+                    Apply to all
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- COMPLIANCE WARNING BANNER (R-041) -->
+      @if (complianceWarning()) {
+        <div class="compliance-warning-banner" role="alert">
+          <svg class="compliance-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span class="compliance-text">{{ complianceWarning() }}</span>
+        </div>
+      }
+
+      <app-watermark-preview [pdfDocProxy]="pdfDocProxy()" [settings]="settings()" [currentPage]="currentPage()"
+        [totalPages]="totalPages()" [zoom]="zoom()" [isPageIncluded]="isCurrentPageIncluded()"
+        [fontkitFont]="fontkitFont()" (pageChange)="onPageChange($event)" (zoomChange)="onZoomChange($event)"
+        (positionChange)="onPositionChange($event)"></app-watermark-preview>
+
+      <!-- FLOATING TOOLS DOCK -->
+      <aside class="floating-tools-dock" aria-label="Quick document actions">
+        <button type="button" class="dock-square-btn btn-count-stack" (click)="docFileInput.click()"
+          title="Add or replace document" aria-label="Add or replace PDF document">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span class="count-badge" [attr.aria-label]="files().length + ' documents loaded'">{{ files().length }}</span>
+        </button>
+
+        <input #docFileInput type="file" accept=".pdf,application/pdf" multiple class="visually-hidden"
+          (change)="onFileInputChange($event)" />
+
+        <button type="button" class="dock-pill-btn" (click)="docFileInput.click()"
+          title="Choose another PDF from device" aria-label="Choose another PDF from device">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </button>
+
+        <button type="button" class="dock-pill-btn btn-cloud-disabled" disabled
+          title="Google Drive integration coming soon" aria-label="Google Drive integration coming soon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 19h20L12 2z"></path>
+          </svg>
+        </button>
+
+        <button type="button" class="dock-pill-btn btn-cloud-disabled" disabled title="Dropbox integration coming soon"
+          aria-label="Dropbox integration coming soon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l-7 5 7 5-7 5 7 5 7-5-7-5 7-5-7-5z"></path>
+          </svg>
+        </button>
+      </aside>
+    </main>
+
+    <!-- MOBILE PANEL BACKDROP OVERLAY -->
+    @if (isSidePanelOpen()) {
+    <div class="mobile-panel-backdrop" (click)="closeMobileSidePanel()" aria-hidden="true"></div>
+    }
+
+    <!-- MOBILE GEAR FAB (OPENS SIDEBAR DRAWER) -->
+    <button type="button" class="mobile-gear-btn" (click)="toggleMobileSidePanel()"
+      [attr.aria-expanded]="isSidePanelOpen()" aria-label="Toggle watermark options panel">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+        </path>
+      </svg>
+    </button>
+
+    <!-- RIGHT PROPERTIES SIDEBAR -->
+    <aside class="sidebar-action-panel" [class.panel-open]="isSidePanelOpen()" role="region"
+      aria-label="Watermark options panel">
+      <div class="sidebar-scroll-body">
+        <!-- SIDEBAR HEADER -->
+        <div class="sidebar-header-row">
+          <h2 class="sidebar-heading">Watermark options</h2>
+          <button type="button" class="mobile-close-panel-btn" (click)="closeMobileSidePanel()"
+            aria-label="Close options panel">
+            ✕
+          </button>
+        </div>
+
+        <!-- SEGMENTED TABS: PLACE TEXT | PLACE IMAGE -->
+        <div class="segmented-tabs-wrapper" role="tablist" aria-label="Watermark type selection">
+          <button type="button" role="tab" class="seg-tab-btn" [class.active]="activeTab() === 'text'"
+            [attr.aria-selected]="activeTab() === 'text'" (click)="setActiveTab('text')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="4 7 4 4 20 4 20 7"></polyline>
+              <line x1="9" y1="20" x2="15" y2="20"></line>
+              <line x1="12" y1="4" x2="12" y2="20"></line>
+            </svg>
+            <span>Place text</span>
+          </button>
+
+          <button type="button" role="tab" class="seg-tab-btn" [class.active]="activeTab() === 'image'"
+            [attr.aria-selected]="activeTab() === 'image'" (click)="setActiveTab('image')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span>Place image</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: PLACE TEXT CONTENT -->
+        @if (activeTab() === 'text') {
+        <div class="tab-pane-content" role="tabpanel" aria-label="Text watermark settings">
+          <!-- Text Area Input -->
+          <div class="form-field-group">
+            <div class="field-label-row">
+              <label for="watermarkTextInput" class="field-label">WATERMARK TEXT</label>
+              <span class="char-count-badge">{{ settings().textConfig.text.length }}/500</span>
+            </div>
+            <textarea id="watermarkTextInput" class="pt-text-input text-multiline" rows="2"
+              placeholder="e.g. CONFIDENTIAL" [ngModel]="settings().textConfig.text"
+              (ngModelChange)="onTextChange($event)" maxlength="500" style="max-height: 247px;"
+              aria-describedby="textChipsHint"></textarea>
+
+            <!-- Quick Chips -->
+            <div class="quick-chips-row" id="textChipsHint" aria-label="Quick preset text options">
+              @for (chip of quickChips; track chip.value) {
+              <button type="button" class="quick-chip-pill"
+                [class.chip-active]="settings().textConfig.text === chip.value" (click)="applyQuickChip(chip.value)">
+                {{ chip.label }}
+              </button>
+              }
+            </div>
+
+            <!-- Dynamic Tokens Helper -->
+            <div class="tokens-helper-row" aria-label="Insert dynamic watermark tokens">
+              <span class="tokens-guide-label">Insert dynamic token:</span>
+              <div class="tokens-chips-list">
+                @for (t of availableTokens; track t.token) {
+                <button type="button" class="token-chip-btn" (click)="insertToken(t.token)"
+                  [title]="'Insert ' + t.label">
+                  {{ t.token }}
+                </button>
+                }
+              </div>
+            </div>
+
+            <!-- Emoji & Script Coverage Warnings (R-040) -->
+            @if (hasEmoji()) {
+              <div class="emoji-warning-notice" role="alert">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Color emoji are not supported in vector PDF watermarks; standard glyphs will be used.</span>
+              </div>
+            }
+            @if (detectedScript() !== 'latin') {
+              <div class="script-badge-row">
+                <span class="script-badge">Detected script: {{ scriptInfo().name }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Typography Toolbar -->
+          <div class="form-field-group">
+            <label class="field-label" for="fontFamilySelect">TYPOGRAPHY</label>
+            <div class="typography-toolbar-row">
+              <select id="fontFamilySelect" class="pt-select-input font-select"
+                [ngModel]="settings().textConfig.fontFamily" (ngModelChange)="setFontFamily($event)"
+                aria-label="Font family">
+                @for (font of availableFonts; track font.id) {
+                <option [value]="font.family">{{ font.name }}</option>
+                }
+              </select>
+
+              <div class="style-toggle-buttons" role="group" aria-label="Font style formatting">
+                <button type="button" class="fmt-btn" [class.active]="settings().textConfig.bold"
+                  [attr.aria-pressed]="settings().textConfig.bold" (click)="toggleBold()" title="Bold"
+                  aria-label="Bold text">
+                  <strong>B</strong>
+                </button>
+                <button type="button" class="fmt-btn" [class.active]="settings().textConfig.italic"
+                  [attr.aria-pressed]="settings().textConfig.italic" (click)="toggleItalic()" title="Italic"
+                  aria-label="Italic text">
+                  <em>I</em>
+                </button>
+                <button type="button" class="fmt-btn" [class.active]="settings().textConfig.underline"
+                  [attr.aria-pressed]="settings().textConfig.underline" (click)="toggleUnderline()" title="Underline"
+                  aria-label="Underline text">
+                  <u>U</u>
+                </button>
+              </div>
+            </div>
+
+            <!-- Font Size & Auto-fit -->
+            <div class="font-size-row">
+              <label class="pt-checkbox-label">
+                <input type="checkbox" [checked]="settings().textConfig.fontSize === 'auto'"
+                  (change)="setFontSize($any($event.target).checked ? 'auto' : 48)" />
+                <span>Auto-fit to page</span>
+              </label>
+
+              @if (settings().textConfig.fontSize !== 'auto') {
+              <div class="custom-size-input-wrap">
+                <input type="number" class="pt-number-input size-input" [ngModel]="settings().textConfig.fontSize"
+                  (ngModelChange)="setFontSize($event)" min="6" max="400" step="1" aria-label="Font size in points" />
+                <span class="input-suffix">pt</span>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Color Palette Swatches -->
+          <div class="form-field-group">
+            <label class="field-label">TEXT COLOR</label>
+            <div class="color-swatches-grid" role="radiogroup" aria-label="Text color palette">
+              @for (c of colorSwatches; track c) {
+              <button type="button" role="radio" class="color-swatch-circle"
+                [class.selected]="settings().textConfig.color === c"
+                [attr.aria-checked]="settings().textConfig.color === c" [style.background-color]="c"
+                (click)="setColor(c)" [title]="c" [attr.aria-label]="'Color ' + c"></button>
+              }
+              <input type="color" class="custom-color-picker" [ngModel]="settings().textConfig.color"
+                (ngModelChange)="setColor($event)" title="Pick custom color" aria-label="Pick custom color" />
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- TAB 2: PLACE IMAGE CONTENT -->
+        @if (activeTab() === 'image') {
+        <div class="tab-pane-content" role="tabpanel" aria-label="Image watermark settings">
+          <div class="form-field-group">
+            <label class="field-label">IMAGE WATERMARK</label>
+
+            @if (!settings().imageConfig.imageDataUrl) {
+            <!-- Drop or upload image button -->
+            <div class="image-upload-drop-card" (click)="imageFileInput.click()" role="button" tabindex="0"
+              aria-label="Upload watermark image (PNG, JPG, WebP)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
                 <polyline points="21 15 16 10 5 21"></polyline>
               </svg>
-              <span>Place image</span>
+              <span class="upload-btn-text">Select image stamp</span>
+              <span class="upload-hint">PNG, JPG, WebP • Max 10 MB</span>
+            </div>
+            } @else {
+            <!-- Loaded Image Preview Card -->
+            <div class="loaded-image-summary-card">
+              <img [src]="settings().imageConfig.imageDataUrl" alt="Watermark stamp preview"
+                class="image-thumb-preview" />
+              <div class="image-meta-info">
+                <span class="image-dimen-text">
+                  {{ settings().imageConfig.imageWidthPx }} × {{ settings().imageConfig.imageHeightPx }} px
+                </span>
+                <div class="image-card-actions">
+                  <button type="button" class="action-link-btn" (click)="imageFileInput.click()">
+                    Replace
+                  </button>
+                  <button type="button" class="action-link-btn danger-link" (click)="removeImage()">
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+            }
+
+            <input #imageFileInput type="file" accept="image/png,image/jpeg,image/webp" class="visually-hidden"
+              (change)="onImageFileChange($event)" />
+          </div>
+
+          <!-- Image Width Slider -->
+          @if (settings().imageConfig.imageDataUrl) {
+          <div class="form-field-group">
+            <div class="field-label-row">
+              <label for="imageWidthSlider" class="field-label">IMAGE SIZE (% OF PAGE WIDTH)</label>
+              <span class="slider-val-badge">{{ settings().imageConfig.widthPercent }}%</span>
+            </div>
+            <input id="imageWidthSlider" type="range" class="pt-range-slider" min="5" max="100" step="1"
+              [ngModel]="settings().imageConfig.widthPercent" (ngModelChange)="setImageWidthPercent($event)"
+              aria-label="Image width percentage" />
+          </div>
+
+          <!-- Remove White Background -->
+          <div class="form-field-group">
+            <label class="pt-checkbox-label">
+              <input type="checkbox" [checked]="settings().imageConfig.removeWhiteBg"
+                (change)="toggleRemoveWhiteBg()" />
+              <span>Remove white background</span>
+            </label>
+
+            @if (settings().imageConfig.removeWhiteBg) {
+            <div class="tolerance-slider-wrap">
+              <div class="field-label-row sub-label-row">
+                <span class="field-sublabel">Tolerance</span>
+                <span class="slider-val-badge">{{ settings().imageConfig.tolerance }}%</span>
+              </div>
+              <input type="range" class="pt-range-slider" min="5" max="60" step="1"
+                [ngModel]="settings().imageConfig.tolerance" (ngModelChange)="setWhiteBgTolerance($event)"
+                aria-label="Background removal tolerance percentage" />
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <div class="sidebar-divider"></div>
+
+        <!-- COMMON OPTIONS (APPLY TO BOTH TEXT AND IMAGE) -->
+
+        <!-- MOSAIC WATERMARK (Phase 2) -->
+        <div class="form-field-group">
+          <label class="pt-checkbox-label">
+            <input type="checkbox" [checked]="settings().common.mosaic" (change)="toggleMosaic()" />
+            <span class="bold-label">Repeat watermark as mosaic pattern</span>
+          </label>
+
+          @if (settings().common.mosaic) {
+          <div class="mosaic-options-card">
+            <!-- Horizontal gap -->
+            <div class="field-label-row sub-label-row">
+              <span class="field-sublabel">Horizontal gap</span>
+              <span class="slider-val-badge">{{ settings().common.horizontalGapMm }} mm</span>
+            </div>
+            <input type="range" class="pt-range-slider" min="0" max="200" step="1"
+              [ngModel]="settings().common.horizontalGapMm" (ngModelChange)="setHorizontalGapMm($event)"
+              aria-label="Horizontal gap in millimeters" />
+
+            <!-- Vertical gap -->
+            <div class="field-label-row sub-label-row" style="margin-top: 10px;">
+              <span class="field-sublabel">Vertical gap</span>
+              <span class="slider-val-badge">{{ settings().common.verticalGapMm }} mm</span>
+            </div>
+            <input type="range" class="pt-range-slider" min="0" max="200" step="1"
+              [ngModel]="settings().common.verticalGapMm" (ngModelChange)="setVerticalGapMm($event)"
+              aria-label="Vertical gap in millimeters" />
+
+            <!-- Stagger alternate rows -->
+            <label class="pt-checkbox-label" style="margin-top: 12px;">
+              <input type="checkbox" [checked]="settings().common.stagger" (change)="toggleStagger()" />
+              <span>Stagger alternate rows</span>
+            </label>
+          </div>
+          }
+        </div>
+
+        <!-- 1. POSITION (3x3 Grid) -->
+        <div class="form-field-group" [class.field-group-disabled]="settings().common.mosaic">
+          <div class="field-label-row">
+            <label class="field-label">POSITION</label>
+            @if (settings().common.mosaic) {
+            <span class="mosaic-disabled-hint">Disabled in Mosaic</span>
+            } @else {
+            <span class="position-current-text">{{ settings().common.position }}</span>
+            }
+          </div>
+
+          <div class="position-3x3-grid" role="radiogroup" aria-label="Watermark placement anchor">
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'top-left'"
+              [attr.aria-checked]="settings().common.position === 'top-left'" (click)="setPosition('top-left')"
+              title="Top Left" aria-label="Top Left">↖</button>
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'top-center'"
+              [attr.aria-checked]="settings().common.position === 'top-center'" (click)="setPosition('top-center')"
+              title="Top Center" aria-label="Top Center">↑</button>
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'top-right'"
+              [attr.aria-checked]="settings().common.position === 'top-right'" (click)="setPosition('top-right')"
+              title="Top Right" aria-label="Top Right">↗</button>
+
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'middle-left'"
+              [attr.aria-checked]="settings().common.position === 'middle-left'" (click)="setPosition('middle-left')"
+              title="Middle Left" aria-label="Middle Left">←</button>
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'center'"
+              [attr.aria-checked]="settings().common.position === 'center'" (click)="setPosition('center')"
+              title="Center" aria-label="Center">•</button>
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'middle-right'"
+              [attr.aria-checked]="settings().common.position === 'middle-right'" (click)="setPosition('middle-right')"
+              title="Middle Right" aria-label="Middle Right">→</button>
+
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'bottom-left'"
+              [attr.aria-checked]="settings().common.position === 'bottom-left'" (click)="setPosition('bottom-left')"
+              title="Bottom Left" aria-label="Bottom Left">↙</button>
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'bottom-center'"
+              [attr.aria-checked]="settings().common.position === 'bottom-center'"
+              (click)="setPosition('bottom-center')" title="Bottom Center" aria-label="Bottom Center">↓</button>
+            <button type="button" role="radio" class="grid-anchor-btn"
+              [class.selected]="settings().common.position === 'bottom-right'"
+              [attr.aria-checked]="settings().common.position === 'bottom-right'" (click)="setPosition('bottom-right')"
+              title="Bottom Right" aria-label="Bottom Right">↘</button>
+          </div>
+
+          <!-- Margin input -->
+          <div class="margin-input-row">
+            <label for="marginInput" class="field-sublabel">Page margin</label>
+            <div class="custom-size-input-wrap">
+              <input id="marginInput" type="number" class="pt-number-input" min="0" max="100" step="1"
+                [ngModel]="settings().common.marginMm" (ngModelChange)="setMarginMm($event)"
+                aria-label="Page margin in millimeters" />
+              <span class="input-suffix">mm</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. OPACITY (Strict: "Opacity" word only) -->
+        <div class="form-field-group">
+          <div class="field-label-row">
+            <label for="opacitySlider" class="field-label">OPACITY</label>
+            <span class="slider-val-badge">{{ settings().common.opacity }}%</span>
+          </div>
+          <input id="opacitySlider" type="range" class="pt-range-slider" min="5" max="100" step="1"
+            [ngModel]="settings().common.opacity" (ngModelChange)="setOpacity($event)"
+            aria-label="Watermark opacity percentage" />
+          <div class="quick-chips-row preset-chips-row" aria-label="Opacity presets">
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.opacity === 25"
+              (click)="setOpacity(25)">
+              25%
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.opacity === 50"
+              (click)="setOpacity(50)">
+              50%
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.opacity === 75"
+              (click)="setOpacity(75)">
+              75%
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.opacity === 100"
+              (click)="setOpacity(100)">
+              100%
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. ROTATION -->
+        <div class="form-field-group">
+          <div class="field-label-row">
+            <label class="field-label">ROTATION</label>
+            <span class="slider-val-badge">{{ settings().common.rotation }}°</span>
+          </div>
+          <div class="quick-chips-row rotation-chips-row" aria-label="Rotation presets">
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.rotation === 0"
+              (click)="setRotation(0)">
+              0°
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.rotation === 45"
+              (click)="setRotation(45)">
+              45° Diagonal
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.rotation === 90"
+              (click)="setRotation(90)">
+              90°
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.rotation === 180"
+              (click)="setRotation(180)">
+              180°
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.rotation === 270"
+              (click)="setRotation(270)">
+              270°
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. PAGES -->
+        <div class="form-field-group">
+          <label class="field-label">PAGES</label>
+          <div class="radio-card-stack" role="radiogroup" aria-label="Page selection">
+            <label class="mode-radio-card" [class.selected]="settings().common.pageMode === 'all'">
+              <input type="radio" name="pageModeRadio" value="all" [checked]="settings().common.pageMode === 'all'"
+                (change)="setPageMode('all')" />
+              <div class="card-text-block">
+                <span class="card-title">All pages</span>
+                <span class="card-desc">Watermark all {{ totalPages() }} pages in this PDF</span>
+              </div>
+            </label>
+
+            <label class="mode-radio-card" [class.selected]="settings().common.pageMode === 'custom'">
+              <input type="radio" name="pageModeRadio" value="custom"
+                [checked]="settings().common.pageMode === 'custom'" (change)="setPageMode('custom')" />
+              <div class="card-text-block">
+                <span class="card-title">Custom range</span>
+                <span class="card-desc">Specify individual pages or ranges</span>
+              </div>
+            </label>
+          </div>
+
+          @if (settings().common.pageMode === 'custom') {
+          <div class="custom-range-box">
+            <input type="text" class="pt-text-input" placeholder="e.g. 1-3, 5, 8-10"
+              [ngModel]="settings().common.customRange" (ngModelChange)="setCustomRange($event)"
+              aria-label="Custom page range input" />
+            <span class="range-count-hint">
+              Will be added to <strong>{{ includedPagesCount() }}</strong> of {{ totalPages() }} pages
+            </span>
+          </div>
+          }
+
+          <!-- Quick Filter Presets (R-036) -->
+          <div class="quick-chips-row page-filters-row" aria-label="Page filter presets">
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.filterPreset === 'all'"
+              (click)="setFilterPreset('all')">
+              All
+            </button>
+            <button type="button" class="quick-chip-pill" [class.chip-active]="settings().common.filterPreset === 'odd'"
+              (click)="setFilterPreset('odd')">
+              Odd pages
+            </button>
+            <button type="button" class="quick-chip-pill"
+              [class.chip-active]="settings().common.filterPreset === 'even'" (click)="setFilterPreset('even')">
+              Even pages
+            </button>
+            <button type="button" class="quick-chip-pill"
+              [class.chip-active]="settings().common.filterPreset === 'first'" (click)="setFilterPreset('first')">
+              First page
+            </button>
+            <button type="button" class="quick-chip-pill"
+              [class.chip-active]="settings().common.filterPreset === 'last'" (click)="setFilterPreset('last')">
+              Last page
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. LAYER (OVER VS BELOW) -->
+        <div class="form-field-group">
+          <label class="field-label">LAYER</label>
+          <div class="radio-card-stack" role="radiogroup" aria-label="Watermark layer order">
+            <label class="mode-radio-card" [class.selected]="settings().common.layer === 'over'">
+              <input type="radio" name="layerModeRadio" value="over" [checked]="settings().common.layer === 'over'"
+                (change)="setLayer('over')" />
+              <div class="card-text-block">
+                <span class="card-title">Over the PDF content</span>
+                <span class="card-desc">Watermark is stamped on top of text and graphics</span>
+              </div>
+            </label>
+
+            <label class="mode-radio-card" [class.selected]="settings().common.layer === 'below'">
+              <input type="radio" name="layerModeRadio" value="below" [checked]="settings().common.layer === 'below'"
+                (change)="setLayer('below')" />
+              <div class="card-text-block">
+                <span class="card-title">Below the PDF content</span>
+                <span class="card-desc">Placed behind page content. May be hidden by opaque backgrounds or scanned
+                  pages.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 6. PRESETS & PREFERENCES (R-039) -->
+        <div class="form-field-group presets-group">
+          <div class="field-label-row">
+            <label class="field-label">SAVED PRESETS</label>
+            <span class="presets-count-badge">{{ presets().length }} saved</span>
+          </div>
+
+          @if (presets().length > 0) {
+            <div class="presets-list" aria-label="Saved watermark presets">
+              @for (p of presets(); track p.id) {
+                <div class="preset-item-card">
+                  <button
+                    type="button"
+                    class="btn-apply-preset"
+                    (click)="applyPreset(p)"
+                    [title]="'Apply preset ' + p.name"
+                  >
+                    <span class="preset-name">{{ p.name }}</span>
+                    <span class="preset-meta">{{ p.settings.common.activeTab }} • {{ p.settings.common.opacity }}%</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-delete-preset"
+                    (click)="deletePreset(p.id, $event)"
+                    title="Delete preset"
+                    aria-label="Delete preset"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Save Current Settings as Preset -->
+          <div class="save-preset-row">
+            <input
+              type="text"
+              class="pt-text-input preset-name-input"
+              placeholder="Preset name (e.g. Confidential)"
+              [ngModel]="newPresetName()"
+              (ngModelChange)="newPresetName.set($event)"
+              (keyup.enter)="saveCurrentAsPreset()"
+              aria-label="Preset name"
+            />
+            <button
+              type="button"
+              class="btn-save-preset"
+              (click)="saveCurrentAsPreset()"
+              title="Save current watermark configuration"
+            >
+              Save
             </button>
           </div>
 
-          <!-- TAB 1: PLACE TEXT CONTENT -->
-          @if (activeTab() === 'text') {
-            <div class="tab-pane-content" role="tabpanel" aria-label="Text watermark settings">
-              <!-- Text Area Input -->
-              <div class="form-field-group">
-                <div class="field-label-row">
-                  <label for="watermarkTextInput" class="field-label">WATERMARK TEXT</label>
-                  <span class="char-count-badge">{{ settings().textConfig.text.length }}/500</span>
-                </div>
-                <textarea
-                  id="watermarkTextInput"
-                  class="pt-text-input text-multiline"
-                  rows="2"
-                  placeholder="e.g. CONFIDENTIAL"
-                  [ngModel]="settings().textConfig.text"
-                  (ngModelChange)="onTextChange($event)"
-                  maxlength="500"
-                  aria-describedby="textChipsHint"
-                ></textarea>
-
-                <!-- Quick Chips -->
-                <div class="quick-chips-row" id="textChipsHint" aria-label="Quick preset text options">
-                  @for (chip of quickChips; track chip.value) {
-                    <button
-                      type="button"
-                      class="quick-chip-pill"
-                      [class.chip-active]="settings().textConfig.text === chip.value"
-                      (click)="applyQuickChip(chip.value)"
-                    >
-                      {{ chip.label }}
-                    </button>
-                  }
-                </div>
-
-                <!-- Dynamic Tokens Helper -->
-                <div class="tokens-helper-row" aria-label="Insert dynamic watermark tokens">
-                  <span class="tokens-guide-label">Insert dynamic token:</span>
-                  <div class="tokens-chips-list">
-                    @for (t of availableTokens; track t.token) {
-                      <button
-                        type="button"
-                        class="token-chip-btn"
-                        (click)="insertToken(t.token)"
-                        [title]="'Insert ' + t.label"
-                      >
-                        {{ t.token }}
-                      </button>
-                    }
-                  </div>
-                </div>
-              </div>
-
-              <!-- Typography Toolbar -->
-              <div class="form-field-group">
-                <label class="field-label" for="fontFamilySelect">TYPOGRAPHY</label>
-                <div class="typography-toolbar-row">
-                  <select
-                    id="fontFamilySelect"
-                    class="pt-select-input font-select"
-                    [ngModel]="settings().textConfig.fontFamily"
-                    (ngModelChange)="setFontFamily($event)"
-                    aria-label="Font family"
-                  >
-                    @for (font of availableFonts; track font.id) {
-                      <option [value]="font.family">{{ font.name }}</option>
-                    }
-                  </select>
-
-                  <div class="style-toggle-buttons" role="group" aria-label="Font style formatting">
-                    <button
-                      type="button"
-                      class="fmt-btn"
-                      [class.active]="settings().textConfig.bold"
-                      [attr.aria-pressed]="settings().textConfig.bold"
-                      (click)="toggleBold()"
-                      title="Bold"
-                      aria-label="Bold text"
-                    >
-                      <strong>B</strong>
-                    </button>
-                    <button
-                      type="button"
-                      class="fmt-btn"
-                      [class.active]="settings().textConfig.italic"
-                      [attr.aria-pressed]="settings().textConfig.italic"
-                      (click)="toggleItalic()"
-                      title="Italic"
-                      aria-label="Italic text"
-                    >
-                      <em>I</em>
-                    </button>
-                    <button
-                      type="button"
-                      class="fmt-btn"
-                      [class.active]="settings().textConfig.underline"
-                      [attr.aria-pressed]="settings().textConfig.underline"
-                      (click)="toggleUnderline()"
-                      title="Underline"
-                      aria-label="Underline text"
-                    >
-                      <u>U</u>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Font Size & Auto-fit -->
-                <div class="font-size-row">
-                  <label class="pt-checkbox-label">
-                    <input
-                      type="checkbox"
-                      [checked]="settings().textConfig.fontSize === 'auto'"
-                      (change)="setFontSize($any($event.target).checked ? 'auto' : 48)"
-                    />
-                    <span>Auto-fit to page</span>
-                  </label>
-
-                  @if (settings().textConfig.fontSize !== 'auto') {
-                    <div class="custom-size-input-wrap">
-                      <input
-                        type="number"
-                        class="pt-number-input size-input"
-                        [ngModel]="settings().textConfig.fontSize"
-                        (ngModelChange)="setFontSize($event)"
-                        min="6"
-                        max="400"
-                        step="1"
-                        aria-label="Font size in points"
-                      />
-                      <span class="input-suffix">pt</span>
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <!-- Color Palette Swatches -->
-              <div class="form-field-group">
-                <label class="field-label">TEXT COLOR</label>
-                <div class="color-swatches-grid" role="radiogroup" aria-label="Text color palette">
-                  @for (c of colorSwatches; track c) {
-                    <button
-                      type="button"
-                      role="radio"
-                      class="color-swatch-circle"
-                      [class.selected]="settings().textConfig.color === c"
-                      [attr.aria-checked]="settings().textConfig.color === c"
-                      [style.background-color]="c"
-                      (click)="setColor(c)"
-                      [title]="c"
-                      [attr.aria-label]="'Color ' + c"
-                    ></button>
-                  }
-                  <input
-                    type="color"
-                    class="custom-color-picker"
-                    [ngModel]="settings().textConfig.color"
-                    (ngModelChange)="setColor($event)"
-                    title="Pick custom color"
-                    aria-label="Pick custom color"
-                  />
-                </div>
-              </div>
-            </div>
-          }
-
-          <!-- TAB 2: PLACE IMAGE CONTENT -->
-          @if (activeTab() === 'image') {
-            <div class="tab-pane-content" role="tabpanel" aria-label="Image watermark settings">
-              <div class="form-field-group">
-                <label class="field-label">IMAGE WATERMARK</label>
-
-                @if (!settings().imageConfig.imageDataUrl) {
-                  <!-- Drop or upload image button -->
-                  <div
-                    class="image-upload-drop-card"
-                    (click)="imageFileInput.click()"
-                    role="button"
-                    tabindex="0"
-                    aria-label="Upload watermark image (PNG, JPG, WebP)"
-                  >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                      <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>
-                    <span class="upload-btn-text">Select image stamp</span>
-                    <span class="upload-hint">PNG, JPG, WebP • Max 10 MB</span>
-                  </div>
-                } @else {
-                  <!-- Loaded Image Preview Card -->
-                  <div class="loaded-image-summary-card">
-                    <img
-                      [src]="settings().imageConfig.imageDataUrl"
-                      alt="Watermark stamp preview"
-                      class="image-thumb-preview"
-                    />
-                    <div class="image-meta-info">
-                      <span class="image-dimen-text">
-                        {{ settings().imageConfig.imageWidthPx }} × {{ settings().imageConfig.imageHeightPx }} px
-                      </span>
-                      <div class="image-card-actions">
-                        <button
-                          type="button"
-                          class="action-link-btn"
-                          (click)="imageFileInput.click()"
-                        >
-                          Replace
-                        </button>
-                        <button
-                          type="button"
-                          class="action-link-btn danger-link"
-                          (click)="removeImage()"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                }
-
-                <input
-                  #imageFileInput
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  class="visually-hidden"
-                  (change)="onImageFileChange($event)"
-                />
-              </div>
-
-              <!-- Image Width Slider -->
-              @if (settings().imageConfig.imageDataUrl) {
-                <div class="form-field-group">
-                  <div class="field-label-row">
-                    <label for="imageWidthSlider" class="field-label">IMAGE SIZE (% OF PAGE WIDTH)</label>
-                    <span class="slider-val-badge">{{ settings().imageConfig.widthPercent }}%</span>
-                  </div>
-                  <input
-                    id="imageWidthSlider"
-                    type="range"
-                    class="pt-range-slider"
-                    min="5"
-                    max="100"
-                    step="1"
-                    [ngModel]="settings().imageConfig.widthPercent"
-                    (ngModelChange)="setImageWidthPercent($event)"
-                    aria-label="Image width percentage"
-                  />
-                </div>
-
-                <!-- Remove White Background -->
-                <div class="form-field-group">
-                  <label class="pt-checkbox-label">
-                    <input
-                      type="checkbox"
-                      [checked]="settings().imageConfig.removeWhiteBg"
-                      (change)="toggleRemoveWhiteBg()"
-                    />
-                    <span>Remove white background</span>
-                  </label>
-
-                  @if (settings().imageConfig.removeWhiteBg) {
-                    <div class="tolerance-slider-wrap">
-                      <div class="field-label-row sub-label-row">
-                        <span class="field-sublabel">Tolerance</span>
-                        <span class="slider-val-badge">{{ settings().imageConfig.tolerance }}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        class="pt-range-slider"
-                        min="5"
-                        max="60"
-                        step="1"
-                        [ngModel]="settings().imageConfig.tolerance"
-                        (ngModelChange)="setWhiteBgTolerance($event)"
-                        aria-label="Background removal tolerance percentage"
-                      />
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          }
-
-          <div class="sidebar-divider"></div>
-
-          <!-- COMMON OPTIONS (APPLY TO BOTH TEXT AND IMAGE) -->
-
-          <!-- MOSAIC WATERMARK (Phase 2) -->
-          <div class="form-field-group">
-            <label class="pt-checkbox-label">
-              <input
-                type="checkbox"
-                [checked]="settings().common.mosaic"
-                (change)="toggleMosaic()"
-              />
-              <span class="bold-label">Repeat watermark as mosaic pattern</span>
-            </label>
-
-            @if (settings().common.mosaic) {
-              <div class="mosaic-options-card">
-                <!-- Horizontal gap -->
-                <div class="field-label-row sub-label-row">
-                  <span class="field-sublabel">Horizontal gap</span>
-                  <span class="slider-val-badge">{{ settings().common.horizontalGapMm }} mm</span>
-                </div>
-                <input
-                  type="range"
-                  class="pt-range-slider"
-                  min="0"
-                  max="200"
-                  step="1"
-                  [ngModel]="settings().common.horizontalGapMm"
-                  (ngModelChange)="setHorizontalGapMm($event)"
-                  aria-label="Horizontal gap in millimeters"
-                />
-
-                <!-- Vertical gap -->
-                <div class="field-label-row sub-label-row" style="margin-top: 10px;">
-                  <span class="field-sublabel">Vertical gap</span>
-                  <span class="slider-val-badge">{{ settings().common.verticalGapMm }} mm</span>
-                </div>
-                <input
-                  type="range"
-                  class="pt-range-slider"
-                  min="0"
-                  max="200"
-                  step="1"
-                  [ngModel]="settings().common.verticalGapMm"
-                  (ngModelChange)="setVerticalGapMm($event)"
-                  aria-label="Vertical gap in millimeters"
-                />
-
-                <!-- Stagger alternate rows -->
-                <label class="pt-checkbox-label" style="margin-top: 12px;">
-                  <input
-                    type="checkbox"
-                    [checked]="settings().common.stagger"
-                    (change)="toggleStagger()"
-                  />
-                  <span>Stagger alternate rows</span>
-                </label>
-              </div>
-            }
-          </div>
-
-          <!-- 1. POSITION (3x3 Grid) -->
-          <div class="form-field-group" [class.field-group-disabled]="settings().common.mosaic">
-            <div class="field-label-row">
-              <label class="field-label">POSITION</label>
-              @if (settings().common.mosaic) {
-                <span class="mosaic-disabled-hint">Disabled in Mosaic</span>
-              } @else {
-                <span class="position-current-text">{{ settings().common.position }}</span>
-              }
-            </div>
-
-            <div class="position-3x3-grid" role="radiogroup" aria-label="Watermark placement anchor">
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'top-left'"
-                [attr.aria-checked]="settings().common.position === 'top-left'"
-                (click)="setPosition('top-left')"
-                title="Top Left"
-                aria-label="Top Left"
-              >↖</button>
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'top-center'"
-                [attr.aria-checked]="settings().common.position === 'top-center'"
-                (click)="setPosition('top-center')"
-                title="Top Center"
-                aria-label="Top Center"
-              >↑</button>
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'top-right'"
-                [attr.aria-checked]="settings().common.position === 'top-right'"
-                (click)="setPosition('top-right')"
-                title="Top Right"
-                aria-label="Top Right"
-              >↗</button>
-
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'middle-left'"
-                [attr.aria-checked]="settings().common.position === 'middle-left'"
-                (click)="setPosition('middle-left')"
-                title="Middle Left"
-                aria-label="Middle Left"
-              >←</button>
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'center'"
-                [attr.aria-checked]="settings().common.position === 'center'"
-                (click)="setPosition('center')"
-                title="Center"
-                aria-label="Center"
-              >•</button>
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'middle-right'"
-                [attr.aria-checked]="settings().common.position === 'middle-right'"
-                (click)="setPosition('middle-right')"
-                title="Middle Right"
-                aria-label="Middle Right"
-              >→</button>
-
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'bottom-left'"
-                [attr.aria-checked]="settings().common.position === 'bottom-left'"
-                (click)="setPosition('bottom-left')"
-                title="Bottom Left"
-                aria-label="Bottom Left"
-              >↙</button>
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'bottom-center'"
-                [attr.aria-checked]="settings().common.position === 'bottom-center'"
-                (click)="setPosition('bottom-center')"
-                title="Bottom Center"
-                aria-label="Bottom Center"
-              >↓</button>
-              <button
-                type="button"
-                role="radio"
-                class="grid-anchor-btn"
-                [class.selected]="settings().common.position === 'bottom-right'"
-                [attr.aria-checked]="settings().common.position === 'bottom-right'"
-                (click)="setPosition('bottom-right')"
-                title="Bottom Right"
-                aria-label="Bottom Right"
-              >↘</button>
-            </div>
-
-            <!-- Margin input -->
-            <div class="margin-input-row">
-              <label for="marginInput" class="field-sublabel">Page margin</label>
-              <div class="custom-size-input-wrap">
-                <input
-                  id="marginInput"
-                  type="number"
-                  class="pt-number-input"
-                  min="0"
-                  max="100"
-                  step="1"
-                  [ngModel]="settings().common.marginMm"
-                  (ngModelChange)="setMarginMm($event)"
-                  aria-label="Page margin in millimeters"
-                />
-                <span class="input-suffix">mm</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. OPACITY (Strict: "Opacity" word only) -->
-          <div class="form-field-group">
-            <div class="field-label-row">
-              <label for="opacitySlider" class="field-label">OPACITY</label>
-              <span class="slider-val-badge">{{ settings().common.opacity }}%</span>
-            </div>
+          <!-- Remember settings opt-in -->
+          <label class="remember-settings-label">
             <input
-              id="opacitySlider"
-              type="range"
-              class="pt-range-slider"
-              min="5"
-              max="100"
-              step="1"
-              [ngModel]="settings().common.opacity"
-              (ngModelChange)="setOpacity($event)"
-              aria-label="Watermark opacity percentage"
+              type="checkbox"
+              class="pt-checkbox"
+              [checked]="isRememberSettings()"
+              (change)="toggleRememberSettings(!isRememberSettings())"
             />
-            <div class="quick-chips-row preset-chips-row" aria-label="Opacity presets">
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.opacity === 25"
-                (click)="setOpacity(25)"
-              >
-                25%
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.opacity === 50"
-                (click)="setOpacity(50)"
-              >
-                50%
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.opacity === 75"
-                (click)="setOpacity(75)"
-              >
-                75%
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.opacity === 100"
-                (click)="setOpacity(100)"
-              >
-                100%
-              </button>
-            </div>
-          </div>
-
-          <!-- 3. ROTATION -->
-          <div class="form-field-group">
-            <div class="field-label-row">
-              <label class="field-label">ROTATION</label>
-              <span class="slider-val-badge">{{ settings().common.rotation }}°</span>
-            </div>
-            <div class="quick-chips-row rotation-chips-row" aria-label="Rotation presets">
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.rotation === 0"
-                (click)="setRotation(0)"
-              >
-                0°
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.rotation === 45"
-                (click)="setRotation(45)"
-              >
-                45° Diagonal
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.rotation === 90"
-                (click)="setRotation(90)"
-              >
-                90°
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.rotation === 180"
-                (click)="setRotation(180)"
-              >
-                180°
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.rotation === 270"
-                (click)="setRotation(270)"
-              >
-                270°
-              </button>
-            </div>
-          </div>
-
-          <!-- 4. PAGES -->
-          <div class="form-field-group">
-            <label class="field-label">PAGES</label>
-            <div class="radio-card-stack" role="radiogroup" aria-label="Page selection">
-              <label
-                class="mode-radio-card"
-                [class.selected]="settings().common.pageMode === 'all'"
-              >
-                <input
-                  type="radio"
-                  name="pageModeRadio"
-                  value="all"
-                  [checked]="settings().common.pageMode === 'all'"
-                  (change)="setPageMode('all')"
-                />
-                <div class="card-text-block">
-                  <span class="card-title">All pages</span>
-                  <span class="card-desc">Watermark all {{ totalPages() }} pages in this PDF</span>
-                </div>
-              </label>
-
-              <label
-                class="mode-radio-card"
-                [class.selected]="settings().common.pageMode === 'custom'"
-              >
-                <input
-                  type="radio"
-                  name="pageModeRadio"
-                  value="custom"
-                  [checked]="settings().common.pageMode === 'custom'"
-                  (change)="setPageMode('custom')"
-                />
-                <div class="card-text-block">
-                  <span class="card-title">Custom range</span>
-                  <span class="card-desc">Specify individual pages or ranges</span>
-                </div>
-              </label>
-            </div>
-
-            @if (settings().common.pageMode === 'custom') {
-              <div class="custom-range-box">
-                <input
-                  type="text"
-                  class="pt-text-input"
-                  placeholder="e.g. 1-3, 5, 8-10"
-                  [ngModel]="settings().common.customRange"
-                  (ngModelChange)="setCustomRange($event)"
-                  aria-label="Custom page range input"
-                />
-                <span class="range-count-hint">
-                  Will be added to <strong>{{ includedPagesCount() }}</strong> of {{ totalPages() }} pages
-                </span>
-              </div>
-            }
-
-            <!-- Quick Filter Presets (R-036) -->
-            <div class="quick-chips-row page-filters-row" aria-label="Page filter presets">
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.filterPreset === 'all'"
-                (click)="setFilterPreset('all')"
-              >
-                All
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.filterPreset === 'odd'"
-                (click)="setFilterPreset('odd')"
-              >
-                Odd pages
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.filterPreset === 'even'"
-                (click)="setFilterPreset('even')"
-              >
-                Even pages
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.filterPreset === 'first'"
-                (click)="setFilterPreset('first')"
-              >
-                First page
-              </button>
-              <button
-                type="button"
-                class="quick-chip-pill"
-                [class.chip-active]="settings().common.filterPreset === 'last'"
-                (click)="setFilterPreset('last')"
-              >
-                Last page
-              </button>
-            </div>
-          </div>
-
-          <!-- 5. LAYER (OVER VS BELOW) -->
-          <div class="form-field-group">
-            <label class="field-label">LAYER</label>
-            <div class="radio-card-stack" role="radiogroup" aria-label="Watermark layer order">
-              <label
-                class="mode-radio-card"
-                [class.selected]="settings().common.layer === 'over'"
-              >
-                <input
-                  type="radio"
-                  name="layerModeRadio"
-                  value="over"
-                  [checked]="settings().common.layer === 'over'"
-                  (change)="setLayer('over')"
-                />
-                <div class="card-text-block">
-                  <span class="card-title">Over the PDF content</span>
-                  <span class="card-desc">Watermark is stamped on top of text and graphics</span>
-                </div>
-              </label>
-
-              <label
-                class="mode-radio-card"
-                [class.selected]="settings().common.layer === 'below'"
-              >
-                <input
-                  type="radio"
-                  name="layerModeRadio"
-                  value="below"
-                  [checked]="settings().common.layer === 'below'"
-                  (change)="setLayer('below')"
-                />
-                <div class="card-text-block">
-                  <span class="card-title">Below the PDF content</span>
-                  <span class="card-desc">Placed behind page content. May be hidden by opaque backgrounds or scanned pages.</span>
-                </div>
-              </label>
-            </div>
-          </div>
+            <span>Remember my settings for future visits</span>
+          </label>
         </div>
+      </div>
 
-        <!-- SIDEBAR FOOTER PRIMARY ACTION -->
-        <div class="sidebar-action-footer">
-          @if (!isSettingsValid() && validationMessage()) {
-            <p id="watermarkValidationNotice" class="sidebar-validation-notice" role="alert">
-              {{ validationMessage() }}
-            </p>
-          }
+      <!-- SIDEBAR FOOTER PRIMARY ACTION -->
+      <div class="sidebar-action-footer">
+        @if (!isSettingsValid() && validationMessage()) {
+        <p id="watermarkValidationNotice" class="sidebar-validation-notice" role="alert">
+          {{ validationMessage() }}
+        </p>
+        }
 
-          <button
-            type="button"
-            class="giant-action-submit-btn"
-            [disabled]="!isSettingsValid()"
-            [attr.aria-describedby]="!isSettingsValid() ? 'watermarkValidationNotice' : null"
-            (click)="executeWatermark()"
-          >
-            <span>Add watermark</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-        </div>
-      </aside>
-
-      <!-- MOBILE PINNED CONVERT BAR (<= 768px) -->
-      <div class="mobile-convert-bar">
-        <button
-          type="button"
-          class="mobile-primary-action-btn"
-          [disabled]="!isSettingsValid()"
-          (click)="executeWatermark()"
-        >
+        <button type="button" class="giant-action-submit-btn" [disabled]="!isSettingsValid()"
+          [attr.aria-describedby]="!isSettingsValid() ? 'watermarkValidationNotice' : null"
+          (click)="executeWatermark()">
           <span>Add watermark</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            aria-hidden="true">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
         </button>
       </div>
+    </aside>
+
+    <!-- MOBILE PINNED CONVERT BAR (<= 768px) -->
+    <div class="mobile-convert-bar">
+      <button type="button" class="mobile-primary-action-btn" [disabled]="!isSettingsValid()"
+        (click)="executeWatermark()">
+        <span>Add watermark</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
     </div>
+  </div>
   }
 
   <!-- 3. PROCESSING STATE -->
   @if (currentState() === 'processing') {
-    <div class="processing-state-wrapper">
-      <h1 class="visually-hidden">Adding Watermark to PDF</h1>
-      <app-processing-state
-        title="Adding watermark..."
-        [percent]="processingProgress()"
-        [message]="processingMessage()"
-      ></app-processing-state>
+  <div class="processing-state-wrapper">
+    <h1 class="visually-hidden">Adding Watermark to PDF</h1>
+    <app-processing-state title="Adding watermark..." [percent]="processingProgress()"
+      [message]="processingMessage()"></app-processing-state>
 
-      <div class="processing-cancel-wrap">
-        <button
-          type="button"
-          class="btn-cancel-operation"
-          (click)="cancelProcessing()"
-        >
-          Cancel Operation
-        </button>
-      </div>
+    <div class="processing-cancel-wrap">
+      <button type="button" class="btn-cancel-operation" (click)="cancelProcessing()">
+        Cancel Operation
+      </button>
     </div>
+  </div>
   }
 
   <!-- 4. RESULT STATE -->
-  @if (currentState() === 'completed' && resultData()) {
+  @if (currentState() === 'completed') {
     <section class="result-state-wrapper">
       <h1 class="visually-hidden">Watermark Completed</h1>
-      <app-result-view
-        [result]="resultData()!"
-        title="PDF Watermarked Successfully!"
-        subtitle="Your document has been stamped with the watermark directly in your browser memory."
-        downloadLabel="Download Watermarked PDF"
-        restartLabel="Watermark Another PDF"
-        [isClientSide]="true"
-        (reset)="resetTool()"
-      ></app-result-view>
+
+      @if (multiFileResults().length <= 1 && resultData()) {
+        <app-result-view
+          [result]="resultData()!"
+          title="PDF Watermarked Successfully!"
+          subtitle="Your document has been stamped with the watermark directly in your browser memory."
+          downloadLabel="Download Watermarked PDF"
+          restartLabel="Watermark Another PDF"
+          [isClientSide]="true"
+          (reset)="resetTool()"
+        ></app-result-view>
+      } @else if (multiFileResults().length > 1) {
+        <!-- MULTI-FILE RESULT VIEW (R-038) -->
+        <div class="multi-result-container">
+          <div class="multi-result-header">
+            <div class="success-icon-badge">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <h2 class="multi-result-title">PDFs Watermarked Successfully!</h2>
+            <p class="multi-result-subtitle">
+              All {{ multiFileResults().length }} documents have been watermarked and archived into a single ZIP file.
+            </p>
+
+            <div class="multi-result-actions">
+              <button
+                type="button"
+                class="btn-primary-zip"
+                (click)="downloadAllZip()"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download All (.zip)</span>
+              </button>
+
+              <button
+                type="button"
+                class="btn-restart-action"
+                (click)="resetTool()"
+              >
+                Watermark More PDFs
+              </button>
+            </div>
+          </div>
+
+          <div class="multi-file-cards-list">
+            <h3 class="file-list-heading">Watermarked Documents ({{ multiFileResults().length }})</h3>
+            @for (item of multiFileResults(); track item.filename) {
+              <div class="multi-file-card">
+                <div class="file-card-info">
+                  <svg class="file-card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                  <div class="file-card-details">
+                    <span class="file-card-name">{{ item.filename }}</span>
+                    <span class="file-card-meta">
+                      {{ item.watermarkedPagesCount }} of {{ item.totalPages }} pages watermarked
+                    </span>
+                    @for (w of item.warnings; track w.message) {
+                      <span class="file-card-warning">{{ w.message }}</span>
+                    }
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="btn-download-individual"
+                  (click)="downloadSingleResult(item)"
+                  title="Download this watermarked PDF"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Download</span>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </section>
   }
 

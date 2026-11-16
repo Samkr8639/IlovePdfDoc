@@ -253,4 +253,35 @@ describe('WatermarkExportService', () => {
       expect(res).toBe('watermarked.pdf');
     });
   });
+
+  describe('exportMultipleFiles (R-037, R-038)', () => {
+    it('processes multiple files and produces a valid ZIP archive', async () => {
+      const doc = await PDFDocument.create();
+      doc.addPage([300, 300]);
+      (doc as any).updateInfoDict = function () {};
+      const bytes = await doc.save();
+
+      const files = [
+        { filename: 'report.pdf', pdfBytes: bytes, settings: WATERMARK_DEFAULT_SETTINGS },
+        { filename: 'report.pdf', pdfBytes: bytes, settings: WATERMARK_DEFAULT_SETTINGS } // Collision!
+      ];
+
+      const progressCalls: any[] = [];
+      const multiResult = await exportService.exportMultipleFiles(files, {
+        onProgress: (p) => progressCalls.push(p)
+      });
+
+      expect(multiResult.results.length).toBe(2);
+      expect(multiResult.zipFilename).toBe('watermarked-pdfs.zip');
+      expect(multiResult.zipBytes.length).toBeGreaterThan(0);
+
+      // Verify filename collision was disambiguated
+      expect(multiResult.results[0].filename).toBe('report-watermarked.pdf');
+      expect(multiResult.results[1].filename).toBe('report-watermarked-1.pdf');
+
+      // Verify progress notifications occurred
+      expect(progressCalls.length).toBeGreaterThanOrEqual(2);
+      expect(progressCalls[progressCalls.length - 1].totalFiles).toBe(2);
+    });
+  });
 });
