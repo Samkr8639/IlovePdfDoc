@@ -76,6 +76,7 @@
       (zoomIn)="zoomIn()"
       (zoomOut)="zoomOut()"
       (resetZoom)="resetZoom()"
+      (help)="startGuidedTour(true)"
       (changeFile)="changeFile()" />
 
     <!-- MAIN WORKSPACE ROW -->
@@ -642,4 +643,7 @@
   }
 </div>
 }
+
+<!-- GUIDED PRODUCT TOUR OVERLAY -->
+<app-pt-guided-tour />
 </div>

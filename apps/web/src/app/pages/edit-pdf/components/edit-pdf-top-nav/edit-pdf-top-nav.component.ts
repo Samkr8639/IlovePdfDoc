@@ -127,6 +127,23 @@ import { CommonModule, DecimalPipe } from '@angular/common';
           </button>
         </div>
 
+        <!-- Help / Quick Tour Button -->
+        <button
+          type="button"
+          class="btn-help-tour"
+          (click)="help.emit()"
+          title="Help & quick walkthrough"
+          aria-label="Help & quick walkthrough"
+        >
+          <svg class="lucide-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <span>Help</span>
+        </button>
+
         <!-- Change file on the far right -->
         <button type="button" class="btn-replace-doc" (click)="changeFile.emit()" title="Change PDF document">
           Change file
@@ -151,6 +168,7 @@ export class EditPdfTopNavComponent {
   readonly zoomIn = output<void>();
   readonly zoomOut = output<void>();
   readonly resetZoom = output<void>();
+  readonly help = output<void>();
   readonly changeFile = output<void>();
 }
 

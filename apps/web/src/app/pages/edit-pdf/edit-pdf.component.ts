@@ -78,6 +78,8 @@ import { ElementInfoPanelComponent } from './components/panels/element-info-pane
 import { AreaSelectionService } from './services/area-selection.service';
 import { SelectionOverlayComponent } from './components/selection-overlay/selection-overlay.component';
 import { SelectionPanelComponent } from './components/panels/selection-panel/selection-panel.component';
+import { PtGuidedTourComponent } from '../../shared/components/guided-tour/pt-guided-tour.component';
+import { GuidedTourService, TourStep } from '../../core/services/guided-tour/guided-tour.service';
 
 type EditorViewMode = 'upload' | 'editor';
 
@@ -109,7 +111,8 @@ if (typeof window !== 'undefined' && pdfjsLib && (pdfjsLib as any).GlobalWorkerO
     OcrPanelComponent,
     ElementInfoPanelComponent,
     SelectionOverlayComponent,
-    SelectionPanelComponent
+    SelectionPanelComponent,
+    PtGuidedTourComponent
   ],
   templateUrl: './edit-pdf.component.html',
   styleUrl: './edit-pdf.component.css',
@@ -133,6 +136,102 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   private freehandDrawing = inject(FreehandDrawingService);
   private viewportNav = inject(ViewportNavigationService);
   readonly areaSelectionService = inject(AreaSelectionService);
+  readonly guidedTourService = inject(GuidedTourService);
+
+  readonly EDIT_PDF_TOUR_STEPS: TourStep[] = [
+    {
+      id: 'step-doc-info',
+      title: 'Document & Page Overview',
+      content: 'View your document filename and page count at a glance, or easily switch to a different file using the "Change file" button.',
+      targetSelector: '.toolbar-doc-pill',
+      placement: 'bottom'
+    },
+    {
+      id: 'step-history',
+      title: 'Undo & Redo History',
+      content: 'Made a mistake? Step backward and forward through any changes with full multi-level history, or use Ctrl+Z and Ctrl+Y.',
+      targetSelector: '.history-capsule',
+      placement: 'bottom'
+    },
+    {
+      id: 'step-mode-toggle',
+      title: 'Annotate & Direct Text Editing',
+      content: 'Switch between Annotate mode (drawing, shapes, stamps, highlights) and Edit Text mode to modify existing PDF text directly with inline typography controls.',
+      targetSelector: '.workspace-mode-capsule',
+      placement: 'bottom'
+    },
+    {
+      id: 'step-zoom-controls',
+      title: 'Zoom In, Out & Fit View',
+      content: 'Scale your view from 50% to 300% using (-) and (+), check the exact zoom level, or click Fit to snap the page to your viewport width.',
+      targetSelector: '.toolbar-zoom-group',
+      placement: 'bottom'
+    },
+    {
+      id: 'step-thumbnails',
+      title: 'Page Thumbnails & Reordering',
+      content: 'Quickly preview all document pages, jump between pages, rotate pages in 90° increments, or delete pages directly from the left sidebar.',
+      targetSelector: '.left-thumbnails-panel',
+      placement: 'right',
+      actionBeforeStep: () => {
+        if (this.isLeftSidebarCollapsed()) {
+          this.toggleLeftSidebar();
+        }
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpenMobile.set(false);
+        }
+      }
+    },
+    {
+      id: 'step-canvas-viewport',
+      title: 'Interactive Document Canvas',
+      content: 'Your document renders continuously with high fidelity. Click to place text, draw freehand, draw shapes, or click any element to move, scale, and rotate with corner handles.',
+      targetSelector: '.canvas-viewport-wrapper',
+      placement: 'bottom',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpenMobile.set(false);
+        }
+      }
+    },
+    {
+      id: 'step-tools-grid',
+      title: 'Toolbox Grid',
+      content: 'Select your active tool: Text, Freehand Pen, Shapes (rectangle, circle, line, polygon), Highlighter, Images, Signatures, Whiteout blocks, Links, or OCR.',
+      targetSelector: 'app-tools-grid',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpenMobile.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-properties-panel',
+      title: 'Contextual Tool Properties',
+      content: 'Adjust color palettes, font family, font size, stroke width, opacity, alignment, and layer order (bring forward / send backward) for your selected element.',
+      targetSelector: '.properties-section',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpenMobile.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-save-download',
+      title: 'Save & Download Your PDF',
+      content: 'When finished, click "Save & Download" to compile your edited PDF privately in your browser with zero server uploads and download it immediately.',
+      targetSelector: '.btn-save-download',
+      placement: 'top',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpenMobile.set(true);
+        }
+      }
+    }
+  ];
+
   private wasMarqueeDragged = false;
 
   private _pageCanvasRef?: ElementRef<HTMLCanvasElement>;
@@ -326,11 +425,48 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       canonical: 'https://pdftailor.in/edit-pdf',
       faqs: []
     });
+
+    // Auto-launch guided tour for first-time visitors on upload screen
+    if (this.viewMode() === 'upload' && !this.guidedTourService.isTourCompleted('edit-pdf-upload')) {
+      setTimeout(() => {
+        if (this.viewMode() === 'upload' && !this.guidedTourService.isActive()) {
+          this.startGuidedTour(false);
+        }
+      }, 800);
+    }
   }
 
   ngOnDestroy(): void {
     this.ocrService.cancel();
     this.pdfRendering.cancelAll();
+    this.guidedTourService.skipTour();
+  }
+
+  /**
+   * Starts or replays the interactive guided walkthrough
+   */
+  startGuidedTour(force = true): void {
+    if (this.viewMode() === 'editor') {
+      this.guidedTourService.startTour({
+        tourId: 'edit-pdf',
+        steps: this.EDIT_PDF_TOUR_STEPS,
+        force
+      });
+    } else {
+      this.guidedTourService.startTour({
+        tourId: 'edit-pdf-upload',
+        steps: [
+          {
+            id: 'step-upload-intro',
+            title: 'Upload Your PDF',
+            content: 'Drag and drop your PDF document here or browse files to begin editing, annotating, and modifying text directly in your browser.',
+            targetSelector: '.hero-dropzone-wrap',
+            placement: 'bottom'
+          }
+        ],
+        force
+      });
+    }
   }
 
   // --- PDF Loading ---
@@ -397,6 +533,15 @@ export class EditPdfComponent implements OnInit, OnDestroy {
     }
 
     setTimeout(() => this.renderCurrentPageToCanvas(), 50);
+
+    // Auto-launch guided tour for first-time editor visitors
+    if (!this.guidedTourService.isTourCompleted('edit-pdf')) {
+      setTimeout(() => {
+        if (this.viewMode() === 'editor' && !this.guidedTourService.isActive()) {
+          this.startGuidedTour(false);
+        }
+      }, 700);
+    }
   }
 
   private async generateThumbnails(): Promise<void> {
@@ -1234,6 +1379,9 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   changeFile(): void {
+    if (this.guidedTourService.isActive()) {
+      this.guidedTourService.skipTour();
+    }
     if (this.elements().length > 0 && this.viewMode() === 'editor') {
       const ok = window.confirm('You have unsaved edits in your document. Are you sure you want to change file?');
       if (!ok) return;

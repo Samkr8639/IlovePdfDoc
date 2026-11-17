@@ -1121,4 +1121,89 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(component.elements().length).toBe(0);
     expect(component.pages().length).toBe(0);
   });
+
+  describe('Guided Tour Integration', () => {
+    it('defines authoritative tour steps covering all major controls in edit-pdf', () => {
+      const stepIds = component.EDIT_PDF_TOUR_STEPS.map(s => s.id);
+      expect(stepIds).toEqual([
+        'step-doc-info',
+        'step-history',
+        'step-mode-toggle',
+        'step-zoom-controls',
+        'step-thumbnails',
+        'step-canvas-viewport',
+        'step-tools-grid',
+        'step-properties-panel',
+        'step-save-download'
+      ]);
+    });
+
+    it('launches editor tour when startGuidedTour is called in editor mode', () => {
+      component.viewMode.set('editor');
+      const startSpy = vi.spyOn(component.guidedTourService, 'startTour');
+
+      component.startGuidedTour(true);
+
+      expect(startSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tourId: 'edit-pdf',
+          force: true
+        })
+      );
+    });
+
+    it('launches upload tour when startGuidedTour is called in upload mode', () => {
+      component.viewMode.set('upload');
+      const startSpy = vi.spyOn(component.guidedTourService, 'startTour');
+
+      component.startGuidedTour(true);
+
+      expect(startSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tourId: 'edit-pdf-upload',
+          force: true
+        })
+      );
+    });
+
+    it('auto-triggers editor tour on first visit if not completed', () => {
+      vi.useFakeTimers();
+      vi.spyOn(component.guidedTourService, 'isTourCompleted').mockReturnValue(false);
+      const startSpy = vi.spyOn(component, 'startGuidedTour');
+
+      component.viewMode.set('upload');
+      component.ngOnInit();
+      vi.advanceTimersByTime(1000);
+
+      expect(startSpy).toHaveBeenCalledWith(false);
+      vi.useRealTimers();
+    });
+
+    it('replays tour when Help button is clicked in top nav', () => {
+      component.viewMode.set('editor');
+      fixture.detectChanges();
+
+      const startSpy = vi.spyOn(component, 'startGuidedTour');
+      const topNav = fixture.debugElement.nativeElement.querySelector('app-edit-pdf-top-nav');
+      expect(topNav).toBeTruthy();
+
+      const helpBtn = topNav.querySelector('.btn-help-tour');
+      expect(helpBtn).toBeTruthy();
+
+      helpBtn.click();
+      expect(startSpy).toHaveBeenCalledWith(true);
+    });
+
+    it('handles actionBeforeStep callbacks in tour steps properly', () => {
+      const thumbStep = component.EDIT_PDF_TOUR_STEPS.find(s => s.id === 'step-thumbnails');
+      expect(thumbStep).toBeDefined();
+
+      component.isLeftSidebarCollapsed.set(true);
+      thumbStep?.actionBeforeStep?.();
+      expect(component.isLeftSidebarCollapsed()).toBe(false);
+
+      const toolsStep = component.EDIT_PDF_TOUR_STEPS.find(s => s.id === 'step-tools-grid');
+      expect(toolsStep).toBeDefined();
+    });
+  });
 });

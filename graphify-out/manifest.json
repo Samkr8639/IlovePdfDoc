@@ -552,14 +552,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794899682.9719622,
-    "seen": 1794899749.6567578,
+    "mtime": 1794900405.995235,
+    "seen": 1794900438.9188416,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794899682.972471,
-    "seen": 1794899749.656761,
+    "mtime": 1794900405.995235,
+    "seen": 1794900438.918845,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
@@ -960,9 +960,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/components/edit-pdf-top-nav/edit-pdf-top-nav.component.ts": {
-    "mtime": 1794898632.644132,
-    "seen": 1794899749.6569088,
-    "ast_hash": "9a76e3e10cac44d9286e167f10ece622",
+    "mtime": 1794900129.9985015,
+    "seen": 1794900438.9189956,
+    "ast_hash": "ae72b38e50aa3969a9ac0943c92e7181",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/components/panels/draw-panel/draw-panel.component.ts": {
@@ -1032,8 +1032,8 @@
     "semantic_hash": "adfe74a408e39bb8a5d425e53965d69a"
   },
   "apps/web/src/app/pages/edit-pdf/components/pdf-bottom-bar/pdf-bottom-bar.component.ts": {
-    "mtime": 1794898693.8735144,
-    "seen": 1794899749.6569233,
+    "mtime": 1794899857.9444745,
+    "seen": 1794900438.9190106,
     "ast_hash": "5f3fa030fef3113dee478313441fb261",
     "semantic_hash": ""
   },
@@ -1062,15 +1062,15 @@
     "semantic_hash": "14dd2cb139a355477d2f65af87607fbb"
   },
   "apps/web/src/app/pages/edit-pdf/edit-pdf.component.spec.ts": {
-    "mtime": 1794899447.6181467,
-    "seen": 1794899749.6569295,
-    "ast_hash": "381a33b78254b7cbf0a1b10b7f3575e1",
+    "mtime": 1794900352.9985073,
+    "seen": 1794900438.919017,
+    "ast_hash": "4e629903cd9bf287dabf5be235307a6d",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/edit-pdf.component.ts": {
-    "mtime": 1794565499.1098554,
-    "seen": 1794569655.2385645,
-    "ast_hash": "5666909c3b1be6d07febf56b1b0c9f14",
+    "mtime": 1794900332.117193,
+    "seen": 1794900438.9190183,
+    "ast_hash": "bef1e7e7e2c63e40bc6a4db0e0be731a",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/models/document-model.ts": {
@@ -1392,9 +1392,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/word-to-pdf/word-to-pdf.component.ts": {
-    "mtime": 1794898262.1629615,
-    "seen": 1794899749.6570113,
-    "ast_hash": "a13bf28c6d4548d9e146c2e5ef8a0eaa",
+    "mtime": 1794899904.7996943,
+    "seen": 1794900438.9191263,
+    "ast_hash": "92f9b6edbd318934ddf46d0fcacc6b85",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/back-to-top/back-to-top.component.ts": {
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794899682.9709358,
-    "seen": 1794899749.6570985,
+    "mtime": 1794900405.9948058,
+    "seen": 1794900438.9192579,
     "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794899682.970425,
-    "seen": 1794899749.6570997,
+    "mtime": 1794900405.9943006,
+    "seen": 1794900438.919259,
     "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
@@ -1718,9 +1718,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/edit-pdf.component.html": {
-    "mtime": 1794898734.3927832,
-    "seen": 1794899749.6571085,
-    "ast_hash": "cde8140c782d303e023ba24c866c5d9e",
+    "mtime": 1794900184.6470823,
+    "seen": 1794900438.9192686,
+    "ast_hash": "a61475c1983580dd0ccdeada88454f91",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/excel-to-pdf/excel-to-pdf.component.html": {
