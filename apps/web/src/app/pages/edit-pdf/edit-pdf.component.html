@@ -644,6 +644,8 @@
 </div>
 }
 
-<!-- GUIDED PRODUCT TOUR OVERLAY -->
+<!-- GUIDED PRODUCT TOUR OVERLAY (Active only in editor workspace) -->
+@if (viewMode() === 'editor') {
 <app-pt-guided-tour />
+}
 </div>

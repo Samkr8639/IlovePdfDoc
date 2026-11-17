@@ -552,14 +552,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794900405.995235,
-    "seen": 1794900438.9188416,
+    "mtime": 1794900752.8397546,
+    "seen": 1794900810.4585571,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794900405.995235,
-    "seen": 1794900438.918845,
+    "mtime": 1794900752.8397546,
+    "seen": 1794900810.45856,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
@@ -1062,15 +1062,15 @@
     "semantic_hash": "14dd2cb139a355477d2f65af87607fbb"
   },
   "apps/web/src/app/pages/edit-pdf/edit-pdf.component.spec.ts": {
-    "mtime": 1794900352.9985073,
-    "seen": 1794900438.919017,
-    "ast_hash": "4e629903cd9bf287dabf5be235307a6d",
+    "mtime": 1794900709.6931753,
+    "seen": 1794900810.458721,
+    "ast_hash": "226214d1a2c19f0dfba434c247f3f69e",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/edit-pdf.component.ts": {
-    "mtime": 1794900332.117193,
-    "seen": 1794900438.9190183,
-    "ast_hash": "bef1e7e7e2c63e40bc6a4db0e0be731a",
+    "mtime": 1794900683.7171698,
+    "seen": 1794900810.4587224,
+    "ast_hash": "45dd13c854af9284194c85334c27247e",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/models/document-model.ts": {
@@ -1248,9 +1248,9 @@
     "semantic_hash": "cffe193261ca8fe2c74d49bc17ff7f65"
   },
   "apps/web/src/app/pages/excel-to-pdf/excel-to-pdf.component.ts": {
-    "mtime": 1794898289.436352,
-    "seen": 1794899749.6569674,
-    "ast_hash": "080349d333e897a7a99b7cbfa96a936e",
+    "mtime": 1794900712.7571218,
+    "seen": 1794900810.4587572,
+    "ast_hash": "6e50fefbb3f67a71de48bb68047f5fa5",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/gdpr-compliance/gdpr-compliance.component.ts": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": "ea6e280b54c44d4744e56a197bc1ed85"
   },
   "apps/web/src/app/pages/powerpoint-to-pdf/powerpoint-to-pdf.component.ts": {
-    "mtime": 1794898323.0562603,
-    "seen": 1794899749.656987,
-    "ast_hash": "ade3bbf01a0dc48d646ec86244e30701",
+    "mtime": 1794900726.4239848,
+    "seen": 1794900810.4587762,
+    "ast_hash": "372a3bef15aadfb0cb6852750eb28675",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/press-media-kit/press-media-kit.component.ts": {
@@ -1392,9 +1392,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/word-to-pdf/word-to-pdf.component.ts": {
-    "mtime": 1794899904.7996943,
-    "seen": 1794900438.9191263,
-    "ast_hash": "92f9b6edbd318934ddf46d0fcacc6b85",
+    "mtime": 1794900483.95444,
+    "seen": 1794900810.4587994,
+    "ast_hash": "a13bf28c6d4548d9e146c2e5ef8a0eaa",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/back-to-top/back-to-top.component.ts": {
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794900405.9948058,
-    "seen": 1794900438.9192579,
+    "mtime": 1794900752.839221,
+    "seen": 1794900810.4588828,
     "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794900405.9943006,
-    "seen": 1794900438.919259,
+    "mtime": 1794900752.838716,
+    "seen": 1794900810.4588838,
     "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
@@ -1718,9 +1718,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/edit-pdf/edit-pdf.component.html": {
-    "mtime": 1794900184.6470823,
-    "seen": 1794900438.9192686,
-    "ast_hash": "a61475c1983580dd0ccdeada88454f91",
+    "mtime": 1794900694.7246063,
+    "seen": 1794900810.458892,
+    "ast_hash": "e8f7d6e45c954aafac6954fe930d9061",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/excel-to-pdf/excel-to-pdf.component.html": {

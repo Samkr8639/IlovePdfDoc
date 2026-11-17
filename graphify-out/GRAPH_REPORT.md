@@ -1,17 +1,17 @@
 # Graph Report - PDF-Tool  (2026-11-17)
 
 ## Corpus Check
-- 374 files · ~430,987 words
+- 374 files · ~430,915 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 60 file(s) not represented in the graph (top: .css 35, .woff 14, (none) 7)
 
 ## Summary
-- 6182 nodes · 11929 edges · 456 communities (138 shown, 318 thin omitted)
+- 6200 nodes · 11999 edges · 476 communities (137 shown, 339 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 236 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cd28de2c`
+- Built from commit: `b865f461`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,7 +34,7 @@
 - ConfigNamespace
 - PartialEvaluator
 - sign-workflow.service.ts
-- Jt
+- t
 - CalRGBCS
 - RefSetCache
 - sign.route.ts
@@ -51,7 +51,7 @@
 - angular.json
 - ref_pdf_lib
 - WidgetAnnotation
-- ref_path
+- AppError
 - SignRequestComponent
 - Asn1Node
 - Page
@@ -60,7 +60,7 @@
 - HandoutPerPage
 - .get
 - SignPdfComponent
-- ContactUsComponent
+- .checkAndRepair
 - powerpoint-to-pdf.route.ts
 - CMap
 - Annotation
@@ -88,7 +88,7 @@
 - JpgToPdfWarning
 - pdf-size-report.ts
 - WorkspaceState
-- edit-pdf-ocr.engine.ts
+- edit-pdf-ocr.route.ts
 - src/app.ts
 - WorkspaceState
 - GuidedTourService
@@ -117,16 +117,16 @@
 - PDFWorkerStreamReader
 - JpgToPdfComponent
 - SelectionOverlayComponent
-- RefSet
+- ._create
 - PdfToPowerPointComponent
 - BasePdfManager
-- PowerPointToPdfService
+- StringStream
 - PDFImage
 - StructTreePage
 - XmlObject
 - SignPanelComponent
 - ExcelToPdfComponent
-- pdf-to-excel/index.ts
+- pdf-to-excel-coverage.spec.ts
 - XFAFactory
 - SimpleXMLParser
 - Text
@@ -139,11 +139,11 @@
 - typescript
 - watermark-text-shaper.ts
 - .createDocumentHandler
-- stringToBytes
+- ColorSpace
 - DecodeStream
 - browser-pdf.service.ts
 - MultiFileOutput
-- ExcelToPdfService
+- Area
 - SignRequestService
 - ConsentService
 - PdfToWordComponent
@@ -163,13 +163,14 @@
 - ConnectionSetNamespace
 - PdfCoordPoint
 - OperatorList
+- run-benchmark-comparison.ts
 - WordToPdfImageQuality
 - WatermarkStorageService
 - .announce
-- ViewportNavigationService
+- Jt
 - UploadConsentDialogComponent
 - benchmark-watermark.ts
-- analyze.mjs
+- pngjs
 - Datasets
 - StrokePath
 - LabCS
@@ -181,7 +182,7 @@
 - web/package.json
 - WatermarkPreviewComponent
 - SignatureImageService
-- CFFDict
+- CFFStrings
 - scripts
 - watermark-pdf.component.ts
 - SanitizeResult
@@ -196,11 +197,11 @@
 - Lexer
 - SafeDpiResult
 - PrivacyPolicyComponent
-- Traverse
+- generate-ai-manifests.js
 - bytesToString
 - Type1Parser
 - PdfToPowerPointOptions
-- IdentityCMap
+- CFFIndex
 - PageDimensions
 - TemplateNamespace
 - Parser
@@ -223,33 +224,33 @@
 - serve-prod.mjs
 - DeviceCmykCS
 - CFFDict
-- isCmd
+- SimpleDOMNode
 - XhtmlObject
 - serve
 - SystemFontInfo
 - IccColorSpace
 - generate-fixtures.ts
 - info
-- Commands
+- MessageHandler
 - angular-cli
 - build
 - SignExportService
-- PDFBase
+- PtGuidedTourComponent
 - options
 - web
-- AESBaseCipher
-- document-layout-reconstructor.ts
+- ExpressionBuilderVisitor
+- WatermarkProcessingService
 - JpegDpiInfo
 - development
 - production
 - staging
-- .setBorderStyle
-- sanitise-pdf.ts
+- .parse
+- FlateStream
 - dev.mjs
-- Option10
+- IdentityToUnicodeMap
 - Value
-- Template
-- ResultViewComponent
+- Type1Font
+- excel-to-pdf.component.ts
 - StructElementNode
 - XFAParser
 - CalGrayCS
@@ -263,7 +264,7 @@
 - xdp_Xdp
 - edit-pdf.component.ts
 - PostScriptParser
-- UploadConsentService
+- DeviceRgbCS
 - Type1CharString
 - web/src/types/fontkit.d.ts
 - sign-core/src/types/fontkit.d.ts
@@ -282,16 +283,16 @@
 - MeshStreamReader
 - SignatureApplyResult
 - Assist
-- EquateRange
+- OfficeConversionPool
 - PageArea
 - ImageEdit
-- LZWStream
+- CFFOffsetTracker
 - Margin
 - Occur
 - gsap@^3.15.0
 - jszip@^3.10.2
 - @ngx-translate/core@^18.1.0
-- StreamsSequenceStream
+- fetchSync
 - App
 - GdprComplianceComponent
 - SecurityWhitepaperComponent
@@ -301,21 +302,21 @@
 - Acrobat7
 - Attributes
 - WordToPdfOutput
-- config_Encryption
-- DeckInfo
-- ValidatedExcelFile
+- DeviceGrayCS
+- OcrService
+- InMemoryScheduler
 - SignFieldPaletteItem
-- DuplexOption
-- IfEmpty
-- Jog
-- Log
-- Overprint
+- PostScriptLexer
+- Border
+- Fill
+- MurmurHash3_64
+- Radial
 - Pagination
-- Pdf
-- RenderPolicy
-- WebClient
-- Whitespace
-- Xdp
+- Solid
+- Variables
+- Bind
+- Button
+- Certificates
 - FileListComponent
 - PtBadgeComponent
 - PtStepListComponent
@@ -324,13 +325,13 @@
 - PageSet
 - DateTimeEdit
 - CookieConsentPreferences
-- ConvertedExcelToPdfResult
+- CFFFDSelect
 - SupportedImageFormat
 - RangeParseResult
 - ZipEntryInput
 - ConvertedPowerPointResult
 - ConvertedWordResult
-- ConvertedPowerPointToPdfResult
+- Compression
 - LoadPdfOptions
 - SignWorkflowStage
 - SenderRequestCreateResult
@@ -359,12 +360,12 @@
 - PdfPoint
 - PdfRect
 - ScreenPoint
-- Event
+- config_Validate
 - OcrProgressUpdate
 - GlyphItem
 - LineSegment
 - TextBlock
-- WorkspaceState
+- EncryptionLevel
 - FlowStep
 - GdprPrinciple
 - SecurityControl
@@ -375,7 +376,7 @@
 - Items
 - WorkspaceState
 - WorkspaceState
-- WorkspaceState
+- Equate
 - BrandAssetItem
 - ColorToken
 - CollectionCategory
@@ -394,7 +395,7 @@
 - FaqItem
 - StepItem
 - Line
-- Signing
+- Mode
 - ApiErrorDetail
 - ProcessingStage
 - ProcessingState
@@ -446,11 +447,31 @@
 - TextLayoutLine
 - TextLayoutOptions
 - TextLayoutResult
-- SubjectDNs
+- OpenAction
 - TimeStamp
 - default-en.ts
 - Validate
+- Pdfa
+- ValidationMessaging
 - Overflow
+- Desc
+- EncryptionMethods
+- Execute
+- Issuers
+- Manifest
+- Oids
+- Script
+- Signature
+- template_Font
+- dotenv
+- @napi-rs/canvas
+- pdf-lib@^1.17.1
+- @pdf-lib/fontkit@^1.1.1
+- pdfjs-dist@^5.4.296
+- pptxgenjs
+- @types/multer@^2.3.0
+- @types/sharp@^0.31.1
+- zod
 - PdfToJpgDpiPreset
 - PdfToJpgQualityPreset
 
@@ -469,35 +490,35 @@
 ## Surprising Connections (you probably didn't know these)
 - `ConvertPdfToExcelOptions` --inherits--> `PdfToExcelOptions`  [EXTRACTED]
   apps/api/src/services/pdf-to-excel/index.ts → packages/contracts/src/pdf-to-excel.ts
-- `runBenchmark()` --calls--> `WatermarkExportService`  [EXTRACTED]
-  scripts/benchmark-watermark.ts → apps/web/src/app/core/services/watermark-pdf/watermark-export.service.ts
+- `SignerRecord` --references--> `SignerStatus`  [EXTRACTED]
+  apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
 - `PdfToExcelJob` --references--> `PdfToExcelTable`  [EXTRACTED]
   apps/api/src/routes/pdf-to-excel.route.ts → packages/contracts/src/pdf-to-excel.ts
-- `SigningRequestRecord` --references--> `AuditLogEntry`  [EXTRACTED]
-  apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
-- `SanitisedPdfResult` --references--> `PdfPageBoxMetrics`  [EXTRACTED]
-  apps/api/src/services/sign/sanitise-pdf.ts → packages/contracts/src/sign-pdf.ts
+- `WatermarkDocumentModel` --references--> `WatermarkFileSettings`  [EXTRACTED]
+  apps/web/src/app/core/services/watermark-pdf/watermark-document-model.ts → packages/contracts/src/watermark-pdf.ts
+- `runBenchmark()` --calls--> `WatermarkLayoutService`  [EXTRACTED]
+  scripts/benchmark-watermark.ts → apps/web/src/app/core/services/watermark-pdf/watermark-layout.service.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (456 total, 318 thin omitted)
+## Communities (476 total, 339 thin omitted)
 
 ### Community 0 - "pdf.worker.min.mjs"
 Cohesion: 0.01
-Nodes (169): aa, ac, addChildren(), addHex(), ae, ai, an, Ao (+161 more)
+Nodes (170): aa, ac, addChildren(), addHex(), ae, ai, an, Ao (+162 more)
 
 ### Community 1 - "XFAObjectArray"
 Cohesion: 0.02
-Nodes (28): Acrobat, Agent, Common, Config, config_FontInfo, ConnectionSet, Data, Desc (+20 more)
+Nodes (25): Acrobat, Agent, Common, Config, config_FontInfo, ConnectionSet, Data, DigestMethods (+17 more)
 
 ### Community 2 - "StringObject"
 Cohesion: 0.03
 Nodes (26): Amd, Base, Certificate, config_Picture, Creator, Enforce, ExcludeNS, GroupParent (+18 more)
 
 ### Community 3 - "SigningRequestRecord"
-Cohesion: 0.11
-Nodes (7): DiskSigningRequestRepository, ensureDir(), writeJsonAtomic(), InMemorySigningRequestRepository, SigningRequestRecord, SignRequestOrder, SignRequestStatus
+Cohesion: 0.06
+Nodes (20): constantTimeEqualHex(), DiskDocumentStorage, DiskSigningRequestRepository, ensureDir(), OutboxEmailService, writeJsonAtomic(), InMemoryDocumentStorage, InMemoryEmailService (+12 more)
 
 ### Community 4 - "excel-to-pdf.route.ts"
 Cohesion: 0.08
@@ -505,71 +526,71 @@ Nodes (28): ExcelPdfOutputFile, ExcelToPdfJob, excelToPdfRouter, jobStore, uploa
 
 ### Community 5 - "OptionObject"
 Cohesion: 0.02
-Nodes (28): ADBE_JSConsole, ADBE_JSDebugger, AutoSave, config_Validate, Conformance, Destination, DigestMethod, DynamicRender (+20 more)
+Nodes (30): ADBE_JSConsole, ADBE_JSDebugger, AutoSave, Conformance, Destination, DigestMethod, DuplexOption, DynamicRender (+22 more)
 
 ### Community 6 - "shadow"
 Cohesion: 0.05
-Nodes (13): Catalog, appendIfJavaScriptDict(), parseNestedOrder(), parseOrder(), FeatureTest, fetchDest(), fetchRemoteDest(), FileSpec (+5 more)
+Nodes (14): Catalog, appendIfJavaScriptDict(), parseNestedOrder(), parseOrder(), createValidAbsoluteUrl(), FeatureTest, fetchDest(), fetchRemoteDest() (+6 more)
 
 ### Community 8 - "Option01"
 Cohesion: 0.03
 Nodes (20): AddSilentPrint, AddViewerPreferences, Change, CompressLogicalStructure, config_Encrypt, ContentCopy, DocumentAssembly, Embed (+12 more)
 
 ### Community 9 - "detect.ts"
-Cohesion: 0.12
-Nodes (27): getScanner(), LayoutBox, LayoutImage, LayoutLine, LayoutPage, LayoutSegment, nativeImport(), PdfLayoutModel (+19 more)
+Cohesion: 0.08
+Nodes (36): analyzePdf(), getScanner(), LayoutBox, LayoutImage, LayoutLine, LayoutPage, LayoutSegment, nativeImport() (+28 more)
 
 ### Community 10 - ".success"
-Cohesion: 0.08
-Nodes (30): applyAssist(), ariaLabel(), CheckButton, checkDimensions(), ChoiceList, computeBbox(), Corner, createWrapper() (+22 more)
+Cohesion: 0.07
+Nodes (35): applyAssist(), ariaLabel(), CheckButton, checkDimensions(), ChoiceList, computeBbox(), Corner, createWrapper() (+27 more)
 
 ### Community 13 - "watermark-pdf.component.ts"
 Cohesion: 0.07
-Nodes (15): WatermarkComplianceReport, WatermarkComplianceService, analyzeStreamGraphicsBalance(), StreamBalanceInfo, WatermarkExportOptions, ProcessingLimitInfo, ProcessingProgressEvent, WatermarkProcessingService (+7 more)
+Nodes (23): SpotlightRect, TourConfig, TourStep, WatermarkComplianceReport, WatermarkComplianceService, analyzeStreamGraphicsBalance(), StreamBalanceInfo, WatermarkExportOptions (+15 more)
 
 ### Community 14 - ".checkAndRepair"
 Cohesion: 0.04
-Nodes (41): adjustWidths(), amendFallbackToUnicode(), applyStandardFontGlyphMap(), buildToFontChar(), CFFFont, convertCidString(), createCmapTable(), createNameTable() (+33 more)
+Nodes (24): adjustWidths(), amendFallbackToUnicode(), applyStandardFontGlyphMap(), buildToFontChar(), CFFFont, compileCharString(), CompiledFont, convertCidString() (+16 more)
 
 ### Community 15 - "ConfigNamespace"
 Cohesion: 0.03
-Nodes (20): Cache, Compression, config_Message, config_Script, config_Template, ConfigNamespace, Debug, Driver (+12 more)
+Nodes (23): Cache, config_Encryption, config_Message, config_Script, config_Template, ConfigNamespace, Debug, Driver (+15 more)
 
 ### Community 16 - "PartialEvaluator"
-Cohesion: 0.06
-Nodes (12): addCachedImageOps(), CMapFactory, fetchBinaryData(), getEncoding(), getTilingPatternIR(), getXfaFontDict(), getXfaFontName(), IdentityToUnicodeMap (+4 more)
+Cohesion: 0.09
+Nodes (10): addCachedImageOps(), CMapFactory, fetchBinaryData(), getTilingPatternIR(), getXfaFontDict(), getXfaFontName(), isPDFFunction(), normalizeBlendMode() (+2 more)
 
 ### Community 17 - "sign-workflow.service.ts"
-Cohesion: 0.13
-Nodes (7): AppError, appendAuditEntry(), generateToken256(), hashSecretToken(), SigningRequestRepository, nowIso(), SignWorkflowService
+Cohesion: 0.08
+Nodes (24): appendAuditEntry(), decryptDocumentAtRest(), encryptDocumentAtRest(), generateToken256(), hashSecretToken(), resolveMasterKey(), sha256Hex(), buildCompletionEmail() (+16 more)
 
-### Community 18 - "Jt"
-Cohesion: 0.09
-Nodes (27): adjustMapping(), buildComponentData(), buildHuffmanTable(), decodeScan(), decodeBlock(), decodeHuffman(), decodeMcu(), readBit() (+19 more)
+### Community 18 - "t"
+Cohesion: 0.24
+Nodes (13): buildComponentData(), decodeScan(), decodeBlock(), decodeHuffman(), decodeMcu(), readBit(), receive(), receiveAndExtend() (+5 more)
 
 ### Community 20 - "RefSetCache"
-Cohesion: 0.06
-Nodes (10): BaseLocalCache, clearGlobalCaches(), GlobalColorSpaceCache, GlobalImageCache, isDict(), LocalGStateCache, LocalImageCache, LocalTilingPatternCache (+2 more)
+Cohesion: 0.05
+Nodes (11): BaseLocalCache, clearGlobalCaches(), GlobalColorSpaceCache, GlobalImageCache, isDict(), LocalGStateCache, LocalImageCache, LocalTilingPatternCache (+3 more)
 
 ### Community 21 - "sign.route.ts"
-Cohesion: 0.05
-Nodes (50): isSignRequestsEnabled(), certUpload, csrfProtection(), parseCookies(), requireSignRequestsEnabled(), signCreateRateLimiter, signEmail, signOtpRateLimiter (+42 more)
+Cohesion: 0.08
+Nodes (24): isSignRequestsEnabled(), certUpload, csrfProtection(), parseCookies(), requireSignRequestsEnabled(), signCreateRateLimiter, signEmail, signOtpRateLimiter (+16 more)
 
 ### Community 23 - "watermark-layout.service.ts"
-Cohesion: 0.06
-Nodes (29): convertMarginToPoints(), VisualPageBox, WatermarkDocumentModel, WatermarkPageLayout, WatermarkPlacement, WatermarkExportService, AutoFitResult, RotatedBoundingBox (+21 more)
+Cohesion: 0.08
+Nodes (26): convertMarginToPoints(), WatermarkDocumentModel, WatermarkPageLayout, WatermarkPlacement, AutoFitResult, RotatedBoundingBox, WatermarkLayoutService, parseWatermarkPages() (+18 more)
 
 ### Community 25 - "dependencies"
-Cohesion: 0.06
-Nodes (48): dependencies, cors@^2.8.5, docx@^9.14.0, dotenv@^16.4.7, exceljs@^4.4.0, express@^4.21.2, express-rate-limit@^8.7.1, fast-xml-parser@^5.11.2 (+40 more)
+Cohesion: 0.09
+Nodes (23): dependencies, cors@^2.8.5, exceljs@^4.4.0, express@^4.21.2, express-rate-limit@^8.7.1, fast-xml-parser@^5.11.2, helmet@^8.0.0, jszip@^3.10.2 (+15 more)
 
 ### Community 26 - "ValidatedPdfFile"
-Cohesion: 0.12
-Nodes (4): ValidatedPdfFile, PdfToExcelService, PdfToPowerPointService, PdfToWordService
+Cohesion: 0.08
+Nodes (5): ValidatedPdfFile, PdfToExcelService, PdfToPowerPointService, PdfToWordService, ViewportNavigationService
 
 ### Community 27 - "Jbig2Error"
-Cohesion: 0.07
-Nodes (25): ContextCache, decodeBitmap(), decodeIAID(), decodeInteger(), decodeMMRBitmap(), decodeRefinement(), decodeTextRegion(), DecodingContext (+17 more)
+Cohesion: 0.09
+Nodes (18): ContextCache, decodeBitmap(), decodeIAID(), decodeInteger(), decodeMMRBitmap(), decodeRefinement(), decodeTextRegion(), DecodingContext (+10 more)
 
 ### Community 28 - "ContentObject"
 Cohesion: 0.04
@@ -588,16 +609,16 @@ Cohesion: 0.25
 Nodes (7): cli, analytics, packageManager, newProjectRoot, projects, $schema, version
 
 ### Community 33 - "ref_pdf_lib"
-Cohesion: 0.09
-Nodes (35): CompressedFileResult, CompressionJob, compressRouter, jobStore, upload, execFileAsync, findGhostscriptBinary(), isGhostscriptEngineEnabled() (+27 more)
+Cohesion: 0.11
+Nodes (31): CompressedFileResult, CompressionJob, compressRouter, jobStore, upload, execFileAsync, findGhostscriptBinary(), isGhostscriptEngineEnabled() (+23 more)
 
 ### Community 34 - "WidgetAnnotation"
-Cohesion: 0.11
-Nodes (12): ChoiceWidgetAnnotation, codePointIter(), DefaultAppearanceEvaluator, escapeString(), getPdfColor(), InkAnnotation, numberToString(), parseDefaultAppearance() (+4 more)
+Cohesion: 0.13
+Nodes (7): ChoiceWidgetAnnotation, DefaultAppearanceEvaluator, escapeString(), parseDefaultAppearance(), SignatureWidgetAnnotation, TextWidgetAnnotation, WidgetAnnotation
 
-### Community 35 - "ref_path"
-Cohesion: 0.06
-Nodes (26): buildDocxFromPages(), ExtractedPageContent, extractPdfPageContents(), jobStore, PdfToWordJob, pdfToWordRouter, upload, validatePdfInput() (+18 more)
+### Community 35 - "AppError"
+Cohesion: 0.09
+Nodes (27): AppError, buildDocxFromPages(), ExtractedPageContent, extractPdfPageContents(), jobStore, PdfToWordJob, upload, validatePdfInput() (+19 more)
 
 ### Community 36 - "SignRequestComponent"
 Cohesion: 0.21
@@ -609,123 +630,111 @@ Nodes (5): AnnotationFactory, getNewAnnotationsMap(), isRefsEqual(), NullStream,
 
 ### Community 39 - "XFAObject"
 Cohesion: 0.02
-Nodes (18): Barcode, BatchOutput, Certificates, Compress, config_Area, Connect, ContentArea, DefaultUi (+10 more)
+Nodes (14): BatchOutput, Compress, config_Area, Encrypt, Keep, LabelPrinter, Mdp, PageOffset (+6 more)
 
 ### Community 40 - ".constructor"
-Cohesion: 0.19
-Nodes (4): ARCFourCipher, calculateMD5(), CipherTransformFactory, NullCipher
+Cohesion: 0.08
+Nodes (10): AES128Cipher, AES256Cipher, AESBaseCipher, ARCFourCipher, calculateMD5(), CipherTransformFactory, isArrayEqual(), NullCipher (+2 more)
 
 ### Community 42 - ".get"
-Cohesion: 0.11
-Nodes (6): FreeTextAnnotation, getModificationDate(), Name, StampAnnotation, stringToAsciiOrUTF16BE(), stringToUTF16String()
+Cohesion: 0.17
+Nodes (4): FreeTextAnnotation, getModificationDate(), stringToAsciiOrUTF16BE(), stringToUTF16String()
 
 ### Community 43 - "SignPdfComponent"
 Cohesion: 0.05
 Nodes (3): SignerDraft, ResizeCorner, SignPdfComponent
 
-### Community 44 - "ContactUsComponent"
-Cohesion: 0.10
-Nodes (12): @angular/common@^22.2.0, @angular/forms@^22.2.0, routes, ContactService, SeoService, LIVE_TOOL_IDS, ContactFormData, PdfBottomBarComponent (+4 more)
+### Community 44 - ".checkAndRepair"
+Cohesion: 0.09
+Nodes (24): adjustMapping(), createCmapTable(), createNameTable(), createOS2Table(), createPostscriptName(), createPostTable(), readNameTable(), readTableEntry() (+16 more)
 
 ### Community 45 - "powerpoint-to-pdf.route.ts"
 Cohesion: 0.04
-Nodes (64): jobStore, MAX_FILES, PowerPointPdfOutputFile, PowerPointToPdfJob, powerpointToPdfRouter, upload, jobStore, PdfOutputFile (+56 more)
+Nodes (63): jobStore, MAX_FILES, PowerPointPdfOutputFile, PowerPointToPdfJob, powerpointToPdfRouter, upload, jobStore, PdfOutputFile (+55 more)
 
 ### Community 47 - "Annotation"
-Cohesion: 0.09
-Nodes (4): Annotation, getRgbColor(), lookupNormalRect(), PopupAnnotation
+Cohesion: 0.07
+Nodes (5): Annotation, AnnotationBorderStyle, getRgbColor(), LinkAnnotation, PopupAnnotation
 
 ### Community 49 - "devDependencies"
-Cohesion: 0.08
-Nodes (24): devDependencies, jest@^29.7.0, supertest@^7.0.0, ts-jest@^29.2.5, tsx@^4.19.3, @types/cors@^2.8.17, @types/express@^4.17.21, @types/jest@^29.5.14 (+16 more)
+Cohesion: 0.10
+Nodes (27): devDependencies, jest@^29.7.0, supertest@^7.0.0, ts-jest@^29.2.5, tsx@^4.19.3, @types/cors@^2.8.17, @types/express@^4.17.21, @types/jest@^29.5.14 (+19 more)
 
 ### Community 51 - "getStringOption"
-Cohesion: 0.07
-Nodes (13): Arc, Execute, getFloat(), getInteger(), getKeyword(), getMeasurement(), getRatio(), getRelevant() (+5 more)
+Cohesion: 0.10
+Nodes (8): getFloat(), getInteger(), getKeyword(), getMeasurement(), getRatio(), getRelevant(), getStringOption(), LockDocument
 
 ### Community 52 - "ExpressionBuilderVisitor"
-Cohesion: 0.07
-Nodes (13): AstArgument, AstBinaryOperation, AstLiteral, AstMin, AstNode, AstVariable, AstVariableDefinition, buildAddOperation() (+5 more)
-
-### Community 53 - "FontFinder"
-Cohesion: 0.18
-Nodes (6): FontFinder, getCurrentPara(), selectFont(), setFontFamily(), setPara(), stripQuotes()
+Cohesion: 0.11
+Nodes (11): AstArgument, AstBinaryOperation, AstLiteral, AstMin, AstNode, AstVariable, AstVariableDefinition, buildAddOperation() (+3 more)
 
 ### Community 54 - "EditElement"
 Cohesion: 0.09
-Nodes (6): AreaSelectionState, EditElement, ImageEditElement, LinkEditElement, AreaSelectionService, ElementOperationsService
+Nodes (5): AreaSelectionState, EditElement, ImageEditElement, AreaSelectionService, ElementOperationsService
 
 ### Community 55 - "PDFDocument"
 Cohesion: 0.08
-Nodes (7): addPageError(), collectActions(), _collectJS(), find(), isName(), objectSize(), PDFDocument
+Nodes (4): addPageError(), find(), isName(), PDFDocument
 
 ### Community 58 - ".#B"
-Cohesion: 0.05
-Nodes (9): AlternateCS, ColorSpace, ColorSpaceUtils, DeviceGrayCS, DeviceRgbaCS, DeviceRgbCS, IndexedCS, MathClamp() (+1 more)
+Cohesion: 0.13
+Nodes (5): AlternateCS, ColorSpaceUtils, IndexedCS, MathClamp(), PatternCS
 
 ### Community 59 - "IntegerObject"
-Cohesion: 0.06
-Nodes (10): AdobeExtensionLevel, Copies, CurrentPage, IntegerObject, Level, MsgId, NumberOfCopies, Part (+2 more)
+Cohesion: 0.05
+Nodes (13): AdjustData, AdobeExtensionLevel, CompressObjectStream, Copies, CurrentPage, IntegerObject, Level, MsgId (+5 more)
 
 ### Community 61 - "Glyph"
 Cohesion: 0.07
 Nodes (6): CompositeGlyph, Contour, GlyfTable, Glyph, GlyphHeader, SimpleGlyph
 
 ### Community 62 - "warn"
-Cohesion: 0.08
-Nodes (10): CmykICCBasedCS, createValidAbsoluteUrl(), decodeString(), fetchSync(), IccColorSpace, JpxError, JpxImage, normalizeBlendMode() (+2 more)
+Cohesion: 0.11
+Nodes (6): CmykICCBasedCS, decodeString(), JpxError, JpxImage, stringToUTF8String(), warn()
 
 ### Community 63 - ".getTextContent"
-Cohesion: 0.13
-Nodes (16): addFakeSpaces(), appendEOL(), applyInverseRotation(), buildTextContentItem(), compareWithLastPosition(), ensureTextContentItem(), flushTextContentItem(), getCurrentTextTransform() (+8 more)
+Cohesion: 0.06
+Nodes (24): B, Commands, Ma(), doRun(), receiveInstance(), updateMemoryViews(), addFakeSpaces(), appendEOL() (+16 more)
 
 ### Community 65 - "compileCharString"
-Cohesion: 0.06
-Nodes (18): parseOperand(), compileCharString(), CompiledFont, compileGlyf(), createDataNode(), readBits(), FontRendererFactory, getFloat214() (+10 more)
+Cohesion: 0.07
+Nodes (20): parseOperand(), compileGlyf(), createDataNode(), readBits(), FontRendererFactory, getFloat214(), I, Jbig2Image (+12 more)
 
 ### Community 66 - "unreachable"
 Cohesion: 0.12
 Nodes (3): BaseStream, Pattern, unreachable()
 
-### Community 69 - "CFFCompiler"
-Cohesion: 0.12
-Nodes (3): CFFCompiler, CFFIndex, CFFOffsetTracker
-
 ### Community 71 - "pdf-size-report.ts"
-Cohesion: 0.09
-Nodes (26): analyzePdfSize(), CategorySummary, ContentStreamDetail, extractImagePlacementsFromPdfjs(), FontDetail, formatBytes(), ImageDetail, isBinaryAvailable() (+18 more)
+Cohesion: 0.16
+Nodes (15): analyzePdfSize(), CategorySummary, ContentStreamDetail, extractImagePlacementsFromPdfjs(), FontDetail, formatBytes(), ImageDetail, isBinaryAvailable() (+7 more)
 
-### Community 73 - "edit-pdf-ocr.engine.ts"
-Cohesion: 0.19
-Nodes (13): detectSkewAngle(), executePdfOcrJob(), getPdfjs(), OCR_CONCURRENCY, OCR_JOB_TIMEOUT_MS, OCR_PAGE_TIMEOUT_MS, processPageOcr(), renderPdfPageToPng() (+5 more)
+### Community 73 - "edit-pdf-ocr.route.ts"
+Cohesion: 0.15
+Nodes (12): editPdfOcrRouter, JOB_RETENTION_MS, OCR_MAX_FILE_SIZE, OCR_MAX_PAGES, OcrJobItem, ocrJobStore, upload, validateOcrPdf() (+4 more)
 
 ### Community 74 - "src/app.ts"
 Cohesion: 0.04
-Nodes (56): multer@^2.5.0, createApp(), env, envFile, envSchema, openApiSpec, app, errorHandler() (+48 more)
-
-### Community 76 - "GuidedTourService"
-Cohesion: 0.09
-Nodes (9): GuidedTourService, SpotlightRect, TourConfig, TourStep, ArrowPlacement, PopoverStyle, PtGuidedTourComponent, TourLayoutInfo (+1 more)
+Nodes (49): multer@^2.5.0, createApp(), env, envFile, envSchema, openApiSpec, app, errorHandler() (+41 more)
 
 ### Community 80 - "FormatError"
-Cohesion: 0.12
-Nodes (7): BaseShading, DummyShading, FlateStream, FormatError, getB(), MeshShading, RadialAxialShading
+Cohesion: 0.16
+Nodes (6): BaseShading, DummyShading, FormatError, getB(), MeshShading, RadialAxialShading
 
 ### Community 81 - "XRef"
-Cohesion: 0.15
-Nodes (3): Ref, XRef, XRefEntryException
+Cohesion: 0.10
+Nodes (6): InvalidPDFException, isCmd(), Ref, XRef, XRefEntryException, XRefParseException
 
 ### Community 83 - "engine.mjs"
-Cohesion: 0.29
-Nodes (8): buildDocx(), cleanHex(), resolveFont(), sanitizeXmlText(), convertPdfToDocx(), __dirname, __filename, getAutoEmbedFonts()
+Cohesion: 0.19
+Nodes (15): analyzePdf(), apply(), cleanFontName(), det(), mul(), parseColor(), sanitizePdfText(), buildDocx() (+7 more)
 
 ### Community 84 - "PdfExportService"
-Cohesion: 0.14
-Nodes (7): BaseEditElement, DrawEditElement, OcrTextLayerElement, ShapeEditElement, SignEditElement, WhiteoutEditElement, PdfExportService
+Cohesion: 0.13
+Nodes (8): BaseEditElement, DrawEditElement, LinkEditElement, OcrTextLayerElement, ShapeEditElement, SignEditElement, WhiteoutEditElement, PdfExportService
 
 ### Community 85 - "pdf-to-powerpoint/build.ts"
-Cohesion: 0.10
-Nodes (31): PdfToPowerPointJob, PowerPointOutputFileResult, extractPdfWithOcr(), getOcrWorker(), getPdfjs(), nativeRequire, OcrPageResult, OcrTextLine (+23 more)
+Cohesion: 0.07
+Nodes (41): PdfToPowerPointJob, PowerPointOutputFileResult, detectSkewAngle(), executePdfOcrJob(), getPdfjs(), OCR_CONCURRENCY, OCR_JOB_TIMEOUT_MS, OCR_PAGE_TIMEOUT_MS (+33 more)
 
 ### Community 86 - "pdf-to-excel/build.ts"
 Cohesion: 0.27
@@ -736,24 +745,24 @@ Cohesion: 0.14
 Nodes (4): Builder, Empty, Root, UnknownNamespace
 
 ### Community 88 - "._create"
-Cohesion: 0.09
-Nodes (17): CaretAnnotation, CircleAnnotation, FileAttachmentAnnotation, getPdfColorArray(), getQuadPoints(), HighlightAnnotation, LineAnnotation, LinkAnnotation (+9 more)
+Cohesion: 0.10
+Nodes (14): CaretAnnotation, CircleAnnotation, getPdfColorArray(), getQuadPoints(), HighlightAnnotation, LineAnnotation, MarkupAnnotation, PolygonAnnotation (+6 more)
+
+### Community 89 - "DecodeStream"
+Cohesion: 0.13
+Nodes (3): DecodeStream, DecryptStream, StreamsSequenceStream
 
 ### Community 91 - "Binder"
-Cohesion: 0.24
+Cohesion: 0.26
 Nodes (3): Binder, createText(), searchNode()
 
 ### Community 92 - "tool-registry.service.ts"
-Cohesion: 0.10
-Nodes (9): ToolRegistryService, WebMcpService, ProcessingMode, ToolCategory, ToolDefinition, ToolSeo, ToolStatus, LIVE_TOOL_IDS (+1 more)
+Cohesion: 0.08
+Nodes (11): ToolRegistryService, LIVE_TOOL_IDS, WebMcpService, RELATED_MAP, ProcessingMode, ToolCategory, ToolDefinition, ToolSeo (+3 more)
 
 ### Community 93 - "ExclGroup"
-Cohesion: 0.06
-Nodes (9): addHTML(), Area, createLine(), ExclGroup, flushHTML(), getAvailableSpace(), getContainedChildren(), Subform (+1 more)
-
-### Community 94 - "CFFParser"
-Cohesion: 0.18
-Nodes (3): CFFEncoding, CFFFDSelect, CFFParser
+Cohesion: 0.10
+Nodes (6): addHTML(), createLine(), ExclGroup, flushHTML(), getAvailableSpace(), Subform
 
 ### Community 95 - "PdfToJpgService"
 Cohesion: 0.21
@@ -775,29 +784,25 @@ Nodes (3): PDFWorkerStream, PDFWorkerStreamRangeReader, PDFWorkerStreamReader
 Cohesion: 0.05
 Nodes (16): ComputedPageLayout, ImageAlignmentOption, ImageFitOption, ImageQualityOption, JpgToPdfBuildResult, JpgToPdfImageItem, JpgToPdfOptions, JpgToPdfProgress (+8 more)
 
-### Community 103 - "RefSet"
-Cohesion: 0.13
-Nodes (3): NameOrNumberTree, ObjectLoader, RefSet
+### Community 103 - "._create"
+Cohesion: 0.10
+Nodes (7): collectActions(), _collectJS(), FileAttachmentAnnotation, getInheritableProperty(), ObjectLoader, objectSize(), RefSet
 
-### Community 107 - "PDFImage"
-Cohesion: 0.22
-Nodes (3): convertBlackAndWhiteToRGBA(), convertToRGBA(), ImageResizer
+### Community 106 - "StringStream"
+Cohesion: 0.23
+Nodes (7): codePointIter(), getPdfColor(), InkAnnotation, numberToString(), StampAnnotation, StringStream, stringToUTF16HexString()
 
 ### Community 108 - "StructTreePage"
-Cohesion: 0.13
-Nodes (4): NumberTree, StructTreePage, nodeToSerializable(), StructTreeRoot
+Cohesion: 0.16
+Nodes (4): NameOrNumberTree, NumberTree, StructTreePage, nodeToSerializable()
 
-### Community 109 - "XmlObject"
-Cohesion: 0.10
-Nodes (3): encodeToXmlString(), utf8StringToString(), XmlObject
-
-### Community 112 - "pdf-to-excel/index.ts"
-Cohesion: 0.27
-Nodes (11): BuildWorkbookResult, applyCoverageGuard(), computeCoverage(), CoverageResult, extractNormalisedWords(), extractWorkbookWords(), ConvertMultiplePdfsInput, ConvertMultiplePdfsResult (+3 more)
+### Community 112 - "pdf-to-excel-coverage.spec.ts"
+Cohesion: 0.67
+Nodes (5): applyCoverageGuard(), computeCoverage(), CoverageResult, extractNormalisedWords(), extractWorkbookWords()
 
 ### Community 114 - "SimpleXMLParser"
-Cohesion: 0.10
-Nodes (6): DatasetReader, DatasetXMLParser, parseXFAPath(), SimpleDOMNode, SimpleXMLParser, updateXFA()
+Cohesion: 0.15
+Nodes (5): DatasetReader, DatasetXMLParser, parseXFAPath(), SimpleXMLParser, updateXFA()
 
 ### Community 115 - "Text"
 Cohesion: 0.05
@@ -824,27 +829,31 @@ Cohesion: 0.09
 Nodes (11): FontPackInfo, SCRIPT_METADATA, WatermarkDetectedScript, WatermarkFontService, bidi, GlyphPathCommand, PositionedGlyph, ShapedLine (+3 more)
 
 ### Community 124 - ".createDocumentHandler"
-Cohesion: 0.12
-Nodes (14): AbortException, getVerbosityLevel(), MessageHandler, WorkerMessageHandler, ensureNotTerminated(), finishWorkerTask(), loadDocument(), setupDoc() (+6 more)
-
-### Community 125 - "stringToBytes"
-Cohesion: 0.25
-Nodes (3): CipherTransform, stringToBytes(), toHexUtil()
+Cohesion: 0.19
+Nodes (11): AbortException, getVerbosityLevel(), ensureNotTerminated(), finishWorkerTask(), loadDocument(), setupDoc(), onFailure(), onSuccess() (+3 more)
 
 ### Community 126 - "DecodeStream"
-Cohesion: 0.13
-Nodes (5): Ascii85Stream, AsciiHexStream, CCITTFaxStream, PredictorStream, RunLengthStream
+Cohesion: 0.11
+Nodes (6): Ascii85Stream, AsciiHexStream, CCITTFaxStream, LZWStream, PredictorStream, RunLengthStream
 
 ### Community 127 - "browser-pdf.service.ts"
 Cohesion: 0.08
 Nodes (11): CompressedPdfItem, CompressPdfResult, MergeResult, SplitPdfOptions, SplitPdfOutputFile, SplitPdfResult, ConvertedWordToPdfResult, SUPPORTED_EXTENSIONS (+3 more)
+
+### Community 129 - "Area"
+Cohesion: 0.14
+Nodes (3): Area, getContainedChildren(), SubformSet
+
+### Community 136 - "Util"
+Cohesion: 0.09
+Nodes (4): getTransformMatrix(), lookupNormalRect(), TranslatedFont, Util
 
 ### Community 137 - "TextEditElement"
 Cohesion: 0.20
 Nodes (3): TextEditElement, PdfTextExtractionService, TextFormattingService
 
 ### Community 139 - "EvaluatorPreprocessor"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (5): AppearanceStreamEvaluator, EvaluatorPreprocessor, LocalColorSpaceCache, LocalFunctionCache, PDFFunctionFactory
 
 ### Community 140 - "stamp-dialog.component.js"
@@ -860,24 +869,32 @@ Cohesion: 0.26
 Nodes (3): assert(), CssFontInfo, toRomanNumerals()
 
 ### Community 144 - ".constructPostScript"
-Cohesion: 0.22
-Nodes (3): PDFFunction, PostScriptLexer, toNumberArray()
+Cohesion: 0.28
+Nodes (3): PDFFunction, PostScriptCompiler, toNumberArray()
 
 ### Community 146 - "ConnectionSetNamespace"
 Cohesion: 0.06
 Nodes (12): connection_set_Uri, ConnectionSetNamespace, EffectiveInputPolicy, EffectiveOutputPolicy, Operation, RootElement, SoapAction, SoapAddress (+4 more)
 
 ### Community 148 - "OperatorList"
-Cohesion: 0.11
-Nodes (5): getTransformMatrix(), isNumberArray(), lookupMatrix(), lookupRect(), OperatorList
+Cohesion: 0.15
+Nodes (4): isNumberArray(), lookupMatrix(), lookupRect(), OperatorList
+
+### Community 149 - "run-benchmark-comparison.ts"
+Cohesion: 0.21
+Nodes (11): AfterResult, AUDIT_TMP_DIR, BEFORE_DATA, DOCS_DIR, Fixture, FIXTURES, FIXTURES_DIR, formatBytes() (+3 more)
+
+### Community 153 - "Jt"
+Cohesion: 0.15
+Nodes (7): DNLMarkerError, EOIMarkerError, Jt, ParserEOFException, PasswordException, ResponseException, UnknownErrorException
 
 ### Community 155 - "benchmark-watermark.ts"
-Cohesion: 0.14
-Nodes (12): WatermarkTokenContext, WatermarkTokenService, BenchmarkResult, buildTestConfigs(), computeP95(), DIMENSIONS, generateMarkdownReport(), generateSamplePdf() (+4 more)
+Cohesion: 0.12
+Nodes (12): WatermarkExportService, WatermarkTokenService, BenchmarkResult, buildTestConfigs(), computeP95(), DIMENSIONS, generateMarkdownReport(), generateSamplePdf() (+4 more)
 
-### Community 156 - "analyze.mjs"
-Cohesion: 0.33
-Nodes (9): pngjs@^7.0.0, analyzePdf(), apply(), cleanFontName(), det(), mul(), parseColor(), sanitizePdfText() (+1 more)
+### Community 156 - "pngjs"
+Cohesion: 0.20
+Nodes (6): docx@^9.14.0, pngjs@^7.0.0, swagger-ui-express@^5.0.1, docx, pngjs, swagger-ui-express
 
 ### Community 157 - "Datasets"
 Cohesion: 0.20
@@ -891,33 +908,41 @@ Nodes (3): FontSelector, text_FontInfo, TextMeasure
 Cohesion: 0.15
 Nodes (12): @angular/compiler@^22.2.0, @angular/material@^22.2.4, docx@^9.14.0, pdf-lib@^1.17.1, docx, pdf-lib, name, packageManager (+4 more)
 
-### Community 169 - "CFFDict"
-Cohesion: 0.10
-Nodes (6): CFF, CFFCharset, CFFHeader, CFFStrings, findBlock(), Type1Font
-
 ### Community 171 - "scripts"
 Cohesion: 0.22
 Nodes (9): scripts, build, dev, dev:prod, dev:staging, start, start:prod, start:staging (+1 more)
 
 ### Community 172 - "watermark-pdf.component.ts"
-Cohesion: 0.04
-Nodes (9): LayoutService, ConversionProgress, SelectedPdfFile, WorkspaceState, WorkspaceState, DropzoneComponent, ExploreMoreToolsComponent, ProcessingStateComponent (+1 more)
+Cohesion: 0.05
+Nodes (14): @angular/common@^22.2.0, @angular/forms@^22.2.0, routes, ContactService, LayoutService, ConversionProgress, SeoService, ContactFormData (+6 more)
+
+### Community 175 - "PDFImage"
+Cohesion: 0.19
+Nodes (4): convertBlackAndWhiteToRGBA(), convertToRGBA(), PDFImage, resizeImageMask()
 
 ### Community 177 - "dependencies"
 Cohesion: 0.12
 Nodes (16): dependencies, @angular/core@^22.2.0, @angular/router@^22.2.0, fflate@^0.8.3, @lucide/angular@^1.63.0, @ngx-translate/http-loader@^18.1.0, @paperflow/sign-core@*, regenerator-runtime@^0.13.11 (+8 more)
 
 ### Community 182 - "Lexer"
-Cohesion: 0.29
-Nodes (3): Cmd, Lexer, toHexDigit()
+Cohesion: 0.26
+Nodes (3): Lexer, Linearization, toHexDigit()
+
+### Community 185 - "generate-ai-manifests.js"
+Cohesion: 0.15
+Nodes (8): availableTools, catalog, fs, liveSet, path, queriesMap, webPublicDir, wellKnownDir
 
 ### Community 186 - "bytesToString"
-Cohesion: 0.21
-Nodes (15): bytesToString(), computeIDs(), escapePDFName(), getFontFileType(), getIndexes(), getSizeInBytes(), incrementalUpdate(), isTrueTypeCollectionFile() (+7 more)
+Cohesion: 0.12
+Nodes (18): bytesToString(), CipherTransform, computeIDs(), escapePDFName(), getFontFileType(), getIndexes(), getSizeInBytes(), incrementalUpdate() (+10 more)
 
 ### Community 187 - "Type1Parser"
 Cohesion: 0.30
 Nodes (4): decrypt(), isHexDigit(), isSpecial(), Type1Parser
+
+### Community 189 - "CFFIndex"
+Cohesion: 0.18
+Nodes (3): CFFCharset, CFFHeader, CFFIndex
 
 ### Community 190 - "PageDimensions"
 Cohesion: 0.08
@@ -925,7 +950,11 @@ Nodes (6): HighlightEditElement, PageDimensions, CanvasInteractionService, Coord
 
 ### Community 191 - "TemplateNamespace"
 Cohesion: 0.02
-Nodes (31): AppearanceFilter, Bind, BindItems, Bookend, Border, Break, BreakAfter, BreakBefore (+23 more)
+Nodes (29): AppearanceFilter, Arc, Barcode, BindItems, Bookend, Break, BreakAfter, BreakBefore (+21 more)
+
+### Community 192 - "Parser"
+Cohesion: 0.23
+Nodes (4): Cmd, findBlock(), isWhiteSpace(), Parser
 
 ### Community 194 - "devDependencies"
 Cohesion: 0.12
@@ -959,21 +988,17 @@ Nodes (6): __dirname, DIST_DIR, __filename, MIME_TYPES, PORT, server
 Cohesion: 0.16
 Nodes (3): CFFDict, CFFPrivateDict, CFFTopDict
 
-### Community 212 - "isCmd"
-Cohesion: 0.15
-Nodes (4): InvalidPDFException, isCmd(), Linearization, XRefParseException
-
 ### Community 213 - "XhtmlObject"
-Cohesion: 0.04
-Nodes (20): _a, B, Body, Br, Html, _i, Li, Ma() (+12 more)
+Cohesion: 0.05
+Nodes (14): _a, Body, Br, Html, _i, Li, Ol, P (+6 more)
 
 ### Community 214 - "serve"
 Cohesion: 0.25
 Nodes (8): serve, allowedHosts, host, proxyConfig, builder, configurations, defaultConfiguration, options
 
 ### Community 217 - "IccColorSpace"
-Cohesion: 0.29
-Nodes (5): getUint8ArrayMemory0(), passArray8ToWasm0(), __wbg_finalize_init(), __wbg_get_imports(), __wbg_init()
+Cohesion: 0.19
+Nodes (6): getUint8ArrayMemory0(), IccColorSpace, passArray8ToWasm0(), __wbg_finalize_init(), __wbg_get_imports(), __wbg_init()
 
 ### Community 218 - "generate-fixtures.ts"
 Cohesion: 0.30
@@ -987,10 +1012,6 @@ Nodes (3): cmd.exe, angular-cli, @angular/cli
 Cohesion: 0.29
 Nodes (7): build, test, builder, configurations, defaultConfiguration, builder, architect
 
-### Community 224 - "PDFBase"
-Cohesion: 0.36
-Nodes (3): AES256Cipher, isArrayEqual(), PDFBase
-
 ### Community 225 - "options"
 Cohesion: 0.33
 Nodes (6): options, allowedCommonJsDependencies, assets, browser, styles, tsConfig
@@ -998,10 +1019,6 @@ Nodes (6): options, allowedCommonJsDependencies, assets, browser, styles, tsConf
 ### Community 226 - "web"
 Cohesion: 0.33
 Nodes (6): web, prefix, projectType, root, schematics, sourceRoot
-
-### Community 229 - "document-layout-reconstructor.ts"
-Cohesion: 0.21
-Nodes (10): ReconstructedDocument, SemanticElement, SemanticElementType, SemanticTableRow, VisualLine, generateDocxDocument(), ExtractedPdfDocument, extractPdfDocument() (+2 more)
 
 ### Community 231 - "development"
 Cohesion: 0.40
@@ -1015,45 +1032,45 @@ Nodes (5): production, budgets, buildTarget, fileReplacements, outputHashing
 Cohesion: 0.40
 Nodes (5): staging, budgets, buildTarget, fileReplacements, outputHashing
 
-### Community 235 - "sanitise-pdf.ts"
-Cohesion: 0.32
-Nodes (5): hasPdfMagicBytes(), PDF_MAGIC, SanitisedPdfResult, sanitiseUploadedPdf(), PdfPageBoxMetrics
-
-### Community 237 - "Option10"
-Cohesion: 0.25
-Nodes (3): AdjustData, CompressObjectStream, Option10
+### Community 234 - ".parse"
+Cohesion: 0.46
+Nodes (6): buildHuffmanTable(), findNextFileMarker(), prepareComponents(), readDataBlock(), readUint16(), skipData()
 
 ### Community 238 - "Value"
 Cohesion: 0.10
 Nodes (6): Caption, Draw, Field, Image, _setValue(), Value
 
+### Community 240 - "excel-to-pdf.component.ts"
+Cohesion: 0.04
+Nodes (16): DeckInfo, ConvertedExcelToPdfResult, ExcelToPdfService, ValidatedExcelFile, ConvertedPowerPointToPdfResult, PowerPointToPdfService, ValidatedPowerPointFile, SheetInfo (+8 more)
+
 ### Community 254 - "edit-pdf.component.ts"
 Cohesion: 0.03
-Nodes (19): EditPdfHeroComponent, EditPdfTopNavComponent, DrawPanelComponent, ElementInfoPanelComponent, HighlightPanelComponent, ImagePanelComponent, LinkPanelComponent, OcrPanelComponent (+11 more)
+Nodes (19): UploadConsentService, EditPdfHeroComponent, EditPdfTopNavComponent, DrawPanelComponent, ElementInfoPanelComponent, HighlightPanelComponent, ImagePanelComponent, LinkPanelComponent (+11 more)
 
 ### Community 261 - ".[zs]"
 Cohesion: 0.40
 Nodes (3): A, fixURL(), recoverJsURL()
 
 ## Knowledge Gaps
-- **196 isolated node(s):** `ImageAlignmentOption`, `ImageFitOption`, `ImageQualityOption`, `MarginOption`, `MeasurementUnit` (+191 more)
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 2105 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **318 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **191 isolated node(s):** `ImageAlignmentOption`, `ImageFitOption`, `ImageQualityOption`, `MarginOption`, `MeasurementUnit` (+186 more)
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 2119 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **339 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Output` connect `ContentEditableModelDirective` to `pdf.worker.min.mjs`, `WatermarkPreviewComponent`, `XFAObject`?**
-  _High betweenness centrality (0.322) - this node is a cross-community bridge._
+  _High betweenness centrality (0.323) - this node is a cross-community bridge._
 - **What connects `ImageAlignmentOption`, `ImageFitOption`, `ImageQualityOption` to the rest of the system?**
-  _196 weakly-connected nodes found - possible missing edges._
+  _191 weakly-connected nodes found - possible missing edges._
 - **Should `pdf.worker.min.mjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.012597402597402597 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.012442074525487208 - nodes in this community are weakly interconnected._
 - **Why does `ContentEditableModelDirective` connect `ContentEditableModelDirective` to `edit-pdf.component.ts`?**
-  _High betweenness centrality (0.200) - this node is a cross-community bridge._
+  _High betweenness centrality (0.226) - this node is a cross-community bridge._
 - **Should `XFAObjectArray` be split into smaller, more focused modules?**
-  _Cohesion score 0.021739130434782608 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.023529411764705882 - nodes in this community are weakly interconnected._
 - **Why does `WatermarkPreviewComponent` connect `WatermarkPreviewComponent` to `ContentEditableModelDirective`, `watermark-pdf.component.ts`, `watermark-layout.service.ts`?**
-  _High betweenness centrality (0.123) - this node is a cross-community bridge._
+  _High betweenness centrality (0.106) - this node is a cross-community bridge._
 - **Should `StringObject` be split into smaller, more focused modules?**
   _Cohesion score 0.02564102564102564 - nodes in this community are weakly interconnected._

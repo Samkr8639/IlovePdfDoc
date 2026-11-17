@@ -1152,30 +1152,24 @@ describe('EditPdfComponent Integration Tests', () => {
       );
     });
 
-    it('launches upload tour when startGuidedTour is called in upload mode', () => {
+    it('does not launch tour when in upload mode', () => {
       component.viewMode.set('upload');
       const startSpy = vi.spyOn(component.guidedTourService, 'startTour');
 
       component.startGuidedTour(true);
 
-      expect(startSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tourId: 'edit-pdf-upload',
-          force: true
-        })
-      );
+      expect(startSpy).not.toHaveBeenCalled();
     });
 
-    it('auto-triggers editor tour on first visit if not completed', () => {
+    it('does not trigger tour on upload screen during ngOnInit', () => {
       vi.useFakeTimers();
-      vi.spyOn(component.guidedTourService, 'isTourCompleted').mockReturnValue(false);
       const startSpy = vi.spyOn(component, 'startGuidedTour');
 
       component.viewMode.set('upload');
       component.ngOnInit();
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(2000);
 
-      expect(startSpy).toHaveBeenCalledWith(false);
+      expect(startSpy).not.toHaveBeenCalled();
       vi.useRealTimers();
     });
 

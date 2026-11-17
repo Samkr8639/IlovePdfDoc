@@ -425,15 +425,6 @@ export class EditPdfComponent implements OnInit, OnDestroy {
       canonical: 'https://pdftailor.in/edit-pdf',
       faqs: []
     });
-
-    // Auto-launch guided tour for first-time visitors on upload screen
-    if (this.viewMode() === 'upload' && !this.guidedTourService.isTourCompleted('edit-pdf-upload')) {
-      setTimeout(() => {
-        if (this.viewMode() === 'upload' && !this.guidedTourService.isActive()) {
-          this.startGuidedTour(false);
-        }
-      }, 800);
-    }
   }
 
   ngOnDestroy(): void {
@@ -443,30 +434,17 @@ export class EditPdfComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Starts or replays the interactive guided walkthrough
+   * Starts or replays the interactive guided walkthrough (available only in editor workspace)
    */
   startGuidedTour(force = true): void {
-    if (this.viewMode() === 'editor') {
-      this.guidedTourService.startTour({
-        tourId: 'edit-pdf',
-        steps: this.EDIT_PDF_TOUR_STEPS,
-        force
-      });
-    } else {
-      this.guidedTourService.startTour({
-        tourId: 'edit-pdf-upload',
-        steps: [
-          {
-            id: 'step-upload-intro',
-            title: 'Upload Your PDF',
-            content: 'Drag and drop your PDF document here or browse files to begin editing, annotating, and modifying text directly in your browser.',
-            targetSelector: '.hero-dropzone-wrap',
-            placement: 'bottom'
-          }
-        ],
-        force
-      });
+    if (this.viewMode() !== 'editor') {
+      return;
     }
+    this.guidedTourService.startTour({
+      tourId: 'edit-pdf',
+      steps: this.EDIT_PDF_TOUR_STEPS,
+      force
+    });
   }
 
   // --- PDF Loading ---
