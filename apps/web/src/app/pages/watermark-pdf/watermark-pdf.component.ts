@@ -240,7 +240,7 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     {
       id: 'step-topbar-controls',
       title: 'Page Navigation & Compare',
-      content: 'Flip between pages, click or hold "Hold to compare" (or press C) to preview the original PDF without watermark, and use the floating bottom capsule to zoom or fit to screen.',
+      content: 'Flip between pages, zoom in or out, fit to screen, and click or hold "Hold to compare" (or press C) to preview the original PDF without watermarks.',
       targetSelector: '.tour-topbar-controls',
       placement: 'bottom',
       actionBeforeStep: () => {

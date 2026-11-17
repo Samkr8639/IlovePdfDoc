@@ -355,6 +355,48 @@
               </svg>
             </button>
           </div>
+
+          <div class="toolbar-divider" aria-hidden="true"></div>
+
+          <div class="toolbar-zoom-group">
+            <button
+              type="button"
+              class="ctrl-btn"
+              [disabled]="zoom() <= 0.5"
+              (click)="onZoomChange(zoom() - 0.25)"
+              aria-label="Zoom out"
+              title="Zoom out"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+
+            <span class="zoom-level-text">{{ (zoom() * 100) | number:'1.0-0' }}%</span>
+
+            <button
+              type="button"
+              class="ctrl-btn"
+              [disabled]="zoom() >= 3.0"
+              (click)="onZoomChange(zoom() + 0.25)"
+              aria-label="Zoom in"
+              title="Zoom in"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="ctrl-btn btn-fit-text"
+              (click)="onZoomChange(1.0)"
+              title="Reset zoom to 100%"
+            >
+              Fit
+            </button>
+          </div>
         </div>
 
         <!-- Right: Hold to Compare (and sync toggle for multi-file) -->
@@ -435,62 +477,6 @@
         (positionChange)="onPositionChange($event)"
         (sizeChange)="onSizeChange($event)"
       ></app-watermark-preview>
-
-      <!-- FLOATING BOTTOM ZOOM CAPSULE (Matches Edit PDF / Sign PDF canonical design) -->
-      <div class="bottom-floating-bar" role="toolbar" aria-label="Zoom controls">
-        <button
-          type="button"
-          class="bar-icon-btn"
-          [disabled]="zoom() <= 0.5"
-          (click)="onZoomChange(zoom() - 0.25)"
-          aria-label="Zoom out"
-          title="Zoom out"
-        >
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          class="bar-text-btn"
-          (click)="onZoomChange(1.0)"
-          title="Reset zoom to 100%"
-        >
-          {{ (zoom() * 100) | number:'1.0-0' }}%
-        </button>
-
-        <button
-          type="button"
-          class="bar-icon-btn"
-          [disabled]="zoom() >= 3.0"
-          (click)="onZoomChange(zoom() + 0.25)"
-          aria-label="Zoom in"
-          title="Zoom in"
-        >
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </button>
-
-        <div class="bar-divider" aria-hidden="true"></div>
-
-        <button
-          type="button"
-          class="bar-icon-btn"
-          (click)="onZoomChange(1.0)"
-          title="Fit to Screen"
-          aria-label="Fit to Screen"
-        >
-          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <polyline points="9 21 3 21 3 15"></polyline>
-            <line x1="21" y1="3" x2="14" y2="10"></line>
-            <line x1="3" y1="21" x2="10" y2="14"></line>
-          </svg>
-        </button>
-      </div>
 
       <!-- CANONICAL FLOATING TOOLS DOCK (Exact match to previous pages) -->
       <div class="floating-tools-dock" role="toolbar" aria-label="Add more documents">
