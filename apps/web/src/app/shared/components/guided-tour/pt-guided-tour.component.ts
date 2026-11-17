@@ -11,6 +11,15 @@ export interface PopoverStyle {
   transform?: string;
 }
 
+export type ArrowPlacement = 'left' | 'right' | 'top' | 'bottom' | null;
+
+export interface TourLayoutInfo {
+  popoverStyle: PopoverStyle;
+  arrowPlacement: ArrowPlacement;
+  arrowStyle: Record<string, string | undefined>;
+  connectorPath: string | null;
+}
+
 @Component({
   selector: 'app-pt-guided-tour',
   standalone: true,
@@ -50,64 +59,96 @@ export class PtGuidedTourComponent {
     };
   });
 
-  // Dynamic Popover Style based on target positioning
-  readonly popoverStyle = computed<PopoverStyle>(() => {
+  // Dynamic Layout Calculation (Popover Position, Caret Arrow & SVG Connector)
+  readonly layoutCalculation = computed<TourLayoutInfo>(() => {
     const s = this.spotlight();
     const vw = this.vw();
     const vh = this.vh();
 
-    // Mobile dock
+    // Mobile layout (<= 640px)
     if (vw <= 640) {
-      return {
+      const popoverStyle: PopoverStyle = {
         top: 'auto',
         bottom: '20px',
         left: '16px',
         right: '16px',
         width: 'auto'
       };
+
+      let connectorPath: string | null = null;
+      if (s) {
+        const cardY = vh - 220;
+        const cardCenterX = vw / 2;
+        const targetCenterX = Math.max(20, Math.min(vw - 20, s.x + s.width / 2));
+        const targetBottomY = Math.min(cardY - 14, s.y + s.height + 4);
+        if (targetBottomY < cardY - 18) {
+          connectorPath = `M ${cardCenterX} ${cardY} C ${cardCenterX} ${(cardY + targetBottomY) / 2}, ${targetCenterX} ${(cardY + targetBottomY) / 2}, ${targetCenterX} ${targetBottomY}`;
+        }
+      }
+
+      return {
+        popoverStyle,
+        arrowPlacement: 'bottom',
+        arrowStyle: {
+          top: '-7px',
+          left: '50%',
+          transform: 'translateX(-50%) rotate(45deg)'
+        },
+        connectorPath
+      };
     }
 
     if (!s) {
       return {
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '360px'
+        popoverStyle: {
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '360px'
+        },
+        arrowPlacement: null,
+        arrowStyle: {},
+        connectorPath: null
       };
     }
 
     const cardWidth = 360;
     const cardHeight = 220; // approximate height for placement calculation
     const step = this.currentStep();
-    const placement = step?.placement || 'bottom';
+    const desiredPlacement = step?.placement || 'bottom';
 
+    let actualPlacement: 'left' | 'right' | 'top' | 'bottom' = 'bottom';
     let left = s.x + (s.width - cardWidth) / 2;
     let top = s.y + s.height + 16;
 
-    if (placement === 'bottom') {
+    if (desiredPlacement === 'bottom') {
+      actualPlacement = 'bottom';
       top = s.y + s.height + 16;
       if (top + cardHeight > vh - 20 && s.y - cardHeight - 16 >= 20) {
-        // Flip to top
+        actualPlacement = 'top';
         top = s.y - cardHeight - 16;
       }
-    } else if (placement === 'top') {
+    } else if (desiredPlacement === 'top') {
+      actualPlacement = 'top';
       top = s.y - cardHeight - 16;
       if (top < 20 && s.y + s.height + cardHeight + 16 <= vh - 20) {
-        // Flip to bottom
+        actualPlacement = 'bottom';
         top = s.y + s.height + 16;
       }
-    } else if (placement === 'left') {
+    } else if (desiredPlacement === 'left') {
+      actualPlacement = 'left';
       left = s.x - cardWidth - 16;
       top = s.y + (s.height - cardHeight) / 2;
       if (left < 20 && s.x + s.width + cardWidth + 16 <= vw - 20) {
-        // Flip to right
+        actualPlacement = 'right';
         left = s.x + s.width + 16;
       }
-    } else if (placement === 'right') {
+    } else if (desiredPlacement === 'right') {
+      actualPlacement = 'right';
       left = s.x + s.width + 16;
       top = s.y + (s.height - cardHeight) / 2;
       if (left + cardWidth > vw - 20 && s.x - cardWidth - 16 >= 20) {
-        // Flip to left
+        actualPlacement = 'left';
         left = s.x - cardWidth - 16;
       }
     }
@@ -116,12 +157,79 @@ export class PtGuidedTourComponent {
     left = Math.max(16, Math.min(vw - cardWidth - 16, left));
     top = Math.max(16, Math.min(vh - cardHeight - 16, top));
 
+    // Calculate Arrow Coordinates & SVG Connector Path
+    const targetCenterX = s.x + s.width / 2;
+    const targetCenterY = s.y + s.height / 2;
+
+    const arrowStyle: { [key: string]: string } = {};
+    let connectorPath: string | null = null;
+
+    if (actualPlacement === 'left') {
+      // Card is to LEFT of target -> caret arrow on RIGHT edge of card
+      const arrowTopClamped = Math.max(24, Math.min(cardHeight - 32, targetCenterY - top - 7));
+      arrowStyle['top'] = `${arrowTopClamped}px`;
+      arrowStyle['right'] = '-7px';
+
+      const startX = left + cardWidth;
+      const startY = top + arrowTopClamped + 7;
+      const endX = Math.max(startX + 6, s.x - 4);
+      const endY = targetCenterY;
+
+      connectorPath = `M ${startX} ${startY} C ${(startX + endX) / 2} ${startY}, ${(startX + endX) / 2} ${endY}, ${endX} ${endY}`;
+    } else if (actualPlacement === 'right') {
+      // Card is to RIGHT of target -> caret arrow on LEFT edge of card
+      const arrowTopClamped = Math.max(24, Math.min(cardHeight - 32, targetCenterY - top - 7));
+      arrowStyle['top'] = `${arrowTopClamped}px`;
+      arrowStyle['left'] = '-7px';
+
+      const startX = left;
+      const startY = top + arrowTopClamped + 7;
+      const endX = Math.min(startX - 6, s.x + s.width + 4);
+      const endY = targetCenterY;
+
+      connectorPath = `M ${startX} ${startY} C ${(startX + endX) / 2} ${startY}, ${(startX + endX) / 2} ${endY}, ${endX} ${endY}`;
+    } else if (actualPlacement === 'top') {
+      // Card is ABOVE target -> caret arrow on BOTTOM edge of card
+      const arrowLeftClamped = Math.max(24, Math.min(cardWidth - 32, targetCenterX - left - 7));
+      arrowStyle['left'] = `${arrowLeftClamped}px`;
+      arrowStyle['bottom'] = '-7px';
+
+      const startX = left + arrowLeftClamped + 7;
+      const startY = top + cardHeight;
+      const endX = targetCenterX;
+      const endY = Math.max(startY + 6, s.y - 4);
+
+      connectorPath = `M ${startX} ${startY} C ${startX} ${(startY + endY) / 2}, ${endX} ${(startY + endY) / 2}, ${endX} ${endY}`;
+    } else {
+      // Card is BELOW target -> caret arrow on TOP edge of card
+      const arrowLeftClamped = Math.max(24, Math.min(cardWidth - 32, targetCenterX - left - 7));
+      arrowStyle['left'] = `${arrowLeftClamped}px`;
+      arrowStyle['top'] = '-7px';
+
+      const startX = left + arrowLeftClamped + 7;
+      const startY = top;
+      const endX = targetCenterX;
+      const endY = Math.min(startY - 6, s.y + s.height + 4);
+
+      connectorPath = `M ${startX} ${startY} C ${startX} ${(startY + endY) / 2}, ${endX} ${(startY + endY) / 2}, ${endX} ${endY}`;
+    }
+
     return {
-      top: `${top}px`,
-      left: `${left}px`,
-      width: `${cardWidth}px`
+      popoverStyle: {
+        top: `${top}px`,
+        left: `${left}px`,
+        width: `${cardWidth}px`
+      },
+      arrowPlacement: actualPlacement,
+      arrowStyle,
+      connectorPath
     };
   });
+
+  readonly popoverStyle = computed<PopoverStyle>(() => this.layoutCalculation().popoverStyle);
+  readonly arrowPlacement = computed<ArrowPlacement>(() => this.layoutCalculation().arrowPlacement);
+  readonly arrowStyle = computed<Record<string, string | undefined>>(() => this.layoutCalculation().arrowStyle);
+  readonly connectorPath = computed<string | null>(() => this.layoutCalculation().connectorPath);
 
   constructor() {
     if (typeof window !== 'undefined') {

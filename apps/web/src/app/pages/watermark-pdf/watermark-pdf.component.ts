@@ -211,35 +211,153 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     { token: '{filename}', label: 'Document name' }
   ];
 
-  // Interactive Guided Tour Steps
+  // Interactive Guided Tour Steps Covering Every Key Control
   readonly WATERMARK_TOUR_STEPS: TourStep[] = [
     {
       id: 'step-files-dock',
-      title: 'Upload & Manage Files',
-      content: 'Add multiple PDFs or upload directly from your computer, Google Drive, or Dropbox. You can watermark multiple files at once.',
+      title: 'Upload & Add Files',
+      content: 'Add multiple PDF documents from your computer, Google Drive, or Dropbox. When multiple files are loaded, switch between them in the top bar.',
       targetSelector: '.floating-tools-dock',
-      placement: 'left'
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(false);
+        }
+      }
     },
     {
       id: 'step-workspace-preview',
-      title: 'Explore the Workspace',
-      content: 'Preview your document with watermarks in real time. Drag the watermark anywhere on the page, or use corner handles to resize and rotate.',
+      title: 'Live Canvas & Handles',
+      content: 'Preview your document in real time. Drag the watermark to position it anywhere, rotate with the top circle handle, or resize with the 4 corner handles.',
       targetSelector: 'app-watermark-preview',
-      placement: 'bottom'
+      placement: 'bottom',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(false);
+        }
+      }
     },
     {
-      id: 'step-watermark-settings',
-      title: 'Customize Your Settings',
-      content: 'Fine-tune your watermark with text or image options, typography, transparency, rotation, 9-point grid alignment, or full mosaic repeat.',
-      targetSelector: '.sidebar-action-panel',
-      placement: 'left'
+      id: 'step-topbar-controls',
+      title: 'Page Navigation & Compare',
+      content: 'Flip between pages, zoom in or out, fit to screen, and click or hold "Hold to compare" (or press C) to preview the original PDF without watermarks.',
+      targetSelector: '.tour-topbar-controls',
+      placement: 'bottom',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(false);
+        }
+      }
+    },
+    {
+      id: 'step-watermark-mode',
+      title: 'Text or Image Watermark',
+      content: 'Choose "Place text" to stamp typography and dynamic tokens, or "Place image" to stamp your company logo, transparent PNG, or graphic mark.',
+      targetSelector: '.segmented-tabs-wrapper',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-text-tokens',
+      title: 'Watermark Text & Tokens',
+      content: 'Type your message, click quick chips (Confidential, Draft, Sample), or insert dynamic tokens such as {page}, {pages}, {date}, and {filename}.',
+      targetSelector: '.tour-text-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        this.setActiveTab('text');
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-typography-styling',
+      title: 'Typography, Size & Color',
+      content: 'Choose from 8 bundled fonts, format with Bold or Italic, adjust the font size slider with quick preset buttons (18–72 pt) or Auto-fit, and pick your color.',
+      targetSelector: '.tour-typography-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        this.setActiveTab('text');
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-position-grid',
+      title: '9-Point Position Grid & Margin',
+      content: 'Snap your watermark to any of the 9 anchor points (corners, edges, or center) and fine-tune page edge margins in millimeters.',
+      targetSelector: '.tour-position-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-opacity-control',
+      title: 'Opacity & Transparency',
+      content: 'Adjust transparency from a faint background watermark (25%) to an opaque stamp (100%), with convenient quick-select chips.',
+      targetSelector: '.tour-opacity-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-rotation-control',
+      title: 'Rotation Angle',
+      content: 'Rotate at custom angles or select one-click presets like 45° diagonal, 90° vertical, or 180° upside-down.',
+      targetSelector: '.tour-rotation-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-mosaic-control',
+      title: 'Repeat as Mosaic Pattern',
+      content: 'Tile your watermark repeatedly across the entire document page in a diagonal grid with customizable horizontal and vertical spacing.',
+      targetSelector: '.tour-mosaic-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
+    },
+    {
+      id: 'step-pages-layer',
+      title: 'Page Range & Layer Order',
+      content: 'Choose which pages to watermark (All, Odd, Even, First, Last, or custom ranges) and stamp Over or Below the PDF content.',
+      targetSelector: '.tour-pages-control',
+      placement: 'left',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
     },
     {
       id: 'step-process-download',
       title: 'Process and Download',
-      content: 'When ready, click "Add watermark" to stamp your documents privately in your browser and download the watermarked PDF or ZIP archive.',
+      content: 'When ready, click "Add watermark" to stamp your PDF privately in your browser with zero server uploads, and download your finished PDF or ZIP.',
       targetSelector: '.giant-action-submit-btn',
-      placement: 'top'
+      placement: 'top',
+      actionBeforeStep: () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+          this.isSidePanelOpen.set(true);
+        }
+      }
     }
   ];
 

@@ -134,6 +134,16 @@
 - **Max File Size**: 100 MB
 - **Description**: Draw, type, or upload your signature and stamp dates, initials, and text fields directly onto any PDF inside your browser with zero file uploads.
 
+### Watermark PDF
+- **URL**: https://pdftailor.com/watermark-pdf
+- **Identifier**: urn:air:pdftailor:tools:watermark-pdf
+- **Category**: edit
+- **Processing Mode**: 100% Client-Side (Browser WebAssembly)
+- **Accepted File Types**: .pdf, application/pdf
+- **Max Files Allowed**: 10
+- **Max File Size**: 100 MB
+- **Description**: Stamp text or image watermarks on your PDF files online free. Customize typography, position, transparency, and mosaic tiling privately in your browser.
+
 
 ## Security & Verification
 All PDFTailor tools support programmatic browser automation and WebMCP form interaction. Documents processed client-side remain in sandbox RAM. Server conversions are subject to strict per-request execution limits and instantaneous memory purges.

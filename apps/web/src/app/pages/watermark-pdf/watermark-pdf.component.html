@@ -322,7 +322,7 @@
         </div>
 
         <!-- Center: Page Navigation & Zoom Controls -->
-        <div class="top-bar-center">
+        <div class="top-bar-center tour-topbar-controls">
           <div class="toolbar-nav-group">
             <button
               type="button"
@@ -613,7 +613,7 @@
         @if (activeTab() === 'text') {
         <div class="tab-pane-content" role="tabpanel" aria-label="Text watermark settings">
           <!-- Text Area Input -->
-          <div class="form-field-group">
+          <div class="form-field-group tour-text-control">
             <div class="field-label-row">
               <label for="watermarkTextInput" class="field-label">WATERMARK TEXT</label>
               <span class="char-count-badge">{{ settings().textConfig.text.length }}/500</span>
@@ -665,7 +665,7 @@
           </div>
 
           <!-- Typography Toolbar -->
-          <div class="form-field-group">
+          <div class="form-field-group tour-typography-control">
             <label class="field-label" for="fontFamilySelect">TYPOGRAPHY</label>
             <div class="typography-toolbar-row">
               <select id="fontFamilySelect" class="pt-select-input font-select"
@@ -892,7 +892,7 @@
         <!-- COMMON OPTIONS (APPLY TO BOTH TEXT AND IMAGE) -->
 
         <!-- MOSAIC WATERMARK (Phase 2) -->
-        <div class="form-field-group">
+        <div class="form-field-group tour-mosaic-control">
           <label class="pt-checkbox-label">
             <input type="checkbox" [checked]="settings().common.mosaic" (change)="toggleMosaic()" />
             <span class="bold-label">Repeat watermark as mosaic pattern</span>
@@ -928,7 +928,7 @@
         </div>
 
         <!-- 1. POSITION (3x3 Grid) -->
-        <div class="form-field-group" [class.field-group-disabled]="settings().common.mosaic">
+        <div class="form-field-group tour-position-control" [class.field-group-disabled]="settings().common.mosaic">
           <div class="field-label-row">
             <label class="field-label">POSITION</label>
             @if (settings().common.mosaic) {
@@ -996,7 +996,7 @@
         </div>
 
         <!-- 2. OPACITY (Strict: "Opacity" word only) -->
-        <div class="form-field-group">
+        <div class="form-field-group tour-opacity-control">
           <div class="field-label-row">
             <label for="opacitySlider" class="field-label">OPACITY</label>
             <span class="slider-val-badge">{{ settings().common.opacity }}%</span>
@@ -1025,7 +1025,7 @@
         </div>
 
         <!-- 3. ROTATION -->
-        <div class="form-field-group">
+        <div class="form-field-group tour-rotation-control">
           <div class="field-label-row">
             <label class="field-label">ROTATION</label>
             <span class="slider-val-badge">{{ settings().common.rotation }}°</span>
@@ -1055,7 +1055,7 @@
         </div>
 
         <!-- 4. PAGES -->
-        <div class="form-field-group">
+        <div class="form-field-group tour-pages-control">
           <label class="field-label">PAGES</label>
           <div class="radio-card-stack" role="radiogroup" aria-label="Page selection">
             <label class="mode-radio-card" [class.selected]="settings().common.pageMode === 'all'">
@@ -1114,7 +1114,7 @@
         </div>
 
         <!-- 5. LAYER (OVER VS BELOW) -->
-        <div class="form-field-group">
+        <div class="form-field-group tour-layer-control">
           <label class="field-label">LAYER</label>
           <div class="radio-card-stack" role="radiogroup" aria-label="Watermark layer order">
             <label class="mode-radio-card" [class.selected]="settings().common.layer === 'over'">

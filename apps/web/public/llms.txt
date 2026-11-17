@@ -17,6 +17,7 @@
 - [PDF to JPG](https://pdftailor.com/pdf-to-jpg): Convert each PDF page into a JPG or extract all images contained in a PDF.
 - [JPG to PDF](https://pdftailor.com/jpg-to-pdf): Convert JPG images to PDF in seconds. Easily adjust orientation and margins.
 - [Sign PDF](https://pdftailor.com/sign-pdf): Sign yourself or request electronic signatures from others.
+- [Watermark PDF](https://pdftailor.com/watermark-pdf): Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.
 
 ## Privacy & Security Architecture
 

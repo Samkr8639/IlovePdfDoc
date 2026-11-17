@@ -59,6 +59,62 @@
   transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Caret Arrow on Card Edge */
+.popover-caret-arrow {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: var(--pt-surface-white, #FFFFFF);
+  border: 1px solid var(--pt-soft-outline, #E4E7EC);
+  transform: rotate(45deg);
+  z-index: 10;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.popover-caret-arrow[data-placement="left"] {
+  /* Popover is to the left of target -> arrow on right edge */
+  right: -7px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.popover-caret-arrow[data-placement="right"] {
+  /* Popover is to the right of target -> arrow on left edge */
+  left: -7px;
+  border-right: none;
+  border-top: none;
+}
+
+.popover-caret-arrow[data-placement="top"] {
+  /* Popover is above target -> arrow on bottom edge */
+  bottom: -7px;
+  border-left: none;
+  border-top: none;
+}
+
+.popover-caret-arrow[data-placement="bottom"] {
+  /* Popover is below target -> arrow on top edge */
+  top: -7px;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* SVG Connector Line & Arrow pointing to target */
+.tour-connector-line {
+  filter: drop-shadow(0 0 6px rgba(20, 184, 166, 0.45));
+  animation: tourLineFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tourLineFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes tourCardFadeIn {
   from {
     opacity: 0;

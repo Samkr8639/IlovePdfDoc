@@ -552,15 +552,15 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794809831.6562312,
-    "seen": 1794809859.329863,
-    "ast_hash": "3bfecf4e6c9b957bf19dc088355675ac",
+    "mtime": 1794894243.6669278,
+    "seen": 1794894305.9008143,
+    "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794809831.6569042,
-    "seen": 1794809859.3298664,
-    "ast_hash": "3bfecf4e6c9b957bf19dc088355675ac",
+    "mtime": 1794894243.6674383,
+    "seen": 1794894305.9008203,
+    "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/i18n/en.json": {
@@ -1676,15 +1676,15 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794809831.6557138,
-    "seen": 1794809859.3301713,
-    "ast_hash": "f1161ccbd2f301701aed620826199b97",
+    "mtime": 1794894243.6664152,
+    "seen": 1794894305.90153,
+    "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794809831.6552293,
-    "seen": 1794809859.3301723,
-    "ast_hash": "e1e7368b0f8076c86d1e15877703d48a",
+    "mtime": 1794894243.6658964,
+    "seen": 1794894305.9015324,
+    "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
   "apps/web/src/app/app.component.html": {
@@ -2594,8 +2594,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/core/services/watermark-pdf/watermark-text-shaper.ts": {
-    "mtime": 1794837252.1021268,
-    "seen": 1794837367.7590492,
+    "mtime": 1794837452.3314495,
+    "seen": 1794894305.9010756,
     "ast_hash": "8bb7471248e93e3ffc7fe3676ca6d8e7",
     "semantic_hash": ""
   },
@@ -2612,8 +2612,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
-    "mtime": 1794837069.9866407,
-    "seen": 1794837367.7591655,
+    "mtime": 1794837452.4864151,
+    "seen": 1794894305.901335,
     "ast_hash": "c495186213d44e46b54550dcecf1eaf4",
     "semantic_hash": ""
   },
@@ -2624,9 +2624,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.ts": {
-    "mtime": 1794837181.5079472,
-    "seen": 1794837367.7591677,
-    "ast_hash": "a2e158ad38fee8c8b1d6985727442251",
+    "mtime": 1794894179.9227722,
+    "seen": 1794894305.9013402,
+    "ast_hash": "8964eb7b0af0c75f25df6a5a5647c8cd",
     "semantic_hash": ""
   },
   "packages/contracts/src/watermark-pdf.ts": {
@@ -2642,9 +2642,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794837191.76591,
-    "seen": 1794837367.7592914,
-    "ast_hash": "01f61e773b94d02b19f794fc9b399d44",
+    "mtime": 1794893937.5544243,
+    "seen": 1794894305.9015994,
+    "ast_hash": "2ddf58fb461877026bbf3f9ad736106a",
     "semantic_hash": ""
   },
   "docs/watermark-pdf-requirements.md": {
@@ -2726,21 +2726,21 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/guided-tour/pt-guided-tour.component.spec.ts": {
-    "mtime": 1794834009.5362327,
-    "seen": 1794834923.8381252,
-    "ast_hash": "f65b47883d797df9573437d16596b6c7",
+    "mtime": 1794894030.251182,
+    "seen": 1794894305.9013603,
+    "ast_hash": "1fbdab139a53f4f3404c7c5ed6bb0cd0",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/guided-tour/pt-guided-tour.component.ts": {
-    "mtime": 1794834206.259747,
-    "seen": 1794834923.8381264,
-    "ast_hash": "6fff61494bac41169ee0dc8dcd02c0cc",
+    "mtime": 1794894003.9486694,
+    "seen": 1794894305.9013627,
+    "ast_hash": "3cb2a92ea2ed2d6a7a7e31c4b1c49d22",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/guided-tour/pt-guided-tour.component.html": {
-    "mtime": 1794833975.4507384,
-    "seen": 1794834923.8382447,
-    "ast_hash": "e3a8872a157c204bb17e259536fde83c",
+    "mtime": 1794893800.9254422,
+    "seen": 1794894305.9016154,
+    "ast_hash": "2da55722f9eae63e0d3fa864a2a94c7d",
     "semantic_hash": ""
   },
   "package-lock.json": {

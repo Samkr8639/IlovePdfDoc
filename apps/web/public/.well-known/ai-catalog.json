@@ -253,6 +253,24 @@
         "sign",
         "pdf"
       ]
+    },
+    {
+      "identifier": "urn:air:pdftailor:tools:watermark-pdf",
+      "displayName": "Watermark PDF",
+      "type": "application/mcp-server-card+json",
+      "description": "Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.",
+      "url": "https://pdftailor.com/watermark-pdf",
+      "representativeQueries": [
+        "watermark pdf online",
+        "how to watermark pdf",
+        "free watermark pdf tool"
+      ],
+      "tags": [
+        "pdf",
+        "edit",
+        "watermark",
+        "pdf"
+      ]
     }
   ]
 }

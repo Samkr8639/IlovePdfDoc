@@ -121,4 +121,19 @@ describe('PtGuidedTourComponent', () => {
 
     expect(tourService.isActive()).toBe(false);
   });
+
+  it('renders directional caret arrow and SVG connector pointing to target control', () => {
+    tourService.startTour(mockConfig);
+    tourService.targetRect.set({ x: 700, y: 150, width: 80, height: 120, radius: 8 });
+    fixture.detectChanges();
+
+    const caretArrow = fixture.nativeElement.querySelector('.popover-caret-arrow');
+    expect(caretArrow).not.toBeNull();
+    expect(caretArrow.getAttribute('data-placement')).toBeTruthy();
+
+    const connectorLine = fixture.nativeElement.querySelector('.tour-connector-line');
+    expect(connectorLine).not.toBeNull();
+    expect(connectorLine.getAttribute('d')).toContain('M');
+    expect(connectorLine.getAttribute('marker-end')).toBe('url(#tourArrowHead)');
+  });
 });
