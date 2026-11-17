@@ -43,52 +43,54 @@ import { FormsModule } from '@angular/forms';
         <span class="page-total">/ {{ totalPages() }}</span>
       </div>
 
-      <div class="bar-divider"></div>
+      @if (showZoom()) {
+        <div class="bar-divider"></div>
 
-      <button
-        type="button"
-        class="bar-icon-btn"
-        (click)="zoomOut.emit()"
-        title="Zoom out">
-        <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
+        <button
+          type="button"
+          class="bar-icon-btn"
+          (click)="zoomOut.emit()"
+          title="Zoom out">
+          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
 
-      <button
-        type="button"
-        class="bar-icon-btn"
-        (click)="zoomIn.emit()"
-        title="Zoom in">
-        <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
+        <button
+          type="button"
+          class="bar-icon-btn"
+          (click)="zoomIn.emit()"
+          title="Zoom in">
+          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
 
-      <button
-        type="button"
-        class="bar-text-btn"
-        (click)="resetZoom.emit()"
-        title="Reset Zoom">
-        {{ (zoom() * 100) | number:'1.0-0' }}%
-      </button>
+        <button
+          type="button"
+          class="bar-text-btn"
+          (click)="resetZoom.emit()"
+          title="Reset Zoom">
+          {{ (zoom() * 100) | number:'1.0-0' }}%
+        </button>
 
-      <button
-        type="button"
-        class="bar-icon-btn"
-        (click)="resetZoom.emit()"
-        title="Fit to Screen">
-        <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 3 21 3 21 9" />
-          <polyline points="9 21 3 21 3 15" />
-          <line x1="21" y1="3" x2="14" y2="10" />
-          <line x1="3" y1="21" x2="10" y2="14" />
-        </svg>
-      </button>
+        <button
+          type="button"
+          class="bar-icon-btn"
+          (click)="resetZoom.emit()"
+          title="Fit to Screen">
+          <svg class="lucide-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9" />
+            <polyline points="9 21 3 21 3 15" />
+            <line x1="21" y1="3" x2="14" y2="10" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+        </button>
+      }
     </div>
   `,
   styles: [`
@@ -110,6 +112,7 @@ export class PdfBottomBarComponent {
   readonly currentPageIndex = input<number>(0);
   readonly totalPages = input<number>(1);
   readonly zoom = input<number>(1.0);
+  readonly showZoom = input<boolean>(true);
 
   readonly prevPage = output<void>();
   readonly nextPage = output<void>();

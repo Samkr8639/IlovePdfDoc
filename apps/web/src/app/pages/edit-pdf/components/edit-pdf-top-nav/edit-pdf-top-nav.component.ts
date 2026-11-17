@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { CommonModule, DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-edit-pdf-top-nav',
   standalone: true,
+  imports: [CommonModule, DecimalPipe],
   template: `
     <div class="top-toolbar-strip">
       <div class="top-toolbar-inner">
@@ -82,6 +84,49 @@ import { Component, input, output } from '@angular/core';
           </button>
         </div>
 
+        <div class="toolbar-divider" aria-hidden="true"></div>
+
+        <!-- Zoom Controls (matching watermark tool top-bar design) -->
+        <div class="toolbar-zoom-group" role="toolbar" aria-label="Zoom controls">
+          <button
+            type="button"
+            class="ctrl-btn"
+            [disabled]="zoom() <= 0.5"
+            (click)="zoomOut.emit()"
+            aria-label="Zoom out"
+            title="Zoom out"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+
+          <span class="zoom-level-text">{{ (zoom() * 100) | number:'1.0-0' }}%</span>
+
+          <button
+            type="button"
+            class="ctrl-btn"
+            [disabled]="zoom() >= 3.0"
+            (click)="zoomIn.emit()"
+            aria-label="Zoom in"
+            title="Zoom in"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="ctrl-btn btn-fit-text"
+            (click)="resetZoom.emit()"
+            title="Reset zoom to 100%"
+          >
+            Fit
+          </button>
+        </div>
+
         <!-- Change file on the far right -->
         <button type="button" class="btn-replace-doc" (click)="changeFile.emit()" title="Change PDF document">
           Change file
@@ -98,10 +143,14 @@ export class EditPdfTopNavComponent {
   readonly isExtractingPageText = input<boolean>(false);
   readonly canUndo = input<boolean>(false);
   readonly canRedo = input<boolean>(false);
+  readonly zoom = input<number>(1.0);
 
   readonly modeChange = output<'annotate' | 'edit'>();
   readonly undo = output<void>();
   readonly redo = output<void>();
+  readonly zoomIn = output<void>();
+  readonly zoomOut = output<void>();
+  readonly resetZoom = output<void>();
   readonly changeFile = output<void>();
 }
 

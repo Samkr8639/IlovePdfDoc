@@ -656,6 +656,38 @@ describe('EditPdfComponent Integration Tests', () => {
     expect(zoomOutSpy).toHaveBeenCalled();
   });
 
+  it('wires zoom in, zoom out, and reset zoom to top nav bar', () => {
+    const zoomInSpy = vi.spyOn(component, 'zoomIn');
+    const zoomOutSpy = vi.spyOn(component, 'zoomOut');
+    const resetZoomSpy = vi.spyOn(component, 'resetZoom');
+
+    component.viewMode.set('editor');
+    fixture.detectChanges();
+
+    const topNav = fixture.debugElement.nativeElement.querySelector('app-edit-pdf-top-nav');
+    expect(topNav).toBeTruthy();
+
+    const zoomGroup = topNav.querySelector('.toolbar-zoom-group');
+    expect(zoomGroup).toBeTruthy();
+
+    const zoomOutBtn = zoomGroup.querySelector('button[aria-label="Zoom out"]');
+    const zoomInBtn = zoomGroup.querySelector('button[aria-label="Zoom in"]');
+    const fitBtn = zoomGroup.querySelector('.btn-fit-text');
+
+    expect(zoomOutBtn).toBeTruthy();
+    expect(zoomInBtn).toBeTruthy();
+    expect(fitBtn).toBeTruthy();
+
+    zoomInBtn.click();
+    expect(zoomInSpy).toHaveBeenCalled();
+
+    zoomOutBtn.click();
+    expect(zoomOutSpy).toHaveBeenCalled();
+
+    fitBtn.click();
+    expect(resetZoomSpy).toHaveBeenCalled();
+  });
+
   it('supports PageDown and PageUp keys for page navigation', () => {
     component.pages.set([
       { pageIndex: 0, widthPt: 595, heightPt: 842, rotation: 0 },

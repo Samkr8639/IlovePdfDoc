@@ -743,6 +743,62 @@
   flex-shrink: 0;
 }
 
+/* ─── Top Toolbar Zoom Group (Matches Watermark Tool Canonical Design) ──────*/
+.toolbar-zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--pt-subtle-bg, #F6F8FA);
+  padding: 3px 6px;
+  border-radius: var(--pt-radius-md, 12px);
+  border: 1px solid var(--pt-soft-outline, #E4E7EC);
+  box-shadow: var(--pt-shadow-sm);
+  flex-shrink: 0;
+}
+
+.toolbar-zoom-group .ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--pt-radius-sm, 8px);
+  color: var(--pt-navy, #14213D);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.toolbar-zoom-group .ctrl-btn:hover:not(:disabled) {
+  background-color: var(--pt-surface-white, #FFFFFF);
+  color: var(--pt-teal-700, #0F766E);
+}
+
+.toolbar-zoom-group .ctrl-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.toolbar-zoom-group .zoom-level-text {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pt-navy, #14213D);
+  min-width: 38px;
+  text-align: center;
+  user-select: none;
+}
+
+.toolbar-zoom-group .btn-fit-text {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  width: auto;
+  padding: 0 8px;
+}
+
 /* Responsive: on narrow screens collapse Undo/Redo labels */
 @media (max-width: 480px) {
   .history-btn span {
@@ -3022,6 +3078,26 @@
     flex-shrink: 0;
   }
 
+  .toolbar-zoom-group {
+    padding: 2px 4px;
+    gap: 3px;
+  }
+
+  .toolbar-zoom-group .ctrl-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .toolbar-zoom-group .zoom-level-text {
+    font-size: 11px;
+    min-width: 32px;
+  }
+
+  .toolbar-zoom-group .btn-fit-text {
+    padding: 0 4px;
+    font-size: 11px;
+  }
+
   /* Center Canvas Viewport */
   .canvas-viewport {
     padding: 14px 8px 100px 8px !important;
@@ -3052,6 +3128,10 @@
 }
 
 @media (max-width: 480px) {
+  .toolbar-zoom-group .btn-fit-text {
+    display: none !important;
+  }
+
   .mode-pill-tab span {
     display: none !important;
   }

@@ -69,9 +69,13 @@
       [isExtractingPageText]="isExtractingPageText()"
       [canUndo]="history.canUndo()"
       [canRedo]="history.canRedo()"
+      [zoom]="zoom()"
       (modeChange)="setEditorMode($event)"
       (undo)="history.undo()"
       (redo)="history.redo()"
+      (zoomIn)="zoomIn()"
+      (zoomOut)="zoomOut()"
+      (resetZoom)="resetZoom()"
       (changeFile)="changeFile()" />
 
     <!-- MAIN WORKSPACE ROW -->
@@ -410,17 +414,16 @@
       <input #fileInputAddMore type="file" hidden accept=".pdf,application/pdf" (change)="onAddMoreFiles($event)" />
       </main>
 
-      <!-- BOTTOM FLOATING CAPSULE BAR -->
+      <!-- BOTTOM FLOATING CAPSULE BAR (Multi-page navigation) -->
+      @if (pages().length > 1) {
       <app-pdf-bottom-bar
+        [showZoom]="false"
         [currentPageIndex]="currentPageIndex()"
         [totalPages]="pages().length"
-        [zoom]="zoom()"
         (prevPage)="prevPage()"
         (nextPage)="nextPage()"
-        (goToPage)="setPageIndex($event)"
-        (zoomIn)="zoomIn()"
-        (zoomOut)="zoomOut()"
-        (resetZoom)="resetZoom()" />
+        (goToPage)="setPageIndex($event)" />
+      }
     </div>
 
     <!-- Mobile Backdrop -->
