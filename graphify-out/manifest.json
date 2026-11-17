@@ -1248,9 +1248,9 @@
     "semantic_hash": "cffe193261ca8fe2c74d49bc17ff7f65"
   },
   "apps/web/src/app/pages/excel-to-pdf/excel-to-pdf.component.ts": {
-    "mtime": 1794565499.1118605,
-    "seen": 1794569655.2385998,
-    "ast_hash": "080349d333e897a7a99b7cbfa96a936e",
+    "mtime": 1794895031.4053166,
+    "seen": 1794896156.789934,
+    "ast_hash": "6e50fefbb3f67a71de48bb68047f5fa5",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/gdpr-compliance/gdpr-compliance.component.ts": {
@@ -1284,9 +1284,9 @@
     "semantic_hash": "2c9fb5daaa5786b567df2d8670a6915e"
   },
   "apps/web/src/app/pages/merge-pdf/merge-pdf.component.ts": {
-    "mtime": 1794565499.1164699,
-    "seen": 1794569655.2386067,
-    "ast_hash": "04ed7141c4edb8c14c843ad5b86be789",
+    "mtime": 1794895075.6218297,
+    "seen": 1794896156.7899415,
+    "ast_hash": "8df18ca77889a641ba5f34d1ac973398",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/pdf-to-excel/pdf-to-excel.component.spec.ts": {
@@ -1296,9 +1296,9 @@
     "semantic_hash": "adae6f4a88ddc7dc7aa114e29039b7a9"
   },
   "apps/web/src/app/pages/pdf-to-excel/pdf-to-excel.component.ts": {
-    "mtime": 1794565499.1174717,
-    "seen": 1794569655.2386088,
-    "ast_hash": "d3bcddbbee8c3938d3295013a9764bf7",
+    "mtime": 1794895061.8380744,
+    "seen": 1794896156.7899442,
+    "ast_hash": "e5dfc4d84e447d20fd36e87b1918ccbc",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/pdf-to-jpg/pdf-to-jpg.component.spec.ts": {
@@ -1320,9 +1320,9 @@
     "semantic_hash": "b9777eaf46ebb5f6e1fa861deaf6517e"
   },
   "apps/web/src/app/pages/pdf-to-powerpoint/pdf-to-powerpoint.component.ts": {
-    "mtime": 1794565499.1204822,
-    "seen": 1794569655.2386136,
-    "ast_hash": "b461bf68d261ddd78f7f658d8c7ca377",
+    "mtime": 1794895068.4165258,
+    "seen": 1794896156.7899485,
+    "ast_hash": "c6b8083c829c646fc947d2c8cb176faf",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/pdf-to-word/pdf-to-word.component.spec.ts": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": "ea6e280b54c44d4744e56a197bc1ed85"
   },
   "apps/web/src/app/pages/powerpoint-to-pdf/powerpoint-to-pdf.component.ts": {
-    "mtime": 1794565499.1224823,
-    "seen": 1794569655.238618,
-    "ast_hash": "ade3bbf01a0dc48d646ec86244e30701",
+    "mtime": 1794895042.2002187,
+    "seen": 1794896156.789953,
+    "ast_hash": "372a3bef15aadfb0cb6852750eb28675",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/press-media-kit/press-media-kit.component.ts": {
@@ -1392,9 +1392,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/word-to-pdf/word-to-pdf.component.ts": {
-    "mtime": 1794813339.656448,
-    "seen": 1794813836.915909,
-    "ast_hash": "a13bf28c6d4548d9e146c2e5ef8a0eaa",
+    "mtime": 1794895053.3064547,
+    "seen": 1794896156.7899764,
+    "ast_hash": "92f9b6edbd318934ddf46d0fcacc6b85",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/back-to-top/back-to-top.component.ts": {
@@ -2624,9 +2624,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.ts": {
-    "mtime": 1794894179.9227722,
-    "seen": 1794894305.9013402,
-    "ast_hash": "8964eb7b0af0c75f25df6a5a5647c8cd",
+    "mtime": 1794896047.5891116,
+    "seen": 1794896156.7899737,
+    "ast_hash": "055ca682d752b3251cb8451f1c044b4f",
     "semantic_hash": ""
   },
   "packages/contracts/src/watermark-pdf.ts": {
@@ -2642,9 +2642,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794893937.5544243,
-    "seen": 1794894305.9015994,
-    "ast_hash": "2ddf58fb461877026bbf3f9ad736106a",
+    "mtime": 1794895996.000163,
+    "seen": 1794896156.7900937,
+    "ast_hash": "f9e3709267092c324a4ea901c0075d6f",
     "semantic_hash": ""
   },
   "docs/watermark-pdf-requirements.md": {
@@ -2732,14 +2732,14 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/guided-tour/pt-guided-tour.component.ts": {
-    "mtime": 1794894003.9486694,
-    "seen": 1794894305.9013627,
+    "mtime": 1794894778.850149,
+    "seen": 1794896156.789985,
     "ast_hash": "3cb2a92ea2ed2d6a7a7e31c4b1c49d22",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/guided-tour/pt-guided-tour.component.html": {
-    "mtime": 1794893800.9254422,
-    "seen": 1794894305.9016154,
+    "mtime": 1794894778.718385,
+    "seen": 1794896156.7900994,
     "ast_hash": "2da55722f9eae63e0d3fa864a2a94c7d",
     "semantic_hash": ""
   },
