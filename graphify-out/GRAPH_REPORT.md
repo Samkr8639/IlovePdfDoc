@@ -1,7 +1,7 @@
 # Graph Report - PDF-Tool  (2026-11-18)
 
 ## Corpus Check
-- 377 files · ~436,981 words
+- 377 files · ~437,024 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 60 file(s) not represented in the graph (top: .css 35, .woff 14, (none) 7)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c58c66d2`
+- Built from commit: `8982a9cd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -434,13 +434,13 @@
 ## Surprising Connections (you probably didn't know these)
 - `SigningRequestRecord` --references--> `AuditLogEntry`  [EXTRACTED]
   apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
+- `SignerRecord` --references--> `SignerStatus`  [EXTRACTED]
+  apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
 - `SigningRequestRecord` --references--> `PdfPageBoxMetrics`  [EXTRACTED]
   apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
 - `SigningRequestRecord` --references--> `SignFieldElement`  [EXTRACTED]
   apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
 - `SigningRequestRecord` --references--> `SignRequestOrder`  [EXTRACTED]
-  apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
-- `SigningRequestRecord` --references--> `SignRequestStatus`  [EXTRACTED]
   apps/api/src/services/sign/interfaces.ts → packages/contracts/src/sign-pdf.ts
 
 ## Import Cycles
@@ -969,16 +969,16 @@ Nodes (19): UploadConsentService, EditPdfHeroComponent, EditPdfTopNavComponent, 
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Output` connect `ContentEditableModelDirective` to `pdf.worker.min.mjs`, `XFAObject`, `WatermarkPreviewComponent`?**
-  _High betweenness centrality (0.376) - this node is a cross-community bridge._
+  _High betweenness centrality (0.346) - this node is a cross-community bridge._
 - **What connects `ImageAlignmentOption`, `ImageFitOption`, `ImageQualityOption` to the rest of the system?**
   _188 weakly-connected nodes found - possible missing edges._
 - **Should `pdf.worker.min.mjs` be split into smaller, more focused modules?**
   _Cohesion score 0.011965192168237854 - nodes in this community are weakly interconnected._
 - **Why does `ContentEditableModelDirective` connect `ContentEditableModelDirective` to `edit-pdf.component.ts`?**
-  _High betweenness centrality (0.225) - this node is a cross-community bridge._
+  _High betweenness centrality (0.219) - this node is a cross-community bridge._
 - **Should `XFAObjectArray` be split into smaller, more focused modules?**
   _Cohesion score 0.02040816326530612 - nodes in this community are weakly interconnected._
 - **Why does `WatermarkPreviewComponent` connect `WatermarkPreviewComponent` to `.computeFitZoom`, `ContentEditableModelDirective`, `watermark-pdf.component.ts`, `watermark-layout.service.ts`, `WatermarkPdfComponent`?**
-  _High betweenness centrality (0.167) - this node is a cross-community bridge._
+  _High betweenness centrality (0.130) - this node is a cross-community bridge._
 - **Should `StringObject` be split into smaller, more focused modules?**
   _Cohesion score 0.018489254108723135 - nodes in this community are weakly interconnected._

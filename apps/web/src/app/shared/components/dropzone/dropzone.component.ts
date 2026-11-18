@@ -155,6 +155,7 @@ export class DropzoneComponent {
   readonly ariaLabel = input<string>('Upload documents dropzone');
   readonly toolName = input<string>('');
   readonly toolDescription = input<string>('');
+  readonly showBottomActions = input<boolean>(false);
 
   readonly filesSelected = output<File[]>();
 

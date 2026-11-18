@@ -150,6 +150,7 @@
 
     <span class="sr-only" aria-live="polite">{{ liveMessage() }}</span>
 
+    @if (showBottomActions()) {
     <!-- PRIMARY ACTION ROW: SELECT FILE + CLOUD SIDECARS -->
     <div class="upload-action-row" (click)="$event.stopPropagation()">
       <button type="button" class="select-file-btn" (click)="fileInput.click()" title="Select files from your device">
@@ -220,5 +221,6 @@
         <span>Free &amp; Unlimited</span>
       </div>
     </div>
+    }
   </div>
 </form>

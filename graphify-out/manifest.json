@@ -552,14 +552,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794996487.0722656,
-    "seen": 1794996599.844344,
+    "mtime": 1794998544.9351003,
+    "seen": 1794998572.5302548,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794996487.0722656,
-    "seen": 1794996599.8443468,
+    "mtime": 1794998544.9356124,
+    "seen": 1794998572.530258,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
@@ -1404,9 +1404,9 @@
     "semantic_hash": "626d4f4cc64426b4ea4f2979e04d8812"
   },
   "apps/web/src/app/shared/components/dropzone/dropzone.component.ts": {
-    "mtime": 1794996463.8400714,
-    "seen": 1794996599.8446198,
-    "ast_hash": "bc1009355b583baa4eedaad950472fc9",
+    "mtime": 1794997876.6323433,
+    "seen": 1794998572.5305808,
+    "ast_hash": "48ca9b2136fc8d8f6ccab5f3e4b87288",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/file-list/file-list.component.ts": {
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794996487.0717497,
-    "seen": 1794996599.8447137,
+    "mtime": 1794998544.9345882,
+    "seen": 1794998572.5306737,
     "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794996487.0712314,
-    "seen": 1794996599.844715,
+    "mtime": 1794998544.9345882,
+    "seen": 1794998572.5306752,
     "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
@@ -1724,9 +1724,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/excel-to-pdf/excel-to-pdf.component.html": {
-    "mtime": 1794565499.1118605,
-    "seen": 1794569655.238725,
-    "ast_hash": "68228fc713269a92026ff8949444a312",
+    "mtime": 1794998513.0182738,
+    "seen": 1794998572.5306854,
+    "ast_hash": "8dc206c6a066e6fe31f752fae16bbeb8",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/gdpr-compliance/gdpr-compliance.component.html": {
@@ -1820,9 +1820,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/dropzone/dropzone.component.html": {
-    "mtime": 1794996418.7873373,
-    "seen": 1794996599.8447506,
-    "ast_hash": "95524f19f7d37ca26d27afbe86418830",
+    "mtime": 1794997876.6349075,
+    "seen": 1794998572.5307114,
+    "ast_hash": "164069e55739550eeeea89b15e5befe3",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/file-list/file-list.component.html": {
@@ -1940,9 +1940,9 @@
     "semantic_hash": ""
   },
   "docs/design.md": {
-    "mtime": 1794807071.0275586,
-    "seen": 1794807958.1868832,
-    "ast_hash": "8c98ff832b143a6fb1b017693f3605bf",
+    "mtime": 1794997279.8145623,
+    "seen": 1794998572.5307376,
+    "ast_hash": "5ed5c132aa5c2520467f48a1d47ebbd3",
     "semantic_hash": ""
   },
   "docs/edit-pdf-ocr.md": {
