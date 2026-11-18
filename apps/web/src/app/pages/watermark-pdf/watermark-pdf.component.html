@@ -275,7 +275,19 @@
     <!-- Hidden H1 for heading hierarchy accessibility -->
     <h1 class="visually-hidden">Watermark PDF Workspace</h1>
 
-    <!-- CANVAS MAIN AREA -->
+    <!-- 1. LEFT THUMBNAILS STRIP (Reference from edit-pdf) -->
+    <app-watermark-thumbnails-panel
+      [totalPages]="totalPages()"
+      [currentPage]="currentPage()"
+      [thumbnails]="pageThumbnails()"
+      [isCollapsed]="isThumbnailsCollapsed()"
+      (toggleCollapse)="toggleThumbnailsCollapse()"
+      (selectPage)="onThumbnailSelectPage($event)"
+      (rotatePage)="rotatePage($event)"
+      (deletePage)="deletePage($event)"
+    />
+
+    <!-- 2. CANVAS MAIN AREA -->
     <main class="canvas-main-area" aria-label="PDF Watermark Preview Area">
       <!-- UNIFIED WORKSPACE TOP TOOLBAR (Single Clean Bar) -->
       <div class="workspace-top-bar" role="toolbar" aria-label="Workspace document and preview controls">
@@ -465,14 +477,16 @@
       }
 
       <app-watermark-preview
+        #watermarkPreview
         [pdfDocProxy]="pdfDocProxy()"
         [settings]="settings()"
         [currentPage]="currentPage()"
         [totalPages]="totalPages()"
         [zoom]="zoom()"
         [isPageIncluded]="isCurrentPageIncluded()"
+        [includedPages]="includedPageNumbers()"
         [fontkitFont]="fontkitFont()"
-        (pageChange)="onPageChange($event)"
+        (pageChange)="onPreviewPageChange($event)"
         (zoomChange)="onZoomChange($event)"
         (positionChange)="onPositionChange($event)"
         (sizeChange)="onSizeChange($event)"

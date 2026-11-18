@@ -1,8 +1,8 @@
 /**
  * Watermark Preview Component
- * Live pdf.js canvas renderer with sub-100ms watermark overlay updates,
- * uniform opacity compositing (parity with PDF transparency groups),
- * Over/Below layer stack, and "Hold to compare".
+ * Live pdf.js multi-page canvas renderer with continuous smooth vertical scrolling,
+ * sub-100ms watermark overlay updates, uniform opacity compositing (parity with
+ * PDF transparency groups), Over/Below layer stack, and "Hold to compare".
  */
 
 import {
@@ -15,6 +15,7 @@ import {
   ViewChild,
   computed,
   effect,
+  inject,
   input,
   signal,
   untracked
@@ -38,6 +39,9 @@ import { VisualPageBox, WatermarkPlacement } from '../../../../core/services/wat
   styleUrl: './watermark-preview.component.css'
 })
 export class WatermarkPreviewComponent implements OnInit, OnDestroy {
+  private hostEl = inject(ElementRef);
+  private layoutService = inject(WatermarkLayoutService);
+
   @ViewChild('pageCanvas', { static: false }) pageCanvasRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('watermarkCanvas', { static: false }) watermarkCanvasRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('previewViewport', { static: false }) previewViewportRef?: ElementRef<HTMLDivElement>;
@@ -48,6 +52,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   readonly totalPages = input<number>(1);
   readonly zoom = input<number>(1.0);
   readonly isPageIncluded = input<boolean>(true);
+  readonly includedPages = input<number[]>([]);
   readonly fontkitFont = input<any>(null);
 
   @Output() pageChange = new EventEmitter<number>();
@@ -59,13 +64,16 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   readonly isCompareActive = signal<boolean>(false);
   readonly isRenderingPage = signal<boolean>(false);
 
-  private activeRenderTask: any = null;
-  private currentPdfPage: any = null;
+  private activeRenderTasks = new Map<number, any>();
   private offscreenCanvas: HTMLCanvasElement | null = null;
   private loadedImageElement: HTMLImageElement | null = null;
-  private cachedPageMetrics: VisualPageBox | null = null;
+  private cachedPageMetricsMap = new Map<number, VisualPageBox>();
   private keydownListener?: (e: KeyboardEvent) => void;
   private tokenService = new WatermarkTokenService();
+
+  // Scrolling state
+  private isScrollTicking = false;
+  private isUserScrollingToPage = false;
 
   // Interactive Drag, Rotate & Resize State
   isDragging = false;
@@ -80,20 +88,28 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   private activeHandle: 'tl' | 'tr' | 'br' | 'bl' | 't' | 'r' | 'b' | 'l' | null = null;
   private currentSinglePlacement: WatermarkPlacement | null = null;
   private guideSnaps = { showCenterX: false, showCenterY: false };
+  private activePointerPageNum = 1;
 
-  constructor(private layoutService: WatermarkLayoutService) {
+  // Pages array for continuous vertical scroll
+  readonly pagesList = computed(() =>
+    Array.from({ length: Math.max(1, this.totalPages()) }, (_, i) => i + 1)
+  );
+
+  constructor() {
     effect(() => {
       this.pdfDocProxy();
-      this.currentPage();
+      this.totalPages();
       this.zoom();
       untracked(() => {
-        this.renderPdfPage();
+        this.renderPdfPages();
       });
     });
 
     effect(() => {
       this.settings();
+      this.currentPage();
       this.isPageIncluded();
+      this.includedPages();
       this.fontkitFont();
       untracked(() => {
         this.drawWatermarkOverlay();
@@ -103,6 +119,10 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
   // Computed accessible aria-label describing current page & watermark
   readonly previewAriaLabel = computed(() => {
+    return this.getPageAriaLabel(this.currentPage());
+  });
+
+  getPageAriaLabel(pageNum: number): string {
     const s = this.settings();
     const isText = s.common.activeTab === 'text';
     const content = isText
@@ -110,9 +130,17 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       : 'image stamp';
     const rot = s.common.rotation ?? 45;
     const pos = s.common.position ?? 'center';
-    const includedStr = this.isPageIncluded() ? '' : ' (Not included)';
-    return `Page ${this.currentPage()} of ${this.totalPages()}, watermark ${content}, ${rot} degrees, ${pos}${includedStr}`;
-  });
+    const includedStr = this.checkIsPageIncluded(pageNum) ? '' : ' (Not included)';
+    return `Page ${pageNum} of ${this.totalPages()}, watermark ${content}, ${rot} degrees, ${pos}${includedStr}`;
+  }
+
+  checkIsPageIncluded(pageNum: number): boolean {
+    const inc = this.includedPages();
+    if (inc && inc.length > 0) {
+      return inc.includes(pageNum);
+    }
+    return this.isPageIncluded();
+  }
 
   ngOnInit(): void {
     // Keyboard shortcut 'C' for toggle compare
@@ -126,105 +154,144 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.activeRenderTask) {
-      try {
-        this.activeRenderTask.cancel();
-      } catch {}
-    }
+    this.cancelActiveRenderTasks();
     if (this.keydownListener) {
       window.removeEventListener('keydown', this.keydownListener);
     }
     this.offscreenCanvas = null;
     this.loadedImageElement = null;
+    this.cachedPageMetricsMap.clear();
+  }
+
+  private cancelActiveRenderTasks(): void {
+    for (const [, task] of this.activeRenderTasks.entries()) {
+      try {
+        task.cancel();
+      } catch {}
+    }
+    this.activeRenderTasks.clear();
   }
 
   /**
-   * Renders the underlying PDF page using pdf.js.
+   * Backward-compatibility wrapper for single-page render calls and tests.
    */
   async renderPdfPage(): Promise<void> {
+    await this.renderPdfPages();
+  }
+
+  /**
+   * Renders the underlying PDF pages using pdf.js into their corresponding canvases.
+   */
+  async renderPdfPages(): Promise<void> {
     const doc = this.pdfDocProxy();
-    const pageNum = this.currentPage();
     const total = this.totalPages();
     const currentZoom = this.zoom();
 
-    if (!doc || pageNum < 1 || pageNum > total) {
+    if (!doc || total < 1) {
       return;
     }
 
-    if (this.activeRenderTask) {
-      try {
-        this.activeRenderTask.cancel();
-      } catch {}
-      this.activeRenderTask = null;
-    }
-
+    this.cancelActiveRenderTasks();
     this.isRenderingPage.set(true);
 
+    const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
+
     try {
-      this.currentPdfPage = await doc.getPage(pageNum);
-      const page = this.currentPdfPage;
+      for (let p = 1; p <= total; p++) {
+        if (this.pdfDocProxy() !== doc) break; // Terminated/switched document
+        const pdfPage = await doc.getPage(p);
 
-      // Extract box metrics
-      const crop = page.view || [0, 0, 612, 792];
-      const rot = page.rotate || 0;
-      const userUnit = page.userUnit || 1.0;
+        // Extract box metrics
+        const crop = pdfPage.view || [0, 0, 612, 792];
+        const rot = pdfPage.rotate || 0;
+        const userUnit = pdfPage.userUnit || 1.0;
 
-      this.cachedPageMetrics = this.layoutService.computeVisualPageBox(
-        crop,
-        page.mediaBox || crop,
-        rot,
-        userUnit,
-        pageNum - 1
-      );
+        const metrics = this.layoutService.computeVisualPageBox(
+          crop,
+          pdfPage.mediaBox || crop,
+          rot,
+          userUnit,
+          p - 1
+        );
+        this.cachedPageMetricsMap.set(p, metrics);
 
-      const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
-      const viewport = page.getViewport({ scale: currentZoom * dpr });
+        const viewport = pdfPage.getViewport({ scale: currentZoom * dpr });
 
-      const pageCanvas = this.pageCanvasRef?.nativeElement;
-      const wmCanvas = this.watermarkCanvasRef?.nativeElement;
+        const pageCanvas = this.getPageCanvas(p);
+        const wmCanvas = this.getWatermarkCanvas(p);
 
-      if (pageCanvas && wmCanvas) {
-        pageCanvas.width = viewport.width;
-        pageCanvas.height = viewport.height;
-        pageCanvas.style.width = `${viewport.width / dpr}px`;
-        pageCanvas.style.height = `${viewport.height / dpr}px`;
+        if (pageCanvas && wmCanvas) {
+          pageCanvas.width = viewport.width;
+          pageCanvas.height = viewport.height;
+          pageCanvas.style.width = `${viewport.width / dpr}px`;
+          pageCanvas.style.height = `${viewport.height / dpr}px`;
 
-        wmCanvas.width = viewport.width;
-        wmCanvas.height = viewport.height;
-        wmCanvas.style.width = `${viewport.width / dpr}px`;
-        wmCanvas.style.height = `${viewport.height / dpr}px`;
+          wmCanvas.width = viewport.width;
+          wmCanvas.height = viewport.height;
+          wmCanvas.style.width = `${viewport.width / dpr}px`;
+          wmCanvas.style.height = `${viewport.height / dpr}px`;
 
-        const ctx = pageCanvas.getContext('2d');
-        if (ctx) {
-          // Render page with transparent background so Below layer works accurately!
-          const renderContext = {
-            canvasContext: ctx,
-            viewport,
-            background: 'rgba(0,0,0,0)'
-          };
+          const ctx = pageCanvas.getContext('2d');
+          if (ctx) {
+            const renderContext = {
+              canvasContext: ctx,
+              viewport,
+              background: 'rgba(0,0,0,0)'
+            };
 
-          this.activeRenderTask = page.render(renderContext);
-          await this.activeRenderTask.promise;
+            const task = pdfPage.render(renderContext);
+            this.activeRenderTasks.set(p, task);
+            try {
+              await task.promise;
+            } catch (err: any) {
+              if (err?.name !== 'RenderingCancelledException') {
+                console.error(`pdf.js render error for page ${p}:`, err);
+              }
+            } finally {
+              this.activeRenderTasks.delete(p);
+            }
+          }
         }
-      }
 
-      this.drawWatermarkOverlay();
+        // Immediately draw watermark on this page
+        this.drawWatermarkOnPage(p);
+      }
     } catch (err: any) {
       if (err?.name !== 'RenderingCancelledException') {
         console.error('pdf.js render error:', err);
       }
     } finally {
       this.isRenderingPage.set(false);
-      this.activeRenderTask = null;
+    }
+  }
+
+  private getPageCanvas(pageNum: number): HTMLCanvasElement | null {
+    return this.hostEl.nativeElement.querySelector(`#pdf-canvas-${pageNum}`) ||
+      (pageNum === 1 ? this.pageCanvasRef?.nativeElement : null);
+  }
+
+  private getWatermarkCanvas(pageNum: number): HTMLCanvasElement | null {
+    return this.hostEl.nativeElement.querySelector(`#wm-canvas-${pageNum}`) ||
+      (pageNum === 1 ? this.watermarkCanvasRef?.nativeElement : null);
+  }
+
+  /**
+   * Fast redraw of all watermark overlay canvases (< 100ms) without re-rendering pdf.js.
+   */
+  drawWatermarkOverlay(): void {
+    const total = this.totalPages();
+    for (let p = 1; p <= total; p++) {
+      this.drawWatermarkOnPage(p);
     }
   }
 
   /**
-   * Fast redraw of the watermark overlay canvas (< 100ms) without re-rendering pdf.js.
+   * Fast draw of watermark on a single page overlay canvas.
    */
-  drawWatermarkOverlay(): void {
-    const wmCanvas = this.watermarkCanvasRef?.nativeElement;
-    if (!wmCanvas || !this.cachedPageMetrics) return;
+  private drawWatermarkOnPage(pageNum: number): void {
+    const wmCanvas = this.getWatermarkCanvas(pageNum);
+    const metrics = this.cachedPageMetricsMap.get(pageNum);
+    if (!wmCanvas || !metrics) return;
 
     const ctx = wmCanvas.getContext('2d');
     if (!ctx) return;
@@ -233,7 +300,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     ctx.clearRect(0, 0, wmCanvas.width, wmCanvas.height);
 
     // If page is excluded or compare is active, do not paint watermark
-    if (!this.isPageIncluded() || this.isCompareActive()) {
+    if (!this.checkIsPageIncluded(pageNum) || this.isCompareActive()) {
       return;
     }
 
@@ -249,7 +316,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     if (isText) {
       const rawText = s.textConfig.text || 'CONFIDENTIAL';
       const text = this.tokenService.evaluate(rawText, {
-        pageNumber: this.currentPage(),
+        pageNumber: pageNum,
         totalPages: this.totalPages(),
         filename: 'Document'
       });
@@ -285,7 +352,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     }
 
     const layout = this.layoutService.resolvePageLayout(
-      this.cachedPageMetrics,
+      metrics,
       s,
       true,
       textMetrics,
@@ -309,12 +376,10 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     // Draw all placements onto offscreen canvas
     for (const p of layout.placements) {
       offCtx.save();
-      // Visual page coordinate (vx, vy): origin bottom-left -> Canvas origin top-left
       const canvasX = p.centerX * scale;
-      const canvasY = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+      const canvasY = (metrics.visualHeight - p.centerY) * scale;
 
       offCtx.translate(canvasX, canvasY);
-      // Canvas rotation: positive is clockwise
       offCtx.rotate((-p.rotation * Math.PI) / 180);
       offCtx.scale(scale, scale);
 
@@ -364,19 +429,25 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     ctx.drawImage(this.offscreenCanvas, 0, 0);
     ctx.restore();
 
-    // Render interactive selection outline & rotate knob if single watermark
-    if (!s.common.mosaic && layout.placements.length === 1) {
-      this.currentSinglePlacement = layout.placements[0];
-      this.drawInteractiveHandles(ctx, this.currentSinglePlacement, scale);
-    } else {
-      this.currentSinglePlacement = null;
+    // Render interactive selection outline & rotate knob on CURRENT active page
+    if (pageNum === this.currentPage()) {
+      if (!s.common.mosaic && layout.placements.length === 1) {
+        this.currentSinglePlacement = layout.placements[0];
+        this.drawInteractiveHandles(ctx, this.currentSinglePlacement, scale, metrics);
+      } else {
+        this.currentSinglePlacement = null;
+      }
     }
   }
 
-  private drawInteractiveHandles(ctx: CanvasRenderingContext2D, p: WatermarkPlacement, scale: number): void {
-    if (!this.cachedPageMetrics) return;
+  private drawInteractiveHandles(
+    ctx: CanvasRenderingContext2D,
+    p: WatermarkPlacement,
+    scale: number,
+    metrics: VisualPageBox
+  ): void {
     const canvasX = p.centerX * scale;
-    const canvasY = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+    const canvasY = (metrics.visualHeight - p.centerY) * scale;
     const rotRad = (-p.rotation * Math.PI) / 180;
 
     // Center guide snaps
@@ -491,10 +562,16 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   }
 
   // Pointer Drag, Rotate & Resize Handlers
-  onCanvasPointerDown(e: PointerEvent): void {
-    if (!this.currentSinglePlacement || !this.cachedPageMetrics) return;
+  onCanvasPointerDown(e: PointerEvent, pageNum: number): void {
+    this.activePointerPageNum = pageNum;
+    if (this.currentPage() !== pageNum) {
+      this.pageChange.emit(pageNum);
+    }
 
-    const canvas = this.watermarkCanvasRef?.nativeElement;
+    const metrics = this.cachedPageMetricsMap.get(pageNum);
+    if (!this.currentSinglePlacement || !metrics) return;
+
+    const canvas = e.currentTarget as HTMLCanvasElement;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -506,7 +583,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
     const p = this.currentSinglePlacement;
     const cx = p.centerX * scale;
-    const cy = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+    const cy = (metrics.visualHeight - p.centerY) * scale;
     const rotRad = (-p.rotation * Math.PI) / 180;
 
     // Check pointer relative to watermark center
@@ -527,7 +604,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     if (Math.hypot(localX, localY - knobY) <= 18) {
       this.isRotating = true;
       this.dragPointerId = e.pointerId;
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      canvas.setPointerCapture(e.pointerId);
       return;
     }
 
@@ -548,7 +625,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
         const currentFs = typeof fsVal === 'number' ? fsVal : 36;
         this.resizeStartFontSize = currentFs;
         this.resizeStartWidthPercent = this.settings().imageConfig.widthPercent;
-        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        canvas.setPointerCapture(e.pointerId);
         return;
       }
     }
@@ -570,7 +647,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
         const currentFs = typeof fsVal === 'number' ? fsVal : 36;
         this.resizeStartFontSize = currentFs;
         this.resizeStartWidthPercent = this.settings().imageConfig.widthPercent;
-        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        canvas.setPointerCapture(e.pointerId);
         return;
       }
     }
@@ -581,22 +658,23 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       this.dragPointerId = e.pointerId;
       this.dragStartOffsetX = clickX - cx;
       this.dragStartOffsetY = clickY - cy;
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      canvas.setPointerCapture(e.pointerId);
       return;
     }
 
-    // 5. Click anywhere on page canvas to jump & drag watermark to that position!
+    // 5. Click anywhere on page canvas to jump & drag watermark to that position
     this.isDragging = true;
     this.dragPointerId = e.pointerId;
     this.dragStartOffsetX = 0;
     this.dragStartOffsetY = 0;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    this.updateDragPosition(clickX, clickY, scale);
+    canvas.setPointerCapture(e.pointerId);
+    this.updateDragPosition(clickX, clickY, scale, metrics);
   }
 
-  onCanvasPointerMove(e: PointerEvent): void {
-    if (!this.cachedPageMetrics) return;
-    const canvas = this.watermarkCanvasRef?.nativeElement;
+  onCanvasPointerMove(e: PointerEvent, pageNum: number): void {
+    const metrics = this.cachedPageMetricsMap.get(pageNum);
+    if (!metrics) return;
+    const canvas = e.currentTarget as HTMLCanvasElement;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -609,7 +687,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     if (!p) return;
 
     const cx = p.centerX * scale;
-    const cy = (this.cachedPageMetrics.visualHeight - p.centerY) * scale;
+    const cy = (metrics.visualHeight - p.centerY) * scale;
     const rotRad = (-p.rotation * Math.PI) / 180;
 
     const dx = ptrX - cx;
@@ -694,14 +772,13 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       canvas.style.cursor = 'grabbing';
       const targetCx = ptrX - this.dragStartOffsetX;
       const targetCy = ptrY - this.dragStartOffsetY;
-      this.updateDragPosition(targetCx, targetCy, scale);
+      this.updateDragPosition(targetCx, targetCy, scale, metrics);
     }
   }
 
-  private updateDragPosition(targetCx: number, targetCy: number, scale: number): void {
-    if (!this.cachedPageMetrics) return;
-    const pageW = this.cachedPageMetrics.visualWidth * scale;
-    const pageH = this.cachedPageMetrics.visualHeight * scale;
+  private updateDragPosition(targetCx: number, targetCy: number, scale: number, metrics: VisualPageBox): void {
+    const pageW = metrics.visualWidth * scale;
+    const pageH = metrics.visualHeight * scale;
 
     let xPct = Math.round((targetCx / pageW) * 100);
     let yPct = Math.round(((pageH - targetCy) / pageH) * 100);
@@ -735,7 +812,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
       try {
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
       } catch {}
-      const canvas = this.watermarkCanvasRef?.nativeElement;
+      const canvas = e.target as HTMLElement;
       if (canvas) {
         canvas.style.cursor = 'default';
       }
@@ -743,22 +820,83 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Multi-Page Continuous Viewport Scroll Handler
+  onViewportScroll(): void {
+    if (this.isUserScrollingToPage || this.isScrollTicking) return;
+    this.isScrollTicking = true;
+
+    requestAnimationFrame(() => {
+      this.isScrollTicking = false;
+      if (this.isUserScrollingToPage) return;
+
+      const vp = this.previewViewportRef?.nativeElement;
+      if (!vp) return;
+
+      const vpRect = vp.getBoundingClientRect();
+      const vpCenterY = vpRect.top + vpRect.height / 2;
+
+      let closestPage = 1;
+      let minDistance = Infinity;
+
+      for (let p = 1; p <= this.totalPages(); p++) {
+        const pageEl = this.hostEl.nativeElement.querySelector(`#watermark-page-${p}`);
+        if (!pageEl) continue;
+
+        const pageRect = pageEl.getBoundingClientRect();
+        const pageCenterY = pageRect.top + pageRect.height / 2;
+        const dist = Math.abs(pageCenterY - vpCenterY);
+
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestPage = p;
+        }
+      }
+
+      if (closestPage !== this.currentPage()) {
+        this.pageChange.emit(closestPage);
+      }
+    });
+  }
+
+  scrollToPage(pageNum: number): void {
+    if (pageNum < 1 || pageNum > this.totalPages()) return;
+    const pageEl = this.hostEl.nativeElement.querySelector(`#watermark-page-${pageNum}`);
+    if (pageEl && typeof pageEl.scrollIntoView === 'function') {
+      this.isUserScrollingToPage = true;
+      pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        this.isUserScrollingToPage = false;
+      }, 500);
+    }
+  }
+
+  onPageClick(pageNum: number): void {
+    if (this.currentPage() !== pageNum) {
+      this.pageChange.emit(pageNum);
+    }
+  }
+
   // Navigation handlers
   goToPrevPage(): void {
     if (this.currentPage() > 1) {
-      this.pageChange.emit(this.currentPage() - 1);
+      const target = this.currentPage() - 1;
+      this.scrollToPage(target);
+      this.pageChange.emit(target);
     }
   }
 
   goToNextPage(): void {
     if (this.currentPage() < this.totalPages()) {
-      this.pageChange.emit(this.currentPage() + 1);
+      const target = this.currentPage() + 1;
+      this.scrollToPage(target);
+      this.pageChange.emit(target);
     }
   }
 
   setPageNumber(page: number): void {
     const clamped = Math.max(1, Math.min(this.totalPages(), page));
     if (clamped !== this.currentPage()) {
+      this.scrollToPage(clamped);
       this.pageChange.emit(clamped);
     }
   }
@@ -781,17 +919,14 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   // Hold to compare handlers
   onCompareHoldStart(): void {
     this.isCompareActive.set(true);
-    this.drawWatermarkOverlay();
   }
 
   onCompareHoldEnd(): void {
     this.isCompareActive.set(false);
-    this.drawWatermarkOverlay();
   }
 
   toggleCompare(): void {
     this.isCompareActive.update(v => !v);
-    this.drawWatermarkOverlay();
   }
 
   private isInputElement(target: any): boolean {

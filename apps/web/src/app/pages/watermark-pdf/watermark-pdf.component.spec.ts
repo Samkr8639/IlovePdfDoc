@@ -497,4 +497,27 @@ describe('WatermarkPdfComponent', () => {
     expect(component.resultData()).toBeNull();
     expect(mockLayoutService.showFooter).toHaveBeenCalled();
   });
+
+  it('toggles thumbnails panel collapse state', () => {
+    expect(component.isThumbnailsCollapsed()).toBe(false);
+    component.toggleThumbnailsCollapse();
+    expect(component.isThumbnailsCollapsed()).toBe(true);
+    component.toggleThumbnailsCollapse();
+    expect(component.isThumbnailsCollapsed()).toBe(false);
+  });
+
+  it('prevents deleting page when document has only 1 page', async () => {
+    const pdfBytes = new Uint8Array([37, 80, 68, 70]);
+    const validFile = new File([pdfBytes], 'single-page.pdf', { type: 'application/pdf' });
+    await component.onFilesAdded([validFile]);
+
+    component.totalPages.set(1);
+    if (component.files()[0]) {
+      component.files()[0].totalPages = 1;
+    }
+
+    await component.deletePage(1);
+
+    expect(component.errorMessage()).toContain('A document must have at least one page');
+  });
 });

@@ -52,6 +52,7 @@ import {
 } from '../../core/services/watermark-pdf/watermark-compliance.service';
 import { parseWatermarkPages } from '../../core/services/watermark-pdf/watermark-range-parser';
 import { WatermarkPreviewComponent } from './components/watermark-preview/watermark-preview.component';
+import { WatermarkThumbnailsPanelComponent } from './components/watermark-thumbnails-panel/watermark-thumbnails-panel.component';
 
 // Shared UI components
 import { DropzoneComponent } from '../../shared/components/dropzone/dropzone.component';
@@ -125,6 +126,7 @@ export const AVAILABLE_FONTS: FontOption[] = [
     CommonModule,
     FormsModule,
     WatermarkPreviewComponent,
+    WatermarkThumbnailsPanelComponent,
     DropzoneComponent,
     ProcessingStateComponent,
     ResultViewComponent,
@@ -151,11 +153,14 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
 
   @ViewChild('imageFileInput') imageFileInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('docFileInput') docFileInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('watermarkPreview') watermarkPreviewRef?: WatermarkPreviewComponent;
 
   // Component state
   readonly currentState = signal<WatermarkWorkspaceState>('upload');
   readonly errorMessage = signal<string | null>(null);
   readonly isSidePanelOpen = signal<boolean>(false);
+  readonly isThumbnailsCollapsed = signal<boolean>(false);
+  readonly pageThumbnails = signal<Map<number, string>>(new Map());
   readonly fontkitFont = signal<any>(null);
   readonly currentFontBytes = signal<Uint8Array | null>(null);
 
@@ -594,6 +599,9 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       this.selectedFileIndex.set(0);
       this.totalPages.set(updatedList[0].totalPages);
       this.currentPage.set(1);
+      if (updatedList[0].pdfProxy) {
+        this.generateThumbnails(updatedList[0].pdfProxy);
+      }
     }
 
     this.currentState.set('organize');
@@ -659,6 +667,9 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       this.selectedFileIndex.set(index);
       this.totalPages.set(this.files()[index].totalPages);
       this.currentPage.set(1);
+      if (this.files()[index]?.pdfProxy) {
+        this.generateThumbnails(this.files()[index].pdfProxy);
+      }
     }
   }
 
@@ -674,6 +685,9 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.selectedFileIndex.set(newIdx);
     this.totalPages.set(list[newIdx].totalPages);
     this.currentPage.set(1);
+    if (list[newIdx]?.pdfProxy) {
+      this.generateThumbnails(list[newIdx].pdfProxy);
+    }
   }
 
   toggleSameSettingsForAll(same: boolean): void {
@@ -693,6 +707,135 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   onPageChange(page: number): void {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
+      this.watermarkPreviewRef?.scrollToPage(page);
+      this.scrollActiveThumbnailIntoView(page);
+    }
+  }
+
+  onPreviewPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.scrollActiveThumbnailIntoView(page);
+    }
+  }
+
+  onThumbnailSelectPage(page: number): void {
+    this.onPageChange(page);
+  }
+
+  scrollActiveThumbnailIntoView(page: number): void {
+    if (typeof document === 'undefined') return;
+    const thumbEl = document.getElementById(`thumb-page-${page}`);
+    if (thumbEl && typeof thumbEl.scrollIntoView === 'function') {
+      thumbEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  toggleThumbnailsCollapse(): void {
+    this.isThumbnailsCollapsed.update(v => !v);
+  }
+
+  async generateThumbnails(pdfDoc: any): Promise<void> {
+    const thumbs = new Map<number, string>();
+    if (!pdfDoc) {
+      this.pageThumbnails.set(thumbs);
+      return;
+    }
+    const total = pdfDoc.numPages;
+    for (let p = 1; p <= total; p++) {
+      try {
+        const page = await pdfDoc.getPage(p);
+        const viewport = page.getViewport({ scale: 0.18 });
+        const offscreen = document.createElement('canvas');
+        offscreen.width = Math.floor(viewport.width);
+        offscreen.height = Math.floor(viewport.height);
+        const ctx = offscreen.getContext('2d');
+        if (ctx) {
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          thumbs.set(p, offscreen.toDataURL('image/jpeg', 0.8));
+        }
+      } catch {
+        // Fallback to placeholder in template
+      }
+    }
+    this.pageThumbnails.set(thumbs);
+  }
+
+  async rotatePage(pageNum: number): Promise<void> {
+    const currentItem = this.currentFileItem();
+    if (!currentItem || pageNum < 1 || pageNum > currentItem.totalPages) return;
+
+    try {
+      const { PDFDocument, degrees } = await import('pdf-lib');
+      const pdfDoc = await PDFDocument.load(currentItem.bytes);
+      const pageIndex = pageNum - 1;
+      const page = pdfDoc.getPage(pageIndex);
+      const oldRot = page.getRotation().angle;
+      const newRot = ((oldRot + 90) % 360 + 360) % 360;
+      page.setRotation(degrees(newRot));
+
+      const updatedBytes = await pdfDoc.save();
+      const newProxy = await this.sharedPdfjs.loadDocument(updatedBytes);
+
+      const updatedFiles = this.files().map((f, idx) => {
+        if (idx === this.selectedFileIndex()) {
+          return {
+            ...f,
+            bytes: updatedBytes,
+            pdfProxy: newProxy
+          };
+        }
+        return f;
+      });
+
+      this.files.set(updatedFiles);
+      await this.generateThumbnails(newProxy);
+    } catch (err: any) {
+      console.error('Failed to rotate page:', err);
+      this.errorMessage.set(`Failed to rotate page ${pageNum}: ${err?.message || err}`);
+    }
+  }
+
+  async deletePage(pageNum: number): Promise<void> {
+    const currentItem = this.currentFileItem();
+    if (!currentItem) return;
+
+    if (currentItem.totalPages <= 1) {
+      this.errorMessage.set('A document must have at least one page.');
+      return;
+    }
+
+    try {
+      const { PDFDocument } = await import('pdf-lib');
+      const pdfDoc = await PDFDocument.load(currentItem.bytes);
+      const pageIndex = pageNum - 1;
+      pdfDoc.removePage(pageIndex);
+
+      const updatedBytes = await pdfDoc.save();
+      const newProxy = await this.sharedPdfjs.loadDocument(updatedBytes);
+      const newTotal = newProxy.numPages;
+
+      const newCurrent = Math.min(this.currentPage(), newTotal);
+      this.currentPage.set(newCurrent);
+      this.totalPages.set(newTotal);
+
+      const updatedFiles = this.files().map((f, idx) => {
+        if (idx === this.selectedFileIndex()) {
+          return {
+            ...f,
+            bytes: updatedBytes,
+            totalPages: newTotal,
+            pdfProxy: newProxy
+          };
+        }
+        return f;
+      });
+
+      this.files.set(updatedFiles);
+      await this.generateThumbnails(newProxy);
+    } catch (err: any) {
+      console.error('Failed to delete page:', err);
+      this.errorMessage.set(`Failed to delete page ${pageNum}: ${err?.message || err}`);
     }
   }
 
@@ -1013,6 +1156,7 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       this.currentPage.set(1);
       this.currentState.set('organize');
       this.layoutService.hideFooter();
+      this.generateThumbnails(pdfProxy);
       this.cancelPasswordPrompt();
     } catch {
       this.passwordError.set('Incorrect password. Please try again.');

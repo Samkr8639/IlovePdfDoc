@@ -552,14 +552,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794904737.8435109,
-    "seen": 1794905692.9089472,
+    "mtime": 1794980149.2092948,
+    "seen": 1794980180.1296768,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794904737.8440237,
-    "seen": 1794905692.9089506,
+    "mtime": 1794980149.209859,
+    "seen": 1794980180.12968,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
@@ -1248,8 +1248,8 @@
     "semantic_hash": "cffe193261ca8fe2c74d49bc17ff7f65"
   },
   "apps/web/src/app/pages/excel-to-pdf/excel-to-pdf.component.ts": {
-    "mtime": 1794904685.0439694,
-    "seen": 1794905692.9091554,
+    "mtime": 1794905756.830878,
+    "seen": 1794980180.1298895,
     "ast_hash": "e35bb70101d92ddba523ce5259abf64e",
     "semantic_hash": ""
   },
@@ -1284,8 +1284,8 @@
     "semantic_hash": "2c9fb5daaa5786b567df2d8670a6915e"
   },
   "apps/web/src/app/pages/merge-pdf/merge-pdf.component.ts": {
-    "mtime": 1794904630.0493383,
-    "seen": 1794905692.9091625,
+    "mtime": 1794905756.8890207,
+    "seen": 1794980180.129897,
     "ast_hash": "f21632c15be282858294142648c70622",
     "semantic_hash": ""
   },
@@ -1296,8 +1296,8 @@
     "semantic_hash": "adae6f4a88ddc7dc7aa114e29039b7a9"
   },
   "apps/web/src/app/pages/pdf-to-excel/pdf-to-excel.component.ts": {
-    "mtime": 1794904657.1994462,
-    "seen": 1794905692.9091644,
+    "mtime": 1794905756.9548724,
+    "seen": 1794980180.1298995,
     "ast_hash": "6fe6bbcf5329ccf312e6e60596c3dfa3",
     "semantic_hash": ""
   },
@@ -1320,8 +1320,8 @@
     "semantic_hash": "b9777eaf46ebb5f6e1fa861deaf6517e"
   },
   "apps/web/src/app/pages/pdf-to-powerpoint/pdf-to-powerpoint.component.ts": {
-    "mtime": 1794904644.529383,
-    "seen": 1794905692.9091694,
+    "mtime": 1794905757.047141,
+    "seen": 1794980180.1299043,
     "ast_hash": "ae53a10307a60b6aedad5d65e97a7667",
     "semantic_hash": ""
   },
@@ -1344,8 +1344,8 @@
     "semantic_hash": "ea6e280b54c44d4744e56a197bc1ed85"
   },
   "apps/web/src/app/pages/powerpoint-to-pdf/powerpoint-to-pdf.component.ts": {
-    "mtime": 1794904614.0813622,
-    "seen": 1794905692.9091737,
+    "mtime": 1794905757.213323,
+    "seen": 1794980180.129909,
     "ast_hash": "52252062066af3883b27bc33532f5b9b",
     "semantic_hash": ""
   },
@@ -1392,8 +1392,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/word-to-pdf/word-to-pdf.component.ts": {
-    "mtime": 1794904670.8602397,
-    "seen": 1794905692.9091983,
+    "mtime": 1794905757.2834592,
+    "seen": 1794980180.1299362,
     "ast_hash": "d027b14f8d30f8b31b7a97abed445e13",
     "semantic_hash": ""
   },
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794904737.8435109,
-    "seen": 1794905692.9092872,
+    "mtime": 1794980149.2082613,
+    "seen": 1794980180.1300244,
     "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794904737.8430054,
-    "seen": 1794905692.9092884,
+    "mtime": 1794980149.2077403,
+    "seen": 1794980180.1300254,
     "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
@@ -2612,21 +2612,21 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
-    "mtime": 1794837452.4864151,
-    "seen": 1794894305.901335,
-    "ast_hash": "c495186213d44e46b54550dcecf1eaf4",
+    "mtime": 1794980060.4929154,
+    "seen": 1794980180.129928,
+    "ast_hash": "399775986ce248f691b3e83f98329fc3",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.spec.ts": {
-    "mtime": 1794821079.9860928,
-    "seen": 1794821803.3716013,
-    "ast_hash": "f1a814c28c29dba0d9d5b83a2bae6286",
+    "mtime": 1794980118.3864274,
+    "seen": 1794980180.1299326,
+    "ast_hash": "017ee32407df11be23e288996f301674",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.ts": {
-    "mtime": 1794897032.6768863,
-    "seen": 1794899749.6570086,
-    "ast_hash": "fa3b55467bf04255b9e3d630b5cea39c",
+    "mtime": 1794980078.8263543,
+    "seen": 1794980180.1299338,
+    "ast_hash": "d7c954ab5ef0eb57802f9f23004a58d2",
     "semantic_hash": ""
   },
   "packages/contracts/src/watermark-pdf.ts": {
@@ -2636,15 +2636,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.html": {
-    "mtime": 1794826637.5700967,
-    "seen": 1794828338.8073769,
-    "ast_hash": "8f8f1da9f884c4896496f7184a3f873d",
+    "mtime": 1794979791.2116547,
+    "seen": 1794980180.1300566,
+    "ast_hash": "f474215fefd4c64c229ef7f392763508",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794897032.6768863,
-    "seen": 1794899749.6571321,
-    "ast_hash": "9784a88c6885245662476c14c8dfb90b",
+    "mtime": 1794980020.3620262,
+    "seen": 1794980180.1300578,
+    "ast_hash": "51cbe6db0df03e45a4e729833c6cacd7",
     "semantic_hash": ""
   },
   "docs/watermark-pdf-requirements.md": {
@@ -2741,6 +2741,18 @@
     "mtime": 1794894778.718385,
     "seen": 1794899749.657138,
     "ast_hash": "2da55722f9eae63e0d3fa864a2a94c7d",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/components/watermark-thumbnails-panel/watermark-thumbnails-panel.component.spec.ts": {
+    "mtime": 1794980107.2164817,
+    "seen": 1794980180.1299298,
+    "ast_hash": "030be6431a419cda414a70525e169f0f",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/pages/watermark-pdf/components/watermark-thumbnails-panel/watermark-thumbnails-panel.component.ts": {
+    "mtime": 1794979759.7327766,
+    "seen": 1794980180.1299312,
+    "ast_hash": "fbe06e33cb005dd78d04ffeebef012f5",
     "semantic_hash": ""
   },
   "package-lock.json": {
