@@ -2,6 +2,13 @@ import { Component, input, output, signal, computed, inject } from '@angular/cor
 import { Router } from '@angular/router';
 import { ToolRegistryService } from '../../../core/services/tool-registry.service';
 
+export interface UploadProgressItem {
+  name: string;
+  size: string;
+  progress: number;
+  isComplete: boolean;
+}
+
 @Component({
   selector: 'app-dropzone',
   standalone: true,
@@ -12,7 +19,7 @@ export class DropzoneComponent {
   private readonly router = inject(Router, { optional: true });
   private readonly toolRegistry = inject(ToolRegistryService, { optional: true });
 
-  readonly title = input<string>('Drag PDF file here');
+  readonly title = input<string>('Select PDF file');
   readonly subtitle = input<string>('');
   readonly acceptedTypes = input<string>('.pdf,application/pdf');
   readonly multiple = input<boolean>(true);
@@ -24,6 +31,12 @@ export class DropzoneComponent {
   readonly filesSelected = output<File[]>();
 
   isDragOver = signal<boolean>(false);
+  isShooting = signal<boolean>(false);
+  isSwishing = signal<boolean>(false);
+  showScorePopup = signal<boolean>(false);
+  scoreBump = signal<boolean>(false);
+  uploadedCount = signal<number>(0);
+  activeUpload = signal<UploadProgressItem | null>(null);
 
   readonly currentRoute = computed(() => {
     return this.router?.url?.split('?')[0] || '/';
@@ -45,6 +58,16 @@ export class DropzoneComponent {
     return tool?.shortDescription || this.title() || 'Upload and process documents';
   });
 
+  private formatFileSize(bytes: number): string {
+    if (!bytes || bytes === 0) return '0 B';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) {
+      return `${mb.toFixed(1)} MB`;
+    }
+    const kb = bytes / 1024;
+    return `${kb.toFixed(0)} KB`;
+  }
+
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -65,7 +88,7 @@ export class DropzoneComponent {
     if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
       const files = Array.from(event.dataTransfer.files);
       const toEmit = this.multiple() ? files : [files[0]];
-      this.filesSelected.emit(toEmit);
+      this.playUploadSequence(toEmit);
     }
   }
 
@@ -74,9 +97,85 @@ export class DropzoneComponent {
     if (input.files && input.files.length > 0) {
       const files = Array.from(input.files);
       const toEmit = this.multiple() ? files : [files[0]];
-      this.filesSelected.emit(toEmit);
       input.value = '';
+      this.playUploadSequence(toEmit);
     }
+  }
+
+  /**
+   * Plays the basketball shot animation, score increment, and progress bar
+   * before emitting filesSelected to the parent container.
+   */
+  private playUploadSequence(files: File[]): void {
+    const primaryFile = files[0];
+    const sizeStr = this.formatFileSize(primaryFile.size);
+
+    this.isShooting.set(true);
+    this.activeUpload.set({
+      name: primaryFile.name,
+      size: sizeStr,
+      progress: 20,
+      isComplete: false
+    });
+
+    // Arc shot phase -> hits basket at 380ms
+    setTimeout(() => {
+      this.isSwishing.set(true);
+      this.showScorePopup.set(true);
+      this.uploadedCount.update(c => c + files.length);
+      this.scoreBump.set(true);
+      this.activeUpload.update(u => u ? { ...u, progress: 68 } : null);
+    }, 380);
+
+    // Swish settles & upload reaches 100%
+    setTimeout(() => {
+      this.isSwishing.set(false);
+      this.activeUpload.update(u => u ? { ...u, progress: 100, isComplete: true } : null);
+    }, 650);
+
+    // Finish and emit files to parent
+    setTimeout(() => {
+      this.showScorePopup.set(false);
+      this.scoreBump.set(false);
+      this.isShooting.set(false);
+      this.filesSelected.emit(files);
+    }, 850);
+  }
+
+  /**
+   * Interactive playful "take the shot" demo from the reference video!
+   */
+  takeInteractiveShot(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    if (this.isShooting()) return;
+
+    this.isShooting.set(true);
+    this.activeUpload.set({
+      name: 'final fileeeeee',
+      size: '2.4 MB',
+      progress: 25,
+      isComplete: false
+    });
+
+    setTimeout(() => {
+      this.isSwishing.set(true);
+      this.showScorePopup.set(true);
+      this.uploadedCount.update(c => c + 1);
+      this.scoreBump.set(true);
+      this.activeUpload.update(u => u ? { ...u, progress: 75 } : null);
+    }, 380);
+
+    setTimeout(() => {
+      this.isSwishing.set(false);
+      this.activeUpload.update(u => u ? { ...u, progress: 100, isComplete: true } : null);
+    }, 650);
+
+    setTimeout(() => {
+      this.showScorePopup.set(false);
+      this.scoreBump.set(false);
+      this.isShooting.set(false);
+    }, 1400);
   }
 
   openGoogleDrive(event: Event): void {

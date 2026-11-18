@@ -1,13 +1,11 @@
 <form
   class="dropzone-area"
   [class.active]="isDragOver()"
+  [class.has-shot]="isShooting()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
-  (click)="fileInput.click()"
   tabindex="0"
-  (keydown.enter)="fileInput.click()"
-  (keydown.space)="fileInput.click()"
   role="form"
   [attr.aria-label]="ariaLabel()"
   [attr.toolname]="effectiveToolName()"
@@ -33,20 +31,115 @@
   />
 
   <div class="dropzone-content">
-    <!-- ANIMATED UPLOAD ICON BADGE -->
-    <div class="dropzone-icon-badge" aria-hidden="true">
-      <svg class="dz-cloud-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Cloud body -->
-        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-        <!-- Upward arrow inside cloud -->
-        <path class="dz-arrow" d="M12 13v4"/>
-        <path class="dz-arrow" d="m10 15 2-2 2 2"/>
-      </svg>
+    <!-- TOP STATUS ROW: TITLE + UPLOADED SCORE PILL (MATCHING VIDEO) -->
+    <div class="dropzone-top-bar">
+      <div class="top-bar-text">
+        <h3 class="top-bar-title">{{ title() || 'Upload files' }}</h3>
+        <p class="top-bar-subtitle">{{ subtitle() || 'Drag and drop, or take the shot.' }}</p>
+      </div>
+      <div class="uploaded-counter-pill" [class.bump]="scoreBump()">
+        <span>Uploaded {{ uploadedCount() }}</span>
+      </div>
     </div>
 
-    <!-- COHESIVE SIDECAR ACTION ROW: ELEVATED CTA + MATCHING CLOUD SQUIRCLES -->
+    <!-- BASKETBALL HOOP DROP CARD -->
+    <div class="hoop-card" (click)="fileInput.click()">
+      <!-- TOP UPLOAD PROMPT -->
+      <div class="hoop-card-prompt">
+        <div class="hoop-upload-icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
+            <polyline points="7 9 12 4 17 9"></polyline>
+            <line x1="12" y1="4" x2="12" y2="16"></line>
+          </svg>
+        </div>
+        <div class="hoop-prompt-text">
+          <span class="prompt-main">Drop files here</span>
+          <span class="prompt-sub">
+            or <button type="button" class="btn-take-shot-link" (click)="takeInteractiveShot($event)">take the shot</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- BASKETBALL HOOP & GRAPHIC COURT SYSTEM -->
+      <div class="basketball-stage" aria-hidden="true">
+        <!-- +1 SCORE POPUP -->
+        @if (showScorePopup()) {
+          <div class="score-popup">+1</div>
+        }
+
+        <!-- TRAJECTORY DOTTED ARC (VISIBLE DURING DRAGOVER OR SHOT) -->
+        <svg class="trajectory-svg" [class.visible]="isDragOver() || isShooting()" viewBox="0 0 320 180" fill="none">
+          <path
+            d="M 25 170 Q 110 15 220 110"
+            stroke="#F97316"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-dasharray="2 12"
+            class="trajectory-path"
+          />
+        </svg>
+
+        <!-- FLYING FILE ITEM (ANIMATES ALONG ARC INTO HOOP) -->
+        @if (isShooting()) {
+          <div class="flying-file-item">
+            <div class="flying-doc-shape">
+              <div class="flying-doc-fold"></div>
+              <div class="flying-doc-lines">
+                <span class="line-1"></span>
+                <span class="line-2"></span>
+              </div>
+              <span class="flying-pdf-badge">PDF</span>
+            </div>
+          </div>
+        }
+
+        <!-- BASKETBALL BACKBOARD -->
+        <div class="hoop-backboard">
+          <div class="backboard-inner-target"></div>
+          <div class="backboard-connector"></div>
+        </div>
+
+        <!-- RIM & NET -->
+        <div class="hoop-rim-net-group">
+          <!-- ORANGE RIM -->
+          <div class="hoop-rim"></div>
+
+          <!-- MESH NET -->
+          <svg class="net-svg" [class.swish-active]="isSwishing()" width="84" height="66" viewBox="0 0 84 66" fill="none">
+            <!-- Vertical ribs -->
+            <path d="M12 2 L22 62 M25 2 L33 62 M42 2 L42 62 M59 2 L51 62 M72 2 L62 62" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round"/>
+            <!-- Crossed diagonals -->
+            <path d="M12 2 L62 62 M72 2 L22 62" stroke="#CBD5E1" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- Horizontal rings -->
+            <path d="M15 16 L69 16 M18 32 L66 32 M21 48 L63 48" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- Bottom scallop loops -->
+            <path d="M22 62 Q 27.5 65 33 62 Q 37.5 65 42 62 Q 46.5 65 51 62 Q 56.5 65 62 62" stroke="#94A3B8" stroke-width="1.6" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE SAMPLE FILE TRIGGER (MATCHING FRAME 1 FROM VIDEO) -->
+    <div class="sample-shot-bar" (click)="takeInteractiveShot($event)" title="Click to test the shot animation!">
+      <div class="sample-doc-card">
+        <div class="mini-doc-icon">
+          <div class="mini-doc-fold"></div>
+          <span class="mini-doc-badge">PDF</span>
+        </div>
+        <span class="sample-doc-title">final fileeeeee</span>
+      </div>
+      <div class="sample-shot-prompt">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+        <span>Click to take the shot!</span>
+      </div>
+    </div>
+
+    <!-- PRIMARY ACTION ROW: SELECT PDF FILE + CLOUD SIDECARS -->
     <div class="upload-action-row" (click)="$event.stopPropagation()">
-      <!-- Primary File Upload Button -->
       <button
         type="button"
         class="select-file-btn"
@@ -102,8 +195,36 @@
       </div>
     </div>
 
-    <!-- DROP HINT -->
-    <p class="drop-hint">{{ subtitle() || 'or drop your PDF document here' }}</p>
+    <!-- UPLOAD PROGRESS CARD (MATCHING FRAMES 11-14 OF VIDEO) -->
+    @if (activeUpload()) {
+      <div class="upload-progress-card" [class.complete]="activeUpload()?.isComplete">
+        <div class="progress-file-info">
+          <div class="mini-doc-icon">
+            <div class="mini-doc-fold"></div>
+            <span class="mini-doc-badge">PDF</span>
+          </div>
+          <div class="progress-text-col">
+            <span class="progress-file-name">{{ activeUpload()?.name }}</span>
+            <span class="progress-file-size">{{ activeUpload()?.size }}</span>
+          </div>
+        </div>
+        <div class="progress-track-col">
+          <div class="progress-status-row">
+            <span class="progress-status-label">{{ activeUpload()?.isComplete ? 'Uploaded' : 'Uploading...' }}</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" [style.width.%]="activeUpload()?.progress"></div>
+          </div>
+        </div>
+        @if (activeUpload()?.isComplete) {
+          <div class="complete-badge-check" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        }
+      </div>
+    }
 
     <!-- TRUST & PRIVACY BADGES -->
     <div class="dropzone-trust-row" aria-label="Security and Privacy Guarantees">
