@@ -219,11 +219,11 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
   // Interactive Guided Tour Steps Covering Every Key Control
   readonly WATERMARK_TOUR_STEPS: TourStep[] = [
     {
-      id: 'step-files-dock',
-      title: 'Upload & Add Files',
-      content: 'Add multiple PDF documents from your computer, Google Drive, or Dropbox. When multiple files are loaded, switch between them in the top bar.',
-      targetSelector: '.floating-tools-dock',
-      placement: 'left',
+      id: 'step-thumbnails-panel',
+      title: 'Pages & Thumbnails',
+      content: 'View all pages of your PDF in real time. Click any thumbnail to jump to that page, or rotate and delete pages as needed.',
+      targetSelector: 'app-watermark-thumbnails-panel',
+      placement: 'right',
       actionBeforeStep: () => {
         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
           this.isSidePanelOpen.set(false);
@@ -534,74 +534,63 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const currentList = [...this.files()];
-    if (currentList.length + validPdfs.length > WATERMARK_LIMITS.maxFiles) {
-      this.errorMessage.set(`You can add up to ${WATERMARK_LIMITS.maxFiles} files at once.`);
+    const file = validPdfs[0];
+    if (file.size > WATERMARK_LIMITS.desktopMaxFileSizeBytes) {
+      this.errorMessage.set(`File "${file.name}" exceeds maximum limit of 100 MB.`);
       return;
     }
 
-    const addedItems: WatermarkFileItem[] = [];
-    for (const file of validPdfs) {
-      if (file.size > WATERMARK_LIMITS.desktopMaxFileSizeBytes) {
-        this.errorMessage.set(`File "${file.name}" exceeds maximum limit of 100 MB.`);
-        return;
-      }
-
+    try {
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let pdfProxy: any;
       try {
-        const buffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        let pdfProxy: any;
-        try {
-          pdfProxy = await this.sharedPdfjs.loadDocument(bytes);
-        } catch (loadErr: any) {
-          const errStr = String(loadErr?.message || loadErr?.name || '').toLowerCase();
-          if (errStr.includes('password') || loadErr?.code === 'PASSWORD_REQUIRED') {
-            this.pendingEncryptedBytes = bytes;
-            this.pendingEncryptedFile = file;
-            this.passwordInput.set('');
-            this.passwordError.set(null);
-            this.showPasswordModal.set(true);
-            return;
-          }
-          throw loadErr;
-        }
-
-        if (pdfProxy.numPages > WATERMARK_LIMITS.desktopMaxPages) {
-          this.errorMessage.set(
-            `Document "${file.name}" has ${pdfProxy.numPages} pages, exceeding the 500-page limit.`
-          );
+        pdfProxy = await this.sharedPdfjs.loadDocument(bytes);
+      } catch (loadErr: any) {
+        const errStr = String(loadErr?.message || loadErr?.name || '').toLowerCase();
+        if (errStr.includes('password') || loadErr?.code === 'PASSWORD_REQUIRED') {
+          this.pendingEncryptedBytes = bytes;
+          this.pendingEncryptedFile = file;
+          this.passwordInput.set('');
+          this.passwordError.set(null);
+          this.showPasswordModal.set(true);
           return;
         }
+        throw loadErr;
+      }
 
-        const compliance = this.complianceService.checkCompliance(bytes);
-        const fileSettings: WatermarkFileSettings = JSON.parse(JSON.stringify(this.settings()));
-
-        addedItems.push({
-          id: `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          file,
-          name: file.name,
-          size: file.size,
-          bytes,
-          totalPages: pdfProxy.numPages,
-          pdfProxy,
-          settings: fileSettings,
-          complianceReport: compliance
-        });
-      } catch (err: any) {
-        this.errorMessage.set(`Failed to load "${file.name}": ${err?.message || 'Invalid PDF'}`);
+      if (pdfProxy.numPages > WATERMARK_LIMITS.desktopMaxPages) {
+        this.errorMessage.set(
+          `Document "${file.name}" has ${pdfProxy.numPages} pages, exceeding the 500-page limit.`
+        );
         return;
       }
-    }
 
-    const updatedList = [...currentList, ...addedItems];
-    this.files.set(updatedList);
-    if (currentList.length === 0 && updatedList.length > 0) {
+      const compliance = this.complianceService.checkCompliance(bytes);
+      const fileSettings: WatermarkFileSettings = JSON.parse(JSON.stringify(this.settings()));
+
+      const item: WatermarkFileItem = {
+        id: `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        file,
+        name: file.name,
+        size: file.size,
+        bytes,
+        totalPages: pdfProxy.numPages,
+        pdfProxy,
+        settings: fileSettings,
+        complianceReport: compliance
+      };
+
+      this.files.set([item]);
       this.selectedFileIndex.set(0);
-      this.totalPages.set(updatedList[0].totalPages);
+      this.totalPages.set(item.totalPages);
       this.currentPage.set(1);
-      if (updatedList[0].pdfProxy) {
-        this.generateThumbnails(updatedList[0].pdfProxy);
+      if (item.pdfProxy) {
+        this.generateThumbnails(item.pdfProxy);
       }
+    } catch (err: any) {
+      this.errorMessage.set(`Failed to load "${file.name}": ${err?.message || 'Invalid PDF'}`);
+      return;
     }
 
     this.currentState.set('organize');
@@ -1149,9 +1138,9 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
         complianceReport: compliance
       };
 
-      const updated = [...this.files(), addedItem];
+      const updated = [addedItem];
       this.files.set(updated);
-      this.selectedFileIndex.set(updated.length - 1);
+      this.selectedFileIndex.set(0);
       this.totalPages.set(pdfProxy.numPages);
       this.currentPage.set(1);
       this.currentState.set('organize');

@@ -371,39 +371,29 @@ describe('WatermarkPdfComponent', () => {
     expect(component.scriptInfo().name).toContain('Indic');
   });
 
-  it('handles multi-file upload, selection, settings sync, and ZIP export (R-037, R-038)', async () => {
+  it('handles single-file upload and document replacement with "Change file"', async () => {
     const f1 = new File([new Uint8Array([37, 80, 68, 70])], 'doc1.pdf', { type: 'application/pdf' });
     const f2 = new File([new Uint8Array([37, 80, 68, 70])], 'doc2.pdf', { type: 'application/pdf' });
 
+    // When multiple files are provided, single-document workflow focuses on the first PDF
     await component.onFilesAdded([f1, f2]);
-    expect(component.files().length).toBe(2);
+    expect(component.files().length).toBe(1);
     expect(component.selectedFileIndex()).toBe(0);
     expect(component.selectedFile()?.name).toBe('doc1.pdf');
 
-    // Switch active file
-    component.selectFile(1);
-    expect(component.selectedFileIndex()).toBe(1);
+    // Change file replaces the current document cleanly
+    await component.onFilesAdded([f2]);
+    expect(component.files().length).toBe(1);
+    expect(component.selectedFileIndex()).toBe(0);
     expect(component.selectedFile()?.name).toBe('doc2.pdf');
 
-    // Toggle same settings for all
-    expect(component.sameSettingsForAll()).toBe(true);
-    component.toggleSameSettingsForAll(false);
-    expect(component.sameSettingsForAll()).toBe(false);
-
-    component.applyCurrentSettingsToAll();
-
-    // Execute multi-file export
+    // Execute watermark export
     component.applyQuickChip('CONFIDENTIAL');
     await component.executeWatermark();
 
     expect(component.currentState()).toBe('completed');
-    expect(component.multiFileResults().length).toBe(2);
-    expect(component.zipBlobUrl()).not.toBeNull();
-    expect(component.zipFilename()).toBe('watermarked-pdfs.zip');
-
-    // Test remove file
-    component.removeFile(0);
-    expect(component.files().length).toBe(1);
+    expect(component.resultData()?.url).toBeTruthy();
+    expect(component.resultData()?.filename).toBe('test-watermarked.pdf');
   });
 
   it('toggles advanced artifact and optional content layer settings (R-042, R-043)', () => {

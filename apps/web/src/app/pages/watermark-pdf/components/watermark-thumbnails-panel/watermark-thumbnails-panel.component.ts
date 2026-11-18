@@ -98,6 +98,12 @@ import { CommonModule } from '@angular/common';
     </aside>
   `,
   styles: [`
+    :host {
+      display: block;
+      height: 100%;
+      flex-shrink: 0;
+    }
+
     .left-thumbnails-panel {
       height: 100%;
       width: 130px;

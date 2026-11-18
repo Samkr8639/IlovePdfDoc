@@ -1,8 +1,18 @@
+:host {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .watermark-preview-root {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
   background-color: var(--pt-subtle-bg, #F6F8FA);
   position: relative;
@@ -11,6 +21,8 @@
 /* MAIN CANVAS VIEWPORT STAGE (Continuous Multi-Page Scroll) */
 .preview-stage-viewport {
   flex: 1;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
   overflow-x: auto;
   position: relative;

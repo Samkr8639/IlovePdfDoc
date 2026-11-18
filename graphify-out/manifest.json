@@ -552,14 +552,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794980149.2092948,
-    "seen": 1794980180.1296768,
+    "mtime": 1794982143.7352865,
+    "seen": 1794982175.6995087,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794980149.209859,
-    "seen": 1794980180.12968,
+    "mtime": 1794982143.7358682,
+    "seen": 1794982175.6995115,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794980149.2082613,
-    "seen": 1794980180.1300244,
+    "mtime": 1794982143.7346606,
+    "seen": 1794982175.6998546,
     "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794980149.2077403,
-    "seen": 1794980180.1300254,
+    "mtime": 1794982143.734141,
+    "seen": 1794982175.6998556,
     "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
@@ -2612,21 +2612,21 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.ts": {
-    "mtime": 1794980060.4929154,
-    "seen": 1794980180.129928,
+    "mtime": 1794980567.1602957,
+    "seen": 1794982175.69976,
     "ast_hash": "399775986ce248f691b3e83f98329fc3",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.spec.ts": {
-    "mtime": 1794980118.3864274,
-    "seen": 1794980180.1299326,
-    "ast_hash": "017ee32407df11be23e288996f301674",
+    "mtime": 1794982098.4970844,
+    "seen": 1794982175.699764,
+    "ast_hash": "c642d290760be6539a7ddac8aadcdd24",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.ts": {
-    "mtime": 1794980078.8263543,
-    "seen": 1794980180.1299338,
-    "ast_hash": "d7c954ab5ef0eb57802f9f23004a58d2",
+    "mtime": 1794981994.825498,
+    "seen": 1794982175.699765,
+    "ast_hash": "b0fa420f1b117973890daa7a2d749335",
     "semantic_hash": ""
   },
   "packages/contracts/src/watermark-pdf.ts": {
@@ -2636,15 +2636,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-preview/watermark-preview.component.html": {
-    "mtime": 1794979791.2116547,
-    "seen": 1794980180.1300566,
+    "mtime": 1794980566.9373627,
+    "seen": 1794982175.699886,
     "ast_hash": "f474215fefd4c64c229ef7f392763508",
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/watermark-pdf.component.html": {
-    "mtime": 1794980020.3620262,
-    "seen": 1794980180.1300578,
-    "ast_hash": "51cbe6db0df03e45a4e729833c6cacd7",
+    "mtime": 1794981817.9825428,
+    "seen": 1794982175.6998873,
+    "ast_hash": "ef3f190999a3d1e30d8a4f8f62effdf9",
     "semantic_hash": ""
   },
   "docs/watermark-pdf-requirements.md": {
@@ -2750,9 +2750,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/pages/watermark-pdf/components/watermark-thumbnails-panel/watermark-thumbnails-panel.component.ts": {
-    "mtime": 1794979759.7327766,
-    "seen": 1794980180.1299312,
-    "ast_hash": "fbe06e33cb005dd78d04ffeebef012f5",
+    "mtime": 1794981583.0301697,
+    "seen": 1794982175.6997626,
+    "ast_hash": "5997266ab796b215b2a2ab6ca20863e9",
     "semantic_hash": ""
   },
   "package-lock.json": {
