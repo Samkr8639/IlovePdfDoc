@@ -129,4 +129,16 @@ describe('WatermarkPreviewComponent', () => {
     // Trigger overlay redraw directly
     expect(() => component.drawWatermarkOverlay()).not.toThrow();
   });
+
+  it('renders page indicator pills and marks active page pill', () => {
+    fixture.componentRef.setInput('totalPages', 3);
+    fixture.componentRef.setInput('currentPage', 2);
+    fixture.detectChanges();
+
+    const pills = fixture.nativeElement.querySelectorAll('.page-indicator-pill');
+    expect(pills.length).toBe(3);
+    expect(pills[1].classList.contains('active-pill')).toBe(true);
+    expect(pills[0].classList.contains('active-pill')).toBe(false);
+    expect(pills[1].textContent).toContain('Page 2 of 3');
+  });
 });

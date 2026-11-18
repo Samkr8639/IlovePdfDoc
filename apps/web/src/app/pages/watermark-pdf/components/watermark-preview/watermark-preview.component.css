@@ -35,10 +35,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   margin: 0 auto;
   width: max-content;
   min-width: 100%;
+}
+
+.preview-page-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .preview-page-sheet {
@@ -97,23 +106,56 @@
   pointer-events: none;
 }
 
-.page-corner-indicator {
-  position: absolute;
-  bottom: -18px;
-  left: 50%;
-  transform: translateX(-50%);
+/* ==========================================================================
+   PAGE INDICATOR PILL (Canonical PDFTailor Design)
+   ========================================================================== */
+.page-indicator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 14px;
   background-color: var(--pt-surface-white, #FFFFFF);
-  border: 1px solid var(--pt-soft-outline, #E5E7EB);
-  color: var(--pt-muted, #64748B);
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--pt-font-body, 'Inter', sans-serif);
-  padding: 2px 8px;
+  border: 1px solid var(--pt-soft-outline, #E4E7EC);
   border-radius: var(--pt-radius-pill, 9999px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 4;
+  color: var(--pt-navy, #14213D);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(11, 18, 32, 0.05);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-indicator-pill:hover {
+  background-color: var(--pt-subtle-bg, #F6F8FA);
+  border-color: var(--pt-teal-700, #0F766E);
+  color: var(--pt-teal-700, #0F766E);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(11, 18, 32, 0.08);
+}
+
+.page-indicator-pill.active-pill {
+  background-color: var(--pt-teal-700, #0F766E);
+  border-color: var(--pt-teal-700, #0F766E);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(15, 118, 110, 0.28);
+}
+
+.page-indicator-pill .pill-number {
+  letter-spacing: 0.01em;
+}
+
+.page-indicator-pill .pill-total {
+  color: var(--pt-muted-light, #94A3B8);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.page-indicator-pill.active-pill .pill-total {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 @media (max-width: 768px) {
@@ -125,7 +167,9 @@
     width: 100%;
     min-width: 0;
   }
-  .page-corner-indicator {
-    display: none;
+  .page-indicator-pill {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 }
