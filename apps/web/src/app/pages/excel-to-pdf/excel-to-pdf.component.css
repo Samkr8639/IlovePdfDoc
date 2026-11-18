@@ -911,19 +911,3 @@
     display: none;
   }
 }
-
-/* Centered dropzone when hero heading/subtitle is removed */
-.unified-hero-section .hero-container {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.unified-hero-section .hero-dropzone-wrap {
-  grid-column: auto !important;
-  grid-row: auto !important;
-  max-width: 680px !important;
-  width: 100% !important;
-  margin: 0 auto !important;
-}
