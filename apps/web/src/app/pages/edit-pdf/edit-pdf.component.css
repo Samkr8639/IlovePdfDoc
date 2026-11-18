@@ -153,20 +153,7 @@
    1. UPLOAD STATE: UNIFIED HERO & DROPZONE (MATCHING ALL OTHER TOOL PAGES)
    =================================================================== */
 .unified-hero-section {
-  padding: 52px 0 32px;
-  text-align: center;
-  background: var(--pt-surface-ground, #f4f5f8);
   width: 100%;
-}
-
-.hero-content {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 16px;
 }
 
 .tool-h1 {

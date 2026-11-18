@@ -618,6 +618,63 @@ app-edit-pdf-hero {
   box-sizing: border-box;
 }
 
+@media (min-width: 1024px) {
+  .unified-hero-section {
+    padding: 44px 0 40px;
+    text-align: left;
+  }
+
+  .unified-hero-section .hero-container,
+  .unified-hero-section .hero-content,
+  .tool-page .unified-hero-section .hero-container,
+  .tool-page .unified-hero-section .hero-content {
+    max-width: 1340px;
+    display: grid;
+    grid-template-columns: minmax(360px, 1fr) minmax(560px, 680px);
+    grid-template-rows: 1fr auto auto auto 1fr;
+    column-gap: 56px;
+    align-items: center;
+    text-align: left;
+  }
+
+  .unified-hero-section .tool-h1 {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: left;
+    margin: 0 0 16px;
+    font-size: clamp(34px, 3.2vw, 48px);
+    line-height: 1.15;
+  }
+
+  .unified-hero-section .hero-subtitle,
+  .unified-hero-section .tool-lead {
+    grid-column: 1;
+    grid-row: 3;
+    text-align: left;
+    margin: 0 0 24px;
+    max-width: 520px;
+    font-size: 16.5px;
+    line-height: 1.6;
+  }
+
+  .unified-hero-section .hero-tour-trigger {
+    grid-column: 1;
+    grid-row: 4;
+    text-align: left;
+    margin: 0 0 24px;
+  }
+
+  .unified-hero-section .hero-dropzone-wrap,
+  .tool-page .unified-hero-section .hero-dropzone-wrap {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    margin: 0;
+    width: 100%;
+    max-width: 680px;
+    justify-self: end;
+  }
+}
+
 .adsense-section {
   padding: 20px 0 12px;
   background: var(--pt-surface-white, #FFFFFF);

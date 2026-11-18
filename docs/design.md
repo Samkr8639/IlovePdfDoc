@@ -239,18 +239,25 @@ Root layout defined in [`apps/web/src/app/app.component.html`](../apps/web/src/a
 - **Visual baselines:** [`merge-pdf-upload-1440.png`](design-assets/merge-pdf-upload-1440.png), [`pdf-to-jpg-upload-1440.png`](design-assets/pdf-to-jpg-upload-1440.png), [`merge-pdf-upload-1024.png`](design-assets/merge-pdf-upload-1024.png), [`merge-pdf-upload-390.png`](design-assets/merge-pdf-upload-390.png)
 
 ```text
+Desktop (>= 1024px): 2-Column Asymmetric Hero (Left: Title & Subtitle, Right: Dropzone)
 +-------------------------------------------------------------------------+
 | [Global Fixed Header: 68px desktop / 60px <=1024px]                     |
 +-------------------------------------------------------------------------+
 | [.global-error-banner (if error, sticky/top full-width #FEF2F2/#FDF3F1)]|
 |                                                                         |
-|  section.unified-hero-section (bg #F4F5F8 / --pt-subtle-bg, pad 52/32)  |
-|   +-- <h1 class="tool-h1"> (Sora 50px/48px w800 --pt-navy)              |
-|   +-- <p class="hero-subtitle"> (Inter 17px --pt-muted, max-w 680px)    |
-|   +-- <app-dropzone> (max-w 960px, min-h 340px, r 24px, white)          |
-|         [60x60 icon badge] -> [CTA 270x60px] + [Drive][Dropbox 60x60]   |
-|         ["or drop files here"] -> [3 Trust Chips]                       |
+|  section.unified-hero-section (bg #F8FAFC, pad 44/40, 2-col >=1024px)   |
+|   +-- Left Column:                                                      |
+|   |    <h1 class="tool-h1"> (Sora clamp 34-48px w800 --pt-navy)         |
+|   |    <p class="hero-subtitle"> (Inter 16.5px --pt-muted, max-w 520px) |
+|   |    [Optional .hero-tour-trigger]                                    |
+|   +-- Right Column:                                                     |
+|        <app-dropzone> (max-w 680px, basketball hoop upload court)       |
+|          [Top control card: Select files ... Uploaded 0]                |
+|          [Hoop stage 680x580: Drop card + hoop + slingshot animation]   |
+|          [Primary action row: Select button + Drive + Dropbox]          |
+|          [3 Trust Chips: In-Browser Privacy, Instant, Free & Unlimited] |
 +-------------------------------------------------------------------------+
+Mobile / Tablet (< 1024px): Single-column stacked centered layout.
 |  section.adsense-section (white, border-top, Leaderboard 728x90 / 970)  |
 +-------------------------------------------------------------------------+
 |  section.features-section -> 4-col .features-grid (2-col <=1024, 1<=768)|
