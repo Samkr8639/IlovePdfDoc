@@ -886,16 +886,41 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     }
   }
 
+  private holdStartTime = 0;
+  private wasHeld = false;
+  private compareStateBeforePress = false;
+
   onCompareHoldStart(): void {
+    this.holdStartTime = Date.now();
+    this.compareStateBeforePress = this.isCompareActive();
     this.isCompareActive.set(true);
   }
 
   onCompareHoldEnd(): void {
-    this.isCompareActive.set(false);
+    if (!this.holdStartTime) {
+      this.isCompareActive.set(false);
+      return;
+    }
+    const elapsed = Date.now() - this.holdStartTime;
+    this.holdStartTime = 0;
+
+    if (elapsed > 200) {
+      // Held down (>200ms): restore the state that was active before holding
+      this.isCompareActive.set(this.compareStateBeforePress);
+      this.wasHeld = true;
+    } else {
+      // Quick tap / click: restore so the following click event can toggle cleanly
+      this.isCompareActive.set(this.compareStateBeforePress);
+      this.wasHeld = false;
+    }
   }
 
   toggleCompare(): void {
-    this.isCompareActive.set(!this.isCompareActive());
+    if (this.wasHeld) {
+      this.wasHeld = false;
+      return;
+    }
+    this.isCompareActive.update(v => !v);
   }
 
   openGoogleDrive(event?: Event): void {

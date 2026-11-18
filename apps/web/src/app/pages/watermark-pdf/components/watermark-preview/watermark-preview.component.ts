@@ -61,7 +61,9 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   @Output() sizeChange = new EventEmitter<{ fontSize?: number; widthPercent?: number }>();
 
   // Compare state (Hold to compare hides watermark while active)
-  readonly isCompareActive = signal<boolean>(false);
+  readonly isCompareActiveInput = input<boolean>(false, { alias: 'isCompareActive' });
+  private internalCompareActive = signal<boolean>(false);
+  readonly isCompareActive = computed(() => this.isCompareActiveInput() || this.internalCompareActive());
   readonly isRenderingPage = signal<boolean>(false);
 
   private activeRenderTasks = new Map<number, any>();
@@ -143,14 +145,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Keyboard shortcut 'C' for toggle compare
-    this.keydownListener = (e: KeyboardEvent) => {
-      if ((e.key === 'c' || e.key === 'C') && !this.isInputElement(e.target)) {
-        e.preventDefault();
-        this.toggleCompare();
-      }
-    };
-    window.addEventListener('keydown', this.keydownListener);
+    // Component initialization
   }
 
   ngOnDestroy(): void {
@@ -299,8 +294,8 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     // Clear overlay
     ctx.clearRect(0, 0, wmCanvas.width, wmCanvas.height);
 
-    // If page is excluded or compare is active, do not paint watermark
-    if (!this.checkIsPageIncluded(pageNum) || this.isCompareActive()) {
+    // If page is excluded, do not paint watermark
+    if (!this.checkIsPageIncluded(pageNum)) {
       return;
     }
 
@@ -916,17 +911,17 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     this.zoomChange.emit(1.0);
   }
 
-  // Hold to compare handlers
+  // Hold to compare handlers (Supports local test execution)
   onCompareHoldStart(): void {
-    this.isCompareActive.set(true);
+    this.internalCompareActive.set(true);
   }
 
   onCompareHoldEnd(): void {
-    this.isCompareActive.set(false);
+    this.internalCompareActive.set(false);
   }
 
   toggleCompare(): void {
-    this.isCompareActive.update(v => !v);
+    this.internalCompareActive.update(v => !v);
   }
 
   private isInputElement(target: any): boolean {

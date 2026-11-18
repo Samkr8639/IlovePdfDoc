@@ -510,4 +510,38 @@ describe('WatermarkPdfComponent', () => {
 
     expect(component.errorMessage()).toContain('A document must have at least one page');
   });
+
+  it('handles hold to compare press, release, quick click, and keyboard shortcut', () => {
+    expect(component.isCompareActive()).toBe(false);
+
+    // 1. Hold to compare: mousedown for 300ms, then mouseup
+    component.onCompareHoldStart();
+    expect(component.isCompareActive()).toBe(true);
+
+    vi.spyOn(Date, 'now').mockReturnValueOnce(Date.now() + 300);
+    component.onCompareHoldEnd();
+    expect(component.isCompareActive()).toBe(false);
+
+    // A click event that follows immediately after release should be ignored
+    component.toggleCompare();
+    expect(component.isCompareActive()).toBe(false);
+
+    // 2. Quick click (<200ms): toggles compare mode ON
+    component.onCompareHoldStart();
+    component.onCompareHoldEnd();
+    component.toggleCompare();
+    expect(component.isCompareActive()).toBe(true);
+
+    // Quick click again: toggles compare mode OFF
+    component.onCompareHoldStart();
+    component.onCompareHoldEnd();
+    component.toggleCompare();
+    expect(component.isCompareActive()).toBe(false);
+
+    // 3. Keyboard shortcut 'C' toggles compare
+    component.onWindowKeyDown(new KeyboardEvent('keydown', { key: 'c' }));
+    expect(component.isCompareActive()).toBe(true);
+    component.onWindowKeyDown(new KeyboardEvent('keydown', { key: 'C' }));
+    expect(component.isCompareActive()).toBe(false);
+  });
 });
