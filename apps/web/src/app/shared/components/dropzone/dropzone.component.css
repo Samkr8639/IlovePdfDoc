@@ -55,24 +55,59 @@
 
 /* MODERN UPLOAD ICON BADGE */
 .dropzone-icon-badge {
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   background: rgba(15, 118, 110, 0.08);
   color: var(--pt-teal-700, #0F766E);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 2px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.08);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.10);
+  animation: dz-float 3s ease-in-out infinite;
+  /* Will-change hint for GPU compositing */
+  will-change: transform;
 }
 
+/* Idle floating animation */
+@keyframes dz-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* On hover / drag-over: spring pop instead of float */
 .dropzone-area:hover .dropzone-icon-badge,
 .dropzone-area.active .dropzone-icon-badge {
-  transform: translateY(-3px) scale(1.05);
+  animation: dz-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   background: rgba(15, 118, 110, 0.14);
-  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.16);
+  box-shadow: 0 8px 22px rgba(15, 118, 110, 0.18);
+}
+
+@keyframes dz-pop {
+  0%   { transform: scale(1) translateY(0); }
+  40%  { transform: scale(1.12) translateY(-7px); }
+  70%  { transform: scale(0.97) translateY(-2px); }
+  100% { transform: scale(1.05) translateY(-4px); }
+}
+
+/* Upward arrow inside the cloud icon bounces on hover */
+.dropzone-area:hover .dz-arrow,
+.dropzone-area.active .dz-arrow {
+  animation: dz-arrow-bounce 0.5s ease-in-out 0.08s infinite alternate;
+}
+
+@keyframes dz-arrow-bounce {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-2px); }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .dropzone-icon-badge,
+  .dz-arrow {
+    animation: none !important;
+  }
 }
 
 /* ACTION ROW: ELEVATED CTA + COHESIVE SIDECAR GROUP */
