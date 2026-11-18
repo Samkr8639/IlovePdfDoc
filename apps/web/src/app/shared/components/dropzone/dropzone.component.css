@@ -255,15 +255,17 @@
   border: none;
   padding: 0;
   font: inherit;
-  color: inherit;
+  color: var(--pt-teal-700, #0F766E);
+  font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   transition: color 0.15s ease;
 }
 
 .btn-take-shot-link:hover,
 .btn-take-shot-link:focus-visible {
   color: #e8571b;
-  text-decoration: underline;
   outline: none;
 }
 
@@ -427,7 +429,7 @@
   }
 }
 
-/* ---------- The file you throw ---------- */
+/* ---------- The file you throw (only visible once file is uploaded/selected) ---------- */
 .file-ball {
   position: absolute;
   top: 0;
@@ -436,7 +438,7 @@
   width: 72px;
   height: 90px;
   opacity: 0;
-  /* positioned + revealed from JS after first render */
+  visibility: hidden;
   pointer-events: none;
   touch-action: none;
   user-select: none;
@@ -444,12 +446,16 @@
   will-change: transform, opacity;
 }
 
-.file-ball.idle {
+.file-ball.visible {
+  visibility: visible;
+}
+
+.file-ball.visible.idle {
   pointer-events: auto;
   cursor: grab;
 }
 
-.file-ball.grabbed {
+.file-ball.visible.grabbed {
   pointer-events: auto;
   cursor: grabbing;
 }

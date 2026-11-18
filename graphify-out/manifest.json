@@ -552,14 +552,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/.well-known/ai-catalog.json": {
-    "mtime": 1794982143.7352865,
-    "seen": 1794982175.6995087,
+    "mtime": 1794996487.0722656,
+    "seen": 1794996599.844344,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
   "apps/web/public/ai-catalog.json": {
-    "mtime": 1794982143.7358682,
-    "seen": 1794982175.6995115,
+    "mtime": 1794996487.0722656,
+    "seen": 1794996599.8443468,
     "ast_hash": "3fe6c7d08c6aecdcb5892a31457b5d15",
     "semantic_hash": ""
   },
@@ -1404,9 +1404,9 @@
     "semantic_hash": "626d4f4cc64426b4ea4f2979e04d8812"
   },
   "apps/web/src/app/shared/components/dropzone/dropzone.component.ts": {
-    "mtime": 1794995642.7856717,
-    "seen": 1794995688.9975266,
-    "ast_hash": "68465ff4f85135976e245c9218ae40c2",
+    "mtime": 1794996463.8400714,
+    "seen": 1794996599.8446198,
+    "ast_hash": "bc1009355b583baa4eedaad950472fc9",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/file-list/file-list.component.ts": {
@@ -1676,14 +1676,14 @@
     "semantic_hash": ""
   },
   "apps/web/public/llms-full.txt": {
-    "mtime": 1794982143.7346606,
-    "seen": 1794982175.6998546,
+    "mtime": 1794996487.0717497,
+    "seen": 1794996599.8447137,
     "ast_hash": "ea179d86a08f06b255683917d1727c8a",
     "semantic_hash": ""
   },
   "apps/web/public/llms.txt": {
-    "mtime": 1794982143.734141,
-    "seen": 1794982175.6998556,
+    "mtime": 1794996487.0712314,
+    "seen": 1794996599.844715,
     "ast_hash": "87086b49e5f6f03066d2e274df3accc6",
     "semantic_hash": ""
   },
@@ -1820,9 +1820,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/dropzone/dropzone.component.html": {
-    "mtime": 1794995392.7534003,
-    "seen": 1794995688.997654,
-    "ast_hash": "78affadd73e7a49fae02a5cf96219338",
+    "mtime": 1794996418.7873373,
+    "seen": 1794996599.8447506,
+    "ast_hash": "95524f19f7d37ca26d27afbe86418830",
     "semantic_hash": ""
   },
   "apps/web/src/app/shared/components/file-list/file-list.component.html": {
@@ -2753,6 +2753,12 @@
     "mtime": 1794990690.5795712,
     "seen": 1794992406.6988683,
     "ast_hash": "278d06fb7e70a6277c09e9d942993780",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/shared/components/dropzone/dropzone.component.spec.ts": {
+    "mtime": 1794996555.816239,
+    "seen": 1794996599.8446186,
+    "ast_hash": "080527ab6a021d7493ca8e269af8badf",
     "semantic_hash": ""
   },
   "package-lock.json": {

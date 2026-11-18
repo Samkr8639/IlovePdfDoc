@@ -142,6 +142,7 @@ export class DropzoneComponent {
 
   private readonly stageEl = viewChild.required<ElementRef<HTMLElement>>('stage');
   private readonly ballEl = viewChild.required<ElementRef<HTMLElement>>('ball');
+  private readonly fileInputEl = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   /** Heading above the drop zone. */
   readonly title = input<string>('Upload files');
@@ -169,6 +170,20 @@ export class DropzoneComponent {
   readonly trail = signal<TrailDot[]>([]);
   readonly phase = signal<Phase>('idle');
   readonly ballLabel = signal<string>(DEFAULT_NAME);
+  readonly hasBall = signal<boolean>(false);
+
+  readonly fileBadge = computed(() => {
+    const file = this.job?.files?.[0];
+    const name = file ? file.name : this.ballLabel();
+    if (!name || name === DEFAULT_NAME) return 'PDF';
+    const cleanName = name.split(' ')[0];
+    const lastDot = cleanName.lastIndexOf('.');
+    if (lastDot !== -1 && lastDot < cleanName.length - 1) {
+      const ext = cleanName.slice(lastDot + 1).trim().toUpperCase();
+      return ext.length <= 4 ? ext : ext.slice(0, 4);
+    }
+    return 'PDF';
+  });
 
   readonly net = buildNetPaths();
 
@@ -217,13 +232,13 @@ export class DropzoneComponent {
     afterNextRender(() => {
       this.reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
       this.layout = this.measure();
-      this.setBall(this.layout.homeX, this.layout.homeY);
+      this.setBall(this.layout.homeX, this.layout.homeY, 0, 1, 1, 0);
 
       let ro: ResizeObserver | null = null;
       if (typeof ResizeObserver !== 'undefined') {
         ro = new ResizeObserver(() => {
           this.layout = this.measure();
-          if (this.phase() === 'idle') {
+          if (this.phase() === 'idle' && this.hasBall()) {
             this.setBall(this.layout.homeX, this.layout.homeY);
           }
         });
@@ -261,7 +276,7 @@ export class DropzoneComponent {
     if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
       const files = Array.from(event.dataTransfer.files);
       const toEmit = this.multiple() ? files : [files[0]];
-      this.playUploadSequence(toEmit);
+      this.prepareFileForLaunch(toEmit);
     }
   }
 
@@ -271,28 +286,53 @@ export class DropzoneComponent {
       const files = Array.from(input.files);
       const toEmit = this.multiple() ? files : [files[0]];
       input.value = '';
-      this.playUploadSequence(toEmit);
+      this.prepareFileForLaunch(toEmit);
     }
   }
 
   /**
-   * Real files: the sample file turns into the user's file, takes a perfect
-   * shot, and `filesSelected` fires when the progress card reaches "Uploaded".
-   * If a shot is already in the air the files are emitted immediately.
+   * Prepares the user's selected file(s) for launch:
+   * displays the file at the launch position with a spring pop-in animation,
+   * showing its actual name and badge. The user can then slingshot or click to launch it.
    */
-  private playUploadSequence(files: File[]): void {
-    if (this.phase() !== 'idle' || !this.layout) {
-      this.filesSelected.emit(files);
-      return;
-    }
+  private prepareFileForLaunch(files: File[]): void {
     const total = files.reduce((sum, f) => sum + f.size, 0);
     const first = files[0].name;
-    this.startAutoShot({
+    const job: Job = {
       name: files.length > 1 ? `${first} +${files.length - 1}` : first,
       size: this.formatFileSize(total),
       count: files.length,
       files
-    });
+    };
+
+    this.job = job;
+    this.ballLabel.set(job.name);
+    this.hasBall.set(true);
+    this.activeUpload.set(null);
+
+    this.layout = this.measure();
+    const L = this.layout;
+    this.ballEl().nativeElement.classList.remove('in-hoop');
+
+    if (this.reduceMotion) {
+      this.setBall(L.homeX, L.homeY, 0, 1, 1, 1);
+      this.phase.set('idle');
+      return;
+    }
+
+    this.setBall(L.homeX, L.homeY, 0, 0.4, 0.4, 0);
+    this.phase.set('busy');
+    this.animate(
+      420,
+      (t) => {
+        const s = 0.4 + 0.6 * easeOutBack(t);
+        this.setBall(L.homeX, L.homeY, 0, s, s, Math.min(1, t * 2.5));
+      },
+      () => {
+        this.setBall(L.homeX, L.homeY, 0, 1, 1, 1);
+        this.phase.set('idle');
+      }
+    );
   }
 
   private formatFileSize(bytes: number): string {
@@ -321,8 +361,17 @@ export class DropzoneComponent {
    * Playable file: grab -> pull back -> aim with dotted arc -> release
    * ===================================================================== */
 
+  onHoopCardClick(): void {
+    if (this.phase() !== 'idle') return;
+    if (this.hasBall()) {
+      this.takeShot();
+    } else {
+      this.fileInputEl()?.nativeElement.click();
+    }
+  }
+
   onBallPointerDown(e: PointerEvent): void {
-    if (this.phase() !== 'idle' || e.button > 0) return;
+    if (!this.hasBall() || this.phase() !== 'idle' || e.button > 0) return;
     e.preventDefault();
     e.stopPropagation();
 
@@ -368,10 +417,10 @@ export class DropzoneComponent {
     const py = L.homeY - this.by;
     this.setTrail([]);
 
-    // A plain click (no pull) just plays the perfect demo shot.
+    // A plain click (no pull) shoots the file into the net automatically.
     if (Math.hypot(px, py) < MIN_PULL) {
       this.phase.set('idle');
-      this.startAutoShot(DEFAULT_JOB);
+      this.startAutoShot(this.job);
       return;
     }
     this.phase.set('busy');
@@ -389,15 +438,21 @@ export class DropzoneComponent {
   onBallKey(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    this.takeShot();
+    if (this.hasBall()) {
+      this.takeShot();
+    }
   }
 
-  /** "or take the shot" link / keyboard users: plays the perfect shot. */
+  /** Launch the file into the hoop or open file picker if no file selected yet. */
   takeShot(event?: Event): void {
     event?.stopPropagation();
     event?.preventDefault();
     if (this.phase() !== 'idle' || !this.layout) return;
-    this.startAutoShot(DEFAULT_JOB);
+    if (this.hasBall()) {
+      this.startAutoShot(this.job);
+    } else {
+      this.fileInputEl()?.nativeElement.click();
+    }
   }
 
   /* ---------- aiming ---------- */
@@ -454,6 +509,7 @@ export class DropzoneComponent {
   private startAutoShot(job: Job): void {
     this.job = job;
     this.ballLabel.set(job.name);
+    this.hasBall.set(true);
     this.layout = this.measure();
     this.activeUpload.set(null);
     this.phase.set('busy');
@@ -476,7 +532,7 @@ export class DropzoneComponent {
         const e = easeOutCubic(t);
         const x = lerp(L.homeX, tx, e);
         const y = lerp(L.homeY, ty, e);
-        this.setBall(x, y, ((x - L.homeX) / MAX_PULL) * 16);
+        this.setBall(x, y, ((x - L.homeX) / MAX_PULL) * 16, 1, 1, 1);
         this.updateAim(x, y);
       },
       () => {
@@ -504,7 +560,7 @@ export class DropzoneComponent {
         this.hideBall();
         this.runScoreTimeline();
       } else {
-        this.respawn(150);
+        this.respawnBall(150);
       }
       return;
     }
@@ -615,12 +671,12 @@ export class DropzoneComponent {
     this.flight = null;
     this.run(() => {
       this.cardHot.set(false);
-      // Real files must never get stuck behind a missed shot.
-      if (this.job.files) {
-        this.filesSelected.emit(this.job.files);
-      }
     });
-    this.respawn(250);
+    if (this.hasBall()) {
+      this.respawnBall(250);
+    } else {
+      this.phase.set('idle');
+    }
   }
 
   /**
@@ -651,16 +707,18 @@ export class DropzoneComponent {
       this.later(40, () => this.activeUpload.update((u) => (u ? { ...u, progress: 100 } : u)));
       this.later(780, () => {
         this.activeUpload.update((u) => (u ? { ...u, isComplete: true } : u));
+        this.hasBall.set(false);
+        this.hideBall();
         if (job.files) {
           this.filesSelected.emit(job.files);
         }
-        this.respawn(900);
+        this.phase.set('idle');
       });
     });
   }
 
   /* =====================================================================
-   * Returning / respawning the sample file
+   * Returning / respawning the file
    * ===================================================================== */
 
   private snapHome(): void {
@@ -672,16 +730,18 @@ export class DropzoneComponent {
       240,
       (t) => {
         const e = easeOutCubic(t);
-        this.setBall(lerp(x0, L.homeX, e), lerp(y0, L.homeY, e), lerp(r0, 0, e));
+        this.setBall(lerp(x0, L.homeX, e), lerp(y0, L.homeY, e), lerp(r0, 0, e), 1, 1, 1);
       },
       () => this.phase.set('idle')
     );
   }
 
-  private respawn(delay: number): void {
+  private respawnBall(delay: number): void {
     this.later(delay, () => {
-      this.job = DEFAULT_JOB;
-      this.ballLabel.set(DEFAULT_NAME);
+      if (!this.hasBall()) {
+        this.phase.set('idle');
+        return;
+      }
       this.layout = this.measure();
       const L = this.layout;
       this.ballEl().nativeElement.classList.remove('in-hoop');
@@ -693,7 +753,7 @@ export class DropzoneComponent {
           this.setBall(L.homeX, L.homeY, 0, s, s, Math.min(1, t * 2.2));
         },
         () => {
-          this.setBall(L.homeX, L.homeY);
+          this.setBall(L.homeX, L.homeY, 0, 1, 1, 1);
           this.phase.set('idle');
         }
       );

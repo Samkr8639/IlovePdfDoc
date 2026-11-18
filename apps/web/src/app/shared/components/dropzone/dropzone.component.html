@@ -35,8 +35,8 @@
 
     <!-- PLAYFIELD: drop card + hoop + the file you throw -->
     <div class="stage" #stage>
-      <!-- Drop card (click opens the picker; real files can be dropped on it) -->
-      <div class="hoop-card" [class.hot]="isDragOver() || cardHot()" (click)="fileInput.click()">
+      <!-- Drop card (click opens the picker or shoots ready file) -->
+      <div class="hoop-card" [class.hot]="isDragOver() || cardHot()" (click)="onHoopCardClick()">
         <div class="hoop-card-prompt">
           <div class="hoop-upload-icon" aria-hidden="true">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -46,10 +46,17 @@
               <line x1="12" y1="4" x2="12" y2="16"></line>
             </svg>
           </div>
-          <span class="prompt-main">Drop files here</span>
-          <span class="prompt-sub">
-            or <button type="button" class="btn-take-shot-link" (click)="takeShot($event)">take the shot</button>
-          </span>
+          @if (!hasBall()) {
+            <span class="prompt-main">Drop files here</span>
+            <span class="prompt-sub">
+              or <button type="button" class="btn-take-shot-link" (click)="fileInput.click(); $event.stopPropagation()">browse from your device</button>
+            </span>
+          } @else {
+            <span class="prompt-main">File ready! Pull to shoot 🏀</span>
+            <span class="prompt-sub">
+              or <button type="button" class="btn-take-shot-link" (click)="takeShot($event)">take the shot &rarr;</button>
+            </span>
+          }
         </div>
       </div>
 
@@ -81,12 +88,20 @@
       }
 
       <!-- THE FILE: grab it, pull back, aim along the dots, let go -->
-      <div #ball class="file-ball" [class.idle]="phase() === 'idle'" [class.grabbed]="phase() === 'dragging'"
-        [attr.role]="phase() === 'idle' ? 'button' : null" [attr.tabindex]="phase() === 'idle' ? 0 : -1"
-        [attr.aria-label]="'Sample file ' + ballLabel() + '. Drag back and release to throw it into the hoop, or press Enter to take the shot.'"
-        (pointerdown)="onBallPointerDown($event)" (pointermove)="onBallPointerMove($event)"
-        (pointerup)="onBallPointerUp($event)" (pointercancel)="onBallPointerCancel($event)"
-        (click)="$event.stopPropagation()" (keydown.enter)="onBallKey($event)" (keydown.space)="onBallKey($event)">
+      <div #ball class="file-ball"
+        [class.visible]="hasBall()"
+        [class.idle]="hasBall() && phase() === 'idle'"
+        [class.grabbed]="hasBall() && phase() === 'dragging'"
+        [attr.role]="hasBall() && phase() === 'idle' ? 'button' : null"
+        [attr.tabindex]="hasBall() && phase() === 'idle' ? 0 : -1"
+        [attr.aria-label]="hasBall() ? ('File ' + ballLabel() + '. Drag back and release to throw it into the hoop, or press Enter to take the shot.') : null"
+        (pointerdown)="onBallPointerDown($event)"
+        (pointermove)="onBallPointerMove($event)"
+        (pointerup)="onBallPointerUp($event)"
+        (pointercancel)="onBallPointerCancel($event)"
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="onBallKey($event)"
+        (keydown.space)="onBallKey($event)">
         <svg class="file-art" viewBox="0 0 72 90" width="72" height="90" aria-hidden="true">
           <path d="M8 0H48L72 24V82a8 8 0 0 1-8 8H8a8 8 0 0 1-8-8V8a8 8 0 0 1 8-8Z" fill="#FFFFFF" />
           <path d="M48 0V16a8 8 0 0 0 8 8H72Z" fill="#E7EBF1" />
@@ -95,9 +110,9 @@
           <rect x="12" y="48" width="26" height="4" rx="2" fill="#E8EBF0" />
           <rect x="10" y="62" width="30" height="16" rx="3.5" fill="#E03A45" />
           <text x="25" y="73.6" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5"
-            font-weight="700" fill="#FFFFFF">PDF</text>
+            font-weight="700" fill="#FFFFFF">{{ fileBadge() }}</text>
         </svg>
-        <span class="ball-label" [class.show]="phase() === 'idle'">{{ ballLabel() }}</span>
+        <span class="ball-label" [class.show]="hasBall() && phase() === 'idle'">{{ ballLabel() }}</span>
       </div>
 
       <!-- Upload progress card -->
@@ -106,7 +121,7 @@
         <div class="progress-file-info">
           <div class="mini-doc-icon" aria-hidden="true">
             <div class="mini-doc-fold"></div>
-            <span class="mini-doc-badge">PDF</span>
+            <span class="mini-doc-badge">{{ fileBadge() }}</span>
           </div>
           <div class="progress-text-col">
             <span class="progress-file-name">{{ upload.name }}</span>
