@@ -6,7 +6,7 @@
  * Follows PDFTailor Design System rules and tokens.
  */
 
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -63,18 +63,20 @@ import { CommonModule } from '@angular/common';
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                 </svg>
               </button>
-              <button
-                type="button"
-                class="card-action-btn danger"
-                (click)="deletePage.emit(pageNum); $event.stopPropagation()"
-                title="Delete page"
-                [attr.aria-label]="'Delete page ' + pageNum">
-                <svg class="lucide-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-              </button>
+              @if (totalPages() > 1) {
+                <button
+                  type="button"
+                  class="card-action-btn danger"
+                  (click)="promptDeletePage(pageNum, $event)"
+                  title="Delete page"
+                  [attr.aria-label]="'Delete page ' + pageNum">
+                  <svg class="lucide-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+              }
             </div>
 
             <!-- Page Preview Mini Sheet -->
@@ -90,6 +92,17 @@ import { CommonModule } from '@angular/common';
                 </div>
               }
             </div>
+
+            <!-- Inline Delete Confirmation Overlay -->
+            @if (confirmingDeletePageNum() === pageNum) {
+              <div class="delete-confirm-overlay" (click)="$event.stopPropagation()">
+                <span class="delete-confirm-title">Delete?</span>
+                <div class="delete-confirm-btns">
+                  <button type="button" class="btn-confirm-delete" (click)="confirmDelete(pageNum, $event)" title="Confirm delete">Yes</button>
+                  <button type="button" class="btn-cancel-delete" (click)="cancelDeletePage($event)" title="Cancel">No</button>
+                </div>
+              </div>
+            }
 
             <div class="page-number-label">{{ pageNum }}</div>
           </div>
@@ -308,6 +321,68 @@ import { CommonModule } from '@angular/common';
       font-weight: 700;
     }
 
+    .delete-confirm-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(20, 33, 61, 0.94);
+      border-radius: var(--pt-radius-sm, 6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      z-index: 15;
+      padding: 0.25rem;
+      backdrop-filter: blur(2px);
+    }
+
+    .delete-confirm-title {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      font-family: var(--pt-font-body, 'Inter', sans-serif);
+      text-align: center;
+    }
+
+    .delete-confirm-btns {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .btn-confirm-delete {
+      background: var(--pt-coral, #E05D44);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--pt-radius-xs, 4px);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 0.2rem 0.45rem;
+      cursor: pointer;
+      font-family: var(--pt-font-body, 'Inter', sans-serif);
+      transition: background 0.12s ease;
+    }
+
+    .btn-confirm-delete:hover {
+      background: var(--pt-coral-hover, #C54E37);
+    }
+
+    .btn-cancel-delete {
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--pt-radius-xs, 4px);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 0.2rem 0.45rem;
+      cursor: pointer;
+      font-family: var(--pt-font-body, 'Inter', sans-serif);
+      transition: background 0.12s ease;
+    }
+
+    .btn-cancel-delete:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
     @media (max-width: 1024px) {
       .left-thumbnails-panel {
         width: 90px;
@@ -339,4 +414,22 @@ export class WatermarkThumbnailsPanelComponent {
   readonly pagesList = computed(() =>
     Array.from({ length: Math.max(1, this.totalPages()) }, (_, i) => i + 1)
   );
+
+  readonly confirmingDeletePageNum = signal<number | null>(null);
+
+  promptDeletePage(pageNum: number, event: Event): void {
+    event.stopPropagation();
+    this.confirmingDeletePageNum.set(pageNum);
+  }
+
+  cancelDeletePage(event: Event): void {
+    event.stopPropagation();
+    this.confirmingDeletePageNum.set(null);
+  }
+
+  confirmDelete(pageNum: number, event: Event): void {
+    event.stopPropagation();
+    this.confirmingDeletePageNum.set(null);
+    this.deletePage.emit(pageNum);
+  }
 }

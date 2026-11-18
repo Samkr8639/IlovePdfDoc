@@ -832,6 +832,11 @@ export class WatermarkPdfComponent implements OnInit, OnDestroy {
     this.zoom.set(Math.min(3.0, Math.max(0.5, zoom)));
   }
 
+  onZoomFit(): void {
+    const fit = this.watermarkPreviewRef?.computeFitZoom() ?? 1.0;
+    this.onZoomChange(fit);
+  }
+
   onPositionChange(pos: { customXPercent: number; customYPercent: number; rotation: number }): void {
     this.updateCommon({
       useCustomPosition: true,

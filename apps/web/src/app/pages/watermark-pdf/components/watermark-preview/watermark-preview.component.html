@@ -29,6 +29,7 @@
               class="watermark-overlay-canvas"
               [style.z-index]="settings().common.layer === 'below' ? 1 : 2"
               [style.opacity]="isCompareActive() ? 0 : 1"
+              [style.pointer-events]="isCompareActive() ? 'none' : 'auto'"
               (pointerdown)="onCanvasPointerDown($event, pageNum)"
               (pointermove)="onCanvasPointerMove($event, pageNum)"
               (pointerup)="onCanvasPointerUp($event)"

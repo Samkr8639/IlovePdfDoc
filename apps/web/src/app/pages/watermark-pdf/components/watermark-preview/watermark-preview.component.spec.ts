@@ -86,6 +86,9 @@ describe('WatermarkPreviewComponent', () => {
 
     component.resetZoom();
     expect(zoomSpy).toHaveBeenCalledWith(1.0);
+
+    component.fitToWidth();
+    expect(zoomSpy).toHaveBeenCalledWith(1.0); // Fallback without viewport element is 1.0
   });
 
   it('applies correct z-indices for Over vs Below layer modes', () => {

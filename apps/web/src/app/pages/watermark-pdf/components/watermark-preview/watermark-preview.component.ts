@@ -187,6 +187,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
     }
 
     this.cancelActiveRenderTasks();
+    this.cachedPageMetricsMap.clear();
     this.isRenderingPage.set(true);
 
     const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
@@ -558,6 +559,7 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
   // Pointer Drag, Rotate & Resize Handlers
   onCanvasPointerDown(e: PointerEvent, pageNum: number): void {
+    if (this.isCompareActive()) return;
     this.activePointerPageNum = pageNum;
     if (this.currentPage() !== pageNum) {
       this.pageChange.emit(pageNum);
@@ -909,6 +911,23 @@ export class WatermarkPreviewComponent implements OnInit, OnDestroy {
 
   resetZoom(): void {
     this.zoomChange.emit(1.0);
+  }
+
+  computeFitZoom(): number {
+    const viewport = this.previewViewportRef?.nativeElement;
+    const metrics = this.cachedPageMetricsMap.get(this.currentPage()) || this.cachedPageMetricsMap.get(1);
+    if (!viewport || !metrics || !metrics.visualWidth || metrics.visualWidth <= 0) {
+      return 1.0;
+    }
+    const availableWidth = viewport.clientWidth - 48; // 24px stage padding on each side
+    if (availableWidth <= 0) return 1.0;
+    const targetZoom = availableWidth / metrics.visualWidth;
+    return Math.max(0.5, Math.min(2.0, Math.round(targetZoom * 100) / 100));
+  }
+
+  fitToWidth(): void {
+    const fit = this.computeFitZoom();
+    this.zoomChange.emit(fit);
   }
 
   // Hold to compare handlers (Supports local test execution)

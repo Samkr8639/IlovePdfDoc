@@ -58,7 +58,7 @@ describe('WatermarkThumbnailsPanelComponent', () => {
     expect(rotateSpy).toHaveBeenCalledWith(2);
   });
 
-  it('emits deletePage when delete action button is clicked', () => {
+  it('prompts delete confirmation and emits deletePage when confirmed', () => {
     const deleteSpy = vi.fn();
     component.deletePage.subscribe(deleteSpy);
 
@@ -67,7 +67,47 @@ describe('WatermarkThumbnailsPanelComponent', () => {
     expect(deleteBtn).toBeTruthy();
 
     deleteBtn.click();
+    fixture.detectChanges();
+
+    expect(component.confirmingDeletePageNum()).toBe(2);
+    expect(deleteSpy).not.toHaveBeenCalled();
+
+    const confirmBtn = el.querySelector('.btn-confirm-delete') as HTMLButtonElement;
+    expect(confirmBtn).toBeTruthy();
+
+    confirmBtn.click();
     expect(deleteSpy).toHaveBeenCalledWith(2);
+    expect(component.confirmingDeletePageNum()).toBeNull();
+  });
+
+  it('cancels page deletion when cancel button is clicked', () => {
+    const deleteSpy = vi.fn();
+    component.deletePage.subscribe(deleteSpy);
+
+    const el = fixture.nativeElement as HTMLElement;
+    const deleteBtn = el.querySelector('#thumb-page-2 .card-action-btn.danger') as HTMLButtonElement;
+    expect(deleteBtn).toBeTruthy();
+
+    deleteBtn.click();
+    fixture.detectChanges();
+
+    const cancelBtn = el.querySelector('.btn-cancel-delete') as HTMLButtonElement;
+    expect(cancelBtn).toBeTruthy();
+
+    cancelBtn.click();
+    fixture.detectChanges();
+
+    expect(deleteSpy).not.toHaveBeenCalled();
+    expect(component.confirmingDeletePageNum()).toBeNull();
+  });
+
+  it('does not render delete button when totalPages is 1', () => {
+    fixture.componentRef.setInput('totalPages', 1);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    const deleteBtn = el.querySelector('#thumb-page-1 .card-action-btn.danger');
+    expect(deleteBtn).toBeNull();
   });
 
   it('emits toggleCollapse when collapse toggle button is clicked', () => {

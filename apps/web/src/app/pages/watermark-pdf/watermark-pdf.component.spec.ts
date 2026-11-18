@@ -544,4 +544,13 @@ describe('WatermarkPdfComponent', () => {
     component.onWindowKeyDown(new KeyboardEvent('keydown', { key: 'C' }));
     expect(component.isCompareActive()).toBe(false);
   });
+
+  it('updates zoom and executes onZoomFit', () => {
+    component.onZoomChange(1.5);
+    expect(component.zoom()).toBe(1.5);
+
+    component.onZoomFit();
+    // In test environment without preview ref it falls back to 1.0
+    expect(component.zoom()).toBe(1.0);
+  });
 });
