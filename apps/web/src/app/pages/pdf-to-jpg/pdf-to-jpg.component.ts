@@ -128,6 +128,14 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
   readonly estimatedSizeText = signal<string>('Calculating...');
   readonly firstPageDimensionsText = signal<string>('');
 
+  // Active view & canvas preview (Matches Edit PDF / Watermark PDF)
+  readonly currentPage = signal<number>(1);
+  readonly zoom = signal<number>(1.0);
+  readonly isLeftSidebarCollapsed = signal<boolean>(false);
+  readonly pdfDoc = signal<any>(null);
+  readonly activePagePreviewUrl = signal<string | null>(null);
+  readonly isRenderingActivePage = signal<boolean>(false);
+
   // Computed: Primary PDF file (first uploaded)
   readonly primaryFile = computed<SelectedPdfFile | null>(() => {
     const files = this.selectedFiles();
@@ -302,6 +310,9 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
       });
 
       this.updateResolutionEstimate(Math.round(vp.width), Math.round(vp.height));
+      this.pdfDoc.set(doc);
+      this.currentPage.set(1);
+      this.renderActivePagePreview(doc, 1);
       this.loadThumbnails(doc, pageCount);
       firstPage.cleanup();
     } catch (err: any) {
@@ -406,6 +417,77 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
   onQualityChange(preset: PdfToJpgQualityPreset): void {
     this.qualityPreset.set(preset);
     this.updateResolutionEstimate();
+  }
+
+  readonly isCurrentPageSelected = computed<boolean>(() => {
+    return this.selectedPageNumbers().includes(this.currentPage());
+  });
+
+  selectPage(pageNum: number): void {
+    if (pageNum < 1 || pageNum > this.totalPagesCount()) return;
+    this.currentPage.set(pageNum);
+    const doc = this.pdfDoc();
+    if (doc) {
+      this.renderActivePagePreview(doc, pageNum);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.selectPage(this.currentPage() - 1);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPagesCount()) {
+      this.selectPage(this.currentPage() + 1);
+    }
+  }
+
+  zoomIn(): void {
+    this.zoom.update((z) => Math.min(3.0, +(z + 0.25).toFixed(2)));
+  }
+
+  zoomOut(): void {
+    this.zoom.update((z) => Math.max(0.5, +(z - 0.25).toFixed(2)));
+  }
+
+  resetZoom(): void {
+    this.zoom.set(1.0);
+  }
+
+  toggleLeftSidebar(): void {
+    this.isLeftSidebarCollapsed.update((c) => !c);
+  }
+
+  toggleCurrentPageSelection(): void {
+    this.togglePageSelection(this.currentPage());
+  }
+
+  async renderActivePagePreview(doc: any, pageNum: number): Promise<void> {
+    if (!doc || pageNum < 1 || pageNum > (doc.numPages || 1)) return;
+    this.isRenderingActivePage.set(true);
+    try {
+      const page = await doc.getPage(pageNum);
+      const vp = page.getViewport({ scale: 1.333 });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(vp.width);
+      canvas.height = Math.round(vp.height);
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = this.backgroundColor() || '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        this.activePagePreviewUrl.set(canvas.toDataURL('image/jpeg', 0.85));
+      }
+      canvas.width = 0;
+      canvas.height = 0;
+      page.cleanup?.();
+    } catch {
+      // Gracefully catch canvas / rendering failure in headless test env
+    } finally {
+      this.isRenderingActivePage.set(false);
+    }
   }
 
   // ──────────────────────────────────────────────────────────────
@@ -678,6 +760,11 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
     this.selectedPageNumbers.set([]);
     this.showAdvanced.set(false);
     this.isSidePanelOpen.set(false);
+    this.currentPage.set(1);
+    this.zoom.set(1.0);
+    this.isLeftSidebarCollapsed.set(false);
+    this.pdfDoc.set(null);
+    this.activePagePreviewUrl.set(null);
   }
 
   private cleanupThumbnails(): void {
