@@ -18,6 +18,18 @@
   display: none;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .dropzone-content {
   display: flex;
   flex-direction: column;
@@ -27,7 +39,7 @@
 }
 
 /* ==========================================================================
-   TOP BAR: TITLE + UPLOADED COUNT BADGE (MATCHING REFERENCE VIDEO)
+   TOP BAR: TITLE + UPLOADED COUNT (REDESIGNED CONTROL CARD)
    ========================================================================== */
 .dropzone-top-bar {
   display: flex;
@@ -35,368 +47,362 @@
   justify-content: space-between;
   width: 100%;
   max-width: 680px;
-  margin: 0 auto 4px;
-  padding: 0 4px;
+  margin: 0 auto 16px;
+  padding: 12px 20px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02);
   box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropzone-area:hover .dropzone-top-bar,
+.dropzone-area.active .dropzone-top-bar {
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 22px -2px rgba(15, 23, 42, 0.08);
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.top-bar-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--pt-teal-700, #0F766E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.dropzone-top-bar:hover .top-bar-badge {
+  transform: translateY(-1px);
+  background: rgba(15, 118, 110, 0.14);
 }
 
 .top-bar-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   text-align: left;
 }
 
 .top-bar-title {
   font-family: var(--pt-font-heading, 'Inter', sans-serif);
-  font-size: 22px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--pt-navy, #14213D);
-  margin: 0 0 2px 0;
-  letter-spacing: -0.015em;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 
 .top-bar-subtitle {
   font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 13.5px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: #64748B;
   margin: 0;
+  line-height: 1.3;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .uploaded-counter-pill {
   display: inline-flex;
   align-items: center;
+  gap: 7px;
   padding: 6px 14px;
   border-radius: 9999px;
-  background: #F1F5F9;
+  background: #F8FAFC;
   border: 1px solid #E2E8F0;
   font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: #475569;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
 }
 
+.counter-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #F97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.pill-label {
+  color: #64748B;
+  font-weight: 500;
+}
+
+.pill-count {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--pt-navy, #14213D);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+  min-width: 10px;
+  text-align: center;
+}
+
 .uploaded-counter-pill.bump {
-  transform: scale(1.16);
-  background: #FEF3C7;
-  color: #92400E;
-  border-color: #FCD34D;
+  transform: scale(1.12);
+  background: #FFF7ED;
+  border-color: #FFEDD5;
+}
+
+.uploaded-counter-pill.bump .counter-dot {
+  transform: scale(1.35);
+  background: #EA580C;
+}
+
+.uploaded-counter-pill.bump .pill-count {
+  transform: scale(1.25);
+  color: #EA580C;
 }
 
 /* ==========================================================================
-   BASKETBALL HOOP DROP CARD
+   STAGE (680 x 580 playfield; everything below is positioned inside it)
+   z-order: card 0 < backboard 1 < rim-back 2 < file-in-hoop 3 < net 4
+            < rim-front 5 / aim dots 5 < file in the air 6 < progress 7 < +1 8
    ========================================================================== */
-.hoop-card {
+.stage {
   position: relative;
   width: 100%;
   max-width: 680px;
+  height: 580px;
   margin: 0 auto;
-  min-height: 290px;
-  background: #FFFFFF;
-  border: 2px dashed #CBD5E1;
-  border-radius: 20px;
-  padding: 24px 20px 16px;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.dropzone-area.active .hoop-card,
+/* ---------- Drop card ---------- */
+.hoop-card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+  width: min(402px, 100%);
+  height: 272px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
 .hoop-card:hover {
-  border-color: #F97316;
-  background: #FFFAF5;
-  box-shadow: 0 14px 36px -10px rgba(249, 115, 22, 0.12);
+  border-color: #94a3b8;
 }
 
-.dropzone-area.active .hoop-card {
-  border-style: solid;
-  background: #FFF7ED;
+.hoop-card.hot,
+.hoop-card.hot:hover {
+  border-color: #f59e6b;
+  background: #fff4ea;
 }
 
-/* TOP UPLOAD PROMPT */
 .hoop-card-prompt {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  z-index: 5;
+  gap: 6px;
 }
 
 .hoop-upload-icon {
-  color: #64748B;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.hoop-card:hover .hoop-upload-icon,
-.dropzone-area.active .hoop-upload-icon {
-  color: #F97316;
-  transform: translateY(-2px);
-}
-
-.hoop-prompt-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  color: #4b5563;
+  margin-bottom: 6px;
 }
 
 .prompt-main {
   font-family: var(--pt-font-heading, 'Inter', sans-serif);
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 600;
-  color: #1E293B;
+  letter-spacing: -0.01em;
+  color: #1b2130;
 }
 
 .prompt-sub {
   font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 13px;
-  color: #64748B;
+  font-size: 13.5px;
+  color: #9aa3b2;
 }
 
 .btn-take-shot-link {
   background: none;
   border: none;
   padding: 0;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: 600;
-  color: #F97316;
-  text-decoration: underline;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
   transition: color 0.15s ease;
 }
 
-.btn-take-shot-link:hover {
-  color: #C2410C;
+.btn-take-shot-link:hover,
+.btn-take-shot-link:focus-visible {
+  color: #e8571b;
+  text-decoration: underline;
+  outline: none;
 }
 
-/* ==========================================================================
-   BASKETBALL HOOP COURT & GRAPHICS
-   ========================================================================== */
-.basketball-stage {
-  position: relative;
-  width: 100%;
-  height: 185px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  pointer-events: none;
-}
-
-/* Backboard */
+/* ---------- Hoop ---------- */
 .hoop-backboard {
   position: absolute;
-  bottom: 58px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 140px;
-  height: 94px;
-  background: #FFFFFF;
-  border: 1.5px solid #E2E8F0;
-  border-radius: 6px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 8px;
-  box-sizing: border-box;
   z-index: 1;
-}
-
-.backboard-inner-target {
-  width: 62px;
-  height: 46px;
-  border: 2.5px solid #F97316;
+  top: 176px;
+  left: 50%;
+  width: 138px;
+  height: 82px;
+  margin-left: -69px;
+  box-sizing: border-box;
+  background: #fffefc;
+  border: 2.5px solid #e9803f;
   border-radius: 3px;
-  box-sizing: border-box;
 }
 
-.backboard-connector {
+.rim-mount {
   position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 6px;
-  background: #EA580C;
-  border-radius: 1px;
-}
-
-/* Rim & Net */
-.hoop-rim-net-group {
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 3;
-}
-
-.hoop-rim {
-  width: 86px;
-  height: 18px;
-  border: 3.5px solid #F97316;
-  border-radius: 50%;
-  background: rgba(249, 115, 22, 0.08);
-  box-shadow: 0 3px 6px rgba(249, 115, 22, 0.3);
-  margin-bottom: -4px;
-  z-index: 4;
-}
-
-.net-svg {
-  display: block;
-  transform-origin: top center;
-  transition: transform 0.2s ease;
   z-index: 2;
-}
-
-.net-svg.swish-active {
-  animation: netWiggle 0.45s ease-in-out;
-}
-
-@keyframes netWiggle {
-  0% { transform: scale(1, 1); }
-  25% { transform: scale(1.16, 0.84) skewX(5deg); }
-  50% { transform: scale(0.92, 1.14) skewX(-4deg); }
-  75% { transform: scale(1.06, 0.96); }
-  100% { transform: scale(1, 1); }
-}
-
-/* Trajectory Dotted Arc */
-.trajectory-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  z-index: 2;
-}
-
-.trajectory-svg.visible {
-  opacity: 1;
-}
-
-.trajectory-path {
-  stroke-dashoffset: 0;
-  animation: dashFlow 1.2s linear infinite;
-}
-
-@keyframes dashFlow {
-  from { stroke-dashoffset: 40; }
-  to { stroke-dashoffset: 0; }
-}
-
-/* Flying File Animation */
-.flying-file-item {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 38px;
-  height: 48px;
-  z-index: 5;
-  animation: shootTrajectory 0.75s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  pointer-events: none;
-}
-
-@keyframes shootTrajectory {
-  0% {
-    opacity: 0;
-    transform: translate(30px, 140px) scale(0.85) rotate(-20deg);
-  }
-  15% {
-    opacity: 1;
-    transform: translate(60px, 80px) scale(1) rotate(-10deg);
-  }
-  45% {
-    transform: translate(140px, 15px) scale(1.02) rotate(6deg);
-  }
-  70% {
-    transform: translate(220px, 60px) scale(0.88) rotate(14deg);
-  }
-  88% {
-    transform: translate(248px, 118px) scale(0.72) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(248px, 146px) scale(0.5) rotate(0deg);
-  }
-}
-
-.flying-doc-shape {
-  width: 38px;
-  height: 48px;
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 4px;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 4px;
-  box-sizing: border-box;
-}
-
-.flying-doc-fold {
-  position: absolute;
-  top: 0;
-  right: 0;
-  border-width: 0 8px 8px 0;
-  border-style: solid;
-  border-color: #E2E8F0 #F8FAFC;
-  border-bottom-left-radius: 2px;
-}
-
-.flying-doc-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  width: 80%;
-  margin-bottom: 6px;
-}
-
-.flying-doc-lines span {
-  height: 2px;
-  background: #E2E8F0;
-  border-radius: 1px;
-}
-
-.flying-pdf-badge {
-  background: #EF4444;
-  color: #FFFFFF;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 1px 4px;
+  top: 257px;
+  left: 50%;
+  width: 26px;
+  height: 14px;
+  margin-left: -13px;
+  background: #d84e14;
   border-radius: 2px;
-  line-height: 1;
 }
 
-/* Score Popup */
-.score-popup {
+.rim {
   position: absolute;
-  top: 36px;
-  right: 32%;
-  font-family: var(--pt-font-heading, 'Inter', sans-serif);
-  font-size: 22px;
-  font-weight: 800;
-  color: #F97316;
-  animation: popScore 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  z-index: 10;
+  top: 260px;
+  left: 50%;
+  width: 164px;
+  height: 24px;
+  margin-left: -82px;
+  box-sizing: border-box;
+  border: 5px solid #e8571b;
+  border-radius: 50%;
   pointer-events: none;
+}
+
+.rim-back {
+  z-index: 2;
+  background: rgba(255, 250, 244, 0.92);
+}
+
+/* only the lower half of the ring sits in front of the file */
+.rim-front {
+  z-index: 5;
+  clip-path: inset(50% 0 0 0);
+}
+
+.rim.rim-hit {
+  animation: rimClank 0.26s ease-out;
+}
+
+@keyframes rimClank {
+  0% {
+    transform: translateY(0);
+  }
+
+  30% {
+    transform: translateY(3px);
+  }
+
+  60% {
+    transform: translateY(-1px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.net {
+  position: absolute;
+  z-index: 4;
+  top: 274px;
+  left: 50%;
+  margin-left: -82px;
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+.net.swish {
+  animation: netSwish 0.5s ease-in-out;
+}
+
+@keyframes netSwish {
+  0% {
+    transform: scale(1, 1);
+  }
+
+  25% {
+    transform: scale(1.14, 0.86) skewX(4deg);
+  }
+
+  50% {
+    transform: scale(0.93, 1.12) skewX(-3deg);
+  }
+
+  75% {
+    transform: scale(1.05, 0.97);
+  }
+
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* ---------- Aim dots ---------- */
+.trail {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.trail-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: #f08a62;
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- +1 ---------- */
+.score-plus {
+  position: absolute;
+  z-index: 8;
+  top: 163px;
+  left: calc(50% + 78px);
+  font-family: var(--pt-font-heading, 'Inter', sans-serif);
+  font-size: 24px;
+  font-weight: 800;
+  color: #e8571b;
+  pointer-events: none;
+  animation: popScore 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes popScore {
@@ -404,96 +410,262 @@
     opacity: 0;
     transform: translateY(8px) scale(0.6);
   }
-  30% {
+
+  20% {
     opacity: 1;
-    transform: translateY(-8px) scale(1.3);
+    transform: translateY(-4px) scale(1.15);
   }
+
   70% {
     opacity: 1;
-    transform: translateY(-16px) scale(1.05);
+    transform: translateY(-10px) scale(1);
   }
+
   100% {
     opacity: 0;
-    transform: translateY(-28px) scale(0.9);
+    transform: translateY(-22px) scale(0.95);
   }
+}
+
+/* ---------- The file you throw ---------- */
+.file-ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  width: 72px;
+  height: 90px;
+  opacity: 0;
+  /* positioned + revealed from JS after first render */
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform, opacity;
+}
+
+.file-ball.idle {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.file-ball.grabbed {
+  pointer-events: auto;
+  cursor: grabbing;
+}
+
+.file-ball.in-hoop {
+  z-index: 3;
+}
+
+.file-ball:focus-visible {
+  outline: 2px solid var(--pt-teal-700, #0f766e);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+
+.file-art {
+  display: block;
+  filter: drop-shadow(0 6px 10px rgba(15, 23, 42, 0.14));
+  transition: filter 0.15s ease;
+}
+
+.file-ball.grabbed .file-art {
+  filter: drop-shadow(0 10px 16px rgba(15, 23, 42, 0.2));
+}
+
+.ball-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #475569;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+
+.ball-label.show {
+  opacity: 1;
 }
 
 /* ==========================================================================
-   SAMPLE SHOT TRIGGER BAR (MATCHING FRAME 1 FROM VIDEO)
+   UPLOAD PROGRESS CARD
    ========================================================================== */
-.sample-shot-bar {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin: 6px auto 2px;
-  padding: 6px 14px;
-  background: #F8FAFC;
-  border: 1px dashed #CBD5E1;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.sample-shot-bar:hover {
-  background: #FFF7ED;
-  border-color: #F97316;
-  transform: translateY(-1px);
-}
-
-.sample-doc-card {
+.upload-progress-card {
+  position: absolute;
+  z-index: 7;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 16px;
+  height: 62px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.08);
+  animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progress-file-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 12px;
+  min-width: 0;
 }
 
 .mini-doc-icon {
   position: relative;
-  width: 18px;
-  height: 22px;
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 2px;
+  flex-shrink: 0;
+  width: 22px;
+  height: 28px;
+  box-sizing: border-box;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 2px;
-  box-sizing: border-box;
+  padding-bottom: 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  opacity: 0.75;
 }
 
 .mini-doc-fold {
   position: absolute;
   top: 0;
   right: 0;
-  border-width: 0 4px 4px 0;
+  border-width: 0 6px 6px 0;
   border-style: solid;
-  border-color: #CBD5E1 #FFFFFF;
+  border-color: #e2e8f0 #ffffff;
 }
 
 .mini-doc-badge {
-  background: #EF4444;
-  color: #FFFFFF;
+  background: #e03a45;
+  color: #ffffff;
   font-size: 6px;
   font-weight: 700;
-  padding: 0 2px;
-  border-radius: 1px;
+  padding: 1px 3px;
+  border-radius: 2px;
   line-height: 1;
 }
 
-.sample-doc-title {
-  font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
+.progress-text-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  text-align: left;
 }
 
-.sample-shot-prompt {
+.progress-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: #12151c;
+}
+
+.progress-file-size {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+.progress-track-col {
+  display: flex;
+  flex: 0 0 190px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-status-label {
+  font-family: var(--pt-font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 4px;
+  overflow: hidden;
+  background: #e8ebf0;
+  border-radius: 9999px;
+}
+
+.progress-bar-fill {
+  width: 0;
+  height: 100%;
+  background: #f97316;
+  border-radius: 9999px;
+  transition: width 0.74s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+}
+
+.upload-progress-card.complete .progress-status-label {
+  color: #059669;
+}
+
+.upload-progress-card.complete .progress-bar-fill {
+  background: #1f9d63;
+}
+
+.complete-badge-slot {
+  display: flex;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+.complete-badge-check {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #F97316;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  background: #1f9d63;
+  border-radius: 50%;
+  animation: checkPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0);
+  }
+
+  70% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* ==========================================================================
@@ -514,7 +686,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: var(--pt-teal-700, #0F766E);
+  background: var(--pt-teal-700, #0f766e);
   color: #ffffff;
   font-family: var(--pt-font-heading, 'Inter', sans-serif);
   font-size: 17px;
@@ -531,7 +703,7 @@
 }
 
 .select-file-btn:hover {
-  background: var(--pt-teal-800, #0B5D57);
+  background: var(--pt-teal-800, #0b5d57);
   transform: translateY(-2px);
   box-shadow: 0 12px 28px -3px rgba(15, 118, 110, 0.48);
 }
@@ -550,7 +722,6 @@
   transform: translateY(-1px);
 }
 
-/* SIDECAR CLUSTER (Google Drive & Dropbox) */
 .cloud-sidecar-group {
   display: flex;
   align-items: center;
@@ -572,7 +743,7 @@
   height: 56px;
   border-radius: 14px;
   background: #ffffff;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #e2e8f0;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
@@ -584,22 +755,21 @@
 }
 
 .google-drive-btn:hover {
-  border-color: #CBD5E1;
-  background: #FCFDFE;
+  border-color: #cbd5e1;
+  background: #fcfdfe;
 }
 
 .dropbox-btn:hover {
-  border-color: #CBD5E1;
-  background: #F8FBFF;
+  border-color: #cbd5e1;
+  background: #f8fbff;
 }
 
-/* HOVER TOOLTIPS FOR SIDECAR BUTTONS */
 .cloud-tooltip {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%) translateY(4px);
-  background: #0F172A;
+  background: #0f172a;
   color: #ffffff;
   font-family: var(--pt-font-body, 'Inter', sans-serif);
   font-size: 11.5px;
@@ -623,136 +793,13 @@
   transform: translateX(-50%);
   border-width: 4px 4px 0 4px;
   border-style: solid;
-  border-color: #0F172A transparent transparent transparent;
+  border-color: #0f172a transparent transparent transparent;
 }
 
 .cloud-btn-wrapper:hover .cloud-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
-}
-
-/* ==========================================================================
-   UPLOAD PROGRESS CARD (MATCHING FRAMES 11-14 OF VIDEO)
-   ========================================================================== */
-.upload-progress-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-  max-width: 680px;
-  margin: 6px auto 0;
-  padding: 12px 18px;
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
-  box-sizing: border-box;
-  animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.progress-file-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.progress-text-col {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.progress-file-name {
-  font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1E293B;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.progress-file-size {
-  font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 11.5px;
-  color: #64748B;
-}
-
-.progress-track-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 240px;
-}
-
-.progress-status-row {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.progress-status-label {
-  font-family: var(--pt-font-body, 'Inter', sans-serif);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #F97316;
-  transition: color 0.2s ease;
-}
-
-.upload-progress-card.complete .progress-status-label {
-  color: #059669;
-}
-
-.progress-bar-bg {
-  width: 100%;
-  height: 5px;
-  background: #E2E8F0;
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: #F97316;
-  border-radius: 9999px;
-  transition: width 0.3s ease, background-color 0.2s ease;
-}
-
-.upload-progress-card.complete .progress-bar-fill {
-  background: #10B981;
-}
-
-.complete-badge-check {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #10B981;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  animation: checkPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes checkPop {
-  0% { transform: scale(0); }
-  70% { transform: scale(1.2); }
-  100% { transform: scale(1); }
 }
 
 /* ==========================================================================
@@ -766,7 +813,7 @@
   flex-wrap: wrap;
   margin-top: 10px;
   padding-top: 14px;
-  border-top: 1px solid #F1F5F9;
+  border-top: 1px solid #f1f5f9;
   width: 100%;
   max-width: 640px;
 }
@@ -777,8 +824,8 @@
   gap: 6px;
   padding: 6px 13px;
   border-radius: 9999px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   font-family: var(--pt-font-body, 'Inter', sans-serif);
   font-size: 12px;
   font-weight: 600;
@@ -787,56 +834,83 @@
 }
 
 .trust-badge-chip svg {
-  color: var(--pt-teal-700, #0F766E);
+  color: var(--pt-teal-700, #0f766e);
 }
 
 .trust-badge-chip:hover {
-  background: #F1F5F9;
-  border-color: #CBD5E1;
-  color: #1E293B;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
 }
 
 /* ==========================================================================
    ACCESSIBILITY & RESPONSIVE RULES
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .net-svg.swish-active,
-  .trajectory-path,
-  .flying-file-item,
-  .score-popup,
-  .uploaded-counter-pill.bump,
+
+  .net.swish,
+  .rim.rim-hit,
+  .score-plus,
+  .upload-progress-card,
   .complete-badge-check {
     animation: none !important;
+  }
+
+  .score-plus {
+    opacity: 1;
+  }
+
+  .progress-bar-fill,
+  .uploaded-counter-pill,
+  .pill-count,
+  .hoop-card {
+    transition: none !important;
   }
 }
 
 @media (max-width: 680px) {
   .dropzone-top-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    padding: 10px 14px;
+    gap: 10px;
   }
-  .hoop-card {
-    min-height: 260px;
-    padding: 20px 14px 14px;
+
+  .top-bar-badge {
+    width: 32px;
+    height: 32px;
   }
+
+  .top-bar-title {
+    font-size: 14px;
+  }
+
+  .top-bar-subtitle {
+    font-size: 11.5px;
+  }
+
+  .uploaded-counter-pill {
+    padding: 5px 10px;
+    font-size: 11.5px;
+  }
+
   .select-file-btn {
     width: 100%;
     min-width: auto;
   }
+
   .cloud-sidecar-group {
     width: 100%;
     justify-content: center;
   }
+
   .upload-progress-card {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 10px;
+    padding: 0 14px;
   }
+
   .progress-track-col {
-    width: 100%;
-    max-width: none;
+    flex-basis: 110px;
   }
+
   .dropzone-trust-row {
     flex-direction: column;
     gap: 8px;

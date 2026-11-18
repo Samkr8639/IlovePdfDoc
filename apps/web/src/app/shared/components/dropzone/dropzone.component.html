@@ -1,193 +1,177 @@
-<form
-  class="dropzone-area"
-  [class.active]="isDragOver()"
-  [class.has-shot]="isShooting()"
-  (dragover)="onDragOver($event)"
-  (dragleave)="onDragLeave($event)"
-  (drop)="onDrop($event)"
-  tabindex="0"
-  role="form"
-  [attr.aria-label]="ariaLabel()"
-  [attr.toolname]="effectiveToolName()"
-  [attr.tooldescription]="effectiveToolDescription()"
-  [attr.data-mcp-tool]="effectiveToolName()"
-  [attr.data-mcp-description]="effectiveToolDescription()"
-  [attr.action]="currentRoute()"
-  method="POST"
-  enctype="multipart/form-data"
-  toolautosubmit
-  (submit)="$event.preventDefault()"
->
-  <input
-    #fileInput
-    type="file"
-    name="files"
-    class="hidden-input"
-    [accept]="acceptedTypes()"
-    [multiple]="multiple()"
-    [attr.data-mcp-input]="'files'"
-    [attr.data-mcp-description]="'Document file input for ' + effectiveToolName()"
-    (change)="onFileInputChange($event)"
-  />
+<form class="dropzone-area" [class.active]="isDragOver()" (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" tabindex="0" role="form" [attr.aria-label]="ariaLabel()"
+  [attr.toolname]="effectiveToolName()" [attr.tooldescription]="effectiveToolDescription()"
+  [attr.data-mcp-tool]="effectiveToolName()" [attr.data-mcp-description]="effectiveToolDescription()"
+  [attr.action]="currentRoute()" method="POST" enctype="multipart/form-data" toolautosubmit
+  (submit)="$event.preventDefault()">
+  <input #fileInput type="file" name="files" class="hidden-input" [accept]="acceptedTypes()" [multiple]="multiple()"
+    [attr.data-mcp-input]="'files'" [attr.data-mcp-description]="'Document file input for ' + effectiveToolName()"
+    (change)="onFileInputChange($event)" />
 
   <div class="dropzone-content">
-    <!-- TOP STATUS ROW: TITLE + UPLOADED SCORE PILL (MATCHING VIDEO) -->
+    <!-- TOP BAR: TITLE + UPLOADED COUNT (REDESIGNED CONTROL CARD) -->
     <div class="dropzone-top-bar">
-      <div class="top-bar-text">
-        <h3 class="top-bar-title">{{ title() || 'Upload files' }}</h3>
-        <p class="top-bar-subtitle">{{ subtitle() || 'Drag and drop, or take the shot.' }}</p>
+      <div class="top-bar-left">
+        <div class="top-bar-badge" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <div class="top-bar-text">
+          <h3 class="top-bar-title">{{ title() || 'Upload files' }}</h3>
+          <p class="top-bar-subtitle">{{ subtitle() || 'Drag and drop, or take the shot.' }}</p>
+        </div>
       </div>
-      <div class="uploaded-counter-pill" [class.bump]="scoreBump()">
-        <span>Uploaded {{ uploadedCount() }}</span>
+      <div class="top-bar-right">
+        <div class="uploaded-counter-pill" [class.bump]="scoreBump()">
+          <span class="counter-dot"></span>
+          <span class="pill-label">Uploaded</span>
+          <span class="pill-count">{{ uploadedCount() }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- BASKETBALL HOOP DROP CARD -->
-    <div class="hoop-card" (click)="fileInput.click()">
-      <!-- TOP UPLOAD PROMPT -->
-      <div class="hoop-card-prompt">
-        <div class="hoop-upload-icon" aria-hidden="true">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
-            <polyline points="7 9 12 4 17 9"></polyline>
-            <line x1="12" y1="4" x2="12" y2="16"></line>
-          </svg>
-        </div>
-        <div class="hoop-prompt-text">
+    <!-- PLAYFIELD: drop card + hoop + the file you throw -->
+    <div class="stage" #stage>
+      <!-- Drop card (click opens the picker; real files can be dropped on it) -->
+      <div class="hoop-card" [class.hot]="isDragOver() || cardHot()" (click)="fileInput.click()">
+        <div class="hoop-card-prompt">
+          <div class="hoop-upload-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
+              <polyline points="7 9 12 4 17 9"></polyline>
+              <line x1="12" y1="4" x2="12" y2="16"></line>
+            </svg>
+          </div>
           <span class="prompt-main">Drop files here</span>
           <span class="prompt-sub">
-            or <button type="button" class="btn-take-shot-link" (click)="takeInteractiveShot($event)">take the shot</button>
+            or <button type="button" class="btn-take-shot-link" (click)="takeShot($event)">take the shot</button>
           </span>
         </div>
       </div>
 
-      <!-- BASKETBALL HOOP & GRAPHIC COURT SYSTEM -->
-      <div class="basketball-stage" aria-hidden="true">
-        <!-- +1 SCORE POPUP -->
-        @if (showScorePopup()) {
-          <div class="score-popup">+1</div>
+      <!-- Hoop: backboard, rim (back half), net, rim (front half) -->
+      <div class="hoop-backboard" aria-hidden="true"></div>
+      <div class="rim-mount" aria-hidden="true"></div>
+      <div class="rim rim-back" [class.rim-hit]="rimHit()" aria-hidden="true"></div>
+
+      <svg class="net" [class.swish]="netSwish()" width="164" height="104" viewBox="0 0 164 104" fill="none"
+        aria-hidden="true">
+        <path [attr.d]="net.weave" stroke="#C3CAD6" stroke-width="1.3" stroke-linecap="round" />
+        <path [attr.d]="net.rings" stroke="#B4BCCB" stroke-width="1.3" stroke-linecap="round" />
+        <path [attr.d]="net.ribs" stroke="#A3ACBC" stroke-width="1.6" stroke-linecap="round" />
+      </svg>
+
+      <div class="rim rim-front" [class.rim-hit]="rimHit()" aria-hidden="true"></div>
+
+      <!-- Dotted aim arc (only while pulling back) -->
+      <div class="trail" aria-hidden="true">
+        @for (d of trail(); track $index) {
+        <span class="trail-dot" [style.left.px]="d.x" [style.top.px]="d.y" [style.width.px]="d.size"
+          [style.height.px]="d.size" [style.opacity]="d.opacity"></span>
         }
+      </div>
 
-        <!-- TRAJECTORY DOTTED ARC (VISIBLE DURING DRAGOVER OR SHOT) -->
-        <svg class="trajectory-svg" [class.visible]="isDragOver() || isShooting()" viewBox="0 0 320 180" fill="none">
-          <path
-            d="M 25 170 Q 110 15 220 110"
-            stroke="#F97316"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-dasharray="2 12"
-            class="trajectory-path"
-          />
+      <!-- +1 beside the backboard -->
+      @if (plusVisible()) {
+      <div class="score-plus" aria-hidden="true">+1</div>
+      }
+
+      <!-- THE FILE: grab it, pull back, aim along the dots, let go -->
+      <div #ball class="file-ball" [class.idle]="phase() === 'idle'" [class.grabbed]="phase() === 'dragging'"
+        [attr.role]="phase() === 'idle' ? 'button' : null" [attr.tabindex]="phase() === 'idle' ? 0 : -1"
+        [attr.aria-label]="'Sample file ' + ballLabel() + '. Drag back and release to throw it into the hoop, or press Enter to take the shot.'"
+        (pointerdown)="onBallPointerDown($event)" (pointermove)="onBallPointerMove($event)"
+        (pointerup)="onBallPointerUp($event)" (pointercancel)="onBallPointerCancel($event)"
+        (click)="$event.stopPropagation()" (keydown.enter)="onBallKey($event)" (keydown.space)="onBallKey($event)">
+        <svg class="file-art" viewBox="0 0 72 90" width="72" height="90" aria-hidden="true">
+          <path d="M8 0H48L72 24V82a8 8 0 0 1-8 8H8a8 8 0 0 1-8-8V8a8 8 0 0 1 8-8Z" fill="#FFFFFF" />
+          <path d="M48 0V16a8 8 0 0 0 8 8H72Z" fill="#E7EBF1" />
+          <rect x="12" y="30" width="34" height="4" rx="2" fill="#E8EBF0" />
+          <rect x="12" y="39" width="42" height="4" rx="2" fill="#E8EBF0" />
+          <rect x="12" y="48" width="26" height="4" rx="2" fill="#E8EBF0" />
+          <rect x="10" y="62" width="30" height="16" rx="3.5" fill="#E03A45" />
+          <text x="25" y="73.6" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5"
+            font-weight="700" fill="#FFFFFF">PDF</text>
         </svg>
+        <span class="ball-label" [class.show]="phase() === 'idle'">{{ ballLabel() }}</span>
+      </div>
 
-        <!-- FLYING FILE ITEM (ANIMATES ALONG ARC INTO HOOP) -->
-        @if (isShooting()) {
-          <div class="flying-file-item">
-            <div class="flying-doc-shape">
-              <div class="flying-doc-fold"></div>
-              <div class="flying-doc-lines">
-                <span class="line-1"></span>
-                <span class="line-2"></span>
-              </div>
-              <span class="flying-pdf-badge">PDF</span>
-            </div>
+      <!-- Upload progress card -->
+      @if (activeUpload(); as upload) {
+      <div class="upload-progress-card" [class.complete]="upload.isComplete">
+        <div class="progress-file-info">
+          <div class="mini-doc-icon" aria-hidden="true">
+            <div class="mini-doc-fold"></div>
+            <span class="mini-doc-badge">PDF</span>
           </div>
-        }
-
-        <!-- BASKETBALL BACKBOARD -->
-        <div class="hoop-backboard">
-          <div class="backboard-inner-target"></div>
-          <div class="backboard-connector"></div>
+          <div class="progress-text-col">
+            <span class="progress-file-name">{{ upload.name }}</span>
+            <span class="progress-file-size">{{ upload.size }}</span>
+          </div>
         </div>
-
-        <!-- RIM & NET -->
-        <div class="hoop-rim-net-group">
-          <!-- ORANGE RIM -->
-          <div class="hoop-rim"></div>
-
-          <!-- MESH NET -->
-          <svg class="net-svg" [class.swish-active]="isSwishing()" width="84" height="66" viewBox="0 0 84 66" fill="none">
-            <!-- Vertical ribs -->
-            <path d="M12 2 L22 62 M25 2 L33 62 M42 2 L42 62 M59 2 L51 62 M72 2 L62 62" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round"/>
-            <!-- Crossed diagonals -->
-            <path d="M12 2 L62 62 M72 2 L22 62" stroke="#CBD5E1" stroke-width="1.2" stroke-linecap="round"/>
-            <!-- Horizontal rings -->
-            <path d="M15 16 L69 16 M18 32 L66 32 M21 48 L63 48" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round"/>
-            <!-- Bottom scallop loops -->
-            <path d="M22 62 Q 27.5 65 33 62 Q 37.5 65 42 62 Q 46.5 65 51 62 Q 56.5 65 62 62" stroke="#94A3B8" stroke-width="1.6" fill="none"/>
-          </svg>
+        <div class="progress-track-col">
+          <span class="progress-status-label">{{ upload.isComplete ? 'Uploaded' : 'Uploading...' }}</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" [style.width.%]="upload.progress"></div>
+          </div>
+        </div>
+        <div class="complete-badge-slot">
+          @if (upload.isComplete) {
+          <div class="complete-badge-check" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          }
         </div>
       </div>
+      }
     </div>
 
-    <!-- INTERACTIVE SAMPLE FILE TRIGGER (MATCHING FRAME 1 FROM VIDEO) -->
-    <div class="sample-shot-bar" (click)="takeInteractiveShot($event)" title="Click to test the shot animation!">
-      <div class="sample-doc-card">
-        <div class="mini-doc-icon">
-          <div class="mini-doc-fold"></div>
-          <span class="mini-doc-badge">PDF</span>
-        </div>
-        <span class="sample-doc-title">final fileeeeee</span>
-      </div>
-      <div class="sample-shot-prompt">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
-        <span>Click to take the shot!</span>
-      </div>
-    </div>
+    <span class="sr-only" aria-live="polite">{{ liveMessage() }}</span>
 
-    <!-- PRIMARY ACTION ROW: SELECT PDF FILE + CLOUD SIDECARS -->
+    <!-- PRIMARY ACTION ROW: SELECT FILE + CLOUD SIDECARS -->
     <div class="upload-action-row" (click)="$event.stopPropagation()">
-      <button
-        type="button"
-        class="select-file-btn"
-        (click)="fileInput.click()"
-        title="Select files from your device"
-      >
-        <svg class="btn-upload-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <button type="button" class="select-file-btn" (click)="fileInput.click()" title="Select files from your device">
+        <svg class="btn-upload-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="17 8 12 3 7 8"></polyline>
           <line x1="12" y1="3" x2="12" y2="15"></line>
         </svg>
-        <span>{{ title() || 'Select PDF file' }}</span>
+        <span>{{ buttonLabel() }}</span>
       </button>
 
-      <!-- Sidecar Cloud Buttons (Google Drive & Dropbox) -->
       <div class="cloud-sidecar-group">
-        <!-- Google Drive Button with Tooltip -->
         <div class="cloud-btn-wrapper">
-          <button
-            type="button"
-            class="cloud-sidecar-btn google-drive-btn"
-            title="Import from Google Drive"
-            aria-label="Import from Google Drive"
-            (click)="openGoogleDrive($event)"
-          >
+          <button type="button" class="cloud-sidecar-btn google-drive-btn" title="Import from Google Drive"
+            aria-label="Import from Google Drive" (click)="openGoogleDrive($event)">
             <svg width="24" height="21" viewBox="0 0 87.3 78" fill="none">
-              <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
-              <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47"/>
-              <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z" fill="#ea4335"/>
-              <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
-              <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
-              <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+              <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z"
+                fill="#0066da" />
+              <path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44A8.9 8.9 0 0 0 0 53h27.5z" fill="#00ac47" />
+              <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15z"
+                fill="#ea4335" />
+              <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" />
+              <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" />
+              <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z"
+                fill="#ffba00" />
             </svg>
           </button>
           <span class="cloud-tooltip">Google Drive</span>
         </div>
 
-        <!-- Dropbox Button with Tooltip -->
         <div class="cloud-btn-wrapper">
-          <button
-            type="button"
-            class="cloud-sidecar-btn dropbox-btn"
-            title="Import from Dropbox"
-            aria-label="Import from Dropbox"
-            (click)="openDropbox($event)"
-          >
+          <button type="button" class="cloud-sidecar-btn dropbox-btn" title="Import from Dropbox"
+            aria-label="Import from Dropbox" (click)="openDropbox($event)">
             <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF">
-              <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
+              <path
+                d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z" />
             </svg>
           </button>
           <span class="cloud-tooltip">Dropbox</span>
@@ -195,58 +179,30 @@
       </div>
     </div>
 
-    <!-- UPLOAD PROGRESS CARD (MATCHING FRAMES 11-14 OF VIDEO) -->
-    @if (activeUpload()) {
-      <div class="upload-progress-card" [class.complete]="activeUpload()?.isComplete">
-        <div class="progress-file-info">
-          <div class="mini-doc-icon">
-            <div class="mini-doc-fold"></div>
-            <span class="mini-doc-badge">PDF</span>
-          </div>
-          <div class="progress-text-col">
-            <span class="progress-file-name">{{ activeUpload()?.name }}</span>
-            <span class="progress-file-size">{{ activeUpload()?.size }}</span>
-          </div>
-        </div>
-        <div class="progress-track-col">
-          <div class="progress-status-row">
-            <span class="progress-status-label">{{ activeUpload()?.isComplete ? 'Uploaded' : 'Uploading...' }}</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" [style.width.%]="activeUpload()?.progress"></div>
-          </div>
-        </div>
-        @if (activeUpload()?.isComplete) {
-          <div class="complete-badge-check" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </div>
-        }
-      </div>
-    }
-
     <!-- TRUST & PRIVACY BADGES -->
     <div class="dropzone-trust-row" aria-label="Security and Privacy Guarantees">
       <div class="trust-badge-chip">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
         <span>100% In-Browser Privacy</span>
       </div>
       <div class="trust-badge-chip">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
         </svg>
         <span>Instant Processing</span>
       </div>
       <div class="trust-badge-chip">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
           <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
-        <span>Free & Unlimited</span>
+        <span>Free &amp; Unlimited</span>
       </div>
     </div>
   </div>
