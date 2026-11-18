@@ -106,7 +106,7 @@
    1. UPLOAD STATE HERO & EDITORIAL SECTIONS
    =================================================================== */
 .unified-hero-section {
-  background: var(--pt-subtle-bg);
+  background: #e900311c !important;
   padding: 48px 0 48px;
   min-height: 520px;
   text-align: center;

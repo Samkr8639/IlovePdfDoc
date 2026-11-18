@@ -168,6 +168,11 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
     return this.primaryFile()?.pageCount || 0;
   });
 
+  // Computed: Array of all 1-based page numbers in primary document
+  readonly allPageNumbers = computed<number[]>(() => {
+    return Array.from({ length: this.totalPagesCount() }, (_, i) => i + 1);
+  });
+
   // Computed: Count of selected pages for conversion
   readonly activePagesCount = computed<number>(() => {
     if (this.pagesMode() === 'all') {
@@ -217,6 +222,14 @@ export class PdfToJpgComponent implements OnInit, OnDestroy {
   // ──────────────────────────────────────────────────────────────
   // FILE UPLOAD & INITIALIZATION
   // ──────────────────────────────────────────────────────────────
+  onFileInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.onFilesSelected(Array.from(input.files));
+      input.value = '';
+    }
+  }
+
   onFilesSelected(files: File[]): void {
     if (!files || files.length === 0) return;
     this.errorMessage.set(null);

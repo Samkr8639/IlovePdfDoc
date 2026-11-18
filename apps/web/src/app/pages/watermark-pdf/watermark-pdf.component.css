@@ -93,7 +93,7 @@
    ========================================================================== */
 .unified-hero-section {
   padding: 52px 0 32px;
-  background-color: var(--pt-subtle-bg, #F6F8FA);
+  background-color: #e900311c !important;
 }
 
 .container {

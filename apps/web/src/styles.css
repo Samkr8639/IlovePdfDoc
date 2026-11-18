@@ -28,6 +28,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignDancingScript';
   src: url('/fonts/sign/dancing-script-latin-600-normal.woff') format('woff');
@@ -35,6 +36,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignGreatVibes';
   src: url('/fonts/sign/great-vibes-latin-400-normal.woff') format('woff');
@@ -42,6 +44,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignSacramento';
   src: url('/fonts/sign/sacramento-latin-400-normal.woff') format('woff');
@@ -49,6 +52,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignKalam';
   src: url('/fonts/sign/kalam-latin-400-normal.woff') format('woff');
@@ -56,6 +60,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignKalamDevanagari';
   src: url('/fonts/sign/kalam-devanagari-400-normal.woff') format('woff');
@@ -63,6 +68,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignAlexBrush';
   src: url('/fonts/sign/alex-brush-latin-400-normal.woff') format('woff');
@@ -70,6 +76,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignSatisfy';
   src: url('/fonts/sign/satisfy-latin-400-normal.woff') format('woff');
@@ -77,6 +84,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignPatrickHand';
   src: url('/fonts/sign/patrick-hand-latin-400-normal.woff') format('woff');
@@ -84,6 +92,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'SignNotoSans';
   src: url('/fonts/sign/noto-sans-latin-400-normal.woff') format('woff');
@@ -197,6 +206,7 @@
   --pt-surface-white: #FFFFFF;
   --pt-canvas-pure: #FFFFFF;
   --pt-subtle-bg: #F6F8FA;
+  --pt-upload-bg: #e9803f12;
   --pt-subtle-bg-alt: #F1F4F8;
   --pt-card-bg: #FFFFFF;
   --pt-soft-outline: #E4E7EC;
@@ -238,11 +248,14 @@
 /* ==========================================================================
    GLOBAL RESET & ACCESSIBILITY PRIMITIVES
    ========================================================================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -286,7 +299,10 @@ html, body {
 
 /* REDUCED MOTION PREFERENCES ENFORCEMENT */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -325,6 +341,7 @@ html, body {
 }
 
 @media (max-width: 768px) {
+
   .container,
   .container-narrow,
   .container-wide {
@@ -336,7 +353,12 @@ html, body {
 /* ==========================================================================
    TYPOGRAPHY UTILITIES
    ========================================================================== */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--pt-font-heading);
   color: var(--pt-text-headline);
   margin-top: 0;
@@ -435,7 +457,8 @@ a:hover {
   margin-bottom: 10px;
 }
 
-.editorial-prose ul, .editorial-prose ol {
+.editorial-prose ul,
+.editorial-prose ol {
   padding-left: 24px;
   margin-bottom: 20px;
 }
@@ -556,7 +579,7 @@ app-edit-pdf-hero {
 }
 
 .unified-hero-section {
-  background: var(--pt-subtle-bg, #F8FAFC);
+  background-color: #e900311c !important;
   padding: 36px 0 40px;
   min-height: 480px;
   text-align: center;
@@ -858,6 +881,7 @@ app-edit-pdf-hero {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .steps-grid {
     grid-template-columns: 1fr;
   }
@@ -963,6 +987,7 @@ app-edit-pdf-hero {
     opacity: 0;
     transform: translateY(-10px) scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -970,6 +995,7 @@ app-edit-pdf-hero {
 }
 
 @media (max-width: 768px) {
+
   .global-error-container,
   .global-error-banner-container {
     top: 76px !important;

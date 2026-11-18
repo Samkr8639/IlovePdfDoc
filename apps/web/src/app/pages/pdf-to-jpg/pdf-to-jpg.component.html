@@ -206,169 +206,161 @@
        ════════════════════════════════════════════════════════════ -->
   @if (currentState() === 'organize') {
     <div class="organize-workspace-screen">
-      <!-- CENTER CANVAS WORKSPACE -->
-      <main class="organize-canvas-pane">
-        <!-- Floating Add-Files Dock -->
-        <div class="floating-file-dock">
-          <div class="dock-stack-wrapper">
+      <!-- Hidden H1 for heading hierarchy accessibility -->
+      <h1 class="visually-hidden">PDF to JPG Workspace</h1>
+
+      <!-- 1. TOP HEADER TOOLS BAR (Fixed at the top, full width, matching watermark-pdf / edit-pdf) -->
+      <div class="workspace-top-bar" role="toolbar" aria-label="Workspace document and selection controls">
+        <!-- Left: Active Document Pill & Change File -->
+        <div class="top-bar-left">
+          <div class="toolbar-doc-pill">
+            <svg class="doc-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span class="doc-name-chip" [title]="primaryFile()?.name || 'Document'">{{ primaryFile()?.name || 'Document' }}</span>
+            <span class="doc-pages-chip">{{ totalPagesCount() }} {{ totalPagesCount() === 1 ? 'page' : 'pages' }}</span>
             <button
               type="button"
-              class="dock-icon-btn dock-main-btn"
-              (click)="fileInput.click()"
-              aria-label="Add more PDF files"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              <span class="dock-badge-counter">{{ selectedFiles().length }}</span>
-            </button>
-            <input #fileInput type="file" accept=".pdf,application/pdf" (change)="onFilesSelected($any($event.target).files); fileInput.value=''" hidden />
-
-            <!-- Device button -->
-            <div class="dock-btn-wrap">
-              <button type="button" class="dock-icon-btn pc-action" (click)="fileInput.click()" aria-label="Upload from this device">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Device</span>
-            </div>
-
-            <!-- Google Drive button -->
-            <div class="dock-btn-wrap">
-              <button type="button" class="dock-icon-btn cloud-action disabled" disabled aria-label="Google Drive (coming soon)">
-                <svg width="20" height="18" viewBox="0 0 87.3 78" aria-hidden="true">
-                  <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066da"/>
-                  <path d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 53.6c-.8 1.4-1.2 2.95-1.2 4.5h27.5l16.15-33.1z" fill="#00ac47"/>
-                  <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 13.8 7.9 10z" fill="#ea4335"/>
-                  <path d="M43.65 25L57.4 1.2c-1.35-.8-2.9-1.2-4.5-1.2H34.4c-1.6 0-3.15.45-4.5 1.2l13.75 23.8z" fill="#00832d"/>
-                  <path d="M59.8 53.1H27.5L13.75 76.9c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2L59.8 53.1z" fill="#2684fc"/>
-                  <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28.1H87.3c0-1.55-.4-3.1-1.2-4.5l-12.7-22.1z" fill="#ffba00"/>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Drive</span>
-            </div>
-
-            <!-- Dropbox button -->
-            <div class="dock-btn-wrap">
-              <button type="button" class="dock-icon-btn cloud-action disabled" disabled aria-label="Dropbox (coming soon)">
-                <svg width="22" height="20" viewBox="0 0 24 22" fill="#0061FF" aria-hidden="true">
-                  <path d="M6 1.8L0 5.7L6 9.6L12 5.7L6 1.8ZM18 1.8L12 5.7L18 9.6L24 5.7L18 1.8ZM0 13.5L6 17.4L12 13.5L6 9.6L0 13.5ZM24 13.5L18 9.6L12 13.5L18 17.4L24 13.5ZM6 18.7L12 22.6L18 18.7L12 14.8L6 18.7Z"/>
-                </svg>
-              </button>
-              <span class="dock-tooltip-label">Dropbox</span>
-            </div>
+              class="doc-tab-close"
+              (click)="resetWorkspace()"
+              title="Remove document and start over"
+              aria-label="Remove document"
+            >✕</button>
           </div>
+
+          <input #changeFileInput type="file" accept=".pdf,application/pdf" class="visually-hidden" (change)="onFileInputChange($event)" />
+          <button
+            type="button"
+            class="btn-change-file"
+            (click)="changeFileInput.click()"
+            title="Change PDF file"
+            aria-label="Change PDF file"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+              <path d="M12 12v9" />
+              <path d="m16 16-4-4-4 4" />
+            </svg>
+            <span>Change file</span>
+          </button>
         </div>
 
-        <!-- Canvas Center Stage -->
-        <div class="center-stage-container">
-          <!-- Document Card Info Header -->
-          @if (primaryFile(); as f) {
-            <div class="primary-file-card">
-              <div class="file-card-icon">
-                <span class="file-pdf-badge">PDF</span>
-              </div>
-              <div class="file-card-details">
-                <span class="file-card-name" [title]="f.name">{{ f.name }}</span>
-                <span class="file-card-meta">
-                  {{ f.formattedSize }}
-                  @if (f.pageCount) {
-                    · {{ f.pageCount }} pages
-                  }
-                  @if (f.firstPageWidthPt && f.firstPageHeightPt) {
-                    · {{ f.firstPageWidthPt }} × {{ f.firstPageHeightPt }} pt
-                  }
-                </span>
-              </div>
-              <button type="button" class="file-card-remove" (click)="resetWorkspace()" aria-label="Remove document">✕</button>
-            </div>
-          }
-
-          <!-- MODE A: PAGE THUMBNAILS GRID -->
+        <!-- Center: Status / Selection Pill -->
+        <div class="top-bar-center">
           @if (mode() === 'convert_pages') {
-            <div class="thumbnails-toolbar">
-              <div class="toolbar-left">
-                <span class="toolbar-label">
-                  Pages to convert: <strong>{{ activePagesCount() }} of {{ totalPagesCount() }}</strong>
-                </span>
-              </div>
-              <div class="toolbar-right">
-                <button type="button" class="btn-text-action" (click)="selectAllPages()">Select all</button>
-                <button type="button" class="btn-text-action" (click)="clearAllPages()">Clear</button>
-                <button type="button" class="btn-text-action" (click)="invertPageSelection()">Invert</button>
-              </div>
+            <div class="selection-status-pill">
+              <span class="status-dot"></span>
+              <span class="status-text">Pages to convert: <strong>{{ activePagesCount() }}</strong> of {{ totalPagesCount() }}</span>
             </div>
-
-            <div class="page-thumbnails-grid" role="group" aria-label="PDF Page Thumbnails">
-              @if (primaryFile(); as f) {
-                @for (pNum of selectedPageNumbers(); track pNum) {
-                  <!-- Thumbnail card -->
-                  <div
-                    class="page-thumb-card"
-                    [class.selected]="selectedPageNumbers().includes(pNum)"
-                    (click)="togglePageSelection(pNum, $event)"
-                    tabindex="0"
-                    (keydown.space)="$event.preventDefault(); togglePageSelection(pNum)"
-                    [attr.aria-label]="'Page ' + pNum + (selectedPageNumbers().includes(pNum) ? ' selected' : ' unselected')"
-                  >
-                    <div class="thumb-check-box">
-                      <input
-                        type="checkbox"
-                        [checked]="selectedPageNumbers().includes(pNum)"
-                        tabindex="-1"
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <div class="thumb-img-wrapper">
-                      @if (f.thumbnails?.get(pNum); as thumbUrl) {
-                        <img [src]="thumbUrl" [alt]="'Page ' + pNum" class="thumb-image" loading="lazy" />
-                      } @else {
-                        <div class="thumb-placeholder-doc">
-                          <span class="thumb-placeholder-num">{{ pNum }}</span>
-                        </div>
-                      }
-                    </div>
-                    <span class="thumb-page-label">Page {{ pNum }}</span>
-                  </div>
-                }
-              }
+          } @else {
+            <div class="selection-status-pill">
+              <span class="status-dot mode-extract"></span>
+              <span class="status-text">Mode: <strong>Extract All Images</strong></span>
             </div>
           }
+        </div>
 
-          <!-- MODE B: EXTRACT IMAGES OVERVIEW -->
-          @if (mode() === 'extract_images') {
-            <div class="extract-mode-banner">
-              <div class="extract-banner-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
+        <!-- Right: Selection Action Pills (Mode A) -->
+        <div class="top-bar-right">
+          @if (mode() === 'convert_pages') {
+            <button type="button" class="btn-topbar-action" (click)="selectAllPages()" title="Select all pages">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Select all</span>
+            </button>
+            <button type="button" class="btn-topbar-action" (click)="clearAllPages()" title="Deselect all pages">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>Clear</span>
+            </button>
+            <button type="button" class="btn-topbar-action" (click)="invertPageSelection()" title="Invert page selection">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Invert</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- 2. MAIN WORKSPACE ROW -->
+      <div class="workspace-main">
+        <!-- CENTER CANVAS WORKSPACE -->
+        <main class="organize-canvas-pane">
+          <div class="center-stage-container">
+            <!-- MODE A: PAGE THUMBNAILS GRID -->
+            @if (mode() === 'convert_pages') {
+              <div class="page-thumbnails-grid" role="group" aria-label="PDF Page Thumbnails">
+                @if (primaryFile(); as f) {
+                  @for (pNum of allPageNumbers(); track pNum) {
+                    <div
+                      class="page-thumb-card"
+                      [class.selected]="selectedPageNumbers().includes(pNum)"
+                      (click)="togglePageSelection(pNum, $event)"
+                      tabindex="0"
+                      (keydown.space)="$event.preventDefault(); togglePageSelection(pNum)"
+                      [attr.aria-label]="'Page ' + pNum + (selectedPageNumbers().includes(pNum) ? ' selected' : ' unselected')"
+                    >
+                      <div class="thumb-check-box" [class.checked]="selectedPageNumbers().includes(pNum)">
+                        @if (selectedPageNumbers().includes(pNum)) {
+                          <svg class="check-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        }
+                      </div>
+                      <div class="thumb-img-wrapper">
+                        @if (f.thumbnails?.get(pNum); as thumbUrl) {
+                          <img [src]="thumbUrl" [alt]="'Page ' + pNum" class="thumb-image" loading="lazy" />
+                        } @else {
+                          <div class="thumb-placeholder-doc">
+                            <span class="thumb-placeholder-num">{{ pNum }}</span>
+                          </div>
+                        }
+                      </div>
+                      <div class="thumb-footer">
+                        <span class="thumb-page-badge">Page {{ pNum }}</span>
+                      </div>
+                    </div>
+                  }
+                }
               </div>
-              <div class="extract-banner-text">
-                <h3>Extract All Embedded Images</h3>
-                <p>
-                  Every photo, graphic, and raster image embedded inside your PDF will be detected and extracted.
-                  Uncompressed JPEGs are passed through losslessly without re-encoding.
-                </p>
-                <div class="extract-criteria-pill">
-                  <span>Minimum size: ≥ {{ minSize() }} × {{ minSize() }} px</span>
-                  @if (keepOriginalJpegs()) {
-                    <span>· Lossless DCT extraction active</span>
-                  }
-                  @if (skipDuplicates()) {
-                    <span>· Duplicate deduplication active</span>
-                  }
+            }
+
+            <!-- MODE B: EXTRACT IMAGES OVERVIEW -->
+            @if (mode() === 'extract_images') {
+              <div class="extract-mode-banner">
+                <div class="extract-banner-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+                <div class="extract-banner-text">
+                  <h3>Extract All Embedded Images</h3>
+                  <p>
+                    Every photo, graphic, and raster image embedded inside your PDF will be detected and extracted.
+                    Uncompressed JPEGs are passed through losslessly without re-encoding.
+                  </p>
+                  <div class="extract-criteria-pill">
+                    <span>Minimum size: ≥ {{ minSize() }} × {{ minSize() }} px</span>
+                    @if (keepOriginalJpegs()) {
+                      <span>· Lossless DCT extraction active</span>
+                    }
+                    @if (skipDuplicates()) {
+                      <span>· Duplicate deduplication active</span>
+                    }
+                  </div>
                 </div>
               </div>
-            </div>
-          }
-        </div>
-      </main>
+            }
+          </div>
+        </main>
 
       <!-- MOBILE SETTINGS TOGGLE BUTTON -->
       <button
@@ -753,7 +745,8 @@
         </div>
       </aside>
     </div>
-  }
+  </div>
+}
 
   <!-- ════════════════════════════════════════════════════════════
        3. PROCESSING STATE
